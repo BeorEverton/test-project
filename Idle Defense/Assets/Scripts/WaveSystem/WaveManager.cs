@@ -9,12 +9,10 @@ namespace Assets.Scripts.WaveSystem
 {
     public class WaveManager : MonoBehaviour
     {
-        public bool GameInRunning = true;
+        public bool GameRunning = true;
 
         [SerializeField] private List<WaveConfigSO> _baseWaves;
         [SerializeField] private EnemySpawner _enemySpawner;
-
-        [SerializeField] private float _timeBetweenWaves;
 
         private WaveConfigSO _currentBaseWave;
         private int _currentBaseWaveIndex = 0;
@@ -42,7 +40,7 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator StartWaveRoutine()
         {
-            while (GameInRunning)
+            while (GameRunning)
             {
                 _currentWaveIndex++;
                 _waveIndexOfCurrentBaseWave++;
@@ -55,7 +53,6 @@ namespace Assets.Scripts.WaveSystem
                 yield return new WaitUntil(() => _waveCompleted);
 
                 _waveCompleted = false;
-                yield return new WaitForSeconds(_timeBetweenWaves);
             }
         }
 
