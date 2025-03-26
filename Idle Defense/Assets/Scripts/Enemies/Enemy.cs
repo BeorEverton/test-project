@@ -1,10 +1,14 @@
 using Assets.Scripts.SO;
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Assets.Scripts.Enemies
 {
     public class Enemy : MonoBehaviour
     {
+        public event EventHandler OnDeath;
+
         [SerializeField] private EnemyStatsSO _stats;
 
         private float _currentHealth;
@@ -53,6 +57,7 @@ namespace Assets.Scripts.Enemies
         public void TakeDamage(float amount)
         {
             _currentHealth -= amount;
+            Debug.Log($"[ENEMY] Damage taken. Current health {_currentHealth}");
 
             CheckIfDead();
         }
@@ -61,6 +66,7 @@ namespace Assets.Scripts.Enemies
         {
             if (_currentHealth <= 0)
             {
+                OnDeath?.Invoke(this, EventArgs.Empty);
                 gameObject.SetActive(false);
             }
         }

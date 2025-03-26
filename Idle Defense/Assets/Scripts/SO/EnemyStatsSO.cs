@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.SO
 {
-    [CreateAssetMenu(fileName = "EnemyStats", menuName = "Enemy/EnemyStats")]
+    [CreateAssetMenu(fileName = "EnemyStats", menuName = "ScriptableObjects/EnemyStats", order = 2)]
     public class EnemyStatsSO : ScriptableObject
     {
         [Header("Base stats")]
