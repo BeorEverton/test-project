@@ -11,18 +11,28 @@ namespace Assets.Scripts.WaveSystem
 {
     public class EnemySpawner : MonoBehaviour
     {
+        public static EnemySpawner Instance { get; private set; }
+
+        public event EventHandler OnWaveCompleted;
+
         [SerializeField] private float _ySpawnPosition;
 
         private WaveConfigSO _currentWave;
         private List<GameObject> _enemiesAlive = new();
+
+        private void Awake()
+        {
+            if (Instance == null)
+                Instance = this;
+            else
+                Destroy(gameObject);
+        }
 
         public void StartWave(WaveConfigSO wave)
         {
             _currentWave = wave;
             StartCoroutine(SpawnEnemies());
         }
-
-        public bool WaveCompleted => _enemiesAlive.Count == 0;
 
         private IEnumerator SpawnEnemies()
         {
@@ -40,6 +50,12 @@ namespace Assets.Scripts.WaveSystem
             }
         }
 
+        private Vector3 GetRandomSpawnPosition()
+        {
+            float randomXPosition = Random.Range(-9f, 9f);
+            return new Vector3(randomXPosition, _ySpawnPosition);
+        }
+
         private void OnEnemyDeath(object sender, EventArgs e)
         {
             if (sender is Enemy enemy)
@@ -47,12 +63,14 @@ namespace Assets.Scripts.WaveSystem
                 enemy.OnDeath -= OnEnemyDeath;
                 _enemiesAlive.Remove(enemy.gameObject);
             }
+
+            CheckIfWaveCompleted();
         }
 
-        private Vector3 GetRandomSpawnPosition()
+        private void CheckIfWaveCompleted()
         {
-            float randomXPosition = Random.Range(-9f, 9f);
-            return new Vector3(randomXPosition, _ySpawnPosition);
+            if (_enemiesAlive.Count <= 0)
+                OnWaveCompleted?.Invoke(this, EventArgs.Empty);
         }
     }
 }

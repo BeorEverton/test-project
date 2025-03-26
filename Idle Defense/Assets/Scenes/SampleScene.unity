@@ -18650,7 +18650,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d94aa41bb68a7c4fbb7c074c5fe0772, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _waves:
+  GameInRunning: 1
+  _baseWaves:
   - {fileID: 11400000, guid: ffde4da8901287845997a8fb5b9ed184, type: 2}
   - {fileID: 11400000, guid: e23941e1289c439419e738806bf834ec, type: 2}
   _enemySpawner: {fileID: 1862916710}

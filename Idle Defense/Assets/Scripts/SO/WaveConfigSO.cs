@@ -7,6 +7,8 @@ namespace Assets.Scripts.SO
     public class WaveConfigSO : ScriptableObject
     {
         [Header("Wave settings")]
+        [Tooltip("WaveIndex to set this as base config")]
+        public int WaveStartIndex;
         [Tooltip("List of enemy prefabs to spawn for current wave")]
         public List<EnemyWaveEntry> EnemyPrefabs;
         [Tooltip("Time between each enemy spawn")]

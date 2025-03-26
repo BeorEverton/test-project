@@ -10,6 +10,8 @@ namespace Assets.Scripts.Enemies
         public event EventHandler OnDeath;
 
         [SerializeField] private EnemyStatsSO _stats;
+        public EnemyStatsSO Stats => _stats;
+        public float MaxHealth { get; private set; }
 
         private float _currentHealth;
         private float _timeSinceLastAttack = 0f;
@@ -17,7 +19,7 @@ namespace Assets.Scripts.Enemies
 
         private void Awake()
         {
-            _currentHealth = _stats.MaxHealth;
+            MaxHealth = _stats.MaxHealth + _stats.AddMaxHealth;
         }
 
         private void Update()
@@ -26,6 +28,9 @@ namespace Assets.Scripts.Enemies
                 MoveTowardsPlayer();
 
             TryAttacking();
+
+            if (Input.GetKeyDown(KeyCode.Space))
+                TakeDamage(100);
         }
 
         private void MoveTowardsPlayer()
