@@ -1,5 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
+using Assets.Scripts.UI;
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -87,6 +88,9 @@ namespace Assets.Scripts.WaveSystem
                 enemy.OnDeath -= OnEnemyDeath;
                 _enemiesCurrentWave.Remove(enemy.gameObject);
                 _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
+
+                // Reduce enemy count in UI
+                UIManager.Instance.EnemyDied(_enemiesCurrentWave.Count);
             }
 
             CheckIfWaveCompleted();

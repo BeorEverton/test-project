@@ -1,5 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
+using Assets.Scripts.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -52,13 +53,26 @@ namespace Assets.Scripts.WaveSystem
         {
             while (GameRunning)
             {
+                // Only updates if current wave index is less than the base waves count
+                if (_currentWaveIndex < _baseWaves.Count)
+                {                    
+                    // Precalculate the total enemies in a wave
+                    int totalEnemies = 0;
+                    for (int i = 0; i < _baseWaves[_currentWaveIndex].EnemyWaveEntries.Count; i++)
+                    {
+                        totalEnemies += _baseWaves[_currentWaveIndex].EnemyWaveEntries[i].NumberOfEnemies;
+                    }
+                    // Update the UI
+                    UIManager.Instance.UpdateWave(_currentWaveIndex, totalEnemies);
+                }
+
                 _currentWaveIndex++;
                 _waveIndexOfCurrentBaseWave++;
 
                 UpdateCurrentBasicWave();
 
                 WaveConfigSO dynamicWave = GenerateDynamicWaveConfig(_currentBaseWave, _currentWaveIndex);
-                _enemySpawner.StartWave(dynamicWave);
+                _enemySpawner.StartWave(dynamicWave);                
 
                 yield return new WaitUntil(() => _waveCompleted);
 
@@ -74,7 +88,7 @@ namespace Assets.Scripts.WaveSystem
             WaveConfigSO nextBaseWave = _baseWaves[_currentBaseWaveIndex + 1];
 
             if (_currentWaveIndex < nextBaseWave.WaveStartIndex)
-                return;
+                return;                      
 
             _currentBaseWaveIndex++;
             _waveIndexOfCurrentBaseWave = 0;
