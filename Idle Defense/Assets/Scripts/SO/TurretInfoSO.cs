@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.SO
 {
+    [CreateAssetMenu(fileName = "TurretInfo", menuName = "ScriptableObjects/TurretInfo", order = 0)]
     public class TurretInfoSO : ScriptableObject
     {
         [Header("Base Turret")]
@@ -11,6 +12,8 @@ namespace Assets.Scripts.SO
         public float FireRate;
         [Tooltip("Distance from the turret that it can shoot")]
         public float Range;
+        [Tooltip("How fast the turretHead rotates towards the target")]
+        public float RotationSpeed;
 
         [Header("Machine Gun Turret")]
         [Tooltip("Chance for a critical attack in procent")]

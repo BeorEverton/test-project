@@ -15,13 +15,12 @@ namespace Assets.Scripts.WaveSystem
         public static EnemySpawner Instance { get; private set; }
 
         public event EventHandler OnWaveCompleted;
+        public readonly List<GameObject> EnemiesCurrentWave = new();
 
         [SerializeField] private float _ySpawnPosition;
 
-        private WaveConfigSO _currentWave;
-        private readonly List<GameObject> _enemiesCurrentWave = new();
-
         private ObjectPool _objectPool;
+        private WaveConfigSO _currentWave;
 
         private void Awake()
         {
@@ -37,7 +36,7 @@ namespace Assets.Scripts.WaveSystem
         {
             _currentWave = wave;
             CreateWave();
-            Shuffle.ShuffleList(_enemiesCurrentWave);
+            Shuffle.ShuffleList(EnemiesCurrentWave);
             StartCoroutine(SpawnEnemies());
         }
 
@@ -60,13 +59,13 @@ namespace Assets.Scripts.WaveSystem
                 tempObj.transform.rotation = Quaternion.identity;
 
                 tempObj.GetComponent<Enemy>().OnDeath += OnEnemyDeath;
-                _enemiesCurrentWave.Add(tempObj);
+                EnemiesCurrentWave.Add(tempObj);
             }
         }
 
         private IEnumerator SpawnEnemies()
         {
-            foreach (GameObject enemy in _enemiesCurrentWave)
+            foreach (GameObject enemy in EnemiesCurrentWave)
             {
                 enemy.SetActive(true);
 
@@ -85,7 +84,7 @@ namespace Assets.Scripts.WaveSystem
             if (sender is Enemy enemy)
             {
                 enemy.OnDeath -= OnEnemyDeath;
-                _enemiesCurrentWave.Remove(enemy.gameObject);
+                EnemiesCurrentWave.Remove(enemy.gameObject);
                 _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
             }
 
@@ -94,7 +93,7 @@ namespace Assets.Scripts.WaveSystem
 
         private void CheckIfWaveCompleted()
         {
-            if (_enemiesCurrentWave.Count <= 0)
+            if (EnemiesCurrentWave.Count <= 0)
                 OnWaveCompleted?.Invoke(this, EventArgs.Empty);
         }
     }
