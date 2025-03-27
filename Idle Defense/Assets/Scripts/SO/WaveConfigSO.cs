@@ -10,7 +10,7 @@ namespace Assets.Scripts.SO
         [Tooltip("WaveIndex to set this as base config")]
         public int WaveStartIndex;
         [Tooltip("List of enemy prefabs to spawn for current wave")]
-        public List<EnemyWaveEntry> EnemyPrefabs;
+        public List<EnemyWaveEntry> EnemyWaveEntries;
         [Tooltip("Time between each enemy spawn")]
         public float TimeBetweenSpawns;
     }
@@ -18,7 +18,9 @@ namespace Assets.Scripts.SO
     [System.Serializable]
     public class EnemyWaveEntry
     {
-        public GameObject enemyPrefab;
-        public int numberOfEnemies;
+        [Tooltip("Enemy prefab to spawn")]
+        public GameObject EnemyPrefab;
+        [Tooltip("Number of initial enemies to spawn")]
+        public int NumberOfEnemies;
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
@@ -18,7 +19,9 @@ namespace Assets.Scripts.WaveSystem
         [SerializeField] private float _ySpawnPosition;
 
         private WaveConfigSO _currentWave;
-        private List<GameObject> _enemiesAlive = new();
+        private readonly List<GameObject> _enemiesCurrentWave = new();
+
+        private ObjectPool _objectPool;
 
         private void Awake()
         {
@@ -26,27 +29,48 @@ namespace Assets.Scripts.WaveSystem
                 Instance = this;
             else
                 Destroy(gameObject);
+
+            _objectPool = new ObjectPool(transform);
         }
 
         public void StartWave(WaveConfigSO wave)
         {
             _currentWave = wave;
+            CreateWave();
+            Shuffle.ShuffleList(_enemiesCurrentWave);
             StartCoroutine(SpawnEnemies());
+        }
+
+        private void CreateWave()
+        {
+            foreach (EnemyWaveEntry entry in _currentWave.EnemyWaveEntries)
+            {
+                CreateEnemiesFromEntry(entry);
+            }
+        }
+
+        private void CreateEnemiesFromEntry(EnemyWaveEntry entry)
+        {
+            for (int i = 0; i < entry.NumberOfEnemies; i++)
+            {
+                string entryName = entry.EnemyPrefab.GetComponent<Enemy>().Info.Name;
+                GameObject tempObj = _objectPool.GetObject(entryName, entry.EnemyPrefab);
+                tempObj.SetActive(false);
+                tempObj.transform.position = GetRandomSpawnPosition();
+                tempObj.transform.rotation = Quaternion.identity;
+
+                tempObj.GetComponent<Enemy>().OnDeath += OnEnemyDeath;
+                _enemiesCurrentWave.Add(tempObj);
+            }
         }
 
         private IEnumerator SpawnEnemies()
         {
-            foreach (EnemyWaveEntry entry in _currentWave.EnemyPrefabs)
+            foreach (GameObject enemy in _enemiesCurrentWave)
             {
-                for (int i = 0; i < entry.numberOfEnemies; i++)
-                {
-                    GameObject tempEnemy = Instantiate(entry.enemyPrefab, GetRandomSpawnPosition(), Quaternion.identity);
+                enemy.SetActive(true);
 
-                    tempEnemy.GetComponent<Enemy>().OnDeath += OnEnemyDeath;
-                    _enemiesAlive.Add(tempEnemy);
-
-                    yield return new WaitForSeconds(_currentWave.TimeBetweenSpawns);
-                }
+                yield return new WaitForSeconds(_currentWave.TimeBetweenSpawns);
             }
         }
 
@@ -61,7 +85,8 @@ namespace Assets.Scripts.WaveSystem
             if (sender is Enemy enemy)
             {
                 enemy.OnDeath -= OnEnemyDeath;
-                _enemiesAlive.Remove(enemy.gameObject);
+                _enemiesCurrentWave.Remove(enemy.gameObject);
+                _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
             }
 
             CheckIfWaveCompleted();
@@ -69,7 +94,7 @@ namespace Assets.Scripts.WaveSystem
 
         private void CheckIfWaveCompleted()
         {
-            if (_enemiesAlive.Count <= 0)
+            if (_enemiesCurrentWave.Count <= 0)
                 OnWaveCompleted?.Invoke(this, EventArgs.Empty);
         }
     }

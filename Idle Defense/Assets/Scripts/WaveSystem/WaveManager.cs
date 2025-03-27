@@ -9,6 +9,8 @@ namespace Assets.Scripts.WaveSystem
 {
     public class WaveManager : MonoBehaviour
     {
+        public static WaveManager Instance { get; private set; }
+
         public bool GameRunning = true;
 
         [SerializeField] private List<WaveConfigSO> _baseWaves;
@@ -20,6 +22,14 @@ namespace Assets.Scripts.WaveSystem
         private int _waveIndexOfCurrentBaseWave = 0;
 
         private bool _waveCompleted = false;
+
+        private void Awake()
+        {
+            if (Instance == null)
+                Instance = this;
+            else
+                Destroy(gameObject);
+        }
 
         private void Start()
         {
@@ -75,20 +85,21 @@ namespace Assets.Scripts.WaveSystem
         {
             WaveConfigSO newWaveConfig = ScriptableObject.CreateInstance<WaveConfigSO>();
 
-            newWaveConfig.EnemyPrefabs = new List<EnemyWaveEntry>();
-            foreach (EnemyWaveEntry entry in baseConfig.EnemyPrefabs)
+            newWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
+            foreach (EnemyWaveEntry entry in baseConfig.EnemyWaveEntries)
             {
                 EnemyWaveEntry newEntry = new()
                 {
-                    enemyPrefab = entry.enemyPrefab,
-                    numberOfEnemies = entry.numberOfEnemies
+                    EnemyPrefab = entry.EnemyPrefab,
+                    NumberOfEnemies = entry.NumberOfEnemies
                 };
 
-                newEntry.numberOfEnemies += _waveIndexOfCurrentBaseWave + _currentBaseWaveIndex;
+                newEntry.NumberOfEnemies += _waveIndexOfCurrentBaseWave + _currentBaseWaveIndex;
 
-                newEntry.enemyPrefab.GetComponent<Enemy>().Stats.AddMaxHealth = (waveIndex * 2f);
+                if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
+                    enemy.Info.AddMaxHealth = (waveIndex * 2f);
 
-                newWaveConfig.EnemyPrefabs.Add(newEntry);
+                newWaveConfig.EnemyWaveEntries.Add(newEntry);
             }
 
             newWaveConfig.TimeBetweenSpawns = baseConfig.TimeBetweenSpawns;

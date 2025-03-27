@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WaveConfig_2
   m_EditorClassIdentifier: 
   WaveStartIndex: 5
-  EnemyPrefabs:
-  - enemyPrefab: {fileID: 6792074172490330980, guid: 7b891a12be174cf48917515bd66f609a, type: 3}
-    numberOfEnemies: 7
-  - enemyPrefab: {fileID: 2999817314158973154, guid: 14d804b6e860a8f44a9559d6a292932d, type: 3}
-    numberOfEnemies: 2
-  TimeBetweenSpawns: 0.8
+  EnemyWaveEntries:
+  - EnemyPrefab: {fileID: 6792074172490330980, guid: 7b891a12be174cf48917515bd66f609a, type: 3}
+    NumberOfEnemies: 7
+  - EnemyPrefab: {fileID: 2999817314158973154, guid: 14d804b6e860a8f44a9559d6a292932d, type: 3}
+    NumberOfEnemies: 2
+  TimeBetweenSpawns: 0.45
