@@ -9,18 +9,13 @@ namespace Assets.Scripts.Enemies
     {
         public event EventHandler OnDeath;
 
-        [SerializeField] private EnemyStatsSO _stats;
-        public EnemyStatsSO Stats => _stats;
+        [SerializeField] private EnemyInfoSO _info;
+        public EnemyInfoSO Info => _info;
         public float MaxHealth { get; private set; }
 
         private float _currentHealth;
         private float _timeSinceLastAttack = 0f;
         private bool CanAttack = false;
-
-        private void Awake()
-        {
-            MaxHealth = _stats.MaxHealth + _stats.AddMaxHealth;
-        }
 
         private void Update()
         {
@@ -33,11 +28,16 @@ namespace Assets.Scripts.Enemies
                 TakeDamage(100);
         }
 
+        private void OnEnable()
+        {
+            ResetEnemy();
+        }
+
         private void MoveTowardsPlayer()
         {
-            gameObject.transform.position += Vector3.down * _stats.Speed * Time.deltaTime;
+            gameObject.transform.position += Vector3.down * _info.Speed * Time.deltaTime;
 
-            if (gameObject.transform.position.y <= _stats.AttackRange)
+            if (gameObject.transform.position.y <= _info.AttackRange)
                 CanAttack = true;
         }
 
@@ -47,7 +47,7 @@ namespace Assets.Scripts.Enemies
                 return;
 
             _timeSinceLastAttack += Time.deltaTime;
-            if (_timeSinceLastAttack < _stats.AttackSpeed)
+            if (_timeSinceLastAttack < _info.AttackSpeed)
                 return;
 
             Attack();
@@ -72,8 +72,15 @@ namespace Assets.Scripts.Enemies
             if (_currentHealth <= 0)
             {
                 OnDeath?.Invoke(this, EventArgs.Empty);
-                gameObject.SetActive(false);
             }
+        }
+
+        private void ResetEnemy()
+        {
+            CanAttack = false;
+            MaxHealth = _info.MaxHealth + _info.AddMaxHealth;
+            _timeSinceLastAttack = 0f;
+            _currentHealth = MaxHealth;
         }
     }
 }

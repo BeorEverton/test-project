@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
   m_Name: RangedEnemy_01
   m_EditorClassIdentifier: 
+  Name: RangedEnemy01
   MaxHealth: 10
   Speed: 0.7
   Damage: 16
   AttackRange: 3
   AttackSpeed: 1.5
+  AddMaxHealth: 16

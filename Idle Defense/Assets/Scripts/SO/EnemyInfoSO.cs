@@ -3,8 +3,11 @@ using UnityEngine;
 namespace Assets.Scripts.SO
 {
     [CreateAssetMenu(fileName = "EnemyStats", menuName = "ScriptableObjects/EnemyStats", order = 2)]
-    public class EnemyStatsSO : ScriptableObject
+    public class EnemyInfoSO : ScriptableObject
     {
+        [Header("Base info")]
+        public string Name;
+
         [Header("Base stats")]
         [Tooltip("Max health")]
         public float MaxHealth;
