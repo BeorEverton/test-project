@@ -16,8 +16,17 @@ namespace Assets.Scripts.Turrets
             if (_timeSinceLastShot < _turretInfo.FireRate)
                 return;
 
-            _targetEnemy.GetComponent<Enemy>().TakeDamage(_turretInfo.Damage);
+            float damage = _turretInfo.Damage;
+            if (IsCriticalHit())
+                damage *= (1 + (_turretInfo.CriticalDamageMultiplier / 100));
+
+            _targetEnemy.GetComponent<Enemy>().TakeDamage(damage);
             _timeSinceLastShot = 0f;
+        }
+
+        private bool IsCriticalHit()
+        {
+            return Random.Range(0, 100) < _turretInfo.CriticalChance;
         }
     }
 }
