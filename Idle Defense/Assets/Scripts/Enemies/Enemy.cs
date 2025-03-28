@@ -7,13 +7,17 @@ namespace Assets.Scripts.Enemies
 {
     public class Enemy : MonoBehaviour
     {
+        public event EventHandler OnMaxHealthChanged;
+        public event EventHandler OnCurrentChanged;
         public event EventHandler OnDeath;
 
         [SerializeField] private EnemyInfoSO _info;
         public EnemyInfoSO Info => _info;
-        public float MaxHealth { get; private set; }
 
-        private float _currentHealth;
+        public float MaxHealth { get; private set; }
+        public bool IsDead => CurrentHealth <= 0;
+        public float CurrentHealth { get; private set; }
+
         private float _timeSinceLastAttack = 0f;
         private bool CanAttack = false;
 
@@ -61,15 +65,16 @@ namespace Assets.Scripts.Enemies
 
         public void TakeDamage(float amount)
         {
-            _currentHealth -= amount;
-            Debug.Log($"[ENEMY] Damage taken. Current health {_currentHealth}");
+            CurrentHealth -= amount;
+
+            OnCurrentChanged?.Invoke(this, EventArgs.Empty);
 
             CheckIfDead();
         }
 
         private void CheckIfDead()
         {
-            if (_currentHealth <= 0)
+            if (CurrentHealth <= 0)
             {
                 OnDeath?.Invoke(this, EventArgs.Empty);
             }
@@ -79,8 +84,9 @@ namespace Assets.Scripts.Enemies
         {
             CanAttack = false;
             MaxHealth = _info.MaxHealth + _info.AddMaxHealth;
+            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
             _timeSinceLastAttack = 0f;
-            _currentHealth = MaxHealth;
+            CurrentHealth = MaxHealth;
         }
     }
 }

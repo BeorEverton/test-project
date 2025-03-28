@@ -15,12 +15,16 @@ namespace Assets.Scripts.WaveSystem
         public static EnemySpawner Instance { get; private set; }
 
         public event EventHandler OnWaveCompleted;
-        public readonly List<GameObject> EnemiesCurrentWave = new();
+        public List<GameObject> EnemiesAlive { get; } = new();
 
         [SerializeField] private float _ySpawnPosition;
 
+        private List<GameObject> _enemiesCurrentWave = new();
+
         private ObjectPool _objectPool;
         private WaveConfigSO _currentWave;
+
+        private bool _waveSpawned;
 
         private void Awake()
         {
@@ -35,13 +39,15 @@ namespace Assets.Scripts.WaveSystem
         public void StartWave(WaveConfigSO wave)
         {
             _currentWave = wave;
+            _waveSpawned = false;
             CreateWave();
-            Shuffle.ShuffleList(EnemiesCurrentWave);
+            Shuffle.ShuffleList(_enemiesCurrentWave);
             StartCoroutine(SpawnEnemies());
         }
 
         private void CreateWave()
         {
+            _enemiesCurrentWave.Clear();
             foreach (EnemyWaveEntry entry in _currentWave.EnemyWaveEntries)
             {
                 CreateEnemiesFromEntry(entry);
@@ -59,18 +65,21 @@ namespace Assets.Scripts.WaveSystem
                 tempObj.transform.rotation = Quaternion.identity;
 
                 tempObj.GetComponent<Enemy>().OnDeath += OnEnemyDeath;
-                EnemiesCurrentWave.Add(tempObj);
+                _enemiesCurrentWave.Add(tempObj);
             }
         }
 
         private IEnumerator SpawnEnemies()
         {
-            foreach (GameObject enemy in EnemiesCurrentWave)
+            foreach (GameObject enemy in _enemiesCurrentWave)
             {
                 enemy.SetActive(true);
+                EnemiesAlive.Add(enemy);
 
                 yield return new WaitForSeconds(_currentWave.TimeBetweenSpawns);
             }
+
+            _waveSpawned = true;
         }
 
         private Vector3 GetRandomSpawnPosition()
@@ -84,7 +93,7 @@ namespace Assets.Scripts.WaveSystem
             if (sender is Enemy enemy)
             {
                 enemy.OnDeath -= OnEnemyDeath;
-                EnemiesCurrentWave.Remove(enemy.gameObject);
+                EnemiesAlive.Remove(enemy.gameObject);
                 _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
             }
 
@@ -93,7 +102,7 @@ namespace Assets.Scripts.WaveSystem
 
         private void CheckIfWaveCompleted()
         {
-            if (EnemiesCurrentWave.Count <= 0)
+            if (_waveSpawned && EnemiesAlive.Count <= 0)
                 OnWaveCompleted?.Invoke(this, EventArgs.Empty);
         }
     }

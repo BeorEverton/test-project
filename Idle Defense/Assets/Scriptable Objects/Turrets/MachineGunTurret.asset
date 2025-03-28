@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damage: 5
   FireRate: 0.1
-  Range: 7.5
-  RotationSpeed: 10
+  RotationSpeed: 5
+  AngleThreshold: 5
   CriticalChance: 10
   CriticalDamageMultiplier: 200
   ExplosionRadius: 0

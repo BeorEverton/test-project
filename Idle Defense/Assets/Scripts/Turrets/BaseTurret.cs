@@ -8,15 +8,21 @@ namespace Assets.Scripts.Turrets
 {
     public abstract class BaseTurret : MonoBehaviour
     {
-        protected GameObject _targetEnemy;
         [SerializeField] protected TurretInfoSO _turretInfo;
         [SerializeField] protected Transform _rotationPoint;
+
+        protected GameObject _targetEnemy;
+        protected float _timeSinceLastShot = 0f;
+        protected bool _targetInRange;
+
+        private bool _targetInAim;
 
         protected virtual void Attack()
         {
             TargetFirst();
             AimTowardsTarget();
-            Shoot();
+            if (_targetInAim && _targetInRange)
+                Shoot();
         }
 
         protected virtual void Shoot()
@@ -26,35 +32,46 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void TargetFirst()
         {
-            _targetEnemy = EnemySpawner.Instance.EnemiesCurrentWave
+            _targetEnemy = EnemySpawner.Instance.EnemiesAlive
                 .OrderBy(enemy => enemy.transform.position.y)
-                .FirstOrDefault();
+                .FirstOrDefault(y => y.transform.position.y <= 7.5f);
         }
 
         protected virtual void AimTowardsTarget()
         {
             if (_targetEnemy == null)
+            {
+                _targetInRange = false;
                 return;
+            }
 
-            if (Vector3.Distance(transform.position, _targetEnemy.transform.position) > _turretInfo.Range)
-                return;
+            _targetInRange = true;
 
             Vector3 direction = _targetEnemy.transform.position - _rotationPoint.position;
 
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90;
 
-            Quaternion targetRotation = Quaternion.Euler(0, 0, angle - 90);
+            Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
 
             _rotationPoint.localRotation = Quaternion.Slerp(
                 _rotationPoint.rotation, targetRotation, _turretInfo.RotationSpeed * Time.deltaTime);
+
+            IsAimingOnTarget(angle);
         }
 
-#if UNITY_EDITOR
-        private void OnDrawGizmosSelected()
+        private void IsAimingOnTarget(float targetAngle)
         {
-            Gizmos.color = Color.red;
-            Handles.DrawWireArc(transform.position, Vector3.forward, Vector3.right, 360, _turretInfo.Range);
+            if (_targetEnemy == null)
+            {
+                _targetInAim = false;
+                return;
+            }
+
+            float currentAngle = _rotationPoint.localRotation.eulerAngles.z;
+
+            float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
+
+            _targetInAim = angleDifference <= _turretInfo.AngleThreshold;
         }
-#endif
     }
 }

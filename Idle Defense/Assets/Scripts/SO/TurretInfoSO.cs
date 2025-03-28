@@ -10,10 +10,10 @@ namespace Assets.Scripts.SO
         public float Damage;
         [Tooltip("Amount of time between shots")]
         public float FireRate;
-        [Tooltip("Distance from the turret that it can shoot")]
-        public float Range;
         [Tooltip("How fast the turretHead rotates towards the target")]
         public float RotationSpeed;
+        [Tooltip("Angle threshold between target and turret before being able to shoot")]
+        public float AngleThreshold;
 
         [Header("Machine Gun Turret")]
         [Tooltip("Chance for a critical attack in procent")]
