@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: RangedEnemy01
   MaxHealth: 10
-  Speed: 0.7
+  MovementSpeed: 1.25
+  MovementSpeedDifference: 0.2
   Damage: 16
   AttackRange: 3
   AttackSpeed: 1.5

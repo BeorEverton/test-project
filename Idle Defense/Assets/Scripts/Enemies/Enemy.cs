@@ -1,8 +1,7 @@
 using Assets.Scripts.SO;
-using Assets.Scripts.UI;
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Enemies
 {
@@ -21,6 +20,7 @@ namespace Assets.Scripts.Enemies
 
         private float _timeSinceLastAttack = 0f;
         private bool CanAttack = false;
+        private float _movementSpeed;
 
         private void Update()
         {
@@ -40,7 +40,7 @@ namespace Assets.Scripts.Enemies
 
         private void MoveTowardsPlayer()
         {
-            gameObject.transform.position += Vector3.down * _info.Speed * Time.deltaTime;
+            gameObject.transform.position += Vector3.down * _movementSpeed * Time.deltaTime;
 
             if (gameObject.transform.position.y <= _info.AttackRange)
                 CanAttack = true;
@@ -88,6 +88,12 @@ namespace Assets.Scripts.Enemies
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
             _timeSinceLastAttack = 0f;
             CurrentHealth = MaxHealth;
+            SetRandomMovementSpeed();
+        }
+
+        private void SetRandomMovementSpeed()
+        {
+            _movementSpeed = Random.Range(_info.MovementSpeed - _info.MovementSpeedDifference, _info.MovementSpeed + _info.MovementSpeedDifference);
         }
     }
 }

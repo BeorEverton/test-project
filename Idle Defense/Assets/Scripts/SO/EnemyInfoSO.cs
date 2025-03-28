@@ -12,7 +12,9 @@ namespace Assets.Scripts.SO
         [Tooltip("Max health")]
         public float MaxHealth;
         [Tooltip("Movement speed")]
-        public float Speed;
+        public float MovementSpeed;
+        [Tooltip("The amount the movementspeed can differ from MovementSpeed")]
+        public float MovementSpeedDifference;
 
         [Header("Attack stats")]
         [Tooltip("Damage dealth to the player per attack")]

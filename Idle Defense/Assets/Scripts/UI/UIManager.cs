@@ -1,5 +1,7 @@
-using UnityEngine;
+using Assets.Scripts.WaveSystem;
+using System;
 using TMPro;
+using UnityEngine;
 
 namespace Assets.Scripts.UI
 {
@@ -9,6 +11,8 @@ namespace Assets.Scripts.UI
 
         public static UIManager Instance { get; private set; }
 
+        private int _enemyCount;
+
         private void Awake()
         {
             if (Instance == null)
@@ -17,16 +21,29 @@ namespace Assets.Scripts.UI
                 Destroy(gameObject);
         }
 
-        public void UpdateWave(int newWave, int totalEnemies)
+        private void Start()
         {
-            wave.text = $"Wave: {newWave + 1}"; // +1 to now show 'wave 0'
-            enemies.text = $"Enemies: {totalEnemies}";
+            EnemySpawner.Instance.OnWaveCreated += OnWaveCreated;
+            EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
+            WaveManager.Instance.OnWaveStarted += OnWaveStarted;
         }
 
-        public void EnemyDied(int totalEnemies)
+        private void OnEnemyDeath(object sender, EventArgs e)
         {
-            // Update enemies text
-            enemies.text = "Enemies: " + totalEnemies;
+            _enemyCount--;
+            enemies.text = $"Enemies: {_enemyCount}";
+        }
+
+        private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
+        {
+            wave.text = $"Wave: {args.WaveNumber}";
+
+        }
+
+        private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
+        {
+            _enemyCount = args.EnemyCount;
+            enemies.text = $"Enemies: {_enemyCount}";
         }
     }
 }

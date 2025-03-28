@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: MeleeEnemy01
   MaxHealth: 20
-  Speed: 1.3
+  MovementSpeed: 1.5
+  MovementSpeedDifference: 0.25
   Damage: 2
   AttackRange: 0.5
   AttackSpeed: 1
-  AddMaxHealth: 16
+  AddMaxHealth: 4

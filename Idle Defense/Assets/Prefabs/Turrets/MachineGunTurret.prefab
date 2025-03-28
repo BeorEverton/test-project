@@ -78,4 +78,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _turretInfo: {fileID: 11400000, guid: d382a866b82a96449b631cb2dc2ef75a, type: 2}
-  _turretBase: {fileID: 0}
+  _rotationPoint: {fileID: 4294516794264858668}
+--- !u!4 &4294516794264858668 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+  m_PrefabInstance: {fileID: 3923003927643922996}
+  m_PrefabAsset: {fileID: 0}

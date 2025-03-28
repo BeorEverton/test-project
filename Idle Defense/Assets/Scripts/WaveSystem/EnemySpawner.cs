@@ -16,6 +16,14 @@ namespace Assets.Scripts.WaveSystem
         public static EnemySpawner Instance { get; private set; }
 
         public event EventHandler OnWaveCompleted;
+        public event EventHandler<OnWaveCreatedEventArgs> OnWaveCreated;
+        public event EventHandler OnEnemyDeath;
+
+        public class OnWaveCreatedEventArgs : EventArgs
+        {
+            public int EnemyCount;
+        }
+
         public List<GameObject> EnemiesAlive { get; } = new();
 
         [SerializeField] private float _ySpawnPosition;
@@ -65,9 +73,10 @@ namespace Assets.Scripts.WaveSystem
                 tempObj.transform.position = GetRandomSpawnPosition();
                 tempObj.transform.rotation = Quaternion.identity;
 
-                tempObj.GetComponent<Enemy>().OnDeath += OnEnemyDeath;
+                tempObj.GetComponent<Enemy>().OnDeath += Enemy_OnEnemyDeath;
                 _enemiesCurrentWave.Add(tempObj);
             }
+            OnWaveCreated?.Invoke(this, new OnWaveCreatedEventArgs { EnemyCount = _enemiesCurrentWave.Count });
         }
 
         private IEnumerator SpawnEnemies()
@@ -85,20 +94,19 @@ namespace Assets.Scripts.WaveSystem
 
         private Vector3 GetRandomSpawnPosition()
         {
-            float randomXPosition = Random.Range(-9f, 9f);
+            float randomXPosition = Random.Range(-9f, 1.8f);
             return new Vector3(randomXPosition, _ySpawnPosition);
         }
 
-        private void OnEnemyDeath(object sender, EventArgs e)
+        private void Enemy_OnEnemyDeath(object sender, EventArgs e)
         {
             if (sender is Enemy enemy)
             {
-                enemy.OnDeath -= OnEnemyDeath;
+                enemy.OnDeath -= Enemy_OnEnemyDeath;
                 EnemiesAlive.Remove(enemy.gameObject);
                 _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
 
-                // Reduce enemy count in UI
-                UIManager.Instance.EnemyDied(_enemiesCurrentWave.Count);
+                OnEnemyDeath?.Invoke(this, EventArgs.Empty);
             }
 
             CheckIfWaveCompleted();
