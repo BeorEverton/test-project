@@ -10,7 +10,7 @@ namespace Assets.Scripts.Turrets
     public abstract class BaseTurret : MonoBehaviour
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
-        [SerializeField] protected Transform _rotationPoint;
+        [SerializeField] protected Transform _rotationPoint, _barrel;     
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -18,7 +18,7 @@ namespace Assets.Scripts.Turrets
 
         private bool _targetInAim;
 
-        private void Update()
+        protected virtual void Update()
         {
             _timeSinceLastShot += Time.deltaTime;
             Attack();
