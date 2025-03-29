@@ -10,6 +10,7 @@ namespace Assets.Scripts.UI
     {
         [SerializeField] private TextMeshProUGUI dmgBonus, spdBonus, wave, enemies, money;
         [SerializeField] private Slider spdBonusSlider;
+        private int waveOnHold;
 
         public static UIManager Instance { get; private set; }
 
@@ -27,34 +28,52 @@ namespace Assets.Scripts.UI
         {
             EnemySpawner.Instance.OnWaveCreated += OnWaveCreated;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
+            EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
         }
 
         private void OnEnemyDeath(object sender, EventArgs e)
         {
             _enemyCount--;
-            enemies.text = $"Enemies: {_enemyCount}";
+            enemies.text = $"Enemies\n{_enemyCount}";
         }
 
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
         {
-            wave.text = $"Wave: {args.WaveNumber}";
+            wave.text = $"Next Wave\n{args.WaveNumber + 1}";
 
         }
 
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
         {
             _enemyCount = args.EnemyCount;
-            enemies.text = $"Enemies: {_enemyCount}";
+            enemies.text = $"Enemies\n{_enemyCount}";
         }
 
+        private void OnWaveCompleted(object sender, EventArgs e)
+        {
+            if (waveOnHold != -1)
+            {
+                WaveManager.Instance.SetWave(waveOnHold);
+                waveOnHold = -1;
+            }            
+        }
+
+        /// <summary>
+        /// Button on the UI to reduce the wave number
+        /// </summary>
         public void ReduceWave()
         {
-            // Button that goes back to the previous wave
-            // Must make sure all enemies are killed before reducing the wave
-            // WaveManager.Instance.ReduceWave();
+            if (waveOnHold == -1)
+            {
+                waveOnHold = WaveManager.Instance.GetCurrentWaveIndex();
+            }
+            else
+                waveOnHold = Mathf.Max(1, waveOnHold - 1);
 
+            wave.text = $"Next Wave\n{waveOnHold}";
         }
+
 
         public void IncreaseWave()
         {

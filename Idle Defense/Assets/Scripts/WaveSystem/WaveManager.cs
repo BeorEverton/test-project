@@ -30,6 +30,8 @@ namespace Assets.Scripts.WaveSystem
 
         private bool _waveCompleted = false;
 
+        private bool forcedWave = false; // Used by the UI to force the next wave
+
         private void Awake()
         {
             if (Instance == null)
@@ -59,7 +61,10 @@ namespace Assets.Scripts.WaveSystem
         {
             while (GameRunning)
             {
-                _currentWaveIndex++;
+                if (forcedWave)                
+                    forcedWave = false;                    
+                else
+                    _currentWaveIndex++;
                 _waveIndexOfCurrentBaseWave++;
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
@@ -116,6 +121,17 @@ namespace Assets.Scripts.WaveSystem
             newWaveConfig.TimeBetweenSpawns = baseConfig.TimeBetweenSpawns;
 
             return newWaveConfig;
+        }
+
+        public int GetCurrentWaveIndex()
+        {
+            return _currentWaveIndex;
+        }
+
+        public void SetWave(int waveIndex)
+        {
+            _currentWaveIndex = waveIndex;
+            forcedWave = true;
         }
     }
 }
