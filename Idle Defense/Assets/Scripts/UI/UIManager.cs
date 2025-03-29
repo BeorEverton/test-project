@@ -65,6 +65,47 @@ namespace Assets.Scripts.UI
         {
             spdBonusSlider.value = value;
             spdBonus.text = "Spd Bonus\n" + value.ToString("F0") +"%";
+            UpdateBonusColor(spdBonus, value);
+        }
+
+        public void UpdateDmgBonus(float value)
+        {
+            dmgBonus.text = "Dmg Bonus\n" + value.ToString("F0") + "%";
+            UpdateBonusColor(dmgBonus, value);
+        }
+
+        /// <summary>
+        /// Colors the bonus text based on the value
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="value"></param>
+        public void UpdateBonusColor(TextMeshProUGUI element, float value)
+        {
+            Color startColor = Color.white;
+            Color midColor = new Color(1f, 1f, 0.5f);       // Pale yellow
+            Color endColor = new Color(1f, 0.5f, 0.5f);      // Pale red
+            Color finalColor = new Color(0.5f, 0.5f, 1f);    // Pale electric blue
+
+            if (value <= 50f)
+            {
+                float t = value / 50f;
+                element.color = Color.Lerp(startColor, midColor, t);
+            }
+            else if (value <= 100f)
+            {
+                float t = (value - 50f) / 50f;
+                element.color = Color.Lerp(midColor, endColor, t);
+            }
+            else if (value <= 200f)
+            {
+                float t = (value - 100f) / 100f;
+                element.color = Color.Lerp(endColor, finalColor, t);
+            }
+            else
+            {
+                // Clamp at final color if value > 200%
+                element.color = finalColor;
+            }
         }
     }
 }

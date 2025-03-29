@@ -1,4 +1,5 @@
 using Assets.Scripts.SO;
+using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using System.Linq;
 using UnityEditor;
@@ -17,10 +18,23 @@ namespace Assets.Scripts.Turrets
 
         private bool _targetInAim;
 
-        protected virtual void Attack()
+        private void Update()
         {
+            _timeSinceLastShot += Time.deltaTime;
+            Attack();
+        }
+
+        protected virtual void Attack()
+        {            
             TargetFirst();
             AimTowardsTarget();
+
+            // Get spd bonus from GameManager and calculate effective fire rate
+            float effectiveFireRate = _turretInfo.FireRate / (1f + GameManager.Instance.spdBonus / 100f);
+
+            if (_timeSinceLastShot < effectiveFireRate)
+                return;
+
             if (_targetInAim && _targetInRange)
                 Shoot();
         }

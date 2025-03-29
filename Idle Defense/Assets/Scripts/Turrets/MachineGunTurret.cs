@@ -1,22 +1,17 @@
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Systems;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
 {
     public class MachineGunTurret : BaseTurret
-    {
-        private void Update()
-        {
-            _timeSinceLastShot += Time.deltaTime;
-            Attack();
-        }
+    {      
 
         protected override void Shoot()
         {
-            if (_timeSinceLastShot < _turretInfo.FireRate)
-                return;
+            // Get dmg bonus from GameManager and calculate effective damage
+            float damage = _turretInfo.Damage * (1f + GameManager.Instance.dmgBonus / 100f);
 
-            float damage = _turretInfo.Damage;
             if (IsCriticalHit())
                 damage *= (1 + (_turretInfo.CriticalDamageMultiplier / 100));
 
