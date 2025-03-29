@@ -1,6 +1,7 @@
 using Assets.Scripts.UI;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Assets.Scripts.Systems
 {
@@ -10,23 +11,26 @@ namespace Assets.Scripts.Systems
         public float spdBonus { get; private set; }
 
         private const float maxSpdBonus = 200f;
-        private const float increaseRate = maxSpdBonus / 5f; // Increase to max in 20 seconds
-        private const float decreaseRate = maxSpdBonus / 60f; // Decrease to 0 in 2 minutes
+        private const float increaseRate = maxSpdBonus / 10f; // Increase to 200 in 10 seconds
+        private const float decreaseRate = maxSpdBonus / 30f; // Decrease to 0 in 30 seconds
 
         private void Update()
         {
-            if (Input.GetMouseButton(0))
+            if (!EventSystem.current.IsPointerOverGameObject())
             {
-                spdBonus += increaseRate * Time.deltaTime;
-            }
-            else
-            {
-                spdBonus -= decreaseRate * Time.deltaTime;
-            }
+                if (Input.GetMouseButton(0))
+                {
+                    spdBonus += increaseRate * Time.deltaTime;
+                }
+                else
+                {
+                    spdBonus -= decreaseRate * Time.deltaTime;
+                }
 
-            spdBonus = Mathf.Clamp(spdBonus, 0, maxSpdBonus);
+                spdBonus = Mathf.Clamp(spdBonus, 0, maxSpdBonus);
 
-            UIManager.Instance.UpdateSpdBonus(spdBonus);
+                UIManager.Instance.UpdateSpdBonus(spdBonus);
+            }
         }
     }
 }
