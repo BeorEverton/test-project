@@ -16,6 +16,7 @@ namespace Assets.Scripts.WaveSystem
         public static EnemySpawner Instance { get; private set; }
 
         public event EventHandler OnWaveCompleted;
+        public event EventHandler OnWaveFailed; // TO-DO, Used to reset the damage bonus
         public event EventHandler<OnWaveCreatedEventArgs> OnWaveCreated;
         public event EventHandler OnEnemyDeath;
 

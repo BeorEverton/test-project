@@ -1,22 +1,51 @@
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Systems;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
 {
     public class MachineGunTurret : BaseTurret
     {
-        private void Update()
+        // Track Recoil
+        private Vector3 _barrelOriginalLocalPos;
+        private float _recoilTimer = 0f;
+        private const float _recoilDuration = 0.1f;
+        private const float _recoilDistance = 0.15f;
+
+        private void Start()
         {
-            _timeSinceLastShot += Time.deltaTime;
-            Attack();
+            _barrelOriginalLocalPos = _barrel.localPosition;
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            ApplyBarrelRecoil();
+        }
+
+        private void ApplyBarrelRecoil()
+        {
+            if (!(_recoilTimer > 0f))
+                return;
+
+            _recoilTimer -= Time.deltaTime;
+
+            float time = 1f - (_recoilTimer / _recoilDuration);
+            _barrel.localPosition = Vector3.Lerp(
+                _barrelOriginalLocalPos + Vector3.up * _recoilDistance,
+                _barrelOriginalLocalPos,
+                time
+            );
         }
 
         protected override void Shoot()
         {
-            if (_timeSinceLastShot < _turretInfo.FireRate)
-                return;
+            _recoilTimer = _recoilDuration;
+            _barrel.localPosition = _barrelOriginalLocalPos + Vector3.up * _recoilDistance;
 
-            float damage = _turretInfo.Damage;
+            // Get dmg bonus from GameManager and calculate effective damage
+            float damage = _turretInfo.Damage * (1f + GameManager.Instance.dmgBonus / 100f);
+
             if (IsCriticalHit())
                 damage *= (1 + (_turretInfo.CriticalDamageMultiplier / 100));
 
