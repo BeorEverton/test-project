@@ -2,7 +2,6 @@ using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
@@ -10,7 +9,7 @@ namespace Assets.Scripts.Turrets
     public abstract class BaseTurret : MonoBehaviour
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
-        [SerializeField] protected Transform _rotationPoint, _barrel;     
+        [SerializeField] protected Transform _rotationPoint, _barrel;
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -25,12 +24,14 @@ namespace Assets.Scripts.Turrets
         }
 
         protected virtual void Attack()
-        {            
-            TargetFirst();
-            AimTowardsTarget();
-
+        {
             // Get spd bonus from GameManager and calculate effective fire rate
-            float effectiveFireRate = _turretInfo.FireRate / (1f + GameManager.Instance.spdBonus / 100f);
+            float bonusMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
+
+            TargetFirst();
+            AimTowardsTarget(bonusMultiplier);
+
+            float effectiveFireRate = _turretInfo.FireRate / bonusMultiplier;
 
             if (_timeSinceLastShot < effectiveFireRate)
                 return;
@@ -41,7 +42,7 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Shoot()
         {
-            //Debug.LogWarning($"[BASETURRET] Shoot not implemented");
+            Debug.LogWarning($"[BASETURRET] Shoot not implemented");
         }
 
         protected virtual void TargetFirst()
@@ -51,7 +52,7 @@ namespace Assets.Scripts.Turrets
                 .FirstOrDefault(y => y.transform.position.y <= 7.5f);
         }
 
-        protected virtual void AimTowardsTarget()
+        protected virtual void AimTowardsTarget(float bonusMultiplier)
         {
             if (_targetEnemy == null)
             {
@@ -68,7 +69,7 @@ namespace Assets.Scripts.Turrets
             Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
 
             _rotationPoint.localRotation = Quaternion.Slerp(
-                _rotationPoint.rotation, targetRotation, _turretInfo.RotationSpeed * Time.deltaTime);
+                _rotationPoint.rotation, targetRotation, _turretInfo.RotationSpeed * bonusMultiplier * Time.deltaTime);
 
             IsAimingOnTarget(angle);
         }

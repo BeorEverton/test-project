@@ -20,17 +20,22 @@ namespace Assets.Scripts.Turrets
         protected override void Update()
         {
             base.Update();
-            if (_recoilTimer > 0f)
-            {
-                _recoilTimer -= Time.deltaTime;
+            ApplyBarrelRecoil();
+        }
 
-                float t = 1f - (_recoilTimer / _recoilDuration);
-                _barrel.localPosition = Vector3.Lerp(
-                    _barrelOriginalLocalPos + Vector3.up * _recoilDistance,
-                    _barrelOriginalLocalPos,
-                    t
-                );
-            }
+        private void ApplyBarrelRecoil()
+        {
+            if (!(_recoilTimer > 0f))
+                return;
+
+            _recoilTimer -= Time.deltaTime;
+
+            float time = 1f - (_recoilTimer / _recoilDuration);
+            _barrel.localPosition = Vector3.Lerp(
+                _barrelOriginalLocalPos + Vector3.up * _recoilDistance,
+                _barrelOriginalLocalPos,
+                time
+            );
         }
 
         protected override void Shoot()
