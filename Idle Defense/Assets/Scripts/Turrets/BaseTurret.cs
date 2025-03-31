@@ -12,7 +12,7 @@ namespace Assets.Scripts.Turrets
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
         [SerializeField] protected Transform _rotationPoint, _barrel, _barrelEnd;
-        [SerializeField] private List<Sprite> _firingSprites;
+        [SerializeField] private List<Sprite> _mussleFlashSprites;
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -46,7 +46,7 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Shoot()
         {
-            StartCoroutine(PlayFiringAnimation());
+            StartCoroutine(ShowMuzzleFlash());
         }
 
         protected virtual void TargetFirst()
@@ -93,13 +93,13 @@ namespace Assets.Scripts.Turrets
             _targetInAim = angleDifference <= _turretInfo.AngleThreshold;
         }
 
-        private IEnumerator PlayFiringAnimation()
+        private IEnumerator ShowMuzzleFlash()
         {
-            if (_firingSprites.Count == 0)
+            if (_mussleFlashSprites.Count == 0)
                 yield break;
 
-            Sprite randomSprite = _firingSprites[Random.Range(0, _firingSprites.Count)];
-            _barrelEnd.GetComponent<SpriteRenderer>().sprite = randomSprite;
+            Sprite randomMuzzleFlash = _mussleFlashSprites[Random.Range(0, _mussleFlashSprites.Count)];
+            _barrelEnd.GetComponent<SpriteRenderer>().sprite = randomMuzzleFlash;
 
             yield return new WaitForSeconds(0.05f);
             _barrelEnd.GetComponent<SpriteRenderer>().sprite = null;
