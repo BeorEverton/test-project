@@ -10,7 +10,7 @@ namespace Assets.Scripts.Turrets
     public abstract class BaseTurret : MonoBehaviour
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
-        [SerializeField] protected Transform _rotationPoint, _barrel;
+        [SerializeField] protected Transform _rotationPoint;
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
