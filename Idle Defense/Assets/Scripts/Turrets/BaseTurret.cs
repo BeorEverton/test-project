@@ -3,6 +3,7 @@ using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Turrets
 {
@@ -16,6 +17,7 @@ namespace Assets.Scripts.Turrets
         protected bool _targetInRange;
 
         private bool _targetInAim;
+        private float xSize = .3f;
 
         protected virtual void Update()
         {
@@ -87,6 +89,18 @@ namespace Assets.Scripts.Turrets
             float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
 
             _targetInAim = angleDifference <= _turretInfo.AngleThreshold;
+        }
+
+        protected virtual void OnDrawGizmosSelected()
+        {
+            if (_targetEnemy == null)
+                return;
+
+            Vector3 position = _targetEnemy.transform.position;
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(position + new Vector3(-xSize, -xSize, 0), position + new Vector3(xSize, xSize, 0));
+            Gizmos.DrawLine(position + new Vector3(-xSize, xSize, 0), position + new Vector3(xSize, -xSize, 0));
         }
     }
 }

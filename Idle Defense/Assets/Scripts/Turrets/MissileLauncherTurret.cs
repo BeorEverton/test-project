@@ -38,12 +38,11 @@ namespace Assets.Scripts.Turrets
             }
         }
 
-#if UNITY_EDITOR
-        private void OnDrawGizmosSelected()
+        protected override void OnDrawGizmosSelected()
         {
+            base.OnDrawGizmosSelected();
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(_targetEnemy != null ? _targetEnemy.transform.position : transform.position, _turretInfo.ExplosionRadius);
         }
-#endif
     }
 }

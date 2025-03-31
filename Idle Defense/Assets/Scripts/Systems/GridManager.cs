@@ -51,6 +51,11 @@ namespace Assets.Scripts.Systems
                 enemyGrid.Remove(gridPos);
         }
 
+        public List<Enemy> GetEnemiesInGrid(Vector2Int gridPos)
+        {
+            return enemyGrid.TryGetValue(gridPos, out List<Enemy> enemies) ? enemies : new List<Enemy>();
+        }
+
         public List<Enemy> GetEnemiesInRange(Vector3 position, int gridRange)
         {
             List<Enemy> enemiesInRange = new();
@@ -68,20 +73,9 @@ namespace Assets.Scripts.Systems
                 }
             }
 
-            //for (int x = -gridRange; x <= gridRange; x++)
-            //{
-            //    for (int y = -gridRange; y <= gridRange; y++)
-            //    {
-            //        Vector2Int checkPos = new(centerGridPos.x + x, centerGridPos.y + y);
-            //        if (enemyGrid.TryGetValue(checkPos, out List<Enemy> enemies))
-            //        {
-            //            enemiesInRange.AddRange(enemies);
-            //        }
-            //    }
-            //}
-
             return enemiesInRange;
         }
+
 
         private void OnDrawGizmosSelected()
         {
