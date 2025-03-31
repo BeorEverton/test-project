@@ -1,4 +1,5 @@
 using Assets.Scripts.SO;
+using Assets.Scripts.Systems;
 using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -21,21 +22,37 @@ namespace Assets.Scripts.Enemies
         private float _timeSinceLastAttack = 0f;
         private bool CanAttack = false;
         private float _movementSpeed;
-
-        private void Update()
-        {
-            if (!CanAttack)
-                MoveTowardsPlayer();
-
-            TryAttacking();
-
-            if (Input.GetKeyDown(KeyCode.Space))
-                TakeDamage(100);
-        }
+        private Vector2Int lastGridPos;
 
         private void OnEnable()
         {
             ResetEnemy();
+            lastGridPos = GridManager.Instance.GetGridPosition(transform.position);
+            GridManager.Instance.AddEnemy(this);
+        }
+
+        private void OnDisable()
+        {
+            GridManager.Instance.RemoveEnemy(this, lastGridPos);
+        }
+
+        private void Update()
+        {
+            if (!CanAttack)
+            {
+                MoveTowardsPlayer();
+
+                Vector2Int currentGridPos = GridManager.Instance.GetGridPosition(transform.position);
+
+                if (currentGridPos != lastGridPos)
+                {
+                    GridManager.Instance.RemoveEnemy(this, lastGridPos);
+                    GridManager.Instance.AddEnemy(this);
+                    lastGridPos = currentGridPos;
+                }
+            }
+
+            TryAttacking();
         }
 
         private void MoveTowardsPlayer()

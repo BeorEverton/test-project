@@ -1,4 +1,8 @@
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Systems;
+using NUnit.Framework;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
@@ -25,12 +29,12 @@ namespace Assets.Scripts.Turrets
 
         private void CreateExplosion(Vector3 target)
         {
-            Collider2D[] explosionHits = Physics2D.OverlapCircleAll(target, _turretInfo.ExplosionRadius);
+            List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(_turretInfo.ExplosionRadius));
 
-            //Do some grid calculations to find the enemies in the explosion radius, without running through all enemies
-            foreach (Collider2D hit in explosionHits)
+            foreach (Enemy enemy in enemiesInAdjecentGrids
+                         .Where(enemy => Vector3.Distance(enemy.transform.position, target) <= _turretInfo.ExplosionRadius))
             {
-                Debug.Log($"Explosion hit {hit.transform.gameObject.name}");
+                enemy.TakeDamage(_turretInfo.SplashDamage);
             }
         }
 
