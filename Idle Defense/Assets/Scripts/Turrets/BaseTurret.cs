@@ -1,23 +1,25 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Turrets
 {
     public abstract class BaseTurret : MonoBehaviour
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
-        [SerializeField] protected Transform _rotationPoint, _barrel;
+        [SerializeField] protected Transform _rotationPoint, _barrel, _barrelEnd;
+        [SerializeField] private List<Sprite> _firingSprites;
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
         protected bool _targetInRange;
 
         private bool _targetInAim;
-        private float xSize = .3f;
+        private float aimSize = .3f;
 
         protected virtual void Update()
         {
@@ -44,7 +46,7 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Shoot()
         {
-            Debug.LogWarning($"[BASETURRET] Shoot not implemented");
+            StartCoroutine(PlayFiringAnimation());
         }
 
         protected virtual void TargetFirst()
@@ -91,6 +93,18 @@ namespace Assets.Scripts.Turrets
             _targetInAim = angleDifference <= _turretInfo.AngleThreshold;
         }
 
+        private IEnumerator PlayFiringAnimation()
+        {
+            if (_firingSprites.Count == 0)
+                yield break;
+
+            Sprite randomSprite = _firingSprites[Random.Range(0, _firingSprites.Count)];
+            _barrelEnd.GetComponent<SpriteRenderer>().sprite = randomSprite;
+
+            yield return new WaitForSeconds(0.05f);
+            _barrelEnd.GetComponent<SpriteRenderer>().sprite = null;
+        }
+
         protected virtual void OnDrawGizmosSelected()
         {
             if (_targetEnemy == null)
@@ -99,8 +113,8 @@ namespace Assets.Scripts.Turrets
             Vector3 position = _targetEnemy.transform.position;
 
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(position + new Vector3(-xSize, -xSize, 0), position + new Vector3(xSize, xSize, 0));
-            Gizmos.DrawLine(position + new Vector3(-xSize, xSize, 0), position + new Vector3(xSize, -xSize, 0));
+            Gizmos.DrawLine(position + new Vector3(-aimSize, -aimSize, 0), position + new Vector3(aimSize, aimSize, 0));
+            Gizmos.DrawLine(position + new Vector3(-aimSize, aimSize, 0), position + new Vector3(aimSize, -aimSize, 0));
         }
     }
 }

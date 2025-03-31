@@ -40,6 +40,8 @@ namespace Assets.Scripts.Turrets
 
         protected override void Shoot()
         {
+            base.Shoot();
+
             _recoilTimer = _recoilDuration;
             _barrel.localPosition = _barrelOriginalLocalPos + Vector3.up * _recoilDistance;
 

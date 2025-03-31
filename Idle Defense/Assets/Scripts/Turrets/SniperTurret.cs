@@ -14,6 +14,8 @@ namespace Assets.Scripts.Turrets
 
         protected override void Shoot()
         {
+            base.Shoot();
+
             int enemiesHit = 0;
 
             // Get dmg bonus from GameManager and calculate effective damage

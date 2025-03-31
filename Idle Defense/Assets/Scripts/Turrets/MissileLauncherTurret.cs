@@ -17,6 +17,8 @@ namespace Assets.Scripts.Turrets
 
         protected override void Shoot()
         {
+            base.Shoot();
+
             if (_timeSinceLastShot < _turretInfo.FireRate)
                 return;
 
