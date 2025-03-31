@@ -33,6 +33,7 @@ namespace Assets.Scripts.Systems
             Input = new PlayerInput();
             Input.Player.Click.performed += OnClickStarted;
             Input.Player.Click.canceled += OnClickReleased;
+            Input.Player.Enable();
         }
 
         private void Start()
@@ -44,6 +45,7 @@ namespace Assets.Scripts.Systems
         {
             Input.Player.Click.performed -= OnClickStarted;
             Input.Player.Click.canceled -= OnClickReleased;
+            Input.Player.Disable();
         }
 
         private void OnClickStarted(InputAction.CallbackContext ctx)
