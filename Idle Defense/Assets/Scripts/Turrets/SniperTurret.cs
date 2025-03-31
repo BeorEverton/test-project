@@ -38,7 +38,7 @@ namespace Assets.Scripts.Turrets
                     _targetEnemy.transform.position   //Second point on the line (target enemy's position).
                 );
 
-                if (enemiesHit >= _turretInfo.PierceCount)
+                if (enemiesHit > _turretInfo.PierceCount)
                     break;
 
                 if (distance > _bulletWidth)
