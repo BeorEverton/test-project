@@ -9,6 +9,9 @@ namespace Assets.Scripts.Systems
 {
     public class GameManager : MonoBehaviour
     {
+        public static GameManager Instance { get; private set; }
+        public PlayerInput Input { get; private set; }
+
         public float dmgBonus { get; private set; }
         public float spdBonus { get; private set; }
 
@@ -20,22 +23,16 @@ namespace Assets.Scripts.Systems
         private float decreaseDelay = 1f;
         private float decreaseTimer = 0f;
 
-        [SerializeField] private PlayerInput _playerInput;
-        private InputAction _clickAction;
-
-        public static GameManager Instance { get; private set; }
-
         private void Awake()
         {
             if (Instance == null)
                 Instance = this;
             else
                 Destroy(gameObject);
-                        
-            _clickAction = _playerInput.actions["Click"];
 
-            _clickAction.performed += OnClickStarted;
-            _clickAction.canceled += OnClickReleased;
+            Input = new PlayerInput();
+            Input.Player.Click.performed += OnClickStarted;
+            Input.Player.Click.canceled += OnClickReleased;
         }
 
         private void Start()
@@ -45,8 +42,8 @@ namespace Assets.Scripts.Systems
 
         private void OnDestroy()
         {
-            _clickAction.performed -= OnClickStarted;
-            _clickAction.canceled -= OnClickReleased;
+            Input.Player.Click.performed -= OnClickStarted;
+            Input.Player.Click.canceled -= OnClickReleased;
         }
 
         private void OnClickStarted(InputAction.CallbackContext ctx)
@@ -102,6 +99,6 @@ namespace Assets.Scripts.Systems
             dmgBonus = 0;
         }
 
-        
+
     }
 }
