@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2140783331710330343}
   - component: {fileID: 2533961459269339917}
+  - component: {fileID: 2309025908519245819}
   m_Layer: 0
   m_Name: Barrel
   m_TagString: Untagged
@@ -25,12 +26,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100265527558455106}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5368120663563582960}
+  m_Father: {fileID: 3887860916152146634}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2533961459269339917
 SpriteRenderer:
@@ -87,6 +88,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &2309025908519245819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100265527558455106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 475867fc76d66fe429aead1e7f82d5d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _startPoint: {fileID: 3887860916152146634}
+  _spriteRenderer: {fileID: 2533961459269339917}
 --- !u!1 &1898482384231616511
 GameObject:
   m_ObjectHideFlags: 0
@@ -116,7 +131,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2140783331710330343}
   m_Father: {fileID: 5368120663563582960}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6288808011356041521
@@ -342,9 +358,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3887860916152146634}
-    - targetCorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2140783331710330343}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       insertIndex: -1
@@ -379,4 +392,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _turretInfo: {fileID: 11400000, guid: f040866604771a0498bb260f1b3eca32, type: 2}
   _rotationPoint: {fileID: 5368120663563582960}
-  _barrel: {fileID: 0}
+  _missile: {fileID: 2309025908519245819}
