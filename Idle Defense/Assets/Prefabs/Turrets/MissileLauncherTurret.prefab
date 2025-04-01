@@ -77,12 +77,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 0, guid: 477bde0e2b9f116488e7572c9653fee1, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 477bde0e2b9f116488e7572c9653fee1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.9444444, y: 1.6}
+  m_Size: {x: 2.2755556, y: 2.2755556}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -179,12 +179,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 0, guid: 66ade26273934124babd3a238c553073, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 66ade26273934124babd3a238c553073, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1.0444444, y: 1.0333333}
+  m_Size: {x: 2.2755556, y: 2.2755556}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -266,12 +266,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0, guid: a21299b4cefdfc348b3a53ca3414dc72, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a21299b4cefdfc348b3a53ca3414dc72, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1.7422222, y: 1.9266666}
+  m_Size: {x: 2.2755556, y: 2.2755556}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -350,7 +350,10 @@ PrefabInstance:
       value: 0.5754717
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5374554300183851244, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+    - {fileID: 5750525389089795690, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+    - {fileID: 1229871911708504018, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       insertIndex: -1
@@ -392,4 +395,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _turretInfo: {fileID: 11400000, guid: f040866604771a0498bb260f1b3eca32, type: 2}
   _rotationPoint: {fileID: 5368120663563582960}
+  _barrelEnd: {fileID: 0}
+  _mussleFlashSprites: []
   _missile: {fileID: 2309025908519245819}

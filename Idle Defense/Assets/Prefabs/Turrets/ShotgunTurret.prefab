@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &2380042850953257167
+--- !u!1001 &7748068552326034007
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Name
-      value: LaserTurret
+      value: TurretBase
       objectReference: {fileID: 0}
     - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.25
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -55,34 +55,5 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4696110832135599143}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
---- !u!4 &3238056590023094999 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
-  m_PrefabInstance: {fileID: 2380042850953257167}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &4549154123848940232 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
-  m_PrefabInstance: {fileID: 2380042850953257167}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4696110832135599143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4549154123848940232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53f230fba6b2f9540a062656d0cd45ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _turretInfo: {fileID: 11400000, guid: 43a962a1d20eeb548a80327e5843ee19, type: 2}
-  _rotationPoint: {fileID: 3238056590023094999}
-  _barrelEnd: {fileID: 0}
-  _mussleFlashSprites: []

@@ -15,7 +15,7 @@ namespace Assets.Scripts.Turrets
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
 
-        [SerializeField] protected Transform _rotationPoint, _barrel, _barrelEnd;
+        [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] private List<Sprite> _mussleFlashSprites;
 
         protected GameObject _targetEnemy;
@@ -127,10 +127,10 @@ namespace Assets.Scripts.Turrets
                 yield break;
 
             Sprite randomMuzzleFlash = _mussleFlashSprites[Random.Range(0, _mussleFlashSprites.Count)];
-            _barrelEnd.GetComponent<SpriteRenderer>().sprite = randomMuzzleFlash;
+            _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = randomMuzzleFlash;
 
             yield return new WaitForSeconds(0.05f);
-            _barrelEnd.GetComponent<SpriteRenderer>().sprite = null;
+            _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = null;
         }
 
         protected virtual void OnDrawGizmosSelected()

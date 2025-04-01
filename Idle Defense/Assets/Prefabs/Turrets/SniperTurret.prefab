@@ -113,7 +113,7 @@ Transform:
   m_GameObject: {fileID: 3622348787288092860}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.426, z: 0}
+  m_LocalPosition: {x: 0, y: 0.445, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -164,12 +164,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 0, guid: 084fb7ea51485f4439ebddacc76361cf, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 084fb7ea51485f4439ebddacc76361cf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.5075, y: 2.1}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -201,7 +201,7 @@ Transform:
   m_GameObject: {fileID: 4212698782346709720}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.43, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -251,12 +251,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0, guid: 84adc0cd0484bc2469e634c132abdf81, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 84adc0cd0484bc2469e634c132abdf81, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1.4475, y: 1.5125}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -270,6 +270,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.007
+      objectReference: {fileID: 0}
     - target: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Name
       value: SniperTurret
@@ -332,7 +336,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6800362798849118830, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.494
       objectReference: {fileID: 0}
     - target: {fileID: 6800362798849118830, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalRotation.x
@@ -348,16 +352,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8162027663542616318, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Size.x
-      value: 0.6725
+      value: 2.56
       objectReference: {fileID: 0}
     - target: {fileID: 8162027663542616318, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Size.y
-      value: 0.26
+      value: 2.56
       objectReference: {fileID: 0}
     - target: {fileID: 8162027663542616318, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 0, guid: 3f06b843426a67f45b672b9faa01ca56, type: 3}
+      objectReference: {fileID: 21300000, guid: 3f06b843426a67f45b672b9faa01ca56, type: 3}
     - target: {fileID: 8162027663542616318, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_SortingOrder
       value: 1
@@ -407,6 +411,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _turretInfo: {fileID: 11400000, guid: e50665230e8078148b03c2ea2409f436, type: 2}
   _rotationPoint: {fileID: 4562069437259260447}
+  _barrelEnd: {fileID: 0}
+  _mussleFlashSprites: []
   pathCells: []
 --- !u!114 &5837989838757907034
 MonoBehaviour:
@@ -421,8 +427,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _barrel: {fileID: 1472640925674251905}
-  _recoilDuration: 0.15
-  _recoilDistance: 0.3
+  _recoilDuration: 0.4
+  _recoilDistance: -0.4
 --- !u!4 &4562069437259260447 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
