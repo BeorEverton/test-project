@@ -1,10 +1,13 @@
+using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Turrets
 {
@@ -18,27 +21,39 @@ namespace Assets.Scripts.Turrets
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
         protected bool _targetInRange;
+        protected float _bonusSpdMultiplier;
+        protected float _bonusDmgMultiplier;
+
+        protected float _damage;
+        protected float _atkSpeed;
 
         private bool _targetInAim;
         private float aimSize = .3f;
 
         protected virtual void Update()
         {
+            // Get spd & dmg bonus from GameManager and calculate effective fire rate
+            _bonusSpdMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
+            _bonusDmgMultiplier = 1f + GameManager.Instance.dmgBonus / 100f;
+
+            // Calculate attack speed and damage
+            _damage = _turretInfo.Damage * _bonusDmgMultiplier;
+            _atkSpeed = _turretInfo.FireRate / _bonusSpdMultiplier;
+
             _timeSinceLastShot += Time.deltaTime;
             Attack();
         }
 
         protected virtual void Attack()
         {
-            // Get spd bonus from GameManager and calculate effective fire rate
-            float bonusMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
+            if (_targetEnemy == null)
+            {
+                TargetFirst();
+            }
 
-            TargetFirst();
-            AimTowardsTarget(bonusMultiplier);
+            AimTowardsTarget(_bonusSpdMultiplier);
 
-            float effectiveFireRate = _turretInfo.FireRate / bonusMultiplier;
-
-            if (_timeSinceLastShot < effectiveFireRate)
+            if (_timeSinceLastShot < _atkSpeed)
                 return;
 
             if (_targetInAim && _targetInRange)
@@ -55,6 +70,18 @@ namespace Assets.Scripts.Turrets
             _targetEnemy = EnemySpawner.Instance.EnemiesAlive
                 .OrderBy(enemy => enemy.transform.position.y)
                 .FirstOrDefault(y => y.transform.position.y <= 7.5f);
+
+            if (_targetEnemy != null)
+                _targetEnemy.GetComponent<Enemy>().OnDeath += Enemy_OnDeath;
+        }
+
+        private void Enemy_OnDeath(object sender, EventArgs _)
+        {
+            if (sender is not Enemy enemy)
+                return;
+
+            enemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
+            _targetEnemy = null;
         }
 
         protected virtual void AimTowardsTarget(float bonusMultiplier)

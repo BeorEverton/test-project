@@ -9,7 +9,7 @@ namespace Assets.Scripts.Enemies
     public class Enemy : MonoBehaviour
     {
         public event EventHandler OnMaxHealthChanged;
-        public event EventHandler OnCurrentChanged;
+        public event EventHandler OnCurrentHealthChanged;
         public event EventHandler OnDeath;
 
         [SerializeField] private EnemyInfoSO _info;
@@ -87,7 +87,7 @@ namespace Assets.Scripts.Enemies
         {
             CurrentHealth -= amount;
 
-            OnCurrentChanged?.Invoke(this, EventArgs.Empty);
+            OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
 
             CheckIfDead();
         }

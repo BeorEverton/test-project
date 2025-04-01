@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
@@ -26,8 +27,7 @@ namespace Assets.Scripts.Turrets
             if (enemy == null)
                 return;
 
-            float bonusMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
-            float timeToImpact = _turretInfo.FireRate / bonusMultiplier;
+            float timeToImpact = _turretInfo.FireRate / _bonusSpdMultiplier;
 
             // Predict position based on speed, impact delay, and enemy attack range
             Vector3 enemyStartPos = _targetEnemy.transform.position;
@@ -45,7 +45,7 @@ namespace Assets.Scripts.Turrets
             LaunchMissile(predictedPosition, travelTime);
 
             // Trigger explosion when missile "arrives"
-            StartCoroutine(DelayedExplosion(predictedPosition, travelTime, enemy));
+            StartCoroutine(DelayedExplosion(predictedPosition, travelTime));
 
             _timeSinceLastShot = 0f;
         }
@@ -55,24 +55,29 @@ namespace Assets.Scripts.Turrets
             _missile.Launch(targetPosition, timeToImpact);
         }
 
-        private IEnumerator DelayedExplosion(Vector3 target, float delay, Enemy enemy)
+        private IEnumerator DelayedExplosion(Vector3 target, float delay)
         {
             yield return new WaitForSeconds(delay);
 
-            CreateExplosion(target, enemy);
+            CreateExplosion(target);
         }
 
-        private void CreateExplosion(Vector3 target, Enemy initialTarget)
+        private void CreateExplosion(Vector3 target)
         {
-            if (initialTarget != null)
-                initialTarget.TakeDamage(_turretInfo.Damage);
-
             List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(_turretInfo.ExplosionRadius));
+            float impactArea = _turretInfo.ExplosionRadius / 3;
 
             foreach (Enemy enemy in enemiesInAdjecentGrids
-                         .Where(enemy => Vector3.Distance(enemy.transform.position, target) <= _turretInfo.ExplosionRadius))
+                         .Where(enemy => Vector3.Distance(enemy.transform.position, target) <= impactArea))
             {
-                enemy.TakeDamage(_turretInfo.SplashDamage);
+                enemy.TakeDamage(_damage);
+            }
+
+            foreach (Enemy enemy in enemiesInAdjecentGrids
+                         .Where(enemy => Vector3.Distance(enemy.transform.position, target) > impactArea &&
+                             Vector3.Distance(enemy.transform.position, target) <= _turretInfo.ExplosionRadius))
+            {
+                enemy.TakeDamage(_turretInfo.SplashDamage * _bonusDmgMultiplier);
             }
         }
 
@@ -81,6 +86,8 @@ namespace Assets.Scripts.Turrets
             base.OnDrawGizmosSelected();
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(_targetEnemy != null ? _targetEnemy.transform.position : transform.position, _turretInfo.ExplosionRadius);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(_targetEnemy != null ? _targetEnemy.transform.position : transform.position, _turretInfo.ExplosionRadius / 3);
         }
     }
 }

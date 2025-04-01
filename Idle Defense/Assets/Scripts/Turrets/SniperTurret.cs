@@ -33,10 +33,8 @@ namespace Assets.Scripts.Turrets
 
             int enemiesHit = 0;
 
-            // Get dmg bonus from GameManager and calculate effective damage
-            float baseDamage = _turretInfo.Damage * (1f + GameManager.Instance.dmgBonus / 100f);
             float pierceDamageFalloff = 1f - _turretInfo.PierceDamageFalloff / 100f;
-            float currentDamage = baseDamage;
+            float currentDamage = _damage;
 
             pathCells = GridRaycaster.GetCellsAlongLine(
                 transform.position,
@@ -49,6 +47,9 @@ namespace Assets.Scripts.Turrets
 
             foreach (Enemy enemy in enemiesInPath)
             {
+                if (enemy == null || _targetEnemy == null)
+                    continue;
+
                 float distance = DistanceFromBulletLine(
                     enemy.transform.position,         //The point we measure the distance from.
                     transform.position,               //First point on the line (turret position).

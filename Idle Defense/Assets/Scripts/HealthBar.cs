@@ -15,7 +15,7 @@ namespace Assets.Scripts
         {
             _enemy = GetComponentInParent<Enemy>();
             _enemy.OnMaxHealthChanged += UpdateMaxHealth;
-            _enemy.OnCurrentChanged += UpdateCurrentHealth;
+            _enemy.OnCurrentHealthChanged += UpdateCurrentHealthHealth;
         }
 
         private void OnEnable()
@@ -28,7 +28,7 @@ namespace Assets.Scripts
             _slider.maxValue = _enemy.MaxHealth;
         }
 
-        private void UpdateCurrentHealth(object sender, EventArgs e)
+        private void UpdateCurrentHealthHealth(object sender, EventArgs e)
         {
             _slider.value = _enemy.CurrentHealth;
         }

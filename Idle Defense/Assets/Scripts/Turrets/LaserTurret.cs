@@ -13,10 +13,7 @@ namespace Assets.Scripts.Turrets
         {
             base.Shoot();
 
-            // Get dmg bonus from GameManager and calculate effective damage
-            float damage = _turretInfo.Damage * (1f + GameManager.Instance.dmgBonus / 100f);
-
-            _targetEnemy.GetComponent<Enemy>().TakeDamage(damage);
+            _targetEnemy.GetComponent<Enemy>().TakeDamage(_damage);
             _timeSinceLastShot = 0f;
         }
     }

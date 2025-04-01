@@ -24,13 +24,11 @@ namespace Assets.Scripts.Turrets
             base.Shoot();
 
             recoil.AddRecoil();
-            // Get dmg bonus from GameManager and calculate effective damage
-            float damage = _turretInfo.Damage * (1f + GameManager.Instance.dmgBonus / 100f);
 
             if (IsCriticalHit())
-                damage *= (1 + (_turretInfo.CriticalDamageMultiplier / 100));
+                _damage *= (1 + (_turretInfo.CriticalDamageMultiplier / 100));
 
-            _targetEnemy.GetComponent<Enemy>().TakeDamage(damage);
+            _targetEnemy.GetComponent<Enemy>().TakeDamage(_damage);
             _timeSinceLastShot = 0f;
         }
 
