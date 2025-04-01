@@ -23,9 +23,6 @@ namespace Assets.Scripts.Turrets
         {
             base.Shoot();
 
-            _recoilTimer = _recoilDuration;
-            _barrel.localPosition = _barrelOriginalLocalPos + Vector3.up * _recoilDistance;
-
             recoil.AddRecoil();
             // Get dmg bonus from GameManager and calculate effective damage
             float damage = _turretInfo.Damage * (1f + GameManager.Instance.dmgBonus / 100f);

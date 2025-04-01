@@ -12,12 +12,6 @@ namespace Assets.Scripts.Turrets
     {
         [SerializeField] private MissileController _missile;
 
-        private void Update()
-        {
-            _timeSinceLastShot += Time.deltaTime;
-            Attack();
-        }
-
         protected override void Shoot()
         {
             base.Shoot();
@@ -36,18 +30,17 @@ namespace Assets.Scripts.Turrets
             float timeToImpact = _turretInfo.FireRate / bonusMultiplier;
 
             // Predict position based on speed, impact delay, and enemy attack range
-            Vector3 startPos = _targetEnemy.transform.position;
-            float movementSpeed = enemy.Info.MovementSpeed;
-            float distanceToAttackRange = startPos.y - enemy.Info.AttackRange;
-            float maxTravelDistance = movementSpeed * timeToImpact;
+            Vector3 enemyStartPos = _targetEnemy.transform.position;
+            float enemyMovementSpeed = enemy.Info.MovementSpeed;
+            float disBetweenEnemyPosAndAtkRange = enemyStartPos.y - enemy.Info.AttackRange;
+            float maxTravelDistance = enemyMovementSpeed;
 
-            float actualTravelDistance = Mathf.Min(distanceToAttackRange, maxTravelDistance);
+            float actualTravelDistance = Mathf.Min(disBetweenEnemyPosAndAtkRange, maxTravelDistance);
 
             // Final predicted position (clamped if enemy would stop)
-            Vector3 predictedPosition = startPos + Vector3.down * actualTravelDistance;
+            Vector3 predictedPosition = enemyStartPos + Vector3.down * actualTravelDistance;
 
-            float travelTime = timeToImpact / 2f;
-            float fadeTime = timeToImpact / 2f;
+            float travelTime = timeToImpact / 4f;
 
             LaunchMissile(predictedPosition, travelTime);
 
@@ -60,22 +53,17 @@ namespace Assets.Scripts.Turrets
         public void LaunchMissile(Vector3 targetPosition, float timeToImpact)
         {
             _missile.Launch(targetPosition, timeToImpact);
-
         }
 
         private IEnumerator DelayedExplosion(Vector3 target, float delay, Enemy enemy)
         {
             yield return new WaitForSeconds(delay);
 
-            if (target == null)
-                yield break;
-
             CreateExplosion(target, enemy);
-        }     
-        
+        }
+
         private void CreateExplosion(Vector3 target, Enemy initialTarget)
         {
-            
             if (initialTarget != null)
                 initialTarget.TakeDamage(_turretInfo.Damage);
 
