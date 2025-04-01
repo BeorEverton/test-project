@@ -68,6 +68,8 @@ namespace Assets.Scripts.Enemies
             if (!CanAttack)
                 return;
 
+            CheckIfDead();
+
             _timeSinceLastAttack += Time.deltaTime;
             if (_timeSinceLastAttack < _info.AttackSpeed)
                 return;
