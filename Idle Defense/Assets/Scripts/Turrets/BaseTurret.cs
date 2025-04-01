@@ -11,6 +11,7 @@ namespace Assets.Scripts.Turrets
     public abstract class BaseTurret : MonoBehaviour
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
+
         [SerializeField] protected Transform _rotationPoint, _barrel, _barrelEnd;
         [SerializeField] private List<Sprite> _mussleFlashSprites;
 

@@ -12,9 +12,24 @@ namespace Assets.Scripts.Turrets
         private float _cellSize = 1f;
         private float _bulletWidth = 0.5f;
 
+        private Recoil recoil;
+
+        private void Start()
+        {
+            recoil = GetComponent<Recoil>();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            recoil.ApplyBarrelRecoil();
+        }
+
         protected override void Shoot()
         {
             base.Shoot();
+
+            recoil.AddRecoil();
 
             int enemiesHit = 0;
 

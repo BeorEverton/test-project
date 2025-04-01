@@ -76,12 +76,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: -6768833439472319301, guid: 648e7cb647eb6314997fae909b80e727, type: 3}
+  m_Sprite: {fileID: 0, guid: 648e7cb647eb6314997fae909b80e727, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.40625, y: 1.27}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -163,12 +163,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -8396357271708780779, guid: cc0caec72af837a498666d8eb046dc3b, type: 3}
+  m_Sprite: {fileID: 0, guid: cc0caec72af837a498666d8eb046dc3b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.68, y: 1.675}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -251,12 +251,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 8739471868564136495, guid: 90490fad41ed74c4991862a1960394bd, type: 3}
+  m_Sprite: {fileID: 0, guid: 90490fad41ed74c4991862a1960394bd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.7925, y: 0.805}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -341,6 +341,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6844404436691851304}
+    - targetCorrespondingSourceObject: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 474684429718730350}
   m_SourcePrefab: {fileID: 100100000, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
 --- !u!1 &2906797065888577587 stripped
 GameObject:
@@ -361,7 +364,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _turretInfo: {fileID: 11400000, guid: d382a866b82a96449b631cb2dc2ef75a, type: 2}
   _rotationPoint: {fileID: 4294516794264858668}
+--- !u!114 &474684429718730350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2906797065888577587}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9b4e69660f0dfa4fa85cba5937ea73a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   _barrel: {fileID: 4765491046842047527}
+  _recoilDuration: 0.1
+  _recoilDistance: 0.15
 --- !u!4 &2948967594423300107 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
