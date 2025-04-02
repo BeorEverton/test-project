@@ -12,17 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6153e066477abf4990f9076288a6088, type: 3}
   m_Name: ShotgunTurret
   m_EditorClassIdentifier: 
-  Damage: 0
-  FireRate: 0
-  RotationSpeed: 0
-  AngleThreshold: 0
+  Damage: 5
+  DamageLevel: 0
+  FireRate: 2
+  FireRateLevel: 0
+  RotationSpeed: 6
+  AngleThreshold: 4
   CriticalChance: 0
+  CriticalChanceLevel: 0
   CriticalDamageMultiplier: 0
+  CriticalDamageMultiplierLevel: 0
   ExplosionRadius: 0
+  ExplosionRadiusLevel: 0
   SplashDamage: 0
+  SplashDamageLevel: 0
   PierceCount: 0
+  PierceCountLevel: 0
   PierceDamageFalloff: 0
-  PelletCount: 0
+  PierceDamageFalloffLevel: 0
+  PelletCount: 5
+  PelletCountLevel: 0
   DamageFalloffOverDistance: 0
+  DamageFalloffOverDistanceLevel: 0
   ProcentBonusDamagePerSec: 0
+  ProcentBonusDamagePerSecLevel: 0
   SlowEffect: 0
+  SlowEffectLevel: 0

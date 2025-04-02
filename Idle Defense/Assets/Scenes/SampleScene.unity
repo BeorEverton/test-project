@@ -4571,7 +4571,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6463036619058361839, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10711,7 +10711,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3206999689089362432, guid: d90f1d543089d534693699decadbf149, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -13493,6 +13493,10 @@ PrefabInstance:
     - target: {fileID: 4549154123848940232, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
       propertyPath: m_Name
       value: LaserTurret
+      objectReference: {fileID: 0}
+    - target: {fileID: 4549154123848940232, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4582981559888802544, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -20716,7 +20720,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2906797065888577587, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2948967594423300107, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -23547,12 +23551,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8476021348886816848, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8476021348886816848, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1903009034}
   m_SourcePrefab: {fileID: 100100000, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
 --- !u!1 &1849285016
 GameObject:
@@ -23832,6 +23839,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1867140072}
   m_CullTransparentMesh: 1
+--- !u!1 &1903009033 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8476021348886816848, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+  m_PrefabInstance: {fileID: 1821057556}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1903009034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903009033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee3786d7be81a34fbd537ca0d499923, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _turretInfo: {fileID: 11400000, guid: 201a812d2671bd142a6aeaa5f8510788, type: 2}
+  _turretInfoBase: {fileID: 0}
+  _rotationPoint: {fileID: 1919121911}
+  _muzzleFlashPosition: {fileID: 0}
+  _mussleFlashSprites: []
+  pathCells: []
+  spreadAngle: 30
+  maxRange: 20
 --- !u!1 &1904857162
 GameObject:
   m_ObjectHideFlags: 0
@@ -24637,6 +24669,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1916911854}
   m_CullTransparentMesh: 1
+--- !u!4 &1919121911 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7381070214935486543, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+  m_PrefabInstance: {fileID: 1821057556}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1932012112
 GameObject:
   m_ObjectHideFlags: 0
