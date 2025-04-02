@@ -18,6 +18,7 @@ namespace Assets.Scripts.Enemies
         public float MaxHealth { get; private set; }
         public bool IsDead => CurrentHealth <= 0;
         public float CurrentHealth { get; private set; }
+        public bool IsSlowed { get; private set; }
 
         private float _timeSinceLastAttack = 0f;
         private bool CanAttack = false;
@@ -113,6 +114,12 @@ namespace Assets.Scripts.Enemies
         private void SetRandomMovementSpeed()
         {
             _movementSpeed = Random.Range(_info.MovementSpeed - _info.MovementSpeedDifference, _info.MovementSpeed + _info.MovementSpeedDifference);
+        }
+
+        public void RreduceMovementSpeed(float procent)
+        {
+            _movementSpeed -= _movementSpeed * (procent / 100f);
+            IsSlowed = true;
         }
     }
 }

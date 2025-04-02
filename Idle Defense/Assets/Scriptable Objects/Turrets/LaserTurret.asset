@@ -13,16 +13,28 @@ MonoBehaviour:
   m_Name: LaserTurret
   m_EditorClassIdentifier: 
   Damage: 0.7
+  DamageLevel: 0
   FireRate: 0.05
+  FireRateLevel: 0
   RotationSpeed: 10
   AngleThreshold: 2
   CriticalChance: 0
+  CriticalChanceLevel: 0
   CriticalDamageMultiplier: 0
+  CriticalDamageMultiplierLevel: 0
   ExplosionRadius: 0
+  ExplosionRadiusLevel: 0
   SplashDamage: 0
+  SplashDamageLevel: 0
   PierceCount: 0
+  PierceCountLevel: 0
   PierceDamageFalloff: 0
+  PierceDamageFalloffLevel: 0
   PelletCount: 0
+  PelletCountLevel: 0
   DamageFalloffOverDistance: 0
+  DamageFalloffOverDistanceLevel: 0
   ProcentBonusDamagePerSec: 100
-  SlowEffect: 0
+  ProcentBonusDamagePerSecLevel: 0
+  SlowEffect: 20
+  SlowEffectLevel: 0

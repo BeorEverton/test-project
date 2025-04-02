@@ -60,9 +60,14 @@ namespace Assets.Scripts.Turrets
         {
             base.Shoot();
 
-            _targetEnemy.GetComponent<Enemy>().TakeDamage(_damage + _rampedDamageBonus);
+            Enemy enemy = _targetEnemy.GetComponent<Enemy>();
+            enemy.TakeDamage(_damage + _rampedDamageBonus);
 
-            _isShooting = true;            
+            if (!enemy.IsSlowed)
+                enemy.RreduceMovementSpeed(_turretInfo.SlowEffect);
+
+            _isShooting = true;
+
 
             _timeSinceLastShot = 0f;
         }
