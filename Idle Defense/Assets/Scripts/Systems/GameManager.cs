@@ -23,6 +23,8 @@ namespace Assets.Scripts.Systems
         private float decreaseDelay = 1f;
         private float decreaseTimer = 0f;
 
+        private ulong money;
+
         private void Awake()
         {
             if (Instance == null)
@@ -76,7 +78,7 @@ namespace Assets.Scripts.Systems
             {
                 if (decreaseTimer >= decreaseDelay)
                 {
-                    spdBonus -= holdIncreaseRate * 0.5f * Time.deltaTime;
+                    spdBonus -= holdIncreaseRate * 0.8f * Time.deltaTime;
                 }
                 else
                 {
@@ -101,6 +103,26 @@ namespace Assets.Scripts.Systems
             dmgBonus = 0;
         }
 
+        public void AddMoney(ulong amount)
+        {
+            money += amount;
+            //UIManager.Instance.UpdateMoney(money);
+        }
 
+        public void RemoveMoney(ulong amount)
+        {
+            money -= amount;
+            //UIManager.Instance.UpdateMoney(money);
+        }
+
+        public ulong GetMoney()
+        {
+            return money;
+        }
+
+        public void DebugAddMOney(int amount)
+        {
+            AddMoney((ulong)amount);
+        }
     }
 }

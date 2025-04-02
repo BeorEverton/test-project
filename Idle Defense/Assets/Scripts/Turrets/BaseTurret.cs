@@ -14,6 +14,8 @@ namespace Assets.Scripts.Turrets
     public abstract class BaseTurret : MonoBehaviour
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
+        [SerializeField] private TurretInfoSO _turretInfoBase;
+        private TurretStatsInstance _stats;
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] private List<Sprite> _mussleFlashSprites;
@@ -30,6 +32,11 @@ namespace Assets.Scripts.Turrets
         private bool _targetInAim;
         private float aimSize = .3f;
 
+        protected virtual void OnEnable()
+        {
+            _stats = new TurretStatsInstance(_turretInfo);
+        }
+
         protected virtual void Update()
         {
             // Get spd & dmg bonus from GameManager and calculate effective fire rate
@@ -37,8 +44,8 @@ namespace Assets.Scripts.Turrets
             _bonusDmgMultiplier = 1f + GameManager.Instance.dmgBonus / 100f;
 
             // Calculate attack speed and damage
-            _damage = _turretInfo.Damage * _bonusDmgMultiplier;
-            _atkSpeed = _turretInfo.FireRate / _bonusSpdMultiplier;
+            _damage = _stats.Damage * _bonusDmgMultiplier;
+            _atkSpeed = _stats.FireRate / _bonusSpdMultiplier;
 
             _timeSinceLastShot += Time.deltaTime;
             Attack();
@@ -101,12 +108,12 @@ namespace Assets.Scripts.Turrets
             Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
 
             _rotationPoint.localRotation = Quaternion.Slerp(
-                _rotationPoint.rotation, targetRotation, _turretInfo.RotationSpeed * bonusMultiplier * Time.deltaTime);
+                _rotationPoint.rotation, targetRotation, _stats.RotationSpeed * bonusMultiplier * Time.deltaTime);
 
             IsAimingOnTarget(angle);
         }
 
-        private void IsAimingOnTarget(float targetAngle)
+        protected virtual void IsAimingOnTarget(float targetAngle)
         {
             if (_targetEnemy == null)
             {
@@ -118,7 +125,7 @@ namespace Assets.Scripts.Turrets
 
             float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
 
-            _targetInAim = angleDifference <= _turretInfo.AngleThreshold;
+            _targetInAim = angleDifference <= _stats.AngleThreshold;
         }
 
         private IEnumerator ShowMuzzleFlash()
@@ -143,6 +150,11 @@ namespace Assets.Scripts.Turrets
             Gizmos.color = Color.red;
             Gizmos.DrawLine(position + new Vector3(-aimSize, -aimSize, 0), position + new Vector3(aimSize, aimSize, 0));
             Gizmos.DrawLine(position + new Vector3(-aimSize, aimSize, 0), position + new Vector3(aimSize, -aimSize, 0));
+        }
+
+        public TurretStatsInstance GetStats()
+        {
+            return _stats;
         }
     }
 }

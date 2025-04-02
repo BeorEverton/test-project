@@ -615,6 +615,7 @@ GameObject:
   - component: {fileID: 69066548}
   - component: {fileID: 69066547}
   - component: {fileID: 69066546}
+  - component: {fileID: 69066550}
   m_Layer: 5
   m_Name: Unique Upgrade (1)
   m_TagString: Untagged
@@ -639,10 +640,10 @@ RectTransform:
   - {fileID: 1004416487}
   m_Father: {fileID: 783776530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -120}
-  m_SizeDelta: {x: 335, y: 30}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &69066546
 MonoBehaviour:
@@ -713,7 +714,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 69066548}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 69066550}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeCriticalDamageMultiplier
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &69066548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -752,6 +777,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 69066544}
   m_CullTransparentMesh: 1
+--- !u!114 &69066550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69066544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1240474255}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &75107605
 GameObject:
   m_ObjectHideFlags: 0
@@ -984,6 +1047,7 @@ RectTransform:
   m_Children:
   - {fileID: 1045016501}
   - {fileID: 1789111144}
+  - {fileID: 1074743225}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1220,7 +1284,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &105204144
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1472,6 +1536,7 @@ Transform:
   - {fileID: 831336687}
   - {fileID: 1168820199}
   - {fileID: 363034051}
+  - {fileID: 263351005}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &129366880
@@ -2003,6 +2068,7 @@ GameObject:
   - component: {fileID: 150638802}
   - component: {fileID: 150638801}
   - component: {fileID: 150638800}
+  - component: {fileID: 150638804}
   m_Layer: 5
   m_Name: Damage Upgrade
   m_TagString: Untagged
@@ -2027,10 +2093,10 @@ RectTransform:
   - {fileID: 706840898}
   m_Father: {fileID: 783776530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -15}
-  m_SizeDelta: {x: 335, y: 30}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &150638800
 MonoBehaviour:
@@ -2101,7 +2167,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 150638802}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 69066550}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeDamage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &150638802
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2140,6 +2230,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 150638798}
   m_CullTransparentMesh: 1
+--- !u!114 &150638804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 150638798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1240474255}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &150827998
 GameObject:
   m_ObjectHideFlags: 0
@@ -2484,6 +2612,7 @@ GameObject:
   - component: {fileID: 179686949}
   - component: {fileID: 179686948}
   - component: {fileID: 179686947}
+  - component: {fileID: 179686951}
   m_Layer: 5
   m_Name: Damage Upgrade
   m_TagString: Untagged
@@ -2510,7 +2639,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -23.428572}
+  m_AnchoredPosition: {x: 177.5, y: -15}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &179686947
@@ -2582,7 +2711,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 179686949}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 179686951}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeDamage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &179686949
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2621,6 +2774,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 179686945}
   m_CullTransparentMesh: 1
+--- !u!114 &179686951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179686945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1989609175}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &196250993
 GameObject:
   m_ObjectHideFlags: 0
@@ -3557,6 +3748,75 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 262259489}
   m_CullTransparentMesh: 1
+--- !u!1 &263351004
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 263351005}
+  - component: {fileID: 263351006}
+  m_Layer: 0
+  m_Name: TurretUpgradeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &263351005
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263351004}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 128342893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &263351006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263351004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9b07cc45c01868469440a6119e07096, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &270738651
 GameObject:
   m_ObjectHideFlags: 0
@@ -3710,6 +3970,7 @@ GameObject:
   - component: {fileID: 281875221}
   - component: {fileID: 281875220}
   - component: {fileID: 281875219}
+  - component: {fileID: 281875223}
   m_Layer: 5
   m_Name: Unique Upgrade
   m_TagString: Untagged
@@ -3736,7 +3997,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -257.7143}
+  m_AnchoredPosition: {x: 177.5, y: -85}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &281875219
@@ -3808,7 +4069,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 281875221}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 281875223}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeExplosionRadius
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &281875221
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3847,6 +4132,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 281875217}
   m_CullTransparentMesh: 1
+--- !u!114 &281875223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281875217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1325377965}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &288989473
 GameObject:
   m_ObjectHideFlags: 0
@@ -4958,6 +5281,7 @@ GameObject:
   - component: {fileID: 395057868}
   - component: {fileID: 395057867}
   - component: {fileID: 395057866}
+  - component: {fileID: 395057870}
   m_Layer: 5
   m_Name: Rate of Fire Upgrade
   m_TagString: Untagged
@@ -4984,7 +5308,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -70.28571}
+  m_AnchoredPosition: {x: 177.5, y: -50}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &395057866
@@ -5056,7 +5380,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 395057868}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 395057870}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeFireRate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &395057868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5095,6 +5443,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 395057864}
   m_CullTransparentMesh: 1
+--- !u!114 &395057870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395057864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1566278414}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &399248864
 GameObject:
   m_ObjectHideFlags: 0
@@ -5879,6 +6265,7 @@ GameObject:
   - component: {fileID: 457512683}
   - component: {fileID: 457512682}
   - component: {fileID: 457512681}
+  - component: {fileID: 457512685}
   m_Layer: 5
   m_Name: Unique Upgrade (1)
   m_TagString: Untagged
@@ -5905,7 +6292,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -304.5714}
+  m_AnchoredPosition: {x: 177.5, y: -120}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &457512681
@@ -5977,7 +6364,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 457512683}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 395057870}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeDamageFalloffOverDistance
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &457512683
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6016,6 +6427,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 457512679}
   m_CullTransparentMesh: 1
+--- !u!114 &457512685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457512679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1566278414}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &457969479
 GameObject:
   m_ObjectHideFlags: 0
@@ -10216,22 +10665,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 689066981844616443, guid: d90f1d543089d534693699decadbf149, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 15
-      objectReference: {fileID: 0}
-    - target: {fileID: 689066981844616443, guid: d90f1d543089d534693699decadbf149, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 689066981844616443, guid: d90f1d543089d534693699decadbf149, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 8.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 972970059104740852, guid: d90f1d543089d534693699decadbf149, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.5
-      objectReference: {fileID: 0}
     - target: {fileID: 3186965071983485496, guid: d90f1d543089d534693699decadbf149, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1
@@ -10499,6 +10932,7 @@ GameObject:
   - component: {fileID: 835452455}
   - component: {fileID: 835452454}
   - component: {fileID: 835452453}
+  - component: {fileID: 835452457}
   m_Layer: 5
   m_Name: Rate of Fire Upgrade
   m_TagString: Untagged
@@ -10523,10 +10957,10 @@ RectTransform:
   - {fileID: 20138060}
   m_Father: {fileID: 783776530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -50}
-  m_SizeDelta: {x: 335, y: 30}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &835452453
 MonoBehaviour:
@@ -10597,7 +11031,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 835452455}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 69066550}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeFireRate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &835452455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10636,6 +11094,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 835452451}
   m_CullTransparentMesh: 1
+--- !u!114 &835452457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 835452451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1240474255}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &836831348
 GameObject:
   m_ObjectHideFlags: 0
@@ -11659,6 +12155,7 @@ GameObject:
   - component: {fileID: 936320653}
   - component: {fileID: 936320652}
   - component: {fileID: 936320651}
+  - component: {fileID: 936320655}
   m_Layer: 5
   m_Name: Unique Upgrade
   m_TagString: Untagged
@@ -11685,7 +12182,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -257.7143}
+  m_AnchoredPosition: {x: 177.5, y: -85}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &936320651
@@ -11757,7 +12254,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 936320653}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 179686951}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradePierceCount
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &936320653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11796,6 +12317,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 936320649}
   m_CullTransparentMesh: 1
+--- !u!114 &936320655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936320649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1989609175}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &954157241
 GameObject:
   m_ObjectHideFlags: 0
@@ -12719,6 +13278,7 @@ GameObject:
   - component: {fileID: 1046281393}
   - component: {fileID: 1046281392}
   - component: {fileID: 1046281391}
+  - component: {fileID: 1046281395}
   m_Layer: 5
   m_Name: Damage Upgrade
   m_TagString: Untagged
@@ -12817,7 +13377,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1046281393}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1046281395}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeDamage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1046281393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12856,6 +13440,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1046281389}
   m_CullTransparentMesh: 1
+--- !u!114 &1046281395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1046281389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 0}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1001 &1046353988
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13235,6 +13857,83 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1071504711}
   m_CullTransparentMesh: 1
+--- !u!1 &1074743224
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1074743225}
+  - component: {fileID: 1074743227}
+  - component: {fileID: 1074743226}
+  m_Layer: 5
+  m_Name: DEBUG
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1074743225
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074743224}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1100692347}
+  - {fileID: 1439019115}
+  m_Father: {fileID: 81245082}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -172.1409, y: 57.5309}
+  m_SizeDelta: {x: 344.2817, y: 115.0619}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1074743226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074743224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1074743227
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074743224}
+  m_CullTransparentMesh: 1
 --- !u!1 &1081354932
 GameObject:
   m_ObjectHideFlags: 0
@@ -13273,10 +13972,10 @@ RectTransform:
   - {fileID: 724769263}
   m_Father: {fileID: 1955787293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 30}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 177.5, y: -50}
+  m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1081354934
 MonoBehaviour:
@@ -13472,6 +14171,142 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1100692346
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1100692347}
+  - component: {fileID: 1100692349}
+  - component: {fileID: 1100692348}
+  m_Layer: 5
+  m_Name: Text (TMP)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1100692347
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100692346}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1074743225}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -25}
+  m_SizeDelta: {x: 0, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1100692348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100692346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: debug
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: a9f6a43fb27082c4b890cdc4bb437a44, type: 2}
+  m_sharedMaterial: {fileID: -2187059935724160410, guid: a9f6a43fb27082c4b890cdc4bb437a44, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 36
+  m_fontSizeBase: 36
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 256
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1100692349
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100692346}
+  m_CullTransparentMesh: 1
 --- !u!1 &1110010998
 GameObject:
   m_ObjectHideFlags: 0
@@ -15401,6 +16236,17 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1240474255 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+  m_PrefabInstance: {fileID: 1650681813}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb975e8e1c83664398f72d88508c61f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1254465871
 GameObject:
   m_ObjectHideFlags: 0
@@ -15686,6 +16532,7 @@ GameObject:
   - component: {fileID: 1304912097}
   - component: {fileID: 1304912096}
   - component: {fileID: 1304912095}
+  - component: {fileID: 1304912099}
   m_Layer: 5
   m_Name: Unique Upgrade (1)
   m_TagString: Untagged
@@ -15712,7 +16559,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -304.5714}
+  m_AnchoredPosition: {x: 177.5, y: -120}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1304912095
@@ -15784,7 +16631,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1304912097}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 281875223}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeSplashDamage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1304912097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15823,6 +16694,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1304912093}
   m_CullTransparentMesh: 1
+--- !u!114 &1304912099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1304912093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1325377965}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1306911068
 GameObject:
   m_ObjectHideFlags: 0
@@ -15836,6 +16745,7 @@ GameObject:
   - component: {fileID: 1306911072}
   - component: {fileID: 1306911071}
   - component: {fileID: 1306911070}
+  - component: {fileID: 1306911074}
   m_Layer: 5
   m_Name: Unique Upgrade
   m_TagString: Untagged
@@ -15862,7 +16772,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -257.7143}
+  m_AnchoredPosition: {x: 177.5, y: -85}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1306911070
@@ -15934,7 +16844,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1306911072}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 395057870}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeSlowEffect
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1306911072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15973,6 +16907,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1306911068}
   m_CullTransparentMesh: 1
+--- !u!114 &1306911074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306911068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1566278414}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1315332936
 GameObject:
   m_ObjectHideFlags: 0
@@ -16185,6 +17157,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1322864616}
   m_CullTransparentMesh: 1
+--- !u!114 &1325377965 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 661742800451786820, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
+  m_PrefabInstance: {fileID: 296267286}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12a70e5973a11b74695c7e1a6ff1a391, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1333914141
 GameObject:
   m_ObjectHideFlags: 0
@@ -17300,6 +18283,7 @@ GameObject:
   - component: {fileID: 1438029191}
   - component: {fileID: 1438029190}
   - component: {fileID: 1438029189}
+  - component: {fileID: 1438029193}
   m_Layer: 5
   m_Name: Rate of Fire Upgrade
   m_TagString: Untagged
@@ -17326,7 +18310,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -70.28571}
+  m_AnchoredPosition: {x: 177.5, y: -50}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1438029189
@@ -17398,7 +18382,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1438029191}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 179686951}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeFireRate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1438029191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17436,6 +18444,177 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1438029187}
+  m_CullTransparentMesh: 1
+--- !u!114 &1438029193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1438029187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1989609175}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
+--- !u!1 &1439019114
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1439019115}
+  - component: {fileID: 1439019118}
+  - component: {fileID: 1439019117}
+  - component: {fileID: 1439019116}
+  m_Layer: 5
+  m_Name: Button
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1439019115
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439019114}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1795555425}
+  m_Father: {fileID: 1074743225}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 160, y: 30}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1439019116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439019114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 1439019117}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1168820200}
+        m_TargetAssemblyTypeName: Assets.Scripts.Systems.GameManager, Assembly-CSharp
+        m_MethodName: DebugAddMOney
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 999999999
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1439019117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439019114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1439019118
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1439019114}
   m_CullTransparentMesh: 1
 --- !u!1 &1445784578
 GameObject:
@@ -17722,6 +18901,7 @@ GameObject:
   - component: {fileID: 1463645625}
   - component: {fileID: 1463645624}
   - component: {fileID: 1463645623}
+  - component: {fileID: 1463645627}
   m_Layer: 5
   m_Name: Rate of Fire Upgrade
   m_TagString: Untagged
@@ -17748,7 +18928,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -70.28571}
+  m_AnchoredPosition: {x: 177.5, y: -50}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1463645623
@@ -17820,7 +19000,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1463645625}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 281875223}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeFireRate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1463645625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17859,6 +19063,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1463645621}
   m_CullTransparentMesh: 1
+--- !u!114 &1463645627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1463645621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1325377965}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1476042776
 GameObject:
   m_ObjectHideFlags: 0
@@ -18481,6 +19723,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1561970865}
   m_CullTransparentMesh: 1
+--- !u!114 &1566278414 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4696110832135599143, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
+  m_PrefabInstance: {fileID: 1046353988}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53f230fba6b2f9540a062656d0cd45ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1573923351
 GameObject:
   m_ObjectHideFlags: 0
@@ -18977,6 +20230,7 @@ GameObject:
   - component: {fileID: 1615651557}
   - component: {fileID: 1615651556}
   - component: {fileID: 1615651555}
+  - component: {fileID: 1615651559}
   m_Layer: 5
   m_Name: Damage Upgrade
   m_TagString: Untagged
@@ -19003,7 +20257,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -23.428572}
+  m_AnchoredPosition: {x: 177.5, y: -15}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1615651555
@@ -19075,7 +20329,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1615651557}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 281875223}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeDamage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1615651557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19114,6 +20392,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1615651553}
   m_CullTransparentMesh: 1
+--- !u!114 &1615651559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1615651553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1325377965}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1625471696
 GameObject:
   m_ObjectHideFlags: 0
@@ -20747,6 +22063,7 @@ GameObject:
   - component: {fileID: 1776539756}
   - component: {fileID: 1776539755}
   - component: {fileID: 1776539754}
+  - component: {fileID: 1776539758}
   m_Layer: 5
   m_Name: Unique Upgrade (1)
   m_TagString: Untagged
@@ -20845,7 +22162,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1776539756}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1046281395}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeDamage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1776539756
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20884,6 +22225,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1776539752}
   m_CullTransparentMesh: 1
+--- !u!114 &1776539758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776539752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 0}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1779177357
 GameObject:
   m_ObjectHideFlags: 0
@@ -20897,6 +22276,7 @@ GameObject:
   - component: {fileID: 1779177361}
   - component: {fileID: 1779177360}
   - component: {fileID: 1779177359}
+  - component: {fileID: 1779177363}
   m_Layer: 5
   m_Name: Unique Upgrade
   m_TagString: Untagged
@@ -20995,7 +22375,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1779177361}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1046281395}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeExplosionRadius
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1779177361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21034,6 +22438,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779177357}
   m_CullTransparentMesh: 1
+--- !u!114 &1779177363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779177357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 0}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1782322219
 GameObject:
   m_ObjectHideFlags: 0
@@ -21122,6 +22564,7 @@ GameObject:
   - component: {fileID: 1784183106}
   - component: {fileID: 1784183105}
   - component: {fileID: 1784183104}
+  - component: {fileID: 1784183108}
   m_Layer: 5
   m_Name: Rate of Fire Upgrade
   m_TagString: Untagged
@@ -21220,7 +22663,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1784183106}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1046281395}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeFireRate
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1784183106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21259,6 +22726,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1784183102}
   m_CullTransparentMesh: 1
+--- !u!114 &1784183108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784183102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 0}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1789111143
 GameObject:
   m_ObjectHideFlags: 0
@@ -21365,6 +22870,142 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1795555424
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1795555425}
+  - component: {fileID: 1795555427}
+  - component: {fileID: 1795555426}
+  m_Layer: 5
+  m_Name: Text (TMP)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1795555425
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1795555424}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1439019115}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1795555426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1795555424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: add money
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: a9f6a43fb27082c4b890cdc4bb437a44, type: 2}
+  m_sharedMaterial: {fileID: -2187059935724160410, guid: a9f6a43fb27082c4b890cdc4bb437a44, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4281479730
+  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 24
+  m_fontSizeBase: 24
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1795555427
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1795555424}
+  m_CullTransparentMesh: 1
 --- !u!1 &1800295494
 GameObject:
   m_ObjectHideFlags: 0
@@ -22561,6 +24202,7 @@ GameObject:
   - component: {fileID: 1910725151}
   - component: {fileID: 1910725150}
   - component: {fileID: 1910725149}
+  - component: {fileID: 1910725153}
   m_Layer: 5
   m_Name: Damage Upgrade
   m_TagString: Untagged
@@ -22587,7 +24229,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -23.428572}
+  m_AnchoredPosition: {x: 177.5, y: -15}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1910725149
@@ -22659,7 +24301,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1910725151}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 395057870}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeDamage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1910725151
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22698,6 +24364,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1910725147}
   m_CullTransparentMesh: 1
+--- !u!114 &1910725153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1910725147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1566278414}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1915504034
 GameObject:
   m_ObjectHideFlags: 0
@@ -22946,6 +24650,7 @@ GameObject:
   - component: {fileID: 1932012116}
   - component: {fileID: 1932012115}
   - component: {fileID: 1932012114}
+  - component: {fileID: 1932012118}
   m_Layer: 5
   m_Name: Unique Upgrade (1)
   m_TagString: Untagged
@@ -22972,7 +24677,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -304.5714}
+  m_AnchoredPosition: {x: 177.5, y: -120}
   m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1932012114
@@ -23044,7 +24749,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1932012116}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 179686951}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradePierceDamageFalloff
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1932012116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23083,6 +24812,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1932012112}
   m_CullTransparentMesh: 1
+--- !u!114 &1932012118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1932012112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1989609175}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &1951089485
 GameObject:
   m_ObjectHideFlags: 0
@@ -23237,7 +25004,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1955787293
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23937,6 +25704,17 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1989609175 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8147607113893816477, guid: d90f1d543089d534693699decadbf149, type: 3}
+  m_PrefabInstance: {fileID: 818134942}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 684478f2609172942bc5bd9b7a992031, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2005399595
 GameObject:
   m_ObjectHideFlags: 0
@@ -24817,6 +26595,7 @@ GameObject:
   - component: {fileID: 2083657898}
   - component: {fileID: 2083657897}
   - component: {fileID: 2083657896}
+  - component: {fileID: 2083657900}
   m_Layer: 5
   m_Name: Unique Upgrade
   m_TagString: Untagged
@@ -24841,10 +26620,10 @@ RectTransform:
   - {fileID: 1315332937}
   m_Father: {fileID: 783776530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 177.5, y: -85}
-  m_SizeDelta: {x: 335, y: 30}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2083657896
 MonoBehaviour:
@@ -24915,7 +26694,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2083657898}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 69066550}
+        m_TargetAssemblyTypeName: TurretUpgradeButton, Assembly-CSharp
+        m_MethodName: SetTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 263351006}
+        m_TargetAssemblyTypeName: TurretUpgradeManager, Assembly-CSharp
+        m_MethodName: UpgradeCriticalChance
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2083657898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24954,6 +26757,44 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2083657894}
   m_CullTransparentMesh: 1
+--- !u!114 &2083657900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2083657894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTurret: {fileID: 1240474255}
+  turret:
+    Damage: 0
+    DamageLevel: 0
+    FireRate: 0
+    FireRateLevel: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    PierceCount: 0
+    PierceCountLevel: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    ProcentBonusDamagePerSec: 0
+    ProcentBonusDamagePerSecLevel: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
 --- !u!1 &2088707849
 GameObject:
   m_ObjectHideFlags: 0
@@ -25578,10 +27419,10 @@ RectTransform:
   - {fileID: 859497568}
   m_Father: {fileID: 1955787293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 30}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 177.5, y: -15}
+  m_SizeDelta: {x: 335, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2119113230
 MonoBehaviour:
