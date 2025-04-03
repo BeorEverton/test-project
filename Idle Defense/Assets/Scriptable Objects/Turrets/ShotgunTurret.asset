@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6153e066477abf4990f9076288a6088, type: 3}
   m_Name: ShotgunTurret
   m_EditorClassIdentifier: 
-  Damage: 5
+  Damage: 30
   DamageLevel: 0
   FireRate: 2
   FireRateLevel: 0
@@ -32,9 +32,9 @@ MonoBehaviour:
   PierceDamageFalloffLevel: 0
   PelletCount: 5
   PelletCountLevel: 0
-  DamageFalloffOverDistance: 0
+  DamageFalloffOverDistance: 5
   DamageFalloffOverDistanceLevel: 0
-  ProcentBonusDamagePerSec: 0
-  ProcentBonusDamagePerSecLevel: 0
+  PercentBonusDamagePerSec: 0
+  PercentBonusDamagePerSecLevel: 0
   SlowEffect: 0
   SlowEffectLevel: 0

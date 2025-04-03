@@ -8,11 +8,10 @@ namespace Assets.Scripts.Turrets
 {
     public class ShotgunTurret : BaseTurret
     {
-        public List<Vector2Int> pathCells = new();
-
         [SerializeField] private float spreadAngle = 30f;
         [SerializeField] private float maxRange = 15f;
 
+        private List<Vector2Int> pathCells = new();
         private float _cellSize = 1f;
         private float _pelletWidth = 0.5f;
         private int pelletCount = 3;
@@ -59,13 +58,23 @@ namespace Assets.Scripts.Turrets
                     float distance = DistanceFromLine(enemy.transform.position, transform.position, pelletTarget);
                     if (distance <= _pelletWidth)
                     {
-                        enemy.TakeDamage(_damage);
+                        float distanceToEnemy = Vector2.Distance(transform.position, enemy.transform.position);
+                        float damage = _damage - GetDamageFalloff(distanceToEnemy);
+
+                        enemy.TakeDamage(damage);
                         break; // Only hit the first enemy in the path
                     }
                 }
             }
 
             _timeSinceLastShot = 0f;
+        }
+
+        private float GetDamageFalloff(float distance)
+        {
+            float damageFalloff = _damage * distance * _turretInfo.DamageFalloffOverDistance / 100;
+            float maxDamageFalloff = _damage * 0.9f; // maximum damage falloff set to 90%
+            return damageFalloff < maxDamageFalloff ? damageFalloff : maxDamageFalloff;
         }
 
         private Vector2 RotateVector2(Vector2 v, float degrees)

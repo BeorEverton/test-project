@@ -36,6 +36,8 @@ namespace Assets.Scripts.WaveSystem
 
         private bool _waveSpawned;
 
+        private int enemiesAlive;
+
         private void Awake()
         {
             if (Instance == null)
@@ -86,6 +88,7 @@ namespace Assets.Scripts.WaveSystem
                 enemy.SetActive(true);
                 enemy.GetComponent<Enemy>().OnDeath += Enemy_OnEnemyDeath;
                 EnemiesAlive.Add(enemy);
+                enemiesAlive++;
 
                 yield return new WaitForSeconds(_currentWave.TimeBetweenSpawns);
             }
@@ -106,6 +109,7 @@ namespace Assets.Scripts.WaveSystem
                 enemy.OnDeath -= Enemy_OnEnemyDeath;
                 EnemiesAlive.Remove(enemy.gameObject);
                 _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
+                enemiesAlive--;
 
                 OnEnemyDeath?.Invoke(this, EventArgs.Empty);
             }
