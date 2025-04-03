@@ -46,7 +46,7 @@ namespace Assets.Scripts.SO
         [Tooltip("Amount of pellets shot per shot")]
         public int PelletCount;
         public int PelletCountLevel;
-        [Tooltip("Amount of damage falloff over distance")]
+        [Tooltip("Amount of damage falloff over distance, measured in 1 unit")]
         public float DamageFalloffOverDistance;
         public float DamageFalloffOverDistanceLevel;
 
