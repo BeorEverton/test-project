@@ -1,4 +1,5 @@
 using Assets.Scripts.Systems;
+using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
 using UnityEngine;
 
@@ -31,9 +32,9 @@ public class TurretUpgradeManager : MonoBehaviour
 
     private bool TrySpend(float cost)
     {
-        if (GameManager.Instance.GetMoney() >= cost)
+        if (GameManager.Instance.Money >= cost)
         {
-            GameManager.Instance.RemoveMoney((ulong)cost);
+            GameManager.Instance.SpendMoney((ulong)cost);
             return true;
         }
 

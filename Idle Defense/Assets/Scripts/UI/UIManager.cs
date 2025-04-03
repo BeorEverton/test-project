@@ -32,7 +32,7 @@ namespace Assets.Scripts.UI
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
         }
 
-        private void OnEnemyDeath(object sender, EventArgs e)
+        private void OnEnemyDeath(object sender, EventArgs _)
         {
             _enemyCount--;
             enemies.text = $"Enemies\n{_enemyCount}";
@@ -56,7 +56,7 @@ namespace Assets.Scripts.UI
             {
                 WaveManager.Instance.SetWave(waveOnHold);
                 waveOnHold = -1;
-            }            
+            }
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Assets.Scripts.UI
         public void UpdateSpdBonus(float value)
         {
             spdBonusSlider.value = value;
-            spdBonus.text = "Spd Bonus\n" + value.ToString("F0") +"%";
+            spdBonus.text = "Spd Bonus\n" + value.ToString("F0") + "%";
             UpdateBonusColor(spdBonus, value);
         }
 

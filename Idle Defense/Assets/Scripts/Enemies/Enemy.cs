@@ -2,6 +2,7 @@ using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using System;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Enemies
@@ -10,10 +11,18 @@ namespace Assets.Scripts.Enemies
     {
         public event EventHandler OnMaxHealthChanged;
         public event EventHandler OnCurrentHealthChanged;
-        public event EventHandler OnDeath;
+        public event EventHandler<OnDeathEventArgs> OnDeath;
 
+        public class OnDeathEventArgs : EventArgs
+        {
+            public ulong CoinDropAmount;
+        }
         [SerializeField] private EnemyInfoSO _info;
-        public EnemyInfoSO Info => _info;
+        public EnemyInfoSO Info
+        {
+            get => _info;
+            set => _info = value;
+        }
 
         public float MaxHealth { get; private set; }
         public bool IsDead => CurrentHealth <= 0;
@@ -34,6 +43,47 @@ namespace Assets.Scripts.Enemies
         private void OnDisable()
         {
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
+        }
+
+        public void TakeDamage(float amount)
+        {
+            CurrentHealth -= amount;
+
+            OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
+
+            CheckIfDead();
+        }
+
+        private void CheckIfDead()
+        {
+            if (CurrentHealth <= 0)
+            {
+                OnDeath?.Invoke(this, new OnDeathEventArgs
+                {
+                    CoinDropAmount = _info.CoinDropAmount
+                });
+            }
+        }
+
+        private void ResetEnemy()
+        {
+            CanAttack = false;
+            MaxHealth = _info.MaxHealth;
+            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
+            TimeSinceLastAttack = 0f;
+            CurrentHealth = MaxHealth;
+            SetRandomMovementSpeed();
+        }
+
+        private void SetRandomMovementSpeed()
+        {
+            MovementSpeed = Random.Range(_info.MovementSpeed - _info.MovementSpeedDifference, _info.MovementSpeed + _info.MovementSpeedDifference);
+        }
+
+        public void ReduceMovementSpeed(float procent)
+        {
+            MovementSpeed -= MovementSpeed * (procent / 100f);
+            IsSlowed = true;
         }
 
         //private void Update()
@@ -79,43 +129,5 @@ namespace Assets.Scripts.Enemies
         //{
         //    Debug.Log("Attacking");
         //}
-
-        public void TakeDamage(float amount)
-        {
-            CurrentHealth -= amount;
-
-            OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
-
-            CheckIfDead();
-        }
-
-        private void CheckIfDead()
-        {
-            if (CurrentHealth <= 0)
-            {
-                OnDeath?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        private void ResetEnemy()
-        {
-            CanAttack = false;
-            MaxHealth = _info.MaxHealth + _info.AddMaxHealth;
-            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
-            TimeSinceLastAttack = 0f;
-            CurrentHealth = MaxHealth;
-            SetRandomMovementSpeed();
-        }
-
-        private void SetRandomMovementSpeed()
-        {
-            MovementSpeed = Random.Range(_info.MovementSpeed - _info.MovementSpeedDifference, _info.MovementSpeed + _info.MovementSpeedDifference);
-        }
-
-        public void ReduceMovementSpeed(float procent)
-        {
-            MovementSpeed -= MovementSpeed * (procent / 100f);
-            IsSlowed = true;
-        }
     }
 }

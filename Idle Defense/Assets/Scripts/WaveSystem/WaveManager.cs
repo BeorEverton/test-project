@@ -23,6 +23,12 @@ namespace Assets.Scripts.WaveSystem
         [SerializeField] private List<WaveConfigSO> _baseWaves;
         [SerializeField] private EnemySpawner _enemySpawner;
 
+        [Header("Enemy Wave Bonus")]
+        [Tooltip("Maxhealth += waveCount * healthMultiplier (Default = 2)")]
+        [SerializeField] private float _healthMultiplierByWaveCount = 2f;
+        [Tooltip("CoinDrop = Ceil(CoinDrop * coinDropmultiplier) (Default = 1.05, 5% increase per wave)")]
+        [SerializeField] private float _coinDropMultiplierByWaveCount = 1.05f;
+
         private WaveConfigSO _currentBaseWave;
         private int _currentBaseWaveIndex = 0;
         private int _currentWaveIndex = 0;
@@ -61,11 +67,14 @@ namespace Assets.Scripts.WaveSystem
         {
             while (GameRunning)
             {
-                if (forcedWave)                
-                    forcedWave = false;                    
+                if (forcedWave)
+                    forcedWave = false;
                 else
+                {
                     _currentWaveIndex++;
-                _waveIndexOfCurrentBaseWave++;
+                    _waveIndexOfCurrentBaseWave++;
+                }
+
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
                     WaveNumber = _currentWaveIndex
@@ -100,20 +109,24 @@ namespace Assets.Scripts.WaveSystem
         private WaveConfigSO GenerateDynamicWaveConfig(WaveConfigSO baseConfig, int waveIndex)
         {
             WaveConfigSO newWaveConfig = ScriptableObject.CreateInstance<WaveConfigSO>();
-
             newWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
+
             foreach (EnemyWaveEntry entry in baseConfig.EnemyWaveEntries)
             {
                 EnemyWaveEntry newEntry = new()
                 {
-                    EnemyPrefab = entry.EnemyPrefab,
-                    NumberOfEnemies = entry.NumberOfEnemies
+                    EnemyPrefab = Instantiate(entry.EnemyPrefab),
+                    NumberOfEnemies = entry.NumberOfEnemies + _waveIndexOfCurrentBaseWave + _currentBaseWaveIndex
                 };
 
-                newEntry.NumberOfEnemies += _waveIndexOfCurrentBaseWave + _currentBaseWaveIndex;
-
                 if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
-                    enemy.Info.AddMaxHealth = (waveIndex * 2f);
+                {
+                    EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
+                    clonedInfo.MaxHealth += (waveIndex * _healthMultiplierByWaveCount);
+                    clonedInfo.CoinDropAmount = (ulong)Mathf.CeilToInt(enemy.Info.CoinDropAmount * (ulong)_currentWaveIndex * _coinDropMultiplierByWaveCount);
+
+                    enemy.Info = clonedInfo;
+                }
 
                 newWaveConfig.EnemyWaveEntries.Add(newEntry);
             }

@@ -18,7 +18,12 @@ namespace Assets.Scripts.WaveSystem
         public event EventHandler OnWaveCompleted;
         public event EventHandler OnWaveFailed; // TO-DO, Used to reset the damage bonus
         public event EventHandler<OnWaveCreatedEventArgs> OnWaveCreated;
-        public event EventHandler OnEnemyDeath;
+        public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
+
+        public class OnEnemyDeathEventArgs : EventArgs
+        {
+            public ulong CoinDropAmount;
+        }
 
         public class OnWaveCreatedEventArgs : EventArgs
         {
@@ -111,7 +116,10 @@ namespace Assets.Scripts.WaveSystem
                 _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
                 enemiesAlive--;
 
-                OnEnemyDeath?.Invoke(this, EventArgs.Empty);
+                OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
+                {
+                    CoinDropAmount = enemy.Info.CoinDropAmount
+                });
             }
 
             CheckIfWaveCompleted();

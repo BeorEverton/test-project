@@ -24,6 +24,7 @@ namespace Assets.Scripts.Systems
         private float decreaseTimer = 0f;
 
         private ulong money;
+        public ulong Money => money;
 
         private void Awake()
         {
@@ -41,6 +42,8 @@ namespace Assets.Scripts.Systems
         private void Start()
         {
             EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
+            EnemySpawner.Instance.OnWaveFailed += OnWaveFailed;
+            EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
         }
 
         private void OnDestroy()
@@ -90,8 +93,10 @@ namespace Assets.Scripts.Systems
             UIManager.Instance.UpdateSpdBonus(spdBonus);
 
         }
-
-
+        private void OnEnemyDeath(object sender, EnemySpawner.OnEnemyDeathEventArgs e)
+        {
+            AddMoney(e.CoinDropAmount);
+        }
         private void OnWaveCompleted(object sender, EventArgs e)
         {
             dmgBonus++;
@@ -109,15 +114,10 @@ namespace Assets.Scripts.Systems
             UIManager.Instance.UpdateMoney(money);
         }
 
-        public void RemoveMoney(ulong amount)
+        public void SpendMoney(ulong amount)
         {
             money -= amount;
             UIManager.Instance.UpdateMoney(money);
-        }
-
-        public ulong GetMoney()
-        {
-            return money;
         }
 
         public void DebugAddMOney(int amount)

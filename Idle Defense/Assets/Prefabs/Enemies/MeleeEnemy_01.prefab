@@ -53,7 +53,19 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8078747747107829962, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: Info
+      value: 
+      objectReference: {fileID: 11400000, guid: 9915ab01954af7a4abade6e54f8787ee, type: 2}
+    - target: {fileID: 8078747747107829962, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: _info
+      value: 
+      objectReference: {fileID: 11400000, guid: 9915ab01954af7a4abade6e54f8787ee, type: 2}
+    - target: {fileID: 8078747747107829962, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: CanAttack
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8078747747107829962, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: _starterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 9915ab01954af7a4abade6e54f8787ee, type: 2}
     - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
