@@ -17,7 +17,7 @@ namespace Assets.Scripts.Turrets
 
         private void Awake()
         {
-            _bonusDmgPerSec = 1f + _turretInfo.ProcentBonusDamagePerSec / 100f;
+            _bonusDmgPerSec = 1f + _turretInfo.PercentBonusDamagePerSec / 100f;
         }
 
         protected override void Update()

@@ -18,11 +18,11 @@ namespace Assets.Scripts.SO
         public float AngleThreshold;
 
         [Header("Machine Gun Turret")]
-        [Tooltip("Chance for a critical attack in procent")]
+        [Tooltip("Chance for a critical attack in Percent")]
         [Range(0, 100)]
         public float CriticalChance;
         public float CriticalChanceLevel;
-        [Tooltip("Multiplier for critical damage in procent")]
+        [Tooltip("Multiplier for critical damage in Percent")]
         public float CriticalDamageMultiplier;
         public float CriticalDamageMultiplierLevel;
 
@@ -52,8 +52,8 @@ namespace Assets.Scripts.SO
 
         [Header("Laser Turret")]
         [Tooltip("Amount of damage added to initial Damage per second active on the same target")]
-        public float ProcentBonusDamagePerSec;
-        public float ProcentBonusDamagePerSecLevel;
+        public float PercentBonusDamagePerSec;
+        public float PercentBonusDamagePerSecLevel;
         [Tooltip("Amount of slow effect applied to the target")]
         public float SlowEffect;
         public float SlowEffectLevel;

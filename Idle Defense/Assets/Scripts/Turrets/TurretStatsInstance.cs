@@ -27,8 +27,8 @@ public class TurretStatsInstance
     public int PelletCountLevel;
     public float DamageFalloffOverDistance;
     public float DamageFalloffOverDistanceLevel;
-    public float ProcentBonusDamagePerSec;
-    public float ProcentBonusDamagePerSecLevel;
+    public float PercentBonusDamagePerSec;
+    public float PercentBonusDamagePerSecLevel;
     public float SlowEffect;
     public float SlowEffectLevel;
 
@@ -58,12 +58,33 @@ public class TurretStatsInstance
         PelletCountLevel = source.PelletCountLevel;
         DamageFalloffOverDistance = source.DamageFalloffOverDistance;
         DamageFalloffOverDistanceLevel = source.DamageFalloffOverDistanceLevel;
-        ProcentBonusDamagePerSec = source.ProcentBonusDamagePerSec;
-        ProcentBonusDamagePerSecLevel = source.ProcentBonusDamagePerSecLevel;
+        PercentBonusDamagePerSec = source.PercentBonusDamagePerSec;
+        PercentBonusDamagePerSecLevel = source.PercentBonusDamagePerSecLevel;
         SlowEffect = source.SlowEffect;
         SlowEffectLevel = source.SlowEffectLevel;
 
         RotationSpeed = source.RotationSpeed;
         AngleThreshold = source.AngleThreshold;
     }
+
+    public int GetUpgradeCost(string statName)
+    {
+        return statName switch
+        {
+            nameof(DamageLevel) => (int)Mathf.Pow(2, DamageLevel),
+            nameof(FireRateLevel) => (int)Mathf.Pow(2, FireRateLevel),
+            nameof(CriticalChanceLevel) => (int)Mathf.Pow(2, CriticalChanceLevel),
+            nameof(CriticalDamageMultiplierLevel) => (int)Mathf.Pow(2, CriticalDamageMultiplierLevel),
+            nameof(ExplosionRadiusLevel) => (int)Mathf.Pow(2, ExplosionRadiusLevel),
+            nameof(SplashDamageLevel) => (int)Mathf.Pow(2, SplashDamageLevel),
+            nameof(PierceCountLevel) => (int)Mathf.Pow(2, PierceCountLevel),
+            nameof(PierceDamageFalloffLevel) => (int)Mathf.Pow(2, PierceDamageFalloffLevel),
+            nameof(PelletCountLevel) => (int)Mathf.Pow(2, PelletCountLevel),
+            nameof(DamageFalloffOverDistanceLevel) => (int)Mathf.Pow(2, DamageFalloffOverDistanceLevel),
+            nameof(PercentBonusDamagePerSecLevel) => (int)Mathf.Pow(2, PercentBonusDamagePerSecLevel),
+            nameof(SlowEffectLevel) => (int)Mathf.Pow(2, SlowEffectLevel),
+            _ => 0
+        };
+    }
+
 }

@@ -106,13 +106,13 @@ namespace Assets.Scripts.Systems
         public void AddMoney(ulong amount)
         {
             money += amount;
-            //UIManager.Instance.UpdateMoney(money);
+            UIManager.Instance.UpdateMoney(money);
         }
 
         public void RemoveMoney(ulong amount)
         {
             money -= amount;
-            //UIManager.Instance.UpdateMoney(money);
+            UIManager.Instance.UpdateMoney(money);
         }
 
         public ulong GetMoney()
