@@ -187,11 +187,11 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateFireRateDisplay()
     {
-        var current = turret.FireRate;
+        var current = 1f / turret.FireRate;
         var bonus = FireRateUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.FireRateLevel));
 
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current),
+        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current, true) + "/s",
             $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
     }
 
