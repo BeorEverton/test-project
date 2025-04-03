@@ -1,3 +1,5 @@
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 
 namespace Assets.Scripts.SO
@@ -19,7 +21,6 @@ namespace Assets.Scripts.SO
 
         [Header("Machine Gun Turret")]
         [Tooltip("Chance for a critical attack in Percent")]
-        [Range(0, 100)]
         public float CriticalChance;
         public float CriticalChanceLevel;
         [Tooltip("Multiplier for critical damage in Percent")]
@@ -57,5 +58,10 @@ namespace Assets.Scripts.SO
         [Tooltip("Amount of slow effect applied to the target")]
         public float SlowEffect;
         public float SlowEffectLevel;
+
+        private void OnValidate()
+        {
+            CriticalChance = Mathf.Clamp(CriticalChance, 0, 100);
+        }
     }
 }

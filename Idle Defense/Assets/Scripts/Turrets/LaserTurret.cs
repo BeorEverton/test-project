@@ -64,7 +64,7 @@ namespace Assets.Scripts.Turrets
             enemy.TakeDamage(_damage + _rampedDamageBonus);
 
             if (!enemy.IsSlowed)
-                enemy.RreduceMovementSpeed(_turretInfo.SlowEffect);
+                enemy.ReduceMovementSpeed(_turretInfo.SlowEffect);
 
             _isShooting = true;
 

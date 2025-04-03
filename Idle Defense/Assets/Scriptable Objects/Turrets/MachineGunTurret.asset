@@ -13,16 +13,28 @@ MonoBehaviour:
   m_Name: MachineGunTurret
   m_EditorClassIdentifier: 
   Damage: 5
+  DamageLevel: 0
   FireRate: 0.1
+  FireRateLevel: 0
   RotationSpeed: 5
   AngleThreshold: 5
   CriticalChance: 10
+  CriticalChanceLevel: 0
   CriticalDamageMultiplier: 200
+  CriticalDamageMultiplierLevel: 0
   ExplosionRadius: 0
+  ExplosionRadiusLevel: 0
   SplashDamage: 0
+  SplashDamageLevel: 0
   PierceCount: 0
+  PierceCountLevel: 0
   PierceDamageFalloff: 0
+  PierceDamageFalloffLevel: 0
   PelletCount: 0
+  PelletCountLevel: 0
   DamageFalloffOverDistance: 0
-  ProcentBonusDamagePerSec: 0
+  DamageFalloffOverDistanceLevel: 0
+  PercentBonusDamagePerSec: 0
+  PercentBonusDamagePerSecLevel: 0
   SlowEffect: 0
+  SlowEffectLevel: 0

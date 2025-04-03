@@ -19,70 +19,66 @@ namespace Assets.Scripts.Enemies
         public bool IsDead => CurrentHealth <= 0;
         public float CurrentHealth { get; private set; }
         public bool IsSlowed { get; private set; }
-
-        private float _timeSinceLastAttack = 0f;
-        private bool CanAttack = false;
-        private float _movementSpeed;
-        private Vector2Int lastGridPos;
+        public bool CanAttack;
+        public float TimeSinceLastAttack = 0f;
+        public float MovementSpeed;
+        public Vector2Int LastGridPos;
 
         private void OnEnable()
         {
             ResetEnemy();
-            lastGridPos = GridManager.Instance.GetGridPosition(transform.position);
+            LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
             GridManager.Instance.AddEnemy(this);
         }
 
         private void OnDisable()
         {
-            GridManager.Instance.RemoveEnemy(this, lastGridPos);
+            GridManager.Instance.RemoveEnemy(this, LastGridPos);
         }
 
-        private void Update()
-        {
-            if (!CanAttack)
-            {
-                MoveTowardsPlayer();
+        //private void Update()
+        //{
+        //    if (!CanAttack)
+        //    {
+        //        MoveTowardsPlayer();
 
-                Vector2Int currentGridPos = GridManager.Instance.GetGridPosition(transform.position);
+        //        Vector2Int currentGridPos = GridManager.Instance.GetGridPosition(transform.position);
 
-                if (currentGridPos != lastGridPos)
-                {
-                    GridManager.Instance.RemoveEnemy(this, lastGridPos);
-                    GridManager.Instance.AddEnemy(this);
-                    lastGridPos = currentGridPos;
-                }
-            }
+        //        if (currentGridPos != LastGridPos)
+        //        {
+        //            GridManager.Instance.RemoveEnemy(this, LastGridPos);
+        //            GridManager.Instance.AddEnemy(this);
+        //            LastGridPos = currentGridPos;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        TryAttacking();
+        //    }
+        //}
 
-            TryAttacking();
-        }
+        //private void MoveTowardsPlayer()
+        //{
+        //    gameObject.transform.position += Vector3.down * MovementSpeed * Time.deltaTime;
 
-        private void MoveTowardsPlayer()
-        {
-            gameObject.transform.position += Vector3.down * _movementSpeed * Time.deltaTime;
+        //    if (gameObject.transform.position.y <= _info.AttackRange)
+        //        CanAttack = true;
+        //}
 
-            if (gameObject.transform.position.y <= _info.AttackRange)
-                CanAttack = true;
-        }
+        //private void TryAttacking()
+        //{
+        //    TimeSinceLastAttack += Time.deltaTime;
+        //    if (TimeSinceLastAttack < _info.AttackSpeed)
+        //        return;
 
-        private void TryAttacking()
-        {
-            if (!CanAttack)
-                return;
+        //    Attack();
+        //    TimeSinceLastAttack = 0f;
+        //}
 
-            CheckIfDead();
-
-            _timeSinceLastAttack += Time.deltaTime;
-            if (_timeSinceLastAttack < _info.AttackSpeed)
-                return;
-
-            Attack();
-            _timeSinceLastAttack = 0f;
-        }
-
-        protected virtual void Attack()
-        {
-            Debug.Log("Attacking");
-        }
+        //protected virtual void Attack()
+        //{
+        //    Debug.Log("Attacking");
+        //}
 
         public void TakeDamage(float amount)
         {
@@ -106,19 +102,19 @@ namespace Assets.Scripts.Enemies
             CanAttack = false;
             MaxHealth = _info.MaxHealth + _info.AddMaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
-            _timeSinceLastAttack = 0f;
+            TimeSinceLastAttack = 0f;
             CurrentHealth = MaxHealth;
             SetRandomMovementSpeed();
         }
 
         private void SetRandomMovementSpeed()
         {
-            _movementSpeed = Random.Range(_info.MovementSpeed - _info.MovementSpeedDifference, _info.MovementSpeed + _info.MovementSpeedDifference);
+            MovementSpeed = Random.Range(_info.MovementSpeed - _info.MovementSpeedDifference, _info.MovementSpeed + _info.MovementSpeedDifference);
         }
 
-        public void RreduceMovementSpeed(float procent)
+        public void ReduceMovementSpeed(float procent)
         {
-            _movementSpeed -= _movementSpeed * (procent / 100f);
+            MovementSpeed -= MovementSpeed * (procent / 100f);
             IsSlowed = true;
         }
     }
