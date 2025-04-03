@@ -25,9 +25,5 @@ namespace Assets.Scripts.SO
         public float AttackRange;
         [Tooltip("Time between each attack. - 0.5 makes the enemy attack twice per second")]
         public float AttackSpeed;
-
-        [Header("Wave settings")]
-        [Tooltip("WaveManager sets this at runtime")]
-        public float AddMaxHealth;
     }
 }
