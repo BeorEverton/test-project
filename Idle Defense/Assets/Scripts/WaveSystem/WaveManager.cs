@@ -122,8 +122,8 @@ namespace Assets.Scripts.WaveSystem
                 if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
                 {
                     EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
-                    clonedInfo.MaxHealth += (waveIndex * _healthMultiplierByWaveCount);
-                    clonedInfo.CoinDropAmount = (ulong)Mathf.CeilToInt(enemy.Info.CoinDropAmount * (ulong)_currentWaveIndex * _coinDropMultiplierByWaveCount);
+                    clonedInfo.MaxHealth += waveIndex + waveIndex * _healthMultiplierByWaveCount;
+                    clonedInfo.CoinDropAmount = (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount * (ulong)waveIndex * _coinDropMultiplierByWaveCount);
 
                     enemy.Info = clonedInfo;
                 }
