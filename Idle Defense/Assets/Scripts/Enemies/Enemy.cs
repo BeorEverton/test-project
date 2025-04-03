@@ -1,6 +1,7 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
@@ -84,6 +85,16 @@ namespace Assets.Scripts.Enemies
         {
             MovementSpeed -= MovementSpeed * (procent / 100f);
             IsSlowed = true;
+        }
+
+        public void SetNewStats(EnemyInfoSO newStats)
+        {
+            _info = newStats;
+            MaxHealth = _info.MaxHealth;
+            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
+            TimeSinceLastAttack = 0f;
+            CurrentHealth = MaxHealth;
+            SetRandomMovementSpeed();
         }
 
         //private void Update()
