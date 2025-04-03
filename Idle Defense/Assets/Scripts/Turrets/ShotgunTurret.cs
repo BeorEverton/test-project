@@ -60,7 +60,7 @@ namespace Assets.Scripts.Turrets
                     {
                         float distanceToEnemy = Vector2.Distance(transform.position, enemy.transform.position);
                         float damage = _damage - GetDamageFalloff(distanceToEnemy);
-                        Debug.Log($"[SHOTGUN] Distance to {enemy}: {distanceToEnemy} resulted in {damage} damage");
+
                         enemy.TakeDamage(damage);
                         break; // Only hit the first enemy in the path
                     }
