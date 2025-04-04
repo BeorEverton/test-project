@@ -58,7 +58,7 @@ public class TurretUpgradeManager : MonoBehaviour
         int cost = turret.GetUpgradeCost(nameof(turret.FireRateLevel));
         if (TrySpend(cost))
         {
-            turret.FireRate += FireRateUpgrade;
+            turret.FireRate -= FireRateUpgrade;
             turret.FireRateLevel += 1f;
             UpdateFireRateDisplay();
         }

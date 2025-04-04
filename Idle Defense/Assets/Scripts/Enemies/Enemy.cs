@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
+using DamageNumbersPro;
 
 namespace Assets.Scripts.Enemies
 {
@@ -14,6 +15,7 @@ namespace Assets.Scripts.Enemies
         public event EventHandler OnMaxHealthChanged;
         public event EventHandler OnCurrentHealthChanged;
         public event EventHandler<OnDeathEventArgs> OnDeath;
+        [SerializeField] private DamageNumber damageNumber, damageNumberCritical;
 
         public class OnDeathEventArgs : EventArgs
         {
@@ -36,8 +38,7 @@ namespace Assets.Scripts.Enemies
         public Vector2Int LastGridPos;
 
         private void OnEnable()
-        {
-            ResetEnemy();
+        {             ResetEnemy();
             LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
             GridManager.Instance.AddEnemy(this);
         }
@@ -47,9 +48,14 @@ namespace Assets.Scripts.Enemies
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
         }
 
-        public void TakeDamage(float amount)
+        public void TakeDamage(float amount, bool isCritical = false)
         {
             CurrentHealth -= amount;
+
+            if (damageNumberCritical && isCritical)            
+                damageNumberCritical.Spawn(transform.position, amount);
+            else if (damageNumber)
+                damageNumber.Spawn(transform.position, amount);
 
             OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
 

@@ -26,7 +26,10 @@ namespace Assets.Scripts.Turrets
             recoil.AddRecoil();
 
             if (IsCriticalHit())
+            {                
                 _damage *= (1 + (_turretInfo.CriticalDamageMultiplier / 100));
+                _targetEnemy.GetComponent<Enemy>().TakeDamage(_damage, true);
+            }
 
             _targetEnemy.GetComponent<Enemy>().TakeDamage(_damage);
             _timeSinceLastShot = 0f;
