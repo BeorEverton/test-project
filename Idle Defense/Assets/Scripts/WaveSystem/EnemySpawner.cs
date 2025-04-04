@@ -76,14 +76,20 @@ namespace Assets.Scripts.WaveSystem
             for (int i = 0; i < entry.NumberOfEnemies; i++)
             {
                 string entryName = entry.EnemyPrefab.GetComponent<Enemy>().Info.Name;
-                GameObject tempObj = _objectPool.GetObject(entryName, entry.EnemyPrefab);
-                tempObj.transform.position = GetRandomSpawnPosition();
-                tempObj.transform.rotation = Quaternion.identity;
 
-                tempObj.SetActive(false);
-                _enemiesCurrentWave.Add(tempObj);
+                GameObject tempEnemy = GetEnemyFromPool(entryName, entry.EnemyPrefab);
+                tempEnemy.SetActive(false);
+                _enemiesCurrentWave.Add(tempEnemy);
             }
             OnWaveCreated?.Invoke(this, new OnWaveCreatedEventArgs { EnemyCount = _enemiesCurrentWave.Count });
+        }
+
+        private GameObject GetEnemyFromPool(string enemyName, GameObject enemyPrefab)
+        {
+            GameObject enemy = _objectPool.GetObject(enemyName, enemyPrefab);
+            enemy.transform.position = GetRandomSpawnPosition();
+            enemy.transform.rotation = Quaternion.identity;
+            return enemy;
         }
 
         private IEnumerator SpawnEnemies()
