@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: RangedEnemy_01
   m_EditorClassIdentifier: 
   Name: RangedEnemy01
+  EnemyClass: 1
   MaxHealth: 10
   MovementSpeed: 1.25
   MovementSpeedDifference: 0.2
-  CoinDropAmount: 15
+  CoinDropAmount: 8
   Damage: 16
   AttackRange: 3
   AttackSpeed: 1.5
-  AddMaxHealth: 2

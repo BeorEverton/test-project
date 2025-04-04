@@ -7,6 +7,8 @@ namespace Assets.Scripts.SO
     {
         [Header("Base info")]
         public string Name;
+        [Tooltip("The class of the enemy. Will be used to scale through levels")]
+        public EnemyClass EnemyClass;
 
         [Header("Base stats")]
         [Tooltip("Max health")]
@@ -25,5 +27,12 @@ namespace Assets.Scripts.SO
         public float AttackRange;
         [Tooltip("Time between each attack. - 0.5 makes the enemy attack twice per second")]
         public float AttackSpeed;
+    }
+
+    public enum EnemyClass
+    {
+        Melee,
+        Ranged,
+        Tank,
     }
 }

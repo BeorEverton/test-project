@@ -1,5 +1,6 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
+using Assets.Scripts.WaveSystem;
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -68,6 +69,7 @@ namespace Assets.Scripts.Enemies
 
         private void ResetEnemy()
         {
+            Info = WaveSettings.Instance.WaveConfig[Info.EnemyClass];
             CanAttack = false;
             MaxHealth = _info.MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
@@ -85,16 +87,6 @@ namespace Assets.Scripts.Enemies
         {
             MovementSpeed -= MovementSpeed * (procent / 100f);
             IsSlowed = true;
-        }
-
-        public void SetNewStats(EnemyInfoSO newStats)
-        {
-            _info = newStats;
-            MaxHealth = _info.MaxHealth;
-            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
-            TimeSinceLastAttack = 0f;
-            CurrentHealth = MaxHealth;
-            SetRandomMovementSpeed();
         }
 
         //private void Update()

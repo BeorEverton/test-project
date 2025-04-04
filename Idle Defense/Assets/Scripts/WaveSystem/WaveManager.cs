@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Assets.Scripts.WaveSystem
 {
@@ -113,20 +114,13 @@ namespace Assets.Scripts.WaveSystem
 
             foreach (EnemyWaveEntry entry in baseConfig.EnemyWaveEntries)
             {
-                EnemyWaveEntry newEntry = new()
-                {
-                    EnemyPrefab = Instantiate(entry.EnemyPrefab),
-                    NumberOfEnemies = entry.NumberOfEnemies + _waveIndexOfCurrentBaseWave + _currentBaseWaveIndex
-                };
+                EnemyWaveEntry newEntry = CreateNewEntry(entry);
 
                 if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
                 {
-                    EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
-                    clonedInfo.MaxHealth += (waveIndex * _healthMultiplierByWaveCount);
-                    clonedInfo.CoinDropAmount = 
-                        (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount * (ulong)_currentWaveIndex * _coinDropMultiplierByWaveCount);
+                    EnemyInfoSO clonedInfo = CloneEnemyInfoWithScale(enemy, waveIndex);
 
-                    enemy.SetNewStats(clonedInfo);
+                    WaveSettings.Instance.AddEnemyConfig(clonedInfo.EnemyClass, clonedInfo);
                 }
 
                 newWaveConfig.EnemyWaveEntries.Add(newEntry);
@@ -135,6 +129,24 @@ namespace Assets.Scripts.WaveSystem
             newWaveConfig.TimeBetweenSpawns = baseConfig.TimeBetweenSpawns;
 
             return newWaveConfig;
+        }
+
+        private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry)
+        {
+            return new EnemyWaveEntry
+            {
+                EnemyPrefab = baseEntry.EnemyPrefab,
+                NumberOfEnemies = baseEntry.NumberOfEnemies + _waveIndexOfCurrentBaseWave + _currentBaseWaveIndex
+            };
+        }
+
+        private EnemyInfoSO CloneEnemyInfoWithScale(Enemy enemy, int waveIndex)
+        {
+            EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
+            clonedInfo.MaxHealth += (waveIndex * _healthMultiplierByWaveCount);
+            clonedInfo.CoinDropAmount =
+                (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount * (ulong)_currentWaveIndex * _coinDropMultiplierByWaveCount);
+            return clonedInfo;
         }
 
         public int GetCurrentWaveIndex()
