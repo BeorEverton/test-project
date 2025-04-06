@@ -14,27 +14,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damage: 5
   DamageLevel: 0
-  FireRate: 0.1
+  DamageUpgradeAmount: 1
+  DamageUpgradeBaseCost: 1
+  FireRate: 2
   FireRateLevel: 0
+  FireRateUpgradeAmount: 0.05
+  FireRateUpgradeBaseCost: 10
   RotationSpeed: 5
   AngleThreshold: 5
-  CriticalChance: 10
+  CriticalChance: 5
   CriticalChanceLevel: 0
-  CriticalDamageMultiplier: 200
+  CriticalChanceUpgradeAmount: 2
+  CriticalChanceUpgradeBaseCost: 5
+  CriticalDamageMultiplier: 20
   CriticalDamageMultiplierLevel: 0
+  CriticalDamageMultiplierUpgradeAmount: 5
+  CriticalDamageMultiplierUpgradeBaseCost: 10
   ExplosionRadius: 0
   ExplosionRadiusLevel: 0
+  ExplosionRadiusUpgradeAmount: 0
+  ExplosionRadiusUpgradeBaseCost: 0
   SplashDamage: 0
   SplashDamageLevel: 0
+  SplashDamageUpgradeAmount: 0
+  SplashDamageUpgradeBaseCost: 0
   PierceCount: 0
   PierceCountLevel: 0
+  PierceCountUpgradeAmount: 0
+  PierceCountUpgradeBaseCost: 0
   PierceDamageFalloff: 0
   PierceDamageFalloffLevel: 0
+  PierceDamageFalloffUpgradeAmount: 0
+  PierceDamageFalloffUpgradeBaseCost: 0
   PelletCount: 0
   PelletCountLevel: 0
+  PelletCountUpgradeAmount: 0
+  PelletCountUpgradeBaseCost: 0
   DamageFalloffOverDistance: 0
   DamageFalloffOverDistanceLevel: 0
+  DamageFalloffOverDistanceUpgradeAmount: 0
+  DamageFalloffOverDistanceUpgradeBaseCost: 0
   PercentBonusDamagePerSec: 0
   PercentBonusDamagePerSecLevel: 0
+  PercentBonusDamagePerSecUpgradeAmount: 0
+  PercentBonusDamagePerSecUpgradeBaseCost: 0
   SlowEffect: 0
   SlowEffectLevel: 0
+  SlowEffectUpgradeAmount: 0
+  SlowEffectUpgradeBaseCost: 0

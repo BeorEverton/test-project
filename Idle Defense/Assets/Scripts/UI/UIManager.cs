@@ -9,7 +9,7 @@ namespace Assets.Scripts.UI
     public class UIManager : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI dmgBonus, spdBonus, wave, enemies, money;
-        [SerializeField] private Slider spdBonusSlider;
+        [SerializeField] private Image spdBonusFill;
         private int waveOnHold;
 
         public static UIManager Instance { get; private set; }
@@ -81,23 +81,31 @@ namespace Assets.Scripts.UI
 
         public void UpdateSpdBonus(float value)
         {
-            spdBonusSlider.value = value;
-            spdBonus.text = "Spd Bonus\n" + value.ToString("F0") + "%";
+            float fillPercent = Mathf.Clamp01(value / 200f);
+            spdBonusFill.fillAmount = fillPercent;
+            spdBonus.text = "Spd +\n" + value.ToString("F0") + "%";
+
+            // From black to red based on fill
+            spdBonusFill.color = Color.Lerp(Color.black, Color.red, fillPercent);
             UpdateBonusColor(spdBonus, value);
         }
 
         public void UpdateDmgBonus(float value)
         {
-            dmgBonus.text = "Dmg Bonus\n" + value.ToString("F0") + "%";
+            dmgBonus.text = "Dmg +\n" + value.ToString("F0") + "%";
             UpdateBonusColor(dmgBonus, value);
         }
 
         /// <summary>
         /// Colors the bonus text based on the value
         /// </summary>
-        /// <param name="element"></param>
-        /// <param name="value"></param>
         public void UpdateBonusColor(TextMeshProUGUI element, float value)
+        {
+            float t = Mathf.Clamp01(value / 200f);
+            element.color = Color.Lerp(Color.black, Color.red, t);
+        }
+
+        /*public void UpdateBonusColor(TextMeshProUGUI element, float value)
         {
             Color startColor = Color.white;
             Color midColor = new Color(1f, 1f, 0.5f);       // Pale yellow
@@ -121,10 +129,10 @@ namespace Assets.Scripts.UI
             }
             else
             {
-                // Clamp at final color if value > 200%
                 element.color = finalColor;
             }
-        }
+        }*/
+
 
         public void UpdateMoney(ulong value)
         {

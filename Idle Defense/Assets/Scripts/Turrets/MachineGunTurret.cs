@@ -25,13 +25,15 @@ namespace Assets.Scripts.Turrets
 
             recoil.AddRecoil();
 
-            if (IsCriticalHit())
-            {                
-                _damage *= (1 + (_turretInfo.CriticalDamageMultiplier / 100));
-                _targetEnemy.GetComponent<Enemy>().TakeDamage(_damage, true);
+            float finalDamage = _damage;
+            bool isCritical = IsCriticalHit();
+
+            if (isCritical)
+            {
+                finalDamage *= 1f + (_turretInfo.CriticalDamageMultiplier / 100f);
             }
 
-            _targetEnemy.GetComponent<Enemy>().TakeDamage(_damage);
+            _targetEnemy.GetComponent<Enemy>().TakeDamage(finalDamage, isCritical);
             _timeSinceLastShot = 0f;
         }
 
