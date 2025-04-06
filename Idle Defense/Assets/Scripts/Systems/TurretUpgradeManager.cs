@@ -178,6 +178,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateDamageDisplay()
     {
+        if (turret == null) return;
         var current = turret.Damage;
         var bonus = DamageUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.DamageLevel));
@@ -188,6 +189,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateFireRateDisplay()
     {
+        if (turret == null) return;
         var current = 1f / turret.FireRate;
         var bonus = FireRateUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.FireRateLevel));
@@ -198,6 +200,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateCriticalChanceDisplay()
     {
+        if (turret == null) return;
         var current = turret.CriticalChance;
         var bonus = CriticalChanceUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.CriticalChanceLevel));
@@ -218,6 +221,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateExplosionRadiusDisplay()
     {
+        if (turret == null) return;
         var current = turret.ExplosionRadius;
         var bonus = ExplosionRadiusUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.ExplosionRadiusLevel));
@@ -228,6 +232,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateSplashDamageDisplay()
     {
+        if (turret == null) return;
         var current = turret.SplashDamage;
         var bonus = SplashDamageUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.SplashDamageLevel));
@@ -238,6 +243,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePierceCountDisplay()
     {
+        if (turret == null) return;
         var current = turret.PierceCount;
         var bonus = PierceCountUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.PierceCountLevel));
@@ -248,6 +254,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePierceDamageFalloffDisplay()
     {
+        if (turret == null) return;
         var current = turret.PierceDamageFalloff;
         var bonus = PierceDamageFalloffUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.PierceDamageFalloffLevel));
@@ -258,6 +265,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePelletCountDisplay()
     {
+        if (turret == null) return;
         var current = turret.PelletCount;
         var bonus = PelletCountUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.PelletCountLevel));
@@ -268,6 +276,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateDamageFalloffOverDistanceDisplay()
     {
+        if (turret == null) return;
         var current = turret.DamageFalloffOverDistance;
         var bonus = DamageFalloffOverDistanceUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.DamageFalloffOverDistanceLevel));
@@ -278,6 +287,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePercentBonusDamagePerSecDisplay()
     {
+        if (turret == null) return;
         var current = turret.PercentBonusDamagePerSec;
         var bonus = PercentBonusDamagePerSecUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.PercentBonusDamagePerSecLevel));
@@ -288,6 +298,7 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateSlowEffectDisplay()
     {
+        if (turret == null) return;
         var current = turret.SlowEffect;
         var bonus = SlowEffectUpgrade;
         var cost = turret.GetUpgradeCost(nameof(turret.SlowEffectLevel));

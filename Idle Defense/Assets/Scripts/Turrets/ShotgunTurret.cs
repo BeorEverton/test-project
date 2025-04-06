@@ -16,15 +16,25 @@ namespace Assets.Scripts.Turrets
         private float _pelletWidth = 0.5f;
         private int pelletCount = 3;
 
+        private Recoil recoil;
+
+        protected override void Update()
+        {
+            base.Update();
+            recoil.ApplyBarrelRecoil();
+        }
+
         private void Start()
         {
             pelletCount = _turretInfo.PelletCount;
+            recoil = GetComponent<Recoil>();
         }
 
         protected override void Shoot()
         {
             base.Shoot();
 
+            recoil.AddRecoil();
             pathCells.Clear();
 
             Vector2 baseDir = ((_targetEnemy.transform.position - transform.position)).normalized;
