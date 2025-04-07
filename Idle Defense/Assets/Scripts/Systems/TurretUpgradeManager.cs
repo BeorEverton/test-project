@@ -150,14 +150,23 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpgradeDamageFalloffOverDistance()
     {
+        if (turret.DamageFalloffOverDistance <= 0f)
+        {
+            UpdateDamageFalloffOverDistanceDisplay(); // Still update UI if player clicks it
+            return;
+        }
+
         float cost = GetHybridCost(turret.DamageFalloffOverDistanceUpgradeBaseCost, turret.DamageFalloffOverDistanceLevel);
         if (TrySpend(cost))
         {
-            turret.DamageFalloffOverDistance += turret.DamageFalloffOverDistanceUpgradeAmount;
+            turret.DamageFalloffOverDistance -= turret.DamageFalloffOverDistanceUpgradeAmount;
+            turret.DamageFalloffOverDistance = Mathf.Max(0f, turret.DamageFalloffOverDistance); // Clamp to avoid negative values
             turret.DamageFalloffOverDistanceLevel += 1f;
             UpdateDamageFalloffOverDistanceDisplay();
         }
     }
+
+
 
     public void UpgradePercentBonusDamagePerSec()
     {
@@ -275,11 +284,20 @@ public class TurretUpgradeManager : MonoBehaviour
     public void UpdateDamageFalloffOverDistanceDisplay()
     {
         if (turret == null) return;
-        var current = turret.DamageFalloffOverDistance;
-        var bonus = turret.DamageFalloffOverDistanceUpgradeAmount;
-        var cost = GetHybridCost(turret.DamageFalloffOverDistanceUpgradeBaseCost, turret.DamageFalloffOverDistanceLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+
+        float current = turret.DamageFalloffOverDistance;
+        float bonus = turret.DamageFalloffOverDistanceUpgradeAmount;
+        float cost = GetHybridCost(turret.DamageFalloffOverDistanceUpgradeBaseCost, turret.DamageFalloffOverDistanceLevel);
+
+        string currentText = $"{current:F1}%";
+        string bonusText = current <= 0f
+            ? "Max"
+            : $"-{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
+
+        turretUpgradeButton.UpdateStats(currentText, bonusText);
     }
+
+
 
     public void UpdatePercentBonusDamagePerSecDisplay()
     {

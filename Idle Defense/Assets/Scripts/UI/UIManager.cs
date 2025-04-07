@@ -9,7 +9,7 @@ namespace Assets.Scripts.UI
     public class UIManager : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI dmgBonus, spdBonus, wave, enemies, money;
-        [SerializeField] private Image spdBonusFill;
+        [SerializeField] private Slider spdBonusSlider;
         private int waveOnHold;
 
         public static UIManager Instance { get; private set; }
@@ -81,13 +81,10 @@ namespace Assets.Scripts.UI
 
         public void UpdateSpdBonus(float value)
         {
-            float fillPercent = Mathf.Clamp01(value / 200f);
-            spdBonusFill.fillAmount = fillPercent;
+            spdBonusSlider.value = value;
             spdBonus.text = "Spd +\n" + value.ToString("F0") + "%";
-
-            // From black to red based on fill
-            spdBonusFill.color = Color.Lerp(Color.black, Color.red, fillPercent);
-            UpdateBonusColor(spdBonus, value);
+                                   
+            //UpdateBonusColor(spdBonus, value);
         }
 
         public void UpdateDmgBonus(float value)
