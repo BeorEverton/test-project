@@ -22,6 +22,8 @@ namespace Assets.Scripts.UI
                 Instance = this;
             else
                 Destroy(gameObject);
+
+            waveOnHold = -1;
         }
 
         private void Start()
@@ -41,7 +43,6 @@ namespace Assets.Scripts.UI
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
         {
             wave.text = $"Next Wave\n{args.WaveNumber + 1}";
-
         }
 
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
@@ -83,7 +84,7 @@ namespace Assets.Scripts.UI
         {
             spdBonusSlider.value = value;
             spdBonus.text = "Spd +\n" + value.ToString("F0") + "%";
-                                   
+
             //UpdateBonusColor(spdBonus, value);
         }
 

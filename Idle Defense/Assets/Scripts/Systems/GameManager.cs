@@ -19,7 +19,7 @@ namespace Assets.Scripts.Systems
         private const float holdIncreaseRate = 5f;
         private const float initialBoost = 5f;
 
-        private bool isHolding = false;
+        private bool isHolding;
         private float decreaseDelay = 1f;
         private float decreaseTimer = 0f;
 
@@ -42,8 +42,8 @@ namespace Assets.Scripts.Systems
         private void Start()
         {
             EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
-            EnemySpawner.Instance.OnWaveFailed += OnWaveFailed;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
+            PlayerBaseManager.Instance.OnWaveFailed += OnWaveFailed;
         }
 
         private void OnDestroy()

@@ -1,12 +1,11 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
-using Assets.Scripts.UI;
-using NUnit.Framework;
+using Assets.Scripts.Systems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
@@ -16,7 +15,7 @@ namespace Assets.Scripts.WaveSystem
         public static EnemySpawner Instance { get; private set; }
 
         public event EventHandler OnWaveCompleted;
-        public event EventHandler OnWaveFailed; // TO-DO, Used to reset the damage bonus
+        public event EventHandler OnWaveStarted;
         public event EventHandler<OnWaveCreatedEventArgs> OnWaveCreated;
         public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
 
@@ -41,8 +40,6 @@ namespace Assets.Scripts.WaveSystem
 
         private bool _waveSpawned;
 
-        private int enemiesAlive;
-
         private void Awake()
         {
             if (Instance == null)
@@ -53,10 +50,18 @@ namespace Assets.Scripts.WaveSystem
             _objectPool = new ObjectPool(transform);
         }
 
+        private void Start()
+        {
+            PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
+        }
+
         public void StartWave(WaveConfigSO wave)
         {
             _currentWave = wave;
             _waveSpawned = false;
+            OnWaveStarted?.Invoke(this, EventArgs.Empty);
+            Debug.Log($"EnemySpawner started the wave");
+
             CreateWave();
             Shuffle.ShuffleList(_enemiesCurrentWave);
             StartCoroutine(SpawnEnemies());
@@ -99,7 +104,6 @@ namespace Assets.Scripts.WaveSystem
                 enemy.SetActive(true);
                 enemy.GetComponent<Enemy>().OnDeath += Enemy_OnEnemyDeath;
                 EnemiesAlive.Add(enemy);
-                enemiesAlive++;
 
                 yield return new WaitForSeconds(_currentWave.TimeBetweenSpawns);
             }
@@ -120,7 +124,6 @@ namespace Assets.Scripts.WaveSystem
                 enemy.OnDeath -= Enemy_OnEnemyDeath;
                 EnemiesAlive.Remove(enemy.gameObject);
                 _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
-                enemiesAlive--;
 
                 OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
                 {
@@ -135,6 +138,27 @@ namespace Assets.Scripts.WaveSystem
         {
             if (_waveSpawned && EnemiesAlive.Count <= 0)
                 OnWaveCompleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
+        {
+            RestartWave();
+        }
+
+        private void RestartWave()
+        {
+            StopCoroutine(SpawnEnemies());
+            foreach (GameObject enemy in EnemiesAlive.ToList())
+            {
+                if (enemy == null)
+                    continue;
+
+                EnemiesAlive.Remove(enemy.gameObject);
+                enemy.GetComponent<Enemy>().OnDeath -= Enemy_OnEnemyDeath;
+                _objectPool.ReturnObject(enemy.GetComponent<Enemy>().Info.Name, enemy);
+            }
+
+            StartWave(_currentWave);
         }
     }
 }

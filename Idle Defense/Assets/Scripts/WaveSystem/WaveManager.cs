@@ -1,11 +1,9 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
-using Assets.Scripts.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Assets.Scripts.WaveSystem
 {
@@ -66,6 +64,8 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator StartWaveRoutine()
         {
+            yield return new WaitForSeconds(2); //Let the game start, and show some UI?
+
             while (GameRunning)
             {
                 if (forcedWave)

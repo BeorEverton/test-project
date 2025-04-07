@@ -1,12 +1,10 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
-using System;
-using Unity.VisualScripting;
-using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
-using Random = UnityEngine.Random;
 using DamageNumbersPro;
+using System;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Enemies
 {
@@ -38,7 +36,8 @@ namespace Assets.Scripts.Enemies
         public Vector2Int LastGridPos;
 
         private void OnEnable()
-        {             ResetEnemy();
+        {
+            ResetEnemy();
             LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
             GridManager.Instance.AddEnemy(this);
         }
@@ -52,7 +51,7 @@ namespace Assets.Scripts.Enemies
         {
             CurrentHealth -= amount;
 
-            if (damageNumberCritical && isCritical)            
+            if (damageNumberCritical && isCritical)
                 damageNumberCritical.Spawn(transform.position, amount);
             else if (damageNumber)
                 damageNumber.Spawn(transform.position, amount);

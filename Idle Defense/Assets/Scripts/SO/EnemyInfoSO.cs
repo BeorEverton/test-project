@@ -22,7 +22,7 @@ namespace Assets.Scripts.SO
 
         [Header("Attack stats")]
         [Tooltip("Damage dealth to the player per attack")]
-        public int Damage;
+        public float Damage;
         [Tooltip("Attack range for the enemy, before attacking the player")]
         public float AttackRange;
         [Tooltip("Time between each attack. - 0.5 makes the enemy attack twice per second")]
