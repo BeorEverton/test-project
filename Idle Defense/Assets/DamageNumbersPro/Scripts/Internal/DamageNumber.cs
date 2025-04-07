@@ -320,7 +320,7 @@ namespace DamageNumbersPro
             //Once:
             GetReferencesIfNecessary();
 
-            if(enablePooling && disableOnSceneLoad)
+            if (enablePooling && disableOnSceneLoad)
             {
                 SceneManager.sceneLoaded += OnSceneLoaded;
             }
@@ -356,7 +356,7 @@ namespace DamageNumbersPro
         public void UpdateDamageNumber(float delta, float time)
         {
             //Check activity.
-            if(isActiveAndEnabled == false)
+            if (isActiveAndEnabled == false)
             {
                 startTime += delta;
                 startLifeTime += delta;
@@ -366,7 +366,7 @@ namespace DamageNumbersPro
             }
 
             //Vectors:
-            if(DNPUpdater.vectorsNeedUpdate)
+            if (DNPUpdater.vectorsNeedUpdate)
             {
                 DNPUpdater.UpdateVectors(transform);
             }
@@ -1167,7 +1167,7 @@ namespace DamageNumbersPro
 
                 //Fill Pool:
                 int amount = poolSize - pools[instanceId].Count;
-                if(amount > poolSize * 0.5f)
+                if (amount > poolSize * 0.5f)
                 {
                     for (int n = 0; n < amount; n++)
                     {
@@ -1185,7 +1185,7 @@ namespace DamageNumbersPro
         public static void ClearPooled(DNPType type = DNPType.All)
         {
             //Check if pools exist.
-            if(pools != null)
+            if (pools != null)
             {
                 //Iterate through pools.
                 foreach (KeyValuePair<int, HashSet<DamageNumber>> entry in pools)
@@ -1229,7 +1229,7 @@ namespace DamageNumbersPro
                 }
 
                 //Destroy all active popups with potential pooling.
-                foreach(DamageNumber popup in popups)
+                foreach (DamageNumber popup in popups)
                 {
                     //Check permanent.
                     if (!ignorePermanent || !popup.permanent)
@@ -1269,7 +1269,7 @@ namespace DamageNumbersPro
         /// <param name="ignorePermanent">Whether permanent popups should be faded out.</param>
         public static void FadeOutActive(DNPType type = DNPType.All, bool ignorePermanent = true)
         {
-            foreach(DamageNumber popup in activeInstances)
+            foreach (DamageNumber popup in activeInstances)
             {
                 if (popup != null)
                 {
@@ -1289,7 +1289,7 @@ namespace DamageNumbersPro
         protected void Restart()
         {
             //Static Reference:
-            if(activeInstances == null)
+            if (activeInstances == null)
             {
                 activeInstances = new HashSet<DamageNumber>();
             }
@@ -1330,7 +1330,7 @@ namespace DamageNumbersPro
                 {
                     bool usesFallbackFonts = fontAsset.fallbackFontAssetTable != null && fontAsset.fallbackFontAssetTable.Count > 0;
                     if (fontAsset.isMultiAtlasTexturesEnabled || usesFallbackFonts)
-                    { 
+                    {
                         //New tmp for fallback assets.
                         GameObject fallbackAsset = Instantiate<GameObject>(textMeshPro.gameObject);
                         fallbackAsset.transform.localScale = Vector3.zero;
@@ -1339,14 +1339,14 @@ namespace DamageNumbersPro
                         DontDestroyOnLoad(fallbackAsset);
 
                         //Create base string containing a single character of the base font.
-                        string textString = System.Char.ConvertFromUtf32((int) fontAsset.characterTable[0].unicode);
+                        string textString = System.Char.ConvertFromUtf32((int)fontAsset.characterTable[0].unicode);
 
                         //Add all characters to support multi-atlas fonts.
                         if (fontAsset.isMultiAtlasTexturesEnabled)
                         {
                             foreach (TMP_Character character in fontAsset.characterTable)
                             {
-                                if(character != null && character.unicode > 0)
+                                if (character != null && character.unicode > 0)
                                 {
                                     textString += System.Char.ConvertFromUtf32((int)character.unicode);
                                 }
@@ -1380,7 +1380,7 @@ namespace DamageNumbersPro
                                     {
                                         for (int unicode = 0; unicode < 40959; unicode++)
                                         {
-                                            if (fallbackFont.TryAddCharacters(new uint[] { (uint) unicode }))
+                                            if (fallbackFont.TryAddCharacters(new uint[] { (uint)unicode }))
                                             {
                                                 if (AddFallbackCharacterToString(ref textString, (uint)unicode, fontAsset, f))
                                                 {
@@ -1414,7 +1414,7 @@ namespace DamageNumbersPro
 
             //Scale to Zero:
             firstFrameScale = true;
-            if(destroyAfterSpawning)
+            if (destroyAfterSpawning)
             {
                 destroyAfterSpawning = false;
                 startLifeTime = -100;
@@ -1424,7 +1424,7 @@ namespace DamageNumbersPro
         bool AddFallbackCharacterToString(ref string textString, uint unicode, TMP_FontAsset mainFontAsset, int fallbackIndex)
         {
             //The unicode 0 can cause issues.
-            if(unicode < 1)
+            if (unicode < 1)
             {
                 return false;
             }
@@ -1453,7 +1453,7 @@ namespace DamageNumbersPro
 
                 if (addCharacter)
                 {
-                    textString += System.Char.ConvertFromUtf32((int) unicode);
+                    textString += System.Char.ConvertFromUtf32((int)unicode);
                     return true;
                 }
             }
@@ -1529,7 +1529,7 @@ namespace DamageNumbersPro
             {
                 currentRotationSpeed = Random.Range(minRotationSpeed, maxRotationSpeed);
 
-                if(rotationSpeedRandomFlip && Random.value < 0.5f)
+                if (rotationSpeedRandomFlip && Random.value < 0.5f)
                 {
                     currentRotationSpeed *= -1;
                 }
@@ -1542,7 +1542,7 @@ namespace DamageNumbersPro
             if (enableLerp)
             {
                 float xOffset = Random.Range(lerpSettings.minX, lerpSettings.maxX) * GetPositionFactor();
-                if(lerpSettings.randomFlip && Random.value < 0.5f)
+                if (lerpSettings.randomFlip && Random.value < 0.5f)
                 {
                     xOffset = -xOffset;
                 }
@@ -1555,7 +1555,7 @@ namespace DamageNumbersPro
             {
                 currentVelocity = new Vector2(Random.Range(velocitySettings.minX, velocitySettings.maxX), Random.Range(velocitySettings.minY, velocitySettings.maxY)) * GetPositionFactor();
 
-                if(velocitySettings.randomFlip && Random.value < 0.5f)
+                if (velocitySettings.randomFlip && Random.value < 0.5f)
                 {
                     currentVelocity.x = -currentVelocity.x;
                 }
@@ -1584,8 +1584,10 @@ namespace DamageNumbersPro
             if (enableCrossScaleFadeIn)
             {
                 currentScaleInOffset = crossScaleFadeIn;
-                if (currentScaleInOffset.x == 0) currentScaleInOffset.x += 0.001f;
-                if (currentScaleInOffset.y == 0) currentScaleInOffset.y += 0.001f;
+                if (currentScaleInOffset.x == 0)
+                    currentScaleInOffset.x += 0.001f;
+                if (currentScaleInOffset.y == 0)
+                    currentScaleInOffset.y += 0.001f;
             }
 
             //Fade Out:
@@ -1593,8 +1595,10 @@ namespace DamageNumbersPro
             if (enableCrossScaleFadeOut)
             {
                 currentScaleOutOffset = crossScaleFadeOut;
-                if (currentScaleOutOffset.x == 0) currentScaleOutOffset.x += 0.001f;
-                if (currentScaleOutOffset.y == 0) currentScaleOutOffset.y += 0.001f;
+                if (currentScaleOutOffset.x == 0)
+                    currentScaleOutOffset.x += 0.001f;
+                if (currentScaleOutOffset.y == 0)
+                    currentScaleOutOffset.y += 0.001f;
             }
 
             lastTargetPosition = Vector3.zero;
@@ -1697,9 +1701,9 @@ namespace DamageNumbersPro
                     //Add zeros to the left to fix numbers less than 1.
                     int usedDecimals = digitSettings.decimals;
                     int currentLength = allDigits.Length;
-                    if(currentLength < usedDecimals)
+                    if (currentLength < usedDecimals)
                     {
-                        for(int i = 0; i < usedDecimals - currentLength; i++)
+                        for (int i = 0; i < usedDecimals - currentLength; i++)
                         {
                             allDigits = "0" + allDigits;
                         }
@@ -1723,7 +1727,7 @@ namespace DamageNumbersPro
                     int digitLength = allDigits.Length;
                     while (digitLength < usedDecimals)
                     {
-                        if(digitSettings.hideZeros)
+                        if (digitSettings.hideZeros)
                         {
                             usedDecimals--;
                         }
@@ -1758,7 +1762,7 @@ namespace DamageNumbersPro
                     numberScale = scaleByNumberSettings.fromScale + (scaleByNumberSettings.toScale - scaleByNumberSettings.fromScale) * Mathf.Clamp01((number - scaleByNumberSettings.fromNumber) / (scaleByNumberSettings.toNumber - scaleByNumberSettings.fromNumber));
                 }
 
-                if(enableColorByNumber)
+                if (enableColorByNumber)
                 {
                     SetColor(colorByNumberSettings.colorGradient.Evaluate(Mathf.Clamp01((number - colorByNumberSettings.fromNumber) / (colorByNumberSettings.toNumber - colorByNumberSettings.fromNumber))));
                 }
@@ -1790,7 +1794,7 @@ namespace DamageNumbersPro
 
             //Scale Fix:
             Vector3 currentLocalScale = transform.localScale;
-            if(!enable3DGame || !renderThroughWalls)
+            if (!enable3DGame || !renderThroughWalls)
             {
                 renderThroughWallsScale = 1f;
             }
@@ -1816,7 +1820,7 @@ namespace DamageNumbersPro
             {
                 Mesh mesh = meshs[n];
 
-                if(mesh != null)
+                if (mesh != null)
                 {
                     Color[] color = mesh.colors;
                     float[] alpha = new float[color.Length];
@@ -1927,13 +1931,13 @@ namespace DamageNumbersPro
                         string decimals = integers.Substring(integerLength, digitSettings.suffixDecimals);
 
                         //Hide zeros.
-                        while(digitSettings.suffixHideZeros && decimals.EndsWith("0"))
+                        while (digitSettings.suffixHideZeros && decimals.EndsWith("0"))
                         {
                             decimals = decimals.Substring(0, decimals.Length - 1);
                         }
 
                         //Combine.
-                        if(decimals.Length > 0)
+                        if (decimals.Length > 0)
                         {
                             integers = shortenedIntegers + digitSettings.suffixDecimalChar + decimals + digitSettings.suffixes[currentSuffix];
                         }
@@ -2156,7 +2160,7 @@ namespace DamageNumbersPro
         {
             float alphaFactor = progress * progress * baseAlpha * baseAlpha;
 
-            if(meshs != null)
+            if (meshs != null)
             {
                 for (int n = 0; n < meshs.Count; n++)
                 {
@@ -2174,7 +2178,7 @@ namespace DamageNumbersPro
                     }
                 }
             }
-            
+
             OnFade(progress);
         }
         #endregion
@@ -2306,7 +2310,8 @@ namespace DamageNumbersPro
             Vector2 mousePosition = Vector3.zero;
 
 #if ENABLE_INPUT_SYSTEM && DNP_NewInputSystem
-            if(Mouse.current != null) {
+            if (Mouse.current != null)
+            {
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(rectParent, Mouse.current.position.ReadValue(), canvasCamera, out mousePosition);
             }
 #else
@@ -2437,7 +2442,7 @@ namespace DamageNumbersPro
         {
             if (myAbsorber != null)
             {
-                if(myAbsorber.myAbsorber != null)
+                if (myAbsorber.myAbsorber != null)
                 {
                     myAbsorber = myAbsorber.myAbsorber;
                 }
@@ -2468,7 +2473,7 @@ namespace DamageNumbersPro
                 baseAlpha = 1f * combinationSettings.alphaCurve.Evaluate(combinationProgress);
                 UpdateAlpha(currentFade);
 
-                if(combinationSettings.instantGain && combinationProgress > 0)
+                if (combinationSettings.instantGain && combinationProgress > 0)
                 {
                     GiveNumber(time);
                 }
@@ -2483,7 +2488,8 @@ namespace DamageNumbersPro
 
         void TryCombination(float time)
         {
-            if (enableCombination == false) return; //No Combination
+            if (enableCombination == false)
+                return; //No Combination
 
             myAbsorber = null;
 
@@ -2709,7 +2715,7 @@ namespace DamageNumbersPro
 
                             otherNumber.remainingOffset += offsetOrigin.normalized * (radius - distance) * collisionSettings.pushFactor;
 
-                            if(!otherNumber.collided)
+                            if (!otherNumber.collided)
                             {
                                 otherNumber.TryCollision(sourcePosition);
                             }
@@ -2750,7 +2756,7 @@ namespace DamageNumbersPro
                     if (otherNumber.enablePush && !otherNumber.pushed)
                     {
                         Vector3 targetPosition = otherNumber.GetTargetPosition();
-                        if (targetPosition.y * pushDirection < heightCap* pushDirection && Vector3.Distance(myTargetPosition, targetPosition) < radius)
+                        if (targetPosition.y * pushDirection < heightCap * pushDirection && Vector3.Distance(myTargetPosition, targetPosition) < radius)
                         {
                             heightCap = targetPosition.y;
                             bestPushTarget = otherNumber;
@@ -2831,9 +2837,9 @@ namespace DamageNumbersPro
             if (enable3DGame && targetCamera != null)
             {
                 //Face Camera:
-                if(faceCameraView)
+                if (faceCameraView)
                 {
-                    if(lookAtCamera)
+                    if (lookAtCamera)
                     {
                         transform.LookAt(transform.position + (transform.position - targetCamera.position));
                     }
@@ -2918,7 +2924,7 @@ namespace DamageNumbersPro
             //First Frame Fix:
             if (firstFrameScale)
             {
-                if(durationFadeIn > 0)
+                if (durationFadeIn > 0)
                 {
                     transform.localScale = Vector3.zero;
                 }
@@ -2986,7 +2992,7 @@ namespace DamageNumbersPro
         /// </summary>
         protected virtual void OnPreSpawn()
         {
-            
+
         }
 
         #endregion
@@ -3029,7 +3035,7 @@ namespace DamageNumbersPro
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if(currentFade > 0)
+            if (currentFade > 0)
             {
                 DestroyDNP();
             }
