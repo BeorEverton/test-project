@@ -58,7 +58,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpgradeFireRate()
     {
-        if (turret.FireRate <= turret.FireRateUpgradeAmount) return;
+        if (turret.FireRate <= turret.FireRateUpgradeAmount)
+            return;
 
         float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
         if (TrySpend(cost))
@@ -71,7 +72,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpgradeCriticalChance()
     {
-        if (turret.CriticalChance >= 100f) return;
+        if (turret.CriticalChance >= 100f)
+            return;
 
         float cost = GetHybridCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel);
         if (TrySpend(cost))
@@ -194,7 +196,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateDamageDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.Damage;
         var bonus = turret.DamageUpgradeAmount;
         var cost = GetHybridCost(turret.DamageUpgradeBaseCost, turret.DamageLevel);
@@ -203,7 +206,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateFireRateDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         float currentDelay = turret.FireRate;
         float bonusSPS = turret.FireRateUpgradeAmount;
         float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
@@ -219,7 +223,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateCriticalChanceDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         float current = turret.CriticalChance;
         float bonus = turret.CriticalChanceUpgradeAmount;
         float cost = GetHybridCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel);
@@ -229,7 +234,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateCriticalDamageMultiplierDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         float current = 1 + turret.CriticalDamageMultiplier; // so it shows 120% instead of 20%
         float bonus = turret.CriticalDamageMultiplierUpgradeAmount;
         float cost = GetHybridCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel);
@@ -238,7 +244,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateExplosionRadiusDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.ExplosionRadius;
         var bonus = turret.ExplosionRadiusUpgradeAmount;
         var cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
@@ -247,7 +254,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateSplashDamageDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.SplashDamage;
         var bonus = turret.SplashDamageUpgradeAmount;
         var cost = GetHybridCost(turret.SplashDamageUpgradeBaseCost, turret.SplashDamageLevel);
@@ -256,7 +264,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePierceCountDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.PierceCount;
         var bonus = turret.PierceCountUpgradeAmount;
         var cost = GetHybridCost(turret.PierceCountUpgradeBaseCost, turret.PierceCountLevel);
@@ -265,7 +274,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePierceDamageFalloffDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.PierceDamageFalloff;
         var bonus = turret.PierceDamageFalloffUpgradeAmount;
         var cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
@@ -274,7 +284,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePelletCountDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.PelletCount;
         var bonus = turret.PelletCountUpgradeAmount;
         var cost = GetHybridCost(turret.PelletCountUpgradeBaseCost, turret.PelletCountLevel);
@@ -283,7 +294,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateDamageFalloffOverDistanceDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
 
         float current = turret.DamageFalloffOverDistance;
         float bonus = turret.DamageFalloffOverDistanceUpgradeAmount;
@@ -301,7 +313,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdatePercentBonusDamagePerSecDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.PercentBonusDamagePerSec;
         var bonus = turret.PercentBonusDamagePerSecUpgradeAmount;
         var cost = GetHybridCost(turret.PercentBonusDamagePerSecUpgradeBaseCost, turret.PercentBonusDamagePerSecLevel);
@@ -310,7 +323,8 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpdateSlowEffectDisplay()
     {
-        if (turret == null) return;
+        if (turret == null)
+            return;
         var current = turret.SlowEffect;
         var bonus = turret.SlowEffectUpgradeAmount;
         var cost = GetHybridCost(turret.SlowEffectUpgradeBaseCost, turret.SlowEffectLevel);

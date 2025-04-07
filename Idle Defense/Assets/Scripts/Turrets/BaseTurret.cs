@@ -15,7 +15,7 @@ namespace Assets.Scripts.Turrets
     {
         [SerializeField] protected TurretInfoSO _turretInfo;
         [SerializeField] private TurretInfoSO _turretInfoBase;
-        private TurretStatsInstance _stats;
+        protected TurretStatsInstance _stats;
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] private List<Sprite> _mussleFlashSprites;

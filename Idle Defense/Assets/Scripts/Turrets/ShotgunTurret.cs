@@ -140,7 +140,7 @@ namespace Assets.Scripts.Turrets
 
         private float GetDamageFalloff(float distance)
         {
-            float damageFalloff = _damage * distance * _turretInfo.DamageFalloffOverDistance / 100;
+            float damageFalloff = _damage * distance * _stats.DamageFalloffOverDistance / 100;
             float maxDamageFalloff = _damage * 0.9f; // maximum damage falloff set to 90%
 
             return damageFalloff < maxDamageFalloff ? damageFalloff : maxDamageFalloff;
