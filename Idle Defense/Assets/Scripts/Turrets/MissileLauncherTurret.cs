@@ -17,7 +17,7 @@ namespace Assets.Scripts.Turrets
         {
             base.Shoot();
 
-            if (_timeSinceLastShot < _turretInfo.FireRate)
+            if (_timeSinceLastShot < _stats.FireRate)
                 return;
 
             if (_targetEnemy == null)
@@ -27,7 +27,7 @@ namespace Assets.Scripts.Turrets
             if (enemy == null)
                 return;
 
-            float timeToImpact = _turretInfo.FireRate / _bonusSpdMultiplier;
+            float timeToImpact = _stats.FireRate / _bonusSpdMultiplier;
 
             // Predict position based on speed, impact delay, and enemy attack range
             Vector3 enemyStartPos = _targetEnemy.transform.position;
@@ -64,8 +64,8 @@ namespace Assets.Scripts.Turrets
 
         private void CreateExplosion(Vector3 target)
         {
-            List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(_turretInfo.ExplosionRadius));
-            float impactArea = _turretInfo.ExplosionRadius / 3;
+            List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(_stats.ExplosionRadius));
+            float impactArea = _stats.ExplosionRadius / 3;
 
             foreach (Enemy enemy in enemiesInAdjecentGrids
                          .Where(enemy => Vector3.Distance(enemy.transform.position, target) <= impactArea))
@@ -75,19 +75,22 @@ namespace Assets.Scripts.Turrets
 
             foreach (Enemy enemy in enemiesInAdjecentGrids
                          .Where(enemy => Vector3.Distance(enemy.transform.position, target) > impactArea &&
-                             Vector3.Distance(enemy.transform.position, target) <= _turretInfo.ExplosionRadius))
+                             Vector3.Distance(enemy.transform.position, target) <= _stats.ExplosionRadius))
             {
-                enemy.TakeDamage(_turretInfo.SplashDamage * _bonusDmgMultiplier);
+                enemy.TakeDamage(_stats.SplashDamage * _bonusDmgMultiplier);
             }
         }
 
         protected override void OnDrawGizmosSelected()
         {
             base.OnDrawGizmosSelected();
+            if (_targetEnemy == null)
+                return;
+
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(_targetEnemy != null ? _targetEnemy.transform.position : transform.position, _turretInfo.ExplosionRadius);
+            Gizmos.DrawWireSphere(_targetEnemy.transform.position, _stats.ExplosionRadius);
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(_targetEnemy != null ? _targetEnemy.transform.position : transform.position, _turretInfo.ExplosionRadius / 3);
+            Gizmos.DrawWireSphere(_targetEnemy.transform.position, _stats.ExplosionRadius / 3);
         }
     }
 }

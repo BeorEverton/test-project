@@ -15,9 +15,11 @@ namespace Assets.Scripts.Turrets
 
         [SerializeField] private LineRenderer _laserLine;
 
-        private void Awake()
+        protected override void OnEnable()
         {
-            _bonusDmgPerSec = 1f + _turretInfo.PercentBonusDamagePerSec / 100f;
+            base.OnEnable();
+
+            _bonusDmgPerSec = 1f + _stats.PercentBonusDamagePerSec / 100f;
         }
 
         protected override void Update()
@@ -64,7 +66,7 @@ namespace Assets.Scripts.Turrets
             enemy.TakeDamage(_damage + _rampedDamageBonus);
 
             if (!enemy.IsSlowed)
-                enemy.ReduceMovementSpeed(_turretInfo.SlowEffect);
+                enemy.ReduceMovementSpeed(_stats.SlowEffect);
 
             _isShooting = true;
 
@@ -82,7 +84,7 @@ namespace Assets.Scripts.Turrets
             }
 
             _timeOnSameTarget += Time.deltaTime;
-            _rampedDamageBonus = _turretInfo.Damage * _bonusDmgPerSec * _timeOnSameTarget;
+            _rampedDamageBonus = _stats.Damage * _bonusDmgPerSec * _timeOnSameTarget;
         }
     }
 }

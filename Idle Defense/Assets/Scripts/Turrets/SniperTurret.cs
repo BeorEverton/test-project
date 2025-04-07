@@ -33,7 +33,7 @@ namespace Assets.Scripts.Turrets
 
             int enemiesHit = 0;
 
-            float pierceDamageFalloff = 1f - _turretInfo.PierceDamageFalloff / 100f;
+            float pierceDamageFalloff = 1f - _stats.PierceDamageFalloff / 100f;
             float currentDamage = _damage;
 
             pathCells = GridRaycaster.GetCellsAlongLine(
@@ -56,7 +56,7 @@ namespace Assets.Scripts.Turrets
                     _targetEnemy.transform.position   //Second point on the line (target enemy's position).
                 );
 
-                if (enemiesHit > _turretInfo.PierceCount)
+                if (enemiesHit > _stats.PierceCount)
                     break;
 
                 if (distance > _bulletWidth)

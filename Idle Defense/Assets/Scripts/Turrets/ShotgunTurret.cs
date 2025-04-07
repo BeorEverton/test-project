@@ -29,7 +29,7 @@ namespace Assets.Scripts.Turrets
 
         private void Start()
         {
-            _pelletCount = _turretInfo.PelletCount;
+            _pelletCount = _stats.PelletCount;
             _recoil = GetComponent<Recoil>();
         }
 
