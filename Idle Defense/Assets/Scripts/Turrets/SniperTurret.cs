@@ -28,48 +28,56 @@ namespace Assets.Scripts.Turrets
         protected override void Shoot()
         {
             base.Shoot();
+            _timeSinceLastShot = 0f;
 
             recoil.AddRecoil();
 
-            int enemiesHit = 0;
+            float pierceChance = _stats.PierceChance;
+            float pierceDamageMultiplier = 1f - (_stats.PierceDamageFalloff / 100f);
 
-            float pierceDamageFalloff = 1f - _stats.PierceDamageFalloff / 100f;
             float currentDamage = _damage;
+            bool firstHit = true;
+            bool stop = false;
 
             pathCells = GridRaycaster.GetCellsAlongLine(
                 transform.position,
                 _targetEnemy.transform.position
             );
 
-            List<Enemy> enemiesInPath = pathCells
-                .SelectMany(cell => GridManager.Instance.GetEnemiesInGrid(cell))
-                .ToList();
+            HashSet<Enemy> hitEnemies = new();
 
-            foreach (Enemy enemy in enemiesInPath)
+            foreach (Vector2Int cell in pathCells)
             {
-                if (enemy == null || _targetEnemy == null)
-                    continue;
+                if (stop) break;
 
-                float distance = DistanceFromBulletLine(
-                    enemy.transform.position,         //The point we measure the distance from.
-                    transform.position,               //First point on the line (turret position).
-                    _targetEnemy.transform.position   //Second point on the line (target enemy's position).
-                );
+                var enemies = GridManager.Instance.GetEnemiesInGrid(cell);
+                if (enemies == null) continue;
 
-                if (enemiesHit > _stats.PierceCount)
-                    break;
+                foreach (Enemy enemy in enemies)
+                {
+                    if (enemy == null || hitEnemies.Contains(enemy))
+                        continue;
 
-                if (distance > _bulletWidth)
-                    continue;
+                    // First hit always succeeds
+                    if (!firstHit)
+                    {
+                        float roll = Random.Range(0f, 100f);
+                        if (roll > pierceChance)
+                        {
+                            stop = true;
+                            break;
+                        }
+                    }
 
-                enemy.TakeDamage(currentDamage);
-
-                enemiesHit++;
-                currentDamage *= pierceDamageFalloff;
+                    enemy.TakeDamage(currentDamage);
+                    currentDamage *= pierceDamageMultiplier;
+                    hitEnemies.Add(enemy);
+                    firstHit = false;
+                }
             }
-
-            _timeSinceLastShot = 0f;
         }
+
+
 
         public float DistanceFromBulletLine(Vector2 target, Vector2 turretPos, Vector2 enemyPos)
         {

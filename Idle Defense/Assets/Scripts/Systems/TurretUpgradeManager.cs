@@ -117,23 +117,27 @@ public class TurretUpgradeManager : MonoBehaviour
         }
     }
 
-    public void UpgradePierceCount()
+    public void UpgradePierceChance()
     {
-        float cost = GetHybridCost(turret.PierceCountUpgradeBaseCost, turret.PierceCountLevel);
+        if (turret.PierceChance >= 100f)
+            return;
+
+        float cost = GetHybridCost(turret.PierceChanceUpgradeBaseCost, turret.PierceChanceLevel);
         if (TrySpend(cost))
         {
-            turret.PierceCount += turret.PierceCountUpgradeAmount;
-            turret.PierceCountLevel += 1;
-            UpdatePierceCountDisplay();
+            turret.PierceChance = Mathf.Min(100f, turret.PierceChance + turret.PierceChanceUpgradeAmount);
+            turret.PierceChanceLevel += 1;
+            UpdatePierceChanceDisplay();
         }
     }
+
 
     public void UpgradePierceDamageFalloff()
     {
         float cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
         if (TrySpend(cost))
         {
-            turret.PierceDamageFalloff += turret.PierceDamageFalloffUpgradeAmount;
+            turret.PierceDamageFalloff -= turret.PierceDamageFalloffUpgradeAmount;
             turret.PierceDamageFalloffLevel += 1f;
             UpdatePierceDamageFalloffDisplay();
         }
@@ -262,25 +266,40 @@ public class TurretUpgradeManager : MonoBehaviour
         turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
     }
 
-    public void UpdatePierceCountDisplay()
+    public void UpdatePierceChanceDisplay()
     {
         if (turret == null)
             return;
-        var current = turret.PierceCount;
-        var bonus = turret.PierceCountUpgradeAmount;
-        var cost = GetHybridCost(turret.PierceCountUpgradeBaseCost, turret.PierceCountLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+
+        var current = turret.PierceChance;
+        var bonus = turret.PierceChanceUpgradeAmount;
+        var cost = GetHybridCost(turret.PierceChanceUpgradeBaseCost, turret.PierceChanceLevel);
+
+        string currentText = $"{current:F1}%";
+        string bonusText = current >= 100f ? "Max" : $"+{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
+
+        turretUpgradeButton.UpdateStats(currentText, bonusText);
     }
+
 
     public void UpdatePierceDamageFalloffDisplay()
     {
         if (turret == null)
             return;
-        var current = turret.PierceDamageFalloff;
-        var bonus = turret.PierceDamageFalloffUpgradeAmount;
-        var cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+
+        float falloff = turret.PierceDamageFalloff;
+        float retained = 100f - falloff; // falloff could be negative = >100% retained
+
+        float bonus = turret.PierceDamageFalloffUpgradeAmount;
+        float cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
+
+        string currentText = $"{retained:F1}%"; // Always show retained damage
+        string bonusText = $"+{bonus:F1}%";
+        string costText = $"${UIManager.AbbreviateNumber(cost)}";
+
+        turretUpgradeButton.UpdateStats(currentText, $"{bonusText} {costText}");
     }
+
 
     public void UpdatePelletCountDisplay()
     {
@@ -341,7 +360,7 @@ public enum TurretUpgradeType
     CriticalDamageMultiplier,
     ExplosionRadius,
     SplashDamage,
-    PierceCount,
+    PierceChance,
     PierceDamageFalloff,
     PelletCount,
     DamageFalloffOverDistance,

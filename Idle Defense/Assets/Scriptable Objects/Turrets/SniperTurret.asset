@@ -12,17 +12,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6153e066477abf4990f9076288a6088, type: 3}
   m_Name: SniperTurret
   m_EditorClassIdentifier: 
-  Damage: 50
+  Damage: 100
+  DamageLevel: 0
+  DamageUpgradeAmount: 10
+  DamageUpgradeBaseCost: 2000
   FireRate: 4
+  FireRateLevel: 0
+  FireRateUpgradeAmount: 0.01
+  FireRateUpgradeBaseCost: 3000
   RotationSpeed: 8
   AngleThreshold: 1
   CriticalChance: 0
+  CriticalChanceLevel: 0
+  CriticalChanceUpgradeAmount: 0
+  CriticalChanceUpgradeBaseCost: 0
   CriticalDamageMultiplier: 0
+  CriticalDamageMultiplierLevel: 0
+  CriticalDamageMultiplierUpgradeAmount: 0
+  CriticalDamageMultiplierUpgradeBaseCost: 0
   ExplosionRadius: 0
+  ExplosionRadiusLevel: 0
+  ExplosionRadiusUpgradeAmount: 0
+  ExplosionRadiusUpgradeBaseCost: 0
   SplashDamage: 0
-  PierceCount: 3
-  PierceDamageFalloff: 40
+  SplashDamageLevel: 0
+  SplashDamageUpgradeAmount: 0
+  SplashDamageUpgradeBaseCost: 0
+  PierceChance: 1
+  PierceChanceLevel: 0
+  PierceChanceUpgradeAmount: 10
+  PierceChanceUpgradeBaseCost: 5000
+  PierceDamageFalloff: 95
+  PierceDamageFalloffLevel: 0
+  PierceDamageFalloffUpgradeAmount: 5
+  PierceDamageFalloffUpgradeBaseCost: 6000
   PelletCount: 0
+  PelletCountLevel: 0
+  PelletCountUpgradeAmount: 0
+  PelletCountUpgradeBaseCost: 0
   DamageFalloffOverDistance: 0
-  ProcentBonusDamagePerSec: 0
+  DamageFalloffOverDistanceLevel: 0
+  DamageFalloffOverDistanceUpgradeAmount: 0
+  DamageFalloffOverDistanceUpgradeBaseCost: 0
+  PercentBonusDamagePerSec: 0
+  PercentBonusDamagePerSecLevel: 0
+  PercentBonusDamagePerSecUpgradeAmount: 0
+  PercentBonusDamagePerSecUpgradeBaseCost: 0
   SlowEffect: 0
+  SlowEffectLevel: 0
+  SlowEffectUpgradeAmount: 0
+  SlowEffectUpgradeBaseCost: 0

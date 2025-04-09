@@ -247,7 +247,7 @@ namespace Assets.Scripts.Turrets
 
             return numerator / denominator;
         }
-#if UNITY_EDITOR
+
         protected override void OnDrawGizmosSelected()
         {
             base.OnDrawGizmosSelected();
@@ -277,5 +277,5 @@ namespace Assets.Scripts.Turrets
 
         }
     }
-#endif
+
 }

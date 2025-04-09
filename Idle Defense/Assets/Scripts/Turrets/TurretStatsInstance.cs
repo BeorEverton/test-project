@@ -39,10 +39,10 @@ namespace Assets.Scripts.Turrets
         public float SplashDamageUpgradeAmount;
         public float SplashDamageUpgradeBaseCost;
 
-        public int PierceCount;
-        public int PierceCountLevel;
-        public int PierceCountUpgradeAmount;
-        public float PierceCountUpgradeBaseCost;
+        public float PierceChance;
+        public int PierceChanceLevel;
+        public float PierceChanceUpgradeAmount;
+        public float PierceChanceUpgradeBaseCost;
 
         public float PierceDamageFalloff;
         public float PierceDamageFalloffLevel;
@@ -104,10 +104,10 @@ namespace Assets.Scripts.Turrets
             SplashDamageUpgradeAmount = source.SplashDamageUpgradeAmount;
             SplashDamageUpgradeBaseCost = source.SplashDamageUpgradeBaseCost;
 
-            PierceCount = source.PierceCount;
-            PierceCountLevel = source.PierceCountLevel;
-            PierceCountUpgradeAmount = source.PierceCountUpgradeAmount;
-            PierceCountUpgradeBaseCost = source.PierceCountUpgradeBaseCost;
+            PierceChance = source.PierceChance;
+            PierceChanceLevel = source.PierceChanceLevel;
+            PierceChanceUpgradeAmount = source.PierceChanceUpgradeAmount;
+            PierceChanceUpgradeBaseCost = source.PierceChanceUpgradeBaseCost;
 
             PierceDamageFalloff = source.PierceDamageFalloff;
             PierceDamageFalloffLevel = source.PierceDamageFalloffLevel;
@@ -148,7 +148,7 @@ namespace Assets.Scripts.Turrets
                 nameof(CriticalDamageMultiplierLevel) => (int)(CriticalDamageMultiplierLevel * CriticalDamageMultiplierUpgradeBaseCost),
                 nameof(ExplosionRadiusLevel) => (int)(ExplosionRadiusLevel * ExplosionRadiusUpgradeBaseCost),
                 nameof(SplashDamageLevel) => (int)(SplashDamageLevel * SplashDamageUpgradeBaseCost),
-                nameof(PierceCountLevel) => (int)(PierceCountLevel * PierceCountUpgradeBaseCost),
+                nameof(PierceChanceLevel) => (int)(PierceChanceLevel * PierceChanceUpgradeBaseCost),
                 nameof(PierceDamageFalloffLevel) => (int)(PierceDamageFalloffLevel * PierceDamageFalloffUpgradeBaseCost),
                 nameof(PelletCountLevel) => (int)(PelletCountLevel * PelletCountUpgradeBaseCost),
                 nameof(DamageFalloffOverDistanceLevel) => (int)(DamageFalloffOverDistanceLevel * DamageFalloffOverDistanceUpgradeBaseCost),

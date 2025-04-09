@@ -67,7 +67,7 @@ public class TurretUpgradeButton : MonoBehaviour
             case TurretUpgradeType.CriticalDamageMultiplier: upgradeManager.UpdateCriticalDamageMultiplierDisplay(); break;
             case TurretUpgradeType.ExplosionRadius: upgradeManager.UpdateExplosionRadiusDisplay(); break;
             case TurretUpgradeType.SplashDamage: upgradeManager.UpdateSplashDamageDisplay(); break;
-            case TurretUpgradeType.PierceCount: upgradeManager.UpdatePierceCountDisplay(); break;
+            case TurretUpgradeType.PierceChance: upgradeManager.UpdatePierceChanceDisplay(); break;
             case TurretUpgradeType.PierceDamageFalloff: upgradeManager.UpdatePierceDamageFalloffDisplay(); break;
             case TurretUpgradeType.PelletCount: upgradeManager.UpdatePelletCountDisplay(); break;
             case TurretUpgradeType.DamageFalloffOverDistance: upgradeManager.UpdateDamageFalloffOverDistanceDisplay(); break;

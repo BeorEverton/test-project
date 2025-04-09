@@ -1,5 +1,3 @@
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 
 namespace Assets.Scripts.SO
@@ -54,10 +52,10 @@ namespace Assets.Scripts.SO
 
         [Header("Sniper Turret")]
         [Tooltip("Amount of enemies a bullet can pierce through")]
-        public int PierceCount;
-        public int PierceCountLevel;
-        public int PierceCountUpgradeAmount;
-        public float PierceCountUpgradeBaseCost;
+        public float PierceChance;
+        public int PierceChanceLevel;
+        public float PierceChanceUpgradeAmount;
+        public float PierceChanceUpgradeBaseCost;
 
         [Tooltip("Amount of damage falloff for each enemy the bullet pierces through")]
         public float PierceDamageFalloff;
