@@ -17,7 +17,7 @@ namespace Assets.Scripts.Turrets
 
         private float _cellSize = 1f;
         private float _pelletWidth = 0.5f;
-        private int _pelletCount;
+        //private int _pelletCount;
 
         private Recoil _recoil;
 
@@ -29,7 +29,7 @@ namespace Assets.Scripts.Turrets
 
         private void Start()
         {
-            _pelletCount = _stats.PelletCount;
+            _stats.PelletCount = _stats.PelletCount;
             _recoil = GetComponent<Recoil>();
         }
 
@@ -45,7 +45,7 @@ namespace Assets.Scripts.Turrets
 
             Vector2 baseDir = ((_targetEnemy.transform.position - transform.position)).normalized;
 
-            if (_pelletCount % 2 == 1)
+            if ( _stats.PelletCount % 2 == 1)
             {
                 FireWithUnevenPelletCount(baseDir);
             }
@@ -55,7 +55,7 @@ namespace Assets.Scripts.Turrets
                 FireWithEvenPelletCount(baseDir);
             }
 
-            foreach (Vector2 targetPos in _pelletTargetPositions)
+            /*foreach (Vector2 targetPos in _pelletTargetPositions)
             {
                 List<Enemy> enemiesInPath = GetEnemiesInPathToTarget(targetPos);
                 SortListByDistance(enemiesInPath);
@@ -72,17 +72,95 @@ namespace Assets.Scripts.Turrets
                         break; // Only hit the first enemy in the path
                     }
                 }
+            }*/
+
+            Enemy[] enemyBuffer = new Enemy[64]; // Reuse a fixed array buffer
+            int enemyCount = 0;
+
+            float[] enemyDistances = new float[64];
+            int[] sortedIndices = new int[64];
+            int sortedCount = 0;
+
+            // Collect enemies once from all pellets
+            foreach (Vector2 targetPos in _pelletTargetPositions)
+            {
+                var path = _cellsInPathToTarget[targetPos];
+                foreach (var cell in path)
+                {
+                    var enemies = GridManager.Instance.GetEnemiesInGrid(cell);
+                    foreach (var enemy in enemies)
+                    {
+                        if (enemy == null) continue;
+
+                        // Avoid duplicates using manual check
+                        bool alreadyAdded = false;
+                        for (int i = 0; i < enemyCount; i++)
+                        {
+                            if (enemyBuffer[i] == enemy)
+                            {
+                                alreadyAdded = true;
+                                break;
+                            }
+                        }
+                        if (alreadyAdded) continue;
+
+                        float distance = DistanceFromLine(enemy.transform.position, transform.position, targetPos);
+                        if (distance <= _pelletWidth)
+                        {
+                            float distToEnemy = Vector2.Distance(transform.position, enemy.transform.position);
+
+                            enemyBuffer[enemyCount] = enemy;
+                            enemyDistances[enemyCount] = distToEnemy;
+                            sortedIndices[sortedCount++] = enemyCount;
+
+                            enemyCount++;
+                            if (enemyCount >= enemyBuffer.Length) break;
+                        }
+                    }
+                }
             }
+
+            // Sort indices by distance (Insertion Sort for small arrays)
+            for (int i = 1; i < sortedCount; i++)
+            {
+                int key = sortedIndices[i];
+                int j = i - 1;
+
+                while (j >= 0 && enemyDistances[sortedIndices[j]] > enemyDistances[key])
+                {
+                    sortedIndices[j + 1] = sortedIndices[j];
+                    j--;
+                }
+                sortedIndices[j + 1] = key;
+            }
+
+            // Distribute pellets
+            int pelletsRemaining = _stats.PelletCount;
+            int index = 0;
+
+            while (pelletsRemaining > 0 && sortedCount > 0)
+            {
+                Enemy enemy = enemyBuffer[sortedIndices[index]];
+                float distToEnemy = enemyDistances[sortedIndices[index]];
+                float damage = _damage - GetDamageFalloff(distToEnemy);
+
+                enemy.TakeDamage(damage);
+                pelletsRemaining--;
+
+                index = (index + 1) % sortedCount;
+            }
+
+
 
             _timeSinceLastShot = 0f;
         }
 
         private void FireWithUnevenPelletCount(Vector2 baseDir)
         {
-            for (int i = 0; i < _pelletCount; i++)
+            for (int i = 0; i < _stats.PelletCount; i++)
             {
-                float angleOffset = _pelletCount > 1
-                    ? Mathf.Lerp(-spreadAngle / 2f, spreadAngle / 2f, (float)i / (_pelletCount - 1))
+                float angleOffset = _stats.PelletCount > 1
+                    ? Mathf.Lerp(-spreadAngle / 2f, spreadAngle / 2f, (float)i / (_stats.PelletCount - 1))
                     : 0f;
 
                 FirePellet(baseDir, angleOffset);
@@ -91,7 +169,7 @@ namespace Assets.Scripts.Turrets
 
         private void FireWithEvenPelletCount(Vector2 baseDir)
         {
-            int pelletsRemaining = _pelletCount - 1;
+            int pelletsRemaining = _stats.PelletCount - 1;
             int leftPellets = pelletsRemaining / 2;
             int rightPellets = pelletsRemaining - leftPellets;
 
@@ -140,11 +218,18 @@ namespace Assets.Scripts.Turrets
 
         private float GetDamageFalloff(float distance)
         {
-            float damageFalloff = _damage * distance * _stats.DamageFalloffOverDistance / 100;
-            float maxDamageFalloff = _damage * 0.9f; // maximum damage falloff set to 90%
+            float minFalloffDistance = 3f;
+            float maxDamageFalloff = _damage * 0.9f; // cap at 90% reduction
 
-            return damageFalloff < maxDamageFalloff ? damageFalloff : maxDamageFalloff;
+            if (distance <= minFalloffDistance)
+                return 0f;
+
+            float effectiveDistance = distance - minFalloffDistance;
+            float damageFalloff = _damage * effectiveDistance * _stats.DamageFalloffOverDistance / 100f;
+
+            return Mathf.Min(damageFalloff, maxDamageFalloff);
         }
+
 
         private Vector2 RotateVector2(Vector2 v, float degrees)
         {
@@ -162,7 +247,7 @@ namespace Assets.Scripts.Turrets
 
             return numerator / denominator;
         }
-
+#if UNITY_EDITOR
         protected override void OnDrawGizmosSelected()
         {
             base.OnDrawGizmosSelected();
@@ -174,6 +259,23 @@ namespace Assets.Scripts.Turrets
             {
                 Gizmos.DrawWireCube(center, Vector3.one * _cellSize * 0.9f);
             }
+
+            // Draw damage falloff zones
+            Vector3 turretPosition = transform.position;
+
+            // Red Circle at 3 units - close range (no falloff)
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(turretPosition, 3f);
+
+            // Yellow Circle at 6 units - mid range (some falloff)
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(turretPosition, 6f);
+
+            // White Circle at 11 units - max range (near max falloff)
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(turretPosition, 11f);
+
         }
     }
+#endif
 }

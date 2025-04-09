@@ -12,6 +12,7 @@ namespace Assets.Scripts.Systems
         public static GameManager Instance { get; private set; }
         public PlayerInput Input { get; private set; }
 
+        // Haven't comented this one, because it might be helpful in the future.
         public float dmgBonus { get; private set; }
         public float spdBonus { get; private set; }
 
@@ -41,9 +42,10 @@ namespace Assets.Scripts.Systems
 
         private void Start()
         {
-            EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
+            // Previous system that increases damage on wave completion
+            //EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
+            //PlayerBaseManager.Instance.OnWaveFailed += OnWaveFailed;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
-            PlayerBaseManager.Instance.OnWaveFailed += OnWaveFailed;
         }
 
         private void OnDestroy()
@@ -97,7 +99,8 @@ namespace Assets.Scripts.Systems
         {
             AddMoney(e.CoinDropAmount);
         }
-        private void OnWaveCompleted(object sender, EventArgs e)
+
+        /*private void OnWaveCompleted(object sender, EventArgs e)
         {
             dmgBonus++;
             UIManager.Instance.UpdateDmgBonus(dmgBonus);
@@ -106,7 +109,7 @@ namespace Assets.Scripts.Systems
         private void OnWaveFailed(object sender, EventArgs e)
         {
             dmgBonus = 0;
-        }
+        }*/
 
         public void AddMoney(ulong amount)
         {

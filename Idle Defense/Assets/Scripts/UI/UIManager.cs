@@ -42,7 +42,7 @@ namespace Assets.Scripts.UI
 
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
         {
-            wave.text = $"Next Wave\n{args.WaveNumber + 1}";
+            wave.text = $"Wave\n{args.WaveNumber}";
         }
 
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
@@ -72,7 +72,7 @@ namespace Assets.Scripts.UI
             else
                 waveOnHold = Mathf.Max(1, waveOnHold - 1);
 
-            wave.text = $"Next Wave\n{waveOnHold}";
+            wave.text = $"Wave\n{waveOnHold}";
         }
 
         public void IncreaseWave()
@@ -136,6 +136,8 @@ namespace Assets.Scripts.UI
         {
             money.SetText(AbbreviateNumber(value));
         }
+
+
 
         public static string AbbreviateNumber(double number, bool showPercent = false)
         {

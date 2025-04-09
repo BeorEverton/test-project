@@ -7,7 +7,7 @@ namespace Assets.Scripts.Systems
     public class PlayerBaseManager : MonoBehaviour
     {
         public static PlayerBaseManager Instance { get; private set; }
-        public event EventHandler OnWaveFailed; // TO-DO, Used to reset the damage bonus
+        public event EventHandler OnWaveFailed; // TO-DO, Used to roll back 10 waves
 
         [SerializeField] private PlayerBaseSO _info;
 
