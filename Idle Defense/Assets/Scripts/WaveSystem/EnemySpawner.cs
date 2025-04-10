@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
@@ -159,6 +160,14 @@ namespace Assets.Scripts.WaveSystem
             }
 
             StartWave(_currentWave);
+        }
+        private void Update()
+        {
+            foreach (GameObject enemy in EnemiesAlive)
+            {
+                Debug.Log($"Enemy at world={enemy.transform.position} => grid={GridManager.Instance.GetGridPosition(enemy.transform.position)}");
+            }            
+
         }
     }
 }

@@ -10,7 +10,6 @@ namespace Assets.Scripts.Turrets
     {
         public List<Vector2Int> pathCells = new();
         private float _cellSize = 1f;
-        private float _bulletWidth = 0.5f;
 
         private Recoil recoil;
 
@@ -32,50 +31,82 @@ namespace Assets.Scripts.Turrets
 
             recoil.AddRecoil();
 
-            float pierceChance = _stats.PierceChance;
-            float pierceDamageMultiplier = 1f - (_stats.PierceDamageFalloff / 100f);
 
+            float pierceDamageMultiplier = 1f - (_stats.PierceDamageFalloff / 100f);
             float currentDamage = _damage;
             bool firstHit = true;
             bool stop = false;
 
+            Vector2 startPos = _muzzleFlashPosition.position;
+            Vector2 dir = (_targetEnemy.transform.position - (Vector3)startPos).normalized;
+
+            // Extend the line: e.g. 20 more units, or your entire screen height
+            float extraDistance = 20f;
+            float distanceToTarget = Vector2.Distance(startPos, _targetEnemy.transform.position);
+            Vector2 extendedPos = startPos + dir * (distanceToTarget + extraDistance);
+
             pathCells = GridRaycaster.GetCellsAlongLine(
-                transform.position,
-                _targetEnemy.transform.position
+                startPos,
+                extendedPos,
+                maxSteps: 100 // or however many steps you need
             );
 
             HashSet<Enemy> hitEnemies = new();
 
             foreach (Vector2Int cell in pathCells)
             {
-                if (stop) break;
-
-                var enemies = GridManager.Instance.GetEnemiesInGrid(cell);
-                if (enemies == null) continue;
-
-                foreach (Enemy enemy in enemies)
+                if (stop)
                 {
-                    if (enemy == null || hitEnemies.Contains(enemy))
+                    break;
+                }
+
+                var enemiesInCell = GridManager.Instance.GetEnemiesInGrid(cell);
+                // Make a copy to not modify the original list
+                var enemiesInCellCopy = new List<Enemy>(GridManager.Instance.GetEnemiesInGrid(cell));
+
+                // Log each cell & number of enemies
+                if (enemiesInCellCopy == null || enemiesInCellCopy.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (Enemy enemy in enemiesInCellCopy)
+                {
+                    if (enemy == null)
+                    {
                         continue;
+                    }
+
+                    if (hitEnemies.Contains(enemy))
+                    {
+                        continue;
+                    }
 
                     // First hit always succeeds
                     if (!firstHit)
                     {
                         float roll = Random.Range(0f, 100f);
-                        if (roll > pierceChance)
+                        if (roll > _stats.PierceChance)
                         {
                             stop = true;
                             break;
                         }
                     }
 
+                    // Deal damage
                     enemy.TakeDamage(currentDamage);
+
+                    // Damage falloff
                     currentDamage *= pierceDamageMultiplier;
+
+                    // Mark that we’ve now hit at least once
                     hitEnemies.Add(enemy);
                     firstHit = false;
                 }
             }
+
         }
+
 
 
 
