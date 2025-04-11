@@ -17,7 +17,6 @@ namespace Assets.Scripts.Turrets
 
         private float _cellSize = 1f;
         private float _pelletWidth = 0.5f;
-        //private int _pelletCount;
 
         private Recoil _recoil;
 
@@ -29,7 +28,6 @@ namespace Assets.Scripts.Turrets
 
         private void Start()
         {
-            _stats.PelletCount = _stats.PelletCount;
             _recoil = GetComponent<Recoil>();
         }
 
@@ -45,7 +43,7 @@ namespace Assets.Scripts.Turrets
 
             Vector2 baseDir = ((_targetEnemy.transform.position - transform.position)).normalized;
 
-            if ( _stats.PelletCount % 2 == 1)
+            if (_stats.PelletCount % 2 == 1)
             {
                 FireWithUnevenPelletCount(baseDir);
             }
@@ -90,7 +88,8 @@ namespace Assets.Scripts.Turrets
                     var enemies = GridManager.Instance.GetEnemiesInGrid(cell);
                     foreach (var enemy in enemies)
                     {
-                        if (enemy == null) continue;
+                        if (enemy == null)
+                            continue;
 
                         // Avoid duplicates using manual check
                         bool alreadyAdded = false;
@@ -102,7 +101,8 @@ namespace Assets.Scripts.Turrets
                                 break;
                             }
                         }
-                        if (alreadyAdded) continue;
+                        if (alreadyAdded)
+                            continue;
 
                         float distance = DistanceFromLine(enemy.transform.position, transform.position, targetPos);
                         if (distance <= _pelletWidth)
@@ -114,7 +114,8 @@ namespace Assets.Scripts.Turrets
                             sortedIndices[sortedCount++] = enemyCount;
 
                             enemyCount++;
-                            if (enemyCount >= enemyBuffer.Length) break;
+                            if (enemyCount >= enemyBuffer.Length)
+                                break;
                         }
                     }
                 }

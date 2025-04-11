@@ -40,6 +40,7 @@ namespace Assets.Scripts.WaveSystem
         private WaveConfigSO _currentWave;
 
         private bool _waveSpawned;
+        private bool _canSpawnEnemies;
 
         private void Awake()
         {
@@ -61,10 +62,10 @@ namespace Assets.Scripts.WaveSystem
             _currentWave = wave;
             _waveSpawned = false;
             OnWaveStarted?.Invoke(this, EventArgs.Empty);
-            Debug.Log($"EnemySpawner started the wave");
 
             CreateWave();
             Shuffle.ShuffleList(_enemiesCurrentWave);
+            _canSpawnEnemies = true;
             StartCoroutine(SpawnEnemies());
         }
 
@@ -102,6 +103,9 @@ namespace Assets.Scripts.WaveSystem
         {
             foreach (GameObject enemy in _enemiesCurrentWave)
             {
+                if (!_canSpawnEnemies)
+                    break;
+
                 enemy.SetActive(true);
                 enemy.GetComponent<Enemy>().OnDeath += Enemy_OnEnemyDeath;
                 EnemiesAlive.Add(enemy);
@@ -143,12 +147,16 @@ namespace Assets.Scripts.WaveSystem
 
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
-            RestartWave();
+            StartCoroutine(RestartWave());
         }
 
-        private void RestartWave()
+        private IEnumerator RestartWave()
         {
+            _canSpawnEnemies = false;
             StopCoroutine(SpawnEnemies());
+
+            yield return new WaitForSeconds(.5f); //Wait to secure all managers are done with EnemiesAlive list
+
             foreach (GameObject enemy in EnemiesAlive.ToList())
             {
                 if (enemy == null)
@@ -160,14 +168,6 @@ namespace Assets.Scripts.WaveSystem
             }
 
             StartWave(_currentWave);
-        }
-        private void Update()
-        {
-            foreach (GameObject enemy in EnemiesAlive)
-            {
-                Debug.Log($"Enemy at world={enemy.transform.position} => grid={GridManager.Instance.GetGridPosition(enemy.transform.position)}");
-            }            
-
         }
     }
 }

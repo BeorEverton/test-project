@@ -15,7 +15,6 @@ namespace Assets.Scripts.WaveSystem
             EnemySpawner.Instance.OnWaveStarted += OnWaveStarted;
             EnemySpawner.Instance.OnWaveCompleted += OnWaveStopped;
             PlayerBaseManager.Instance.OnWaveFailed += OnWaveStopped;
-            Debug.Log($"EnemyManager is listening for waveStart");
         }
 
         private void OnDisable()
