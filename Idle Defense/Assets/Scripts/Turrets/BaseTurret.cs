@@ -31,6 +31,19 @@ namespace Assets.Scripts.Turrets
         private bool _targetInAim;
         private float aimSize = .3f;
 
+        // Control the attack range based on the screen size
+        private float _screenLeft;
+        private float _screenRight;
+        private float _screenTop;
+        private float _screenBottom;
+
+        private int _lastScreenWidth;
+        private int _lastScreenHeight;
+
+        // How far from the top the enemy needs to be for the turrets to shoot
+        private const float _topSpawnMargin = 0.5f;
+
+
         protected virtual void OnEnable()
         {
             _stats = new TurretStatsInstance(_turretInfo);
@@ -52,6 +65,8 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Attack()
         {
+            UpdateScreenBoundsIfNeeded();
+
             if (_targetEnemy == null)
             {
                 TargetFirst();
@@ -62,7 +77,7 @@ namespace Assets.Scripts.Turrets
             if (_timeSinceLastShot < _atkSpeed)
                 return;
 
-            if (_targetInAim && _targetInRange)
+            if (_targetInAim && _targetInRange && IsTargetVisibleOnScreen())
                 Shoot();
         }
 
@@ -79,6 +94,15 @@ namespace Assets.Scripts.Turrets
 
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath += Enemy_OnDeath;
+        }
+
+        private bool IsTargetVisibleOnScreen()
+        {
+            if (_targetEnemy == null) return false;
+
+            Vector3 pos = _targetEnemy.transform.position;
+            return pos.x >= _screenLeft && pos.x <= _screenRight &&
+                   pos.y >= _screenBottom && pos.y <= (_screenTop - _topSpawnMargin);
         }
 
         private void Enemy_OnDeath(object sender, EventArgs _)
@@ -155,5 +179,21 @@ namespace Assets.Scripts.Turrets
         {
             return _stats;
         }
+
+        private void UpdateScreenBoundsIfNeeded()
+        {
+            if (Screen.width != _lastScreenWidth || Screen.height != _lastScreenHeight)
+            {
+                Camera cam = Camera.main;
+                _screenLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
+                _screenRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
+                _screenBottom = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).y;
+                _screenTop = cam.ViewportToWorldPoint(new Vector3(0, 1, 0)).y;
+
+                _lastScreenWidth = Screen.width;
+                _lastScreenHeight = Screen.height;
+            }
+        }
+
     }
 }

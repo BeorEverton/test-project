@@ -20,6 +20,13 @@ namespace Assets.Scripts.WaveSystem
         public event EventHandler<OnWaveCreatedEventArgs> OnWaveCreated;
         public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
 
+        // Screen size control for adjustable x spawn position
+        private float _screenLeft;
+        private float _screenRight;
+        private int _lastScreenWidth;
+        private int _lastScreenHeight;
+        private const float _spawnMargin = 0.5f;
+
         public class OnEnemyDeathEventArgs : EventArgs
         {
             public ulong CoinDropAmount;
@@ -116,11 +123,28 @@ namespace Assets.Scripts.WaveSystem
             _waveSpawned = true;
         }
 
+        /// <summary>
+        /// Updates the bounds of the screen to know where enemies should respawn
+        /// </summary>
+        private void UpdateScreenBoundsIfNeeded()
+        {
+            if (Screen.width != _lastScreenWidth || Screen.height != _lastScreenHeight)
+            {
+                _screenLeft = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).x + _spawnMargin;
+                _screenRight = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0)).x - _spawnMargin;
+                _lastScreenWidth = Screen.width;
+                _lastScreenHeight = Screen.height;
+            }
+        }
+
         private Vector3 GetRandomSpawnPosition()
         {
-            float randomXPosition = Random.Range(-9f, 1.8f);
+            UpdateScreenBoundsIfNeeded();
+            float randomXPosition = Random.Range(_screenLeft, _screenRight);
             return new Vector3(randomXPosition, _ySpawnPosition);
         }
+
+
 
         private void Enemy_OnEnemyDeath(object sender, EventArgs e)
         {
