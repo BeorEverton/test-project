@@ -37,7 +37,7 @@ namespace Assets.Scripts.UI
         private void OnEnemyDeath(object sender, EventArgs _)
         {
             _enemyCount--;
-            enemies.text = $"Enemies\n{_enemyCount}";
+            enemies.text = $"{_enemyCount}";
         }
 
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
@@ -48,7 +48,7 @@ namespace Assets.Scripts.UI
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
         {
             _enemyCount = args.EnemyCount;
-            enemies.text = $"Enemies\n{_enemyCount}";
+            enemies.text = $"{_enemyCount}";
         }
 
         private void OnWaveCompleted(object sender, EventArgs e)
@@ -134,7 +134,7 @@ namespace Assets.Scripts.UI
 
         public void UpdateMoney(ulong value)
         {
-            money.SetText(AbbreviateNumber(value));
+            money.SetText("$" + AbbreviateNumber(value));
         }
 
 

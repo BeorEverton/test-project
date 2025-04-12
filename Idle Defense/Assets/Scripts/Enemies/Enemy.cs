@@ -35,6 +35,10 @@ namespace Assets.Scripts.Enemies
         public float MovementSpeed;
         public Vector2Int LastGridPos;
 
+        // Laser targeting
+        private float _baseMovementSpeed;
+
+
         private void OnEnable()
         {
             ResetEnemy();
@@ -85,14 +89,27 @@ namespace Assets.Scripts.Enemies
 
         private void SetRandomMovementSpeed()
         {
-            MovementSpeed = Random.Range(_info.MovementSpeed - _info.MovementSpeedDifference, _info.MovementSpeed + _info.MovementSpeedDifference);
+            _baseMovementSpeed = Random.Range(
+                _info.MovementSpeed - _info.MovementSpeedDifference,
+                _info.MovementSpeed + _info.MovementSpeedDifference
+            );
+
+            MovementSpeed = _baseMovementSpeed;
         }
 
-        public void ReduceMovementSpeed(float procent)
+
+        public void ReduceMovementSpeed(float percent)
         {
-            MovementSpeed -= MovementSpeed * (procent / 100f);
+            // Don't reduce speed again if already slowed with equal or stronger effect
+            float newSpeed = _baseMovementSpeed * (1f - percent / 100f);
+            if (IsSlowed && newSpeed >= MovementSpeed)
+                return;
+
+            MovementSpeed = newSpeed;
             IsSlowed = true;
         }
+
+
 
         //private void Update()
         //{

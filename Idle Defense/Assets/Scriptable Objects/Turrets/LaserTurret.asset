@@ -12,29 +12,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6153e066477abf4990f9076288a6088, type: 3}
   m_Name: LaserTurret
   m_EditorClassIdentifier: 
-  Damage: 0.7
+  Damage: 5
   DamageLevel: 0
-  FireRate: 0.05
+  DamageUpgradeAmount: 1
+  DamageUpgradeBaseCost: 15000
+  FireRate: 0.25
   FireRateLevel: 0
+  FireRateUpgradeAmount: 0.02
+  FireRateUpgradeBaseCost: 50000
   RotationSpeed: 10
   AngleThreshold: 2
   CriticalChance: 0
   CriticalChanceLevel: 0
+  CriticalChanceUpgradeAmount: 0
+  CriticalChanceUpgradeBaseCost: 0
   CriticalDamageMultiplier: 0
   CriticalDamageMultiplierLevel: 0
+  CriticalDamageMultiplierUpgradeAmount: 0
+  CriticalDamageMultiplierUpgradeBaseCost: 0
   ExplosionRadius: 0
   ExplosionRadiusLevel: 0
+  ExplosionRadiusUpgradeAmount: 0
+  ExplosionRadiusUpgradeBaseCost: 0
   SplashDamage: 0
   SplashDamageLevel: 0
-  PierceCount: 0
-  PierceCountLevel: 0
+  SplashDamageUpgradeAmount: 0
+  SplashDamageUpgradeBaseCost: 0
+  PierceChance: 0
+  PierceChanceLevel: 0
+  PierceChanceUpgradeAmount: 0
+  PierceChanceUpgradeBaseCost: 0
   PierceDamageFalloff: 0
   PierceDamageFalloffLevel: 0
+  PierceDamageFalloffUpgradeAmount: 0
+  PierceDamageFalloffUpgradeBaseCost: 0
   PelletCount: 0
   PelletCountLevel: 0
+  PelletCountUpgradeAmount: 0
+  PelletCountUpgradeBaseCost: 0
   DamageFalloffOverDistance: 0
   DamageFalloffOverDistanceLevel: 0
-  PercentBonusDamagePerSec: 10
+  DamageFalloffOverDistanceUpgradeAmount: 0
+  DamageFalloffOverDistanceUpgradeBaseCost: 0
+  PercentBonusDamagePerSec: 5
   PercentBonusDamagePerSecLevel: 0
+  PercentBonusDamagePerSecUpgradeAmount: 0.2
+  PercentBonusDamagePerSecUpgradeBaseCost: 3000
   SlowEffect: 20
   SlowEffectLevel: 0
+  SlowEffectUpgradeAmount: 2
+  SlowEffectUpgradeBaseCost: 8000

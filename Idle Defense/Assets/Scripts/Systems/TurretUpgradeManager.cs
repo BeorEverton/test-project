@@ -97,6 +97,12 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpgradeExplosionRadius()
     {
+        if (turret.ExplosionRadius >= 5f)
+        {
+            UpdateExplosionRadiusDisplay(); // Update UI to show Max if needed
+            return;
+        }
+
         float cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
         if (TrySpend(cost))
         {
@@ -105,6 +111,7 @@ public class TurretUpgradeManager : MonoBehaviour
             UpdateExplosionRadiusDisplay();
         }
     }
+
 
     public void UpgradeSplashDamage()
     {
@@ -187,14 +194,22 @@ public class TurretUpgradeManager : MonoBehaviour
 
     public void UpgradeSlowEffect()
     {
+        if (turret.SlowEffect >= 100f)
+        {
+            UpdateSlowEffectDisplay(); // Update UI to show Max
+            return;
+        }
+
         float cost = GetHybridCost(turret.SlowEffectUpgradeBaseCost, turret.SlowEffectLevel);
         if (TrySpend(cost))
         {
             turret.SlowEffect += turret.SlowEffectUpgradeAmount;
+            turret.SlowEffect = Mathf.Min(turret.SlowEffect, 100f); // Clamp to 100%
             turret.SlowEffectLevel += 1f;
             UpdateSlowEffectDisplay();
         }
     }
+
 
     // Update Display Methods
 
@@ -250,11 +265,19 @@ public class TurretUpgradeManager : MonoBehaviour
     {
         if (turret == null)
             return;
-        var current = turret.ExplosionRadius;
-        var bonus = turret.ExplosionRadiusUpgradeAmount;
-        var cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+
+        float current = turret.ExplosionRadius;
+        float bonus = turret.ExplosionRadiusUpgradeAmount;
+        float cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
+
+        string currentText = $"{current:F1}";
+        string bonusText = turret.ExplosionRadiusLevel >= 5f
+            ? "Max"
+            : $"+{bonus:F1} ${UIManager.AbbreviateNumber(cost)}";
+
+        turretUpgradeButton.UpdateStats(currentText, bonusText);
     }
+
 
     public void UpdateSplashDamageDisplay()
     {
@@ -328,27 +351,39 @@ public class TurretUpgradeManager : MonoBehaviour
         turretUpgradeButton.UpdateStats(currentText, bonusText);
     }
 
-
-
     public void UpdatePercentBonusDamagePerSecDisplay()
     {
         if (turret == null)
             return;
-        var current = turret.PercentBonusDamagePerSec;
-        var bonus = turret.PercentBonusDamagePerSecUpgradeAmount;
-        var cost = GetHybridCost(turret.PercentBonusDamagePerSecUpgradeBaseCost, turret.PercentBonusDamagePerSecLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+
+        float current = turret.PercentBonusDamagePerSec;
+        float bonus = turret.PercentBonusDamagePerSecUpgradeAmount;
+        float cost = GetHybridCost(turret.PercentBonusDamagePerSecUpgradeBaseCost, turret.PercentBonusDamagePerSecLevel);
+
+        string currentText = $"{current:F1}%";
+        string bonusText = $"+{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
+
+        turretUpgradeButton.UpdateStats(currentText, bonusText);
     }
+
 
     public void UpdateSlowEffectDisplay()
     {
         if (turret == null)
             return;
-        var current = turret.SlowEffect;
-        var bonus = turret.SlowEffectUpgradeAmount;
-        var cost = GetHybridCost(turret.SlowEffectUpgradeBaseCost, turret.SlowEffectLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+
+        float current = turret.SlowEffect;
+        float bonus = turret.SlowEffectUpgradeAmount;
+        float cost = GetHybridCost(turret.SlowEffectUpgradeBaseCost, turret.SlowEffectLevel);
+
+        string currentText = $"{current:F1}%";
+        string bonusText = current >= 100f
+            ? "Max"
+            : $"+{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
+
+        turretUpgradeButton.UpdateStats(currentText, bonusText);
     }
+
 }
 
 

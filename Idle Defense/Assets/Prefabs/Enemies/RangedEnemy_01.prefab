@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RangedEnemy_01
       objectReference: {fileID: 0}
+    - target: {fileID: 4054926558504893090, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 22.9
+      objectReference: {fileID: 0}
     - target: {fileID: 5550549370963425500, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -77,16 +81,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 1e6569d70efb577439529de6c16daab7, type: 2}
     - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 4233310686934124197, guid: 039daf6df36b8c149b74f8d975f863f5, type: 3}
+    - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Color.b
-      value: 0.22316661
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Color.g
-      value: 0.7050516
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Color.r
-      value: 0.8018868
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
