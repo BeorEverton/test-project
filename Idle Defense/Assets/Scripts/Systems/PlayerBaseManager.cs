@@ -11,8 +11,8 @@ namespace Assets.Scripts.Systems
         public event EventHandler OnWaveFailed; // TO-DO, Used to roll back 10 waves
         public event Action<float, float> OnHealthChanged; // (currentHealth, maxHealth)
 
-
-        [SerializeField] private PlayerBaseSO _info;
+        [SerializeField] private PlayerBaseSO _baseInfo;  // The original SO from the inspector
+        private PlayerBaseSO _info;                      // The runtime clone
 
         private float _currentHealth;
         private float _regenDelayTimer;
@@ -37,6 +37,8 @@ namespace Assets.Scripts.Systems
                 Instance = this;
             else
                 Destroy(gameObject);
+
+            _info = Instantiate(_baseInfo); // Copy the SO
 
             InitializeGame();
         }
