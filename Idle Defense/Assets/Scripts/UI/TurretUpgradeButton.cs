@@ -13,7 +13,7 @@ public class TurretUpgradeButton : MonoBehaviour
     [SerializeField] private TurretStatsInstance turret;
 
     [Header("UI Elements (Auto-Assigned)")]
-    [SerializeField] private TextMeshProUGUI statValue, upgradeAndCost;
+    [SerializeField] private TextMeshProUGUI statName, statValue, statUpgradeAmount, statUpgradeCost;
 
     [Header("Upgrade Type")]
     [SerializeField] private TurretUpgradeType upgradeType;
@@ -23,10 +23,12 @@ public class TurretUpgradeButton : MonoBehaviour
         // Auto-assign the first two TextMeshProUGUI components in children
         var tmpros = GetComponentsInChildren<TextMeshProUGUI>();
 
-        if (tmpros.Length >= 2)
+        if (tmpros.Length >= 4)
         {
+            statName = tmpros[0];
             statValue = tmpros[1];
-            upgradeAndCost = tmpros[2];
+            statUpgradeAmount = tmpros[2];
+            statUpgradeCost = tmpros[3];
         }
         else
         {
@@ -42,6 +44,7 @@ public class TurretUpgradeButton : MonoBehaviour
 
         // Update the initial data
         SetTurret();
+        statName.SetText(GetDisplayNameForUpgrade(upgradeType));
         UpdateDisplayFromType();
 
     }
@@ -51,10 +54,55 @@ public class TurretUpgradeButton : MonoBehaviour
         upgradeManager.SetTurret(turret, this);
     }
 
-    public void UpdateStats(string value, string upgradeCost)
+    public void OnClick()
+    {
+        if (upgradeManager == null)
+            upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
+
+        switch (upgradeType)
+        {
+            case TurretUpgradeType.Damage: upgradeManager.UpgradeDamage(); break;
+            case TurretUpgradeType.FireRate: upgradeManager.UpgradeFireRate(); break;
+            case TurretUpgradeType.CriticalChance: upgradeManager.UpgradeCriticalChance(); break;
+            case TurretUpgradeType.CriticalDamageMultiplier: upgradeManager.UpgradeCriticalDamageMultiplier(); break;
+            case TurretUpgradeType.ExplosionRadius: upgradeManager.UpgradeExplosionRadius(); break;
+            case TurretUpgradeType.SplashDamage: upgradeManager.UpgradeSplashDamage(); break;
+            case TurretUpgradeType.PierceChance: upgradeManager.UpgradePierceChance(); break;
+            case TurretUpgradeType.PierceDamageFalloff: upgradeManager.UpgradePierceDamageFalloff(); break;
+            case TurretUpgradeType.PelletCount: upgradeManager.UpgradePelletCount(); break;
+            case TurretUpgradeType.DamageFalloffOverDistance: upgradeManager.UpgradeDamageFalloffOverDistance(); break;
+            case TurretUpgradeType.PercentBonusDamagePerSec: upgradeManager.UpgradePercentBonusDamagePerSec(); break;
+            case TurretUpgradeType.SlowEffect: upgradeManager.UpgradeSlowEffect(); break;
+        }
+    }
+
+
+    public void UpdateStats(string value, string upgradeAmount, string upgradeCost)
     {
         statValue.SetText(value);
-        upgradeAndCost.SetText(upgradeCost);
+        statUpgradeAmount.SetText(upgradeAmount);
+        statUpgradeCost.SetText(upgradeCost);
+    }
+
+
+    private string GetDisplayNameForUpgrade(TurretUpgradeType type)
+    {
+        return type switch
+        {
+            TurretUpgradeType.Damage => "Damage",
+            TurretUpgradeType.FireRate => "Fire Rate",
+            TurretUpgradeType.CriticalChance => "Critical Chance",
+            TurretUpgradeType.CriticalDamageMultiplier => "Critical Damage",
+            TurretUpgradeType.ExplosionRadius => "Explosion Radius",
+            TurretUpgradeType.SplashDamage => "Splash Damage",
+            TurretUpgradeType.PierceChance => "Pierce Chance",
+            TurretUpgradeType.PierceDamageFalloff => "Pierce Falloff",
+            TurretUpgradeType.PelletCount => "Pellet Count",
+            TurretUpgradeType.DamageFalloffOverDistance => "Range Falloff",
+            TurretUpgradeType.PercentBonusDamagePerSec => "Bonus Dmg/s",
+            TurretUpgradeType.SlowEffect => "Slow Effect",
+            _ => type.ToString()
+        };
     }
 
     public void UpdateDisplayFromType()

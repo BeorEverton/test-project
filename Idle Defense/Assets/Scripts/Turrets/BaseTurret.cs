@@ -41,7 +41,7 @@ namespace Assets.Scripts.Turrets
         private int _lastScreenHeight;
 
         // How far from the top the enemy needs to be for the turrets to shoot
-        private const float _topSpawnMargin = 0.5f;
+        private const float _topSpawnMargin = 1f;
 
 
         protected virtual void OnEnable()

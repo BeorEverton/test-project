@@ -57,6 +57,7 @@ namespace Assets.Scripts.Systems
 
         private void OnClickStarted(InputAction.CallbackContext ctx)
         {
+            if (EventSystem.current.IsPointerOverGameObject()) return;
             spdBonus += initialBoost;
             isHolding = true;
             decreaseTimer = 0f;

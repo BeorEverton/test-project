@@ -210,178 +210,219 @@ public class TurretUpgradeManager : MonoBehaviour
         }
     }
 
-
-    // Update Display Methods
-
-    public void UpdateDamageDisplay()
-    {
-        if (turret == null)
-            return;
-        var current = turret.Damage;
-        var bonus = turret.DamageUpgradeAmount;
-        var cost = GetHybridCost(turret.DamageUpgradeBaseCost, turret.DamageLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
-    }
-
-    public void UpdateFireRateDisplay()
-    {
-        if (turret == null)
-            return;
-        float currentDelay = turret.FireRate;
-        float bonusSPS = turret.FireRateUpgradeAmount;
-        float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
-        string currentDisplay = FormatFireRate(1f / currentDelay);
-        string bonusDisplay = turret.FireRate <= turret.FireRateUpgradeAmount ? "Max" : $"+{bonusSPS:F2}/s ${UIManager.AbbreviateNumber(cost)}";
-        turretUpgradeButton.UpdateStats(currentDisplay, bonusDisplay);
-    }
-
     private string FormatFireRate(float shotsPerSecond)
     {
         return shotsPerSecond >= 1f ? $"{shotsPerSecond:F2}/s" : $"1/{(1f / shotsPerSecond):F2}s";
     }
 
+    // Update Display Methods
+
+    public void UpdateDamageDisplay()
+    {
+        if (turret == null) return;
+        float current = turret.Damage;
+        float bonus = turret.DamageUpgradeAmount;
+        float cost = GetHybridCost(turret.DamageUpgradeBaseCost, turret.DamageLevel);
+        turretUpgradeButton.UpdateStats(
+            UIManager.AbbreviateNumber(current),
+            $"+{UIManager.AbbreviateNumber(bonus)}",
+            $"${UIManager.AbbreviateNumber(cost)}"
+        );
+    }
+
+    public void UpdateFireRateDisplay()
+    {
+        if (turret == null) return;
+        float currentDelay = turret.FireRate;
+        float bonusSPS = turret.FireRateUpgradeAmount;
+        float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
+        string currentDisplay = FormatFireRate(1f / currentDelay);
+
+        if (turret.FireRate <= turret.FireRateUpgradeAmount)
+        {
+            turretUpgradeButton.UpdateStats(currentDisplay, "Max", "");
+        }
+        else
+        {
+            turretUpgradeButton.UpdateStats(
+                currentDisplay,
+                $"+{bonusSPS:F2}/s",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+        }
+    }
+
     public void UpdateCriticalChanceDisplay()
     {
-        if (turret == null)
-            return;
+        if (turret == null) return;
         float current = turret.CriticalChance;
         float bonus = turret.CriticalChanceUpgradeAmount;
         float cost = GetHybridCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel);
-        string bonusText = current >= 100f ? "Max" : $"+{bonus}% ${UIManager.AbbreviateNumber(cost)}";
-        turretUpgradeButton.UpdateStats($"{current}%", bonusText);
+        if (current >= 100f)
+        {
+            turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
+        }
+        else
+        {
+            turretUpgradeButton.UpdateStats(
+                $"{current:F1}%",
+                $"+{bonus:F1}%",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+        }
     }
 
     public void UpdateCriticalDamageMultiplierDisplay()
     {
-        if (turret == null)
-            return;
-        float current = 1 + turret.CriticalDamageMultiplier; // so it shows 120% instead of 20%
+        if (turret == null) return;
+        float current = 1 + turret.CriticalDamageMultiplier;
         float bonus = turret.CriticalDamageMultiplierUpgradeAmount;
         float cost = GetHybridCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel);
-        turretUpgradeButton.UpdateStats($"{current}%", $"+{bonus}% ${UIManager.AbbreviateNumber(cost)}");
+        turretUpgradeButton.UpdateStats(
+            $"{current:F1}%",
+            $"+{bonus:F1}%",
+            $"${UIManager.AbbreviateNumber(cost)}"
+        );
     }
 
     public void UpdateExplosionRadiusDisplay()
     {
-        if (turret == null)
-            return;
-
+        if (turret == null) return;
         float current = turret.ExplosionRadius;
         float bonus = turret.ExplosionRadiusUpgradeAmount;
         float cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
 
-        string currentText = $"{current:F1}";
-        string bonusText = turret.ExplosionRadiusLevel >= 5f
-            ? "Max"
-            : $"+{bonus:F1} ${UIManager.AbbreviateNumber(cost)}";
-
-        turretUpgradeButton.UpdateStats(currentText, bonusText);
+        if (turret.ExplosionRadiusLevel >= 5f)
+        {
+            turretUpgradeButton.UpdateStats($"{current:F1}", "Max", "");
+        }
+        else
+        {
+            turretUpgradeButton.UpdateStats(
+                $"{current:F1}",
+                $"+{bonus:F1}",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+        }
     }
-
 
     public void UpdateSplashDamageDisplay()
     {
-        if (turret == null)
-            return;
-        var current = turret.SplashDamage;
-        var bonus = turret.SplashDamageUpgradeAmount;
-        var cost = GetHybridCost(turret.SplashDamageUpgradeBaseCost, turret.SplashDamageLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+        if (turret == null) return;
+        float current = turret.SplashDamage;
+        float bonus = turret.SplashDamageUpgradeAmount;
+        float cost = GetHybridCost(turret.SplashDamageUpgradeBaseCost, turret.SplashDamageLevel);
+        turretUpgradeButton.UpdateStats(
+            UIManager.AbbreviateNumber(current),
+            $"+{UIManager.AbbreviateNumber(bonus)}",
+            $"${UIManager.AbbreviateNumber(cost)}"
+        );
     }
 
     public void UpdatePierceChanceDisplay()
     {
-        if (turret == null)
-            return;
+        if (turret == null) return;
+        float current = turret.PierceChance;
+        float bonus = turret.PierceChanceUpgradeAmount;
+        float cost = GetHybridCost(turret.PierceChanceUpgradeBaseCost, turret.PierceChanceLevel);
 
-        var current = turret.PierceChance;
-        var bonus = turret.PierceChanceUpgradeAmount;
-        var cost = GetHybridCost(turret.PierceChanceUpgradeBaseCost, turret.PierceChanceLevel);
-
-        string currentText = $"{current:F1}%";
-        string bonusText = current >= 100f ? "Max" : $"+{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
-
-        turretUpgradeButton.UpdateStats(currentText, bonusText);
+        if (current >= 100f)
+        {
+            turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
+        }
+        else
+        {
+            turretUpgradeButton.UpdateStats(
+                $"{current:F1}%",
+                $"+{bonus:F1}%",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+        }
     }
-
 
     public void UpdatePierceDamageFalloffDisplay()
     {
-        if (turret == null)
-            return;
-
+        if (turret == null) return;
         float falloff = turret.PierceDamageFalloff;
-        float retained = 100f - falloff; // falloff could be negative = >100% retained
-
+        float retained = 100f - falloff;
         float bonus = turret.PierceDamageFalloffUpgradeAmount;
         float cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
 
-        string currentText = $"{retained:F1}%"; // Always show retained damage
-        string bonusText = $"+{bonus:F1}%";
-        string costText = $"${UIManager.AbbreviateNumber(cost)}";
-
-        turretUpgradeButton.UpdateStats(currentText, $"{bonusText} {costText}");
+        turretUpgradeButton.UpdateStats(
+            $"{retained:F1}%",
+            $"+{bonus:F1}%",
+            $"${UIManager.AbbreviateNumber(cost)}"
+        );
     }
-
 
     public void UpdatePelletCountDisplay()
     {
-        if (turret == null)
-            return;
-        var current = turret.PelletCount;
-        var bonus = turret.PelletCountUpgradeAmount;
-        var cost = GetHybridCost(turret.PelletCountUpgradeBaseCost, turret.PelletCountLevel);
-        turretUpgradeButton.UpdateStats(UIManager.AbbreviateNumber(current), $"+{UIManager.AbbreviateNumber(bonus)} ${UIManager.AbbreviateNumber(cost)}");
+        if (turret == null) return;
+        float current = turret.PelletCount;
+        float bonus = turret.PelletCountUpgradeAmount;
+        float cost = GetHybridCost(turret.PelletCountUpgradeBaseCost, turret.PelletCountLevel);
+
+        turretUpgradeButton.UpdateStats(
+            UIManager.AbbreviateNumber(current),
+            $"+{UIManager.AbbreviateNumber(bonus)}",
+            $"${UIManager.AbbreviateNumber(cost)}"
+        );
     }
 
     public void UpdateDamageFalloffOverDistanceDisplay()
     {
-        if (turret == null)
-            return;
-
+        if (turret == null) return;
         float current = turret.DamageFalloffOverDistance;
         float bonus = turret.DamageFalloffOverDistanceUpgradeAmount;
         float cost = GetHybridCost(turret.DamageFalloffOverDistanceUpgradeBaseCost, turret.DamageFalloffOverDistanceLevel);
 
-        string currentText = $"{current:F1}%";
-        string bonusText = current <= 0f
-            ? "Max"
-            : $"-{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
-
-        turretUpgradeButton.UpdateStats(currentText, bonusText);
+        if (current <= 0f)
+        {
+            turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
+        }
+        else
+        {
+            turretUpgradeButton.UpdateStats(
+                $"{current:F1}%",
+                $"-{bonus:F1}%",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+        }
     }
 
     public void UpdatePercentBonusDamagePerSecDisplay()
     {
-        if (turret == null)
-            return;
-
+        if (turret == null) return;
         float current = turret.PercentBonusDamagePerSec;
         float bonus = turret.PercentBonusDamagePerSecUpgradeAmount;
         float cost = GetHybridCost(turret.PercentBonusDamagePerSecUpgradeBaseCost, turret.PercentBonusDamagePerSecLevel);
 
-        string currentText = $"{current:F1}%";
-        string bonusText = $"+{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
-
-        turretUpgradeButton.UpdateStats(currentText, bonusText);
+        turretUpgradeButton.UpdateStats(
+            $"{current:F1}%",
+            $"+{bonus:F1}%",
+            $"${UIManager.AbbreviateNumber(cost)}"
+        );
     }
-
 
     public void UpdateSlowEffectDisplay()
     {
-        if (turret == null)
-            return;
-
+        if (turret == null) return;
         float current = turret.SlowEffect;
         float bonus = turret.SlowEffectUpgradeAmount;
         float cost = GetHybridCost(turret.SlowEffectUpgradeBaseCost, turret.SlowEffectLevel);
 
-        string currentText = $"{current:F1}%";
-        string bonusText = current >= 100f
-            ? "Max"
-            : $"+{bonus:F1}% ${UIManager.AbbreviateNumber(cost)}";
-
-        turretUpgradeButton.UpdateStats(currentText, bonusText);
+        if (current >= 100f)
+        {
+            turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
+        }
+        else
+        {
+            turretUpgradeButton.UpdateStats(
+                $"{current:F1}%",
+                $"+{bonus:F1}%",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+        }
     }
 
 }
