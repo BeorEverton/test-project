@@ -193,7 +193,7 @@ namespace Assets.Scripts.WaveSystem
                 _objectPool.ReturnObject(enemy.GetComponent<Enemy>().Info.Name, enemy);
             }
 
-            StartWave(_currentWave);
+            OnWaveCompleted?.Invoke(this, EventArgs.Empty);
         }
     }
 }

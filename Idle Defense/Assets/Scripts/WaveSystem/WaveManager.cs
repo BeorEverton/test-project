@@ -1,5 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
+using Assets.Scripts.Systems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,14 +30,9 @@ namespace Assets.Scripts.WaveSystem
         [Tooltip("CoinDrop = Ceil(CoinDrop * coinDropmultiplier) (Default = 1.05, 5% increase per wave)")]
         [SerializeField] private float _coinDropMultiplierByWaveCount = 1.05f;
 
-        private WaveConfigSO _currentBaseWaveSO;
-        private int _currentBaseWaveIndex = 0; //Start with first base wave in list
-        private int _waveIndexOfCurrentBaseWave = 0; //Index of current base wave. Reset when base wave changes
-
-        private int _currentWaveIndex = 0; //Overall wave index
-
         private Dictionary<int, Wave> _waves = new(); //Dictionary of all waves, with wave number as key
         private int _maxWaves = 0; //Amount of waves in dictionary
+        private int _currentWave = 0; //Overall wave index
         private bool _waveCompleted = false;
 
         private void Awake()
@@ -49,24 +45,27 @@ namespace Assets.Scripts.WaveSystem
 
         private async void Start()
         {
-            if (_baseWaveSOs != null && _baseWaveSOs.Count > 0)
-            {
-                _currentBaseWaveSO = _baseWaveSOs[0];
-            }
-
             await GenerateWavesAsync(startWaveNumber: 1, amountToGenerate: 100); //Generate first 100 waves, starting from wave 1
 
             StartCoroutine(StartWaveRoutine());
 
             EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
+            PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
         }
 
-        public int GetCurrentWaveIndex() => _currentWaveIndex;
-        public Wave GetCurrentWave() => _waves[_currentWaveIndex];
+        public int GetCurrentWaveIndex() => _currentWave;
+        public Wave GetCurrentWave() => _waves[_currentWave];
 
         private void OnWaveCompleted(object sender, EventArgs e)
         {
             _waveCompleted = true;
+        }
+
+        private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
+        {
+            _currentWave -= 11; //11 due to StartWaveRoutine count +1 before initializing
+            if (_currentWave < 1)
+                _currentWave = 0;
         }
 
         private IEnumerator StartWaveRoutine()
@@ -75,23 +74,23 @@ namespace Assets.Scripts.WaveSystem
 
             while (GameRunning)
             {
-                _currentWaveIndex++;
+                _currentWave++;
 
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
-                    WaveNumber = _currentWaveIndex
+                    WaveNumber = _currentWave
                 });
 
                 try
                 {
-                    if (_waves.TryGetValue(_currentWaveIndex, out Wave wave))
+                    if (_waves.TryGetValue(_currentWave, out Wave wave))
                     {
                         _enemySpawner.StartWave(wave.WaveConfig);
 
                     }
                     else
                     {
-                        throw new Exception($"Wave {_currentWaveIndex} not found in dictionary");
+                        throw new Exception($"Wave {_currentWave} not found in dictionary");
                     }
                 }
                 catch (Exception e)
@@ -99,7 +98,7 @@ namespace Assets.Scripts.WaveSystem
                     Debug.LogError(e.Message);
                 }
 
-                if (_maxWaves < _currentWaveIndex + 10) //Generate new waves when only 10 left
+                if (_maxWaves < _currentWave + 10) //Generate new waves when only 10 left
                 {
                     GenerateWaves(startWaveNumber: _maxWaves, amountToGenerate: 100);
                 }
@@ -110,12 +109,12 @@ namespace Assets.Scripts.WaveSystem
             }
         }
 
-        private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry)
+        private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry, int waveNumber)
         {
             return new EnemyWaveEntry
             {
                 EnemyPrefab = baseEntry.EnemyPrefab,
-                NumberOfEnemies = baseEntry.NumberOfEnemies + _waveIndexOfCurrentBaseWave + _currentBaseWaveIndex
+                NumberOfEnemies = baseEntry.NumberOfEnemies + waveNumber
             };
         }
 
@@ -145,7 +144,7 @@ namespace Assets.Scripts.WaveSystem
                 tempWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
                 foreach (EnemyWaveEntry entry in baseWave.EnemyWaveEntries)
                 {
-                    EnemyWaveEntry newEntry = CreateNewEntry(entry);
+                    EnemyWaveEntry newEntry = CreateNewEntry(entry, waveNumber);
 
                     if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
                     {
