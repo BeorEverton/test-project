@@ -48,6 +48,7 @@ namespace Assets.Scripts.UI
             if (currentWave >= _requiredWave)
             {
                 _unlockButton.gameObject.SetActive(true);
+                _unlockText.color = Color.black;
                 _lockedOverlay.SetActive(true);
                 _unlockText.text = $"Unlock ${UIManager.AbbreviateNumber(_unlockCost)}";
             }
@@ -55,6 +56,7 @@ namespace Assets.Scripts.UI
             {
                 _lockedOverlay.SetActive(true);
                 _unlockButton.gameObject.SetActive(false);
+                _unlockText.color = Color.white;
                 _unlockText.text = $"Locked\nWave {_requiredWave}";
             }
         }
