@@ -8,9 +8,9 @@ namespace Assets.Scripts.Turrets
 {
     public class SniperTurret : BaseTurret
     {
-        public List<Vector2Int> pathCells = new();
-        private float _cellSize = 1f;
-        private float _bulletWidth = 0.1f;
+        private List<Vector2Int> _pathCells = new();
+        private readonly float _cellSize = 1f;
+        private readonly float _bulletWidth = 0.1f;
 
         private Recoil _recoil;
 
@@ -44,13 +44,13 @@ namespace Assets.Scripts.Turrets
             float distanceToTarget = Vector2.Distance(startPos, _targetEnemy.transform.position);
             Vector2 extendedPos = startPos + dir * (distanceToTarget + extraDistance);
 
-            pathCells = GridRaycaster.GetCellsAlongLine(
+            _pathCells = GridRaycaster.GetCellsAlongLine(
                 startPos,
                 extendedPos,
                 maxSteps: 30 // or however many steps you need
             );
 
-            List<Enemy> enemiesInPath = pathCells
+            List<Enemy> enemiesInPath = _pathCells
                 .SelectMany(cell => GridManager.Instance.GetEnemiesInGrid(cell))
                 .ToList();
 
@@ -100,7 +100,7 @@ namespace Assets.Scripts.Turrets
 
             // Highlight occupied grid cells
             Gizmos.color = Color.red;
-            foreach (Vector3 center in pathCells
+            foreach (Vector3 center in _pathCells
                          .Select(gridCell => new Vector3(gridCell.x * _cellSize + _cellSize / 2, gridCell.y * _cellSize + _cellSize / 2, 0)))
             {
                 Gizmos.DrawWireCube(center, Vector3.one * _cellSize * 0.9f);
