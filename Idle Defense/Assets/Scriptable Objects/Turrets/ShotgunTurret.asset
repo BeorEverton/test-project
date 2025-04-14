@@ -15,11 +15,11 @@ MonoBehaviour:
   Damage: 30
   DamageLevel: 0
   DamageUpgradeAmount: 5
-  DamageUpgradeBaseCost: 40
+  DamageUpgradeBaseCost: 60
   FireRate: 2
   FireRateLevel: 0
   FireRateUpgradeAmount: 0.05
-  FireRateUpgradeBaseCost: 80
+  FireRateUpgradeBaseCost: 100
   RotationSpeed: 6
   AngleThreshold: 4
   CriticalChance: 0
@@ -38,10 +38,10 @@ MonoBehaviour:
   SplashDamageLevel: 0
   SplashDamageUpgradeAmount: 0
   SplashDamageUpgradeBaseCost: 0
-  PierceCount: 0
-  PierceCountLevel: 0
-  PierceCountUpgradeAmount: 0
-  PierceCountUpgradeBaseCost: 0
+  PierceChance: 0
+  PierceChanceLevel: 0
+  PierceChanceUpgradeAmount: 0
+  PierceChanceUpgradeBaseCost: 0
   PierceDamageFalloff: 0
   PierceDamageFalloffLevel: 0
   PierceDamageFalloffUpgradeAmount: 0

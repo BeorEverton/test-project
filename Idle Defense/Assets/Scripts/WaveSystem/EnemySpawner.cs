@@ -39,7 +39,8 @@ namespace Assets.Scripts.WaveSystem
 
         public List<GameObject> EnemiesAlive { get; } = new();
 
-        [SerializeField] private float _ySpawnPosition;
+        // [SerializeField] private float _ySpawnPosition; Changed to recognize screen bounds
+        private float _screenTop;
 
         private List<GameObject> _enemiesCurrentWave = new();
 
@@ -130,8 +131,11 @@ namespace Assets.Scripts.WaveSystem
         {
             if (Screen.width != _lastScreenWidth || Screen.height != _lastScreenHeight)
             {
-                _screenLeft = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).x + _spawnMargin;
-                _screenRight = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0)).x - _spawnMargin;
+                Camera cam = Camera.main;
+                _screenLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x + _spawnMargin;
+                _screenRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x - _spawnMargin;
+
+                _screenTop = cam.ViewportToWorldPoint(new Vector3(0.5f, 1f, 0)).y + 1f; // 1 unit above visible top
                 _lastScreenWidth = Screen.width;
                 _lastScreenHeight = Screen.height;
             }
@@ -141,10 +145,8 @@ namespace Assets.Scripts.WaveSystem
         {
             UpdateScreenBoundsIfNeeded();
             float randomXPosition = Random.Range(_screenLeft, _screenRight);
-            return new Vector3(randomXPosition, _ySpawnPosition);
+            return new Vector3(randomXPosition, _screenTop);
         }
-
-
 
         private void Enemy_OnEnemyDeath(object sender, EventArgs e)
         {

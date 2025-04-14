@@ -39,6 +39,7 @@ public class TurretUnlockRequirement : MonoBehaviour
         if (isUnlocked)
         {
             lockedOverlay.SetActive(false);
+            unlockText.gameObject.SetActive(false);
             unlockButton.gameObject.SetActive(false);
             return;
         }

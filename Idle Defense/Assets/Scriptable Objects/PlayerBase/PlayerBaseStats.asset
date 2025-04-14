@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: PlayerBaseStats
   m_EditorClassIdentifier: 
   MaxHealth: 20
-  RegenAmount: 0.2
+  RegenAmount: 0.1
   RegenDelay: 2
   RegenInterval: 5
   MaxHealthUpgradeAmount: 5
   MaxHealthUpgradeBaseCost: 10
-  MaxHealthLevel: 1
-  RegenAmountUpgradeAmount: 0.2
+  MaxHealthLevel: 0
+  RegenAmountUpgradeAmount: 0.1
   RegenAmountUpgradeBaseCost: 15
-  RegenAmountLevel: 2
+  RegenAmountLevel: 0
   RegenIntervalUpgradeAmount: 0.1
   RegenIntervalUpgradeBaseCost: 50
   RegenIntervalLevel: 0
