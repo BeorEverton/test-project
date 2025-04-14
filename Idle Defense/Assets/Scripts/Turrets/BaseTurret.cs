@@ -13,6 +13,9 @@ namespace Assets.Scripts.Turrets
 {
     public abstract class BaseTurret : MonoBehaviour
     {
+
+        public EnemyTarget EnemyTargetChoise = EnemyTarget.First;
+
         [SerializeField] protected TurretInfoSO _turretInfo;
         protected TurretStatsInstance _stats;
 
@@ -43,8 +46,6 @@ namespace Assets.Scripts.Turrets
 
         // How far from the top the enemy needs to be for the turrets to shoot
         private const float _topSpawnMargin = 1f;
-
-        public EnemyTarget EnemyTargetChoise = EnemyTarget.First;
 
         protected virtual void OnEnable()
         {
