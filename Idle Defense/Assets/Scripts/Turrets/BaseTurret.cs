@@ -17,7 +17,8 @@ namespace Assets.Scripts.Turrets
         protected TurretStatsInstance _stats;
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
-        [SerializeField] private List<Sprite> _mussleFlashSprites;
+        [SerializeField] private List<Sprite> _muzzleFlashSprites;
+        private bool _isFiring = false; // Holds the rotation towards the next enemy while muzzle is active
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -72,7 +73,10 @@ namespace Assets.Scripts.Turrets
                 TargetFirst();
             }
 
-            AimTowardsTarget(_bonusSpdMultiplier);
+            // Wait for muzzle flash to deactivate before rotating
+            if (!_isFiring)
+                AimTowardsTarget(_bonusSpdMultiplier);
+
 
             if (_timeSinceLastShot < _atkSpeed)
                 return;
@@ -83,6 +87,8 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Shoot()
         {
+            _isFiring = true;
+
             StartCoroutine(ShowMuzzleFlash());
         }
 
@@ -153,14 +159,16 @@ namespace Assets.Scripts.Turrets
 
         private IEnumerator ShowMuzzleFlash()
         {
-            if (_mussleFlashSprites.Count == 0)
+            if (_muzzleFlashSprites.Count == 0)
                 yield break;
 
-            Sprite randomMuzzleFlash = _mussleFlashSprites[Random.Range(0, _mussleFlashSprites.Count)];
+            Sprite randomMuzzleFlash = _muzzleFlashSprites[Random.Range(0, _muzzleFlashSprites.Count)];
             _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = randomMuzzleFlash;
 
             yield return new WaitForSeconds(0.05f);
             _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = null;
+            _isFiring = false;
+
         }
 
         protected virtual void OnDrawGizmosSelected()
