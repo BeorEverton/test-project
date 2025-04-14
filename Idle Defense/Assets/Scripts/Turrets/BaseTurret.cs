@@ -44,6 +44,7 @@ namespace Assets.Scripts.Turrets
         // How far from the top the enemy needs to be for the turrets to shoot
         private const float _topSpawnMargin = 1f;
 
+        public EnemyTarget EnemyTargetChoise = EnemyTarget.First;
 
         protected virtual void OnEnable()
         {
@@ -70,7 +71,7 @@ namespace Assets.Scripts.Turrets
 
             if (_targetEnemy == null || !_targetEnemy.activeInHierarchy)
             {
-                TargetFirst();
+                TargetEnemy();
             }
 
             AimTowardsTarget(_bonusSpdMultiplier);
@@ -87,11 +88,27 @@ namespace Assets.Scripts.Turrets
             StartCoroutine(ShowMuzzleFlash());
         }
 
-        protected virtual void TargetFirst()
+        protected virtual void TargetEnemy()
         {
-            _targetEnemy = EnemySpawner.Instance.EnemiesAlive
-                .OrderBy(enemy => enemy.transform.position.y)
-                .FirstOrDefault(y => y.transform.position.y <= _attackRange);
+            List<GameObject> enemiesAlive = EnemySpawner.Instance.EnemiesAlive;
+            _targetEnemy = EnemyTargetChoise switch
+            {
+                EnemyTarget.First => enemiesAlive
+                    .OrderBy(enemy => enemy.transform.position.y)
+                    .FirstOrDefault(y => y.transform.position.y <= _attackRange),
+
+                EnemyTarget.Strongest => enemiesAlive
+                    .OrderByDescending(enemy => enemy.GetComponent<Enemy>().MaxHealth)
+                    .FirstOrDefault(y => y.transform.position.y <= _attackRange),
+
+                EnemyTarget.Random => enemiesAlive
+                    .OrderBy(_ => Random.value)
+                    .FirstOrDefault(y => y.transform.position.y <= _attackRange),
+
+                _ => enemiesAlive
+                    .OrderBy(enemy => enemy.transform.position.y)
+                    .FirstOrDefault(y => y.transform.position.y <= _attackRange)
+            };
 
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath += Enemy_OnDeath;
@@ -196,6 +213,12 @@ namespace Assets.Scripts.Turrets
                 _lastScreenHeight = Screen.height;
             }
         }
+    }
 
+    public enum EnemyTarget
+    {
+        First,
+        Strongest,
+        Random
     }
 }
