@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &2268937 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1404109076970763384, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 1342818203}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &81245078
 GameObject:
   m_ObjectHideFlags: 0
@@ -317,7 +322,7 @@ PrefabInstance:
       value: Shotgun Unlock Button
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
-      propertyPath: turretToUnlock
+      propertyPath: _turretToUnlock
       value: 
       objectReference: {fileID: 1903009033}
     m_RemovedComponents: []
@@ -795,6 +800,10 @@ PrefabInstance:
       propertyPath: turretToUnlock
       value: 
       objectReference: {fileID: 1502747102}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _turretToUnlock
+      value: 
+      objectReference: {fileID: 1502747102}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1180,6 +1189,10 @@ PrefabInstance:
       propertyPath: turretToUnlock
       value: 
       objectReference: {fileID: 837185441}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _turretToUnlock
+      value: 
+      objectReference: {fileID: 837185441}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1416,6 +1429,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: turretToUnlock
+      value: 
+      objectReference: {fileID: 553529171}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _turretToUnlock
       value: 
       objectReference: {fileID: 553529171}
     m_RemovedComponents: []
@@ -1885,11 +1902,27 @@ PrefabInstance:
       value: 50000
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockText
+      value: 
+      objectReference: {fileID: 1136429169}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: requiredWave
       value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockButton
+      value: 
+      objectReference: {fileID: 1801855234}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _lockedOverlay
+      value: 
+      objectReference: {fileID: 666123747}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: turretToUnlock
+      value: 
+      objectReference: {fileID: 553529171}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _turretToUnlock
       value: 
       objectReference: {fileID: 553529171}
     m_RemovedComponents: []
@@ -1902,6 +1935,33 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 105158152935383436, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
   m_PrefabInstance: {fileID: 620684226}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &666123747 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1404109076970763384, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 620684226}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &669842168 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3435656254366332225, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 1342818203}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &681762854 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3423114139010491191, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 1342818203}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &763639272
 GameObject:
   m_ObjectHideFlags: 0
@@ -2244,12 +2304,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8af8b486392fc0a41a0c479f819ba90d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dmgBonus: {fileID: 1907158338}
-  spdBonus: {fileID: 2058240590}
-  wave: {fileID: 8178224260527420349}
-  enemies: {fileID: 6797622795491635399}
-  money: {fileID: 5616840248210813476}
-  spdBonusSlider: {fileID: 234552608}
+  _dmgBonus: {fileID: 1907158338}
+  _spdBonus: {fileID: 2058240590}
+  _wave: {fileID: 8178224260527420349}
+  _enemies: {fileID: 6797622795491635399}
+  _money: {fileID: 5616840248210813476}
+  _spdBonusSlider: {fileID: 234552608}
 --- !u!1 &837185441 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6463036619058361839, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
@@ -2636,6 +2696,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 983654790}
   m_CullTransparentMesh: 1
+--- !u!1 &985327441 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1404109076970763384, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 7465881596456636586}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1013419549 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3423114139010491191, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 7465881596456636586}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1045016500
 GameObject:
   m_ObjectHideFlags: 0
@@ -2844,11 +2920,27 @@ PrefabInstance:
       value: 1000000
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockText
+      value: 
+      objectReference: {fileID: 1932584523}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: requiredWave
       value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockButton
+      value: 
+      objectReference: {fileID: 1277987789}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _lockedOverlay
+      value: 
+      objectReference: {fileID: 1491246992}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: turretToUnlock
+      value: 
+      objectReference: {fileID: 837185441}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _turretToUnlock
       value: 
       objectReference: {fileID: 837185441}
     m_RemovedComponents: []
@@ -3234,6 +3326,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1136429169 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3435656254366332225, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 620684226}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1168820198
 GameObject:
   m_ObjectHideFlags: 0
@@ -3573,6 +3676,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1276229659}
   m_CullTransparentMesh: 1
+--- !u!114 &1277987789 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3423114139010491191, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 1046073009}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1325377965 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 661742800451786820, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
@@ -3685,11 +3799,27 @@ PrefabInstance:
       value: 100000000
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockText
+      value: 
+      objectReference: {fileID: 669842168}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: requiredWave
       value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockButton
+      value: 
+      objectReference: {fileID: 681762854}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _lockedOverlay
+      value: 
+      objectReference: {fileID: 2268937}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: turretToUnlock
+      value: 
+      objectReference: {fileID: 1502747102}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _turretToUnlock
       value: 
       objectReference: {fileID: 1502747102}
     m_RemovedComponents: []
@@ -4362,6 +4492,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1439019114}
   m_CullTransparentMesh: 1
+--- !u!1 &1491246992 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1404109076970763384, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 1046073009}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1502747102 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4549154123848940232, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
@@ -4981,6 +5116,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
   m_PrefabInstance: {fileID: 1721717441}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1725156834 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3435656254366332225, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 7465881596456636586}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1795555424
 GameObject:
   m_ObjectHideFlags: 0
@@ -5117,6 +5263,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1795555424}
   m_CullTransparentMesh: 1
+--- !u!114 &1801855234 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3423114139010491191, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 620684226}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1821057556
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5245,7 +5402,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameRunning: 1
-  _baseWaves:
+  _baseWaveSOs:
   - {fileID: 11400000, guid: ffde4da8901287845997a8fb5b9ed184, type: 2}
   - {fileID: 11400000, guid: e23941e1289c439419e738806bf834ec, type: 2}
   - {fileID: 11400000, guid: 60321e0a5fcb294498547b985c97b2e7, type: 2}
@@ -5453,6 +5610,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 365056471891780250, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
   m_PrefabInstance: {fileID: 1821057556}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1932584523 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3435656254366332225, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+  m_PrefabInstance: {fileID: 1046073009}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1976050375
 GameObject:
   m_ObjectHideFlags: 0
@@ -12885,12 +13053,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc87f5e0c3abe1346adb888c235558d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lockedOverlay: {fileID: 0}
-  turretToUnlock: {fileID: 0}
-  unlockButton: {fileID: 0}
-  unlockText: {fileID: 0}
-  requiredWave: 10
-  unlockCost: 100
+  _lockedOverlay: {fileID: 985327441}
+  _turretToUnlock: {fileID: 1903009033}
+  _unlockButton: {fileID: 1013419549}
+  _unlockText: {fileID: 1725156834}
+  _requiredWave: 10
+  _unlockCost: 100
 --- !u!1 &6411440722816993238
 GameObject:
   m_ObjectHideFlags: 0
@@ -13914,7 +14082,23 @@ PrefabInstance:
       value: 5000
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockText
+      value: 
+      objectReference: {fileID: 1725156834}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockButton
+      value: 
+      objectReference: {fileID: 1013419549}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _lockedOverlay
+      value: 
+      objectReference: {fileID: 985327441}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: turretToUnlock
+      value: 
+      objectReference: {fileID: 1903009033}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _turretToUnlock
       value: 
       objectReference: {fileID: 1903009033}
     m_RemovedComponents: []
@@ -14705,10 +14889,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24d4d0d30ae8d7d4bb8690d330da156c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frontSlider: {fileID: 8057202092681202605}
-  backSlider: {fileID: 931788741615105945}
-  healthText: {fileID: 4098846018540285478}
-  lerpDuration: 0.4
+  _frontSlider: {fileID: 8057202092681202605}
+  _backSlider: {fileID: 931788741615105945}
+  _healthText: {fileID: 4098846018540285478}
+  _lerpDuration: 0.4
 --- !u!114 &7842604134948263357
 MonoBehaviour:
   m_ObjectHideFlags: 0

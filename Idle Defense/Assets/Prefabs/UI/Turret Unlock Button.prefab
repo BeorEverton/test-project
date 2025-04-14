@@ -51,12 +51,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc87f5e0c3abe1346adb888c235558d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lockedOverlay: {fileID: 1404109076970763384}
-  turretToUnlock: {fileID: 0}
-  unlockButton: {fileID: 3423114139010491191}
-  unlockText: {fileID: 3435656254366332225}
-  requiredWave: 10
-  unlockCost: 5000
+  _lockedOverlay: {fileID: 1404109076970763384}
+  _turretToUnlock: {fileID: 0}
+  _unlockButton: {fileID: 3423114139010491191}
+  _unlockText: {fileID: 3435656254366332225}
+  _requiredWave: 10
+  _unlockCost: 100
 --- !u!1 &1404109076970763384
 GameObject:
   m_ObjectHideFlags: 0
