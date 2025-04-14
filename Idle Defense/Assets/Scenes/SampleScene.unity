@@ -1007,6 +1007,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 661742800451786820, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
+      propertyPath: _attackRange
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6416085132788252119, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.5
@@ -1069,7 +1073,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6463036619058361839, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2203,7 +2207,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3206999689089362432, guid: d90f1d543089d534693699decadbf149, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8147607113893816477, guid: d90f1d543089d534693699decadbf149, type: 3}
+      propertyPath: _attackRange
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -2886,7 +2894,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4549154123848940232, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4582981559888802544, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
       propertyPath: m_LocalScale.x
@@ -2943,6 +2951,10 @@ PrefabInstance:
     - target: {fileID: 4582981559888802544, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
       propertyPath: m_ConstrainProportionsScale
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4696110832135599143, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
+      propertyPath: _attackRange
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3762,16 +3774,16 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
-  m_Sprite: {fileID: -3323732126268073275, guid: 5afae8ecd66ea0641900e492d1d3d04c, type: 3}
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 3.49, y: 2.3}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1001 &1369485622
@@ -4652,12 +4664,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+      propertyPath: _attackRange
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: _muzzleFlashPosition
       value: 
       objectReference: {fileID: 1369426135}
     - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: _mussleFlashSprites.Array.size
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+      propertyPath: _muzzleFlashSprites.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: '_mussleFlashSprites.Array.data[0]'
@@ -4667,6 +4687,10 @@ PrefabInstance:
       propertyPath: '_mussleFlashSprites.Array.data[1]'
       value: 
       objectReference: {fileID: 407011343619612724, guid: 5afae8ecd66ea0641900e492d1d3d04c, type: 3}
+    - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+      propertyPath: '_muzzleFlashSprites.Array.data[0]'
+      value: 
+      objectReference: {fileID: 703903316360307281, guid: 5afae8ecd66ea0641900e492d1d3d04c, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5125,6 +5149,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3301549281895169227, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+      propertyPath: _attackRange
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8438393725525434472, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.5
@@ -5187,7 +5215,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8476021348886816848, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

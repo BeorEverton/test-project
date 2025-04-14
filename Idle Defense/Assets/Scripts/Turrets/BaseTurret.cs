@@ -18,7 +18,7 @@ namespace Assets.Scripts.Turrets
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] private List<Sprite> _muzzleFlashSprites;
-        private bool _isFiring = false; // Holds the rotation towards the next enemy while muzzle is active
+        [SerializeField] private float _attackRange;
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -68,15 +68,12 @@ namespace Assets.Scripts.Turrets
         {
             UpdateScreenBoundsIfNeeded();
 
-            if (_targetEnemy == null)
+            if (_targetEnemy == null || !_targetEnemy.activeInHierarchy)
             {
                 TargetFirst();
             }
 
-            // Wait for muzzle flash to deactivate before rotating
-            if (!_isFiring)
-                AimTowardsTarget(_bonusSpdMultiplier);
-
+            AimTowardsTarget(_bonusSpdMultiplier);
 
             if (_timeSinceLastShot < _atkSpeed)
                 return;
@@ -87,8 +84,6 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Shoot()
         {
-            _isFiring = true;
-
             StartCoroutine(ShowMuzzleFlash());
         }
 
@@ -96,7 +91,7 @@ namespace Assets.Scripts.Turrets
         {
             _targetEnemy = EnemySpawner.Instance.EnemiesAlive
                 .OrderBy(enemy => enemy.transform.position.y)
-                .FirstOrDefault(y => y.transform.position.y <= 7.5f);
+                .FirstOrDefault(y => y.transform.position.y <= _attackRange);
 
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath += Enemy_OnDeath;
@@ -104,7 +99,8 @@ namespace Assets.Scripts.Turrets
 
         private bool IsTargetVisibleOnScreen()
         {
-            if (_targetEnemy == null) return false;
+            if (!_targetEnemy.activeInHierarchy)
+                return false;
 
             Vector3 pos = _targetEnemy.transform.position;
             return pos.x >= _screenLeft && pos.x <= _screenRight &&
@@ -122,7 +118,7 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void AimTowardsTarget(float bonusMultiplier)
         {
-            if (_targetEnemy == null)
+            if (_targetEnemy == null) // Wait for muzzle flash to deactivate before rotating
             {
                 _targetInRange = false;
                 return;
@@ -165,10 +161,8 @@ namespace Assets.Scripts.Turrets
             Sprite randomMuzzleFlash = _muzzleFlashSprites[Random.Range(0, _muzzleFlashSprites.Count)];
             _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = randomMuzzleFlash;
 
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.03f);
             _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = null;
-            _isFiring = false;
-
         }
 
         protected virtual void OnDrawGizmosSelected()
