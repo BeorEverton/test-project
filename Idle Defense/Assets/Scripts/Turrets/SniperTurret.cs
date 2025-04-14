@@ -10,6 +10,7 @@ namespace Assets.Scripts.Turrets
     {
         public List<Vector2Int> pathCells = new();
         private float _cellSize = 1f;
+        private float _bulletWidth = 0.1f;
 
         private Recoil _recoil;
 
@@ -31,80 +32,54 @@ namespace Assets.Scripts.Turrets
 
             _recoil.AddRecoil();
 
-
-            float pierceDamageMultiplier = 1f - (_stats.PierceDamageFalloff / 100f);
+            float pierceDamageMultiplier = _stats.PierceDamageFalloff / 100f;
             float currentDamage = _damage;
             bool firstHit = true;
-            bool stop = false;
 
             Vector2 startPos = _muzzleFlashPosition.position;
             Vector2 dir = (_targetEnemy.transform.position - (Vector3)startPos).normalized;
 
             // Extend the line: e.g. 20 more units, or your entire screen height
-            float extraDistance = 20f;
+            float extraDistance = 0f;
             float distanceToTarget = Vector2.Distance(startPos, _targetEnemy.transform.position);
             Vector2 extendedPos = startPos + dir * (distanceToTarget + extraDistance);
 
             pathCells = GridRaycaster.GetCellsAlongLine(
                 startPos,
                 extendedPos,
-                maxSteps: 100 // or however many steps you need
+                maxSteps: 30 // or however many steps you need
             );
 
-            HashSet<Enemy> hitEnemies = new();
+            List<Enemy> enemiesInPath = pathCells
+                .SelectMany(cell => GridManager.Instance.GetEnemiesInGrid(cell))
+                .ToList();
 
-            foreach (Vector2Int cell in pathCells)
+            foreach (Enemy enemy in enemiesInPath)
             {
-                if (stop)
-                {
-                    break;
-                }
-
-                var enemiesInCell = GridManager.Instance.GetEnemiesInGrid(cell);
-                // Make a copy to not modify the original list
-                var enemiesInCellCopy = new List<Enemy>(GridManager.Instance.GetEnemiesInGrid(cell));
-
-                // Log each cell & number of enemies
-                if (enemiesInCellCopy == null || enemiesInCellCopy.Count == 0)
-                {
+                if (enemy == null)
                     continue;
-                }
 
-                foreach (Enemy enemy in enemiesInCellCopy)
-                {
-                    if (enemy == null)
-                    {
-                        continue;
-                    }
+                float distance = DistanceFromBulletLine(
+                    enemy.transform.position,           //The point we measure the distance from.
+                    transform.position,                 //First point on the line (turret position).
+                    extendedPos                         //Second point on the line (target enemy's position).
+                );
 
-                    if (hitEnemies.Contains(enemy))
-                    {
-                        continue;
-                    }
+                if (distance > _bulletWidth)
+                    continue;
 
-                    // First hit always succeeds
-                    if (!firstHit)
-                    {
-                        float roll = Random.Range(0f, 100f);
-                        if (roll > _stats.PierceChance)
-                        {
-                            stop = true;
-                            break;
-                        }
-                    }
-
-                    // Deal damage
-                    enemy.TakeDamage(currentDamage);
-
-                    // Damage falloff
-                    currentDamage *= pierceDamageMultiplier;
-
-                    // Mark that we’ve now hit at least once
-                    hitEnemies.Add(enemy);
+                if (firstHit)
                     firstHit = false;
+                else
+                {
+                    float roll = Random.Range(0f, 100f);
+                    if (roll > _stats.PierceChance)
+                        break;
                 }
-            }
 
+                enemy.TakeDamage(currentDamage);
+                currentDamage *= pierceDamageMultiplier;
+            }
         }
 
         public float DistanceFromBulletLine(Vector2 target, Vector2 turretPos, Vector2 enemyPos)

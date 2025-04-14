@@ -51,7 +51,7 @@ namespace Assets.Scripts.SO
         public float SplashDamageUpgradeBaseCost;
 
         [Header("Sniper Turret")]
-        [Tooltip("Amount of enemies a bullet can pierce through")]
+        [Tooltip("Chance for the bullet to pierce through an enemy")]
         public float PierceChance;
         public int PierceChanceLevel;
         public float PierceChanceUpgradeAmount;
