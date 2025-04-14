@@ -10,7 +10,6 @@ namespace Assets.Scripts.UI
     {
         [SerializeField] private TextMeshProUGUI dmgBonus, spdBonus, wave, enemies, money;
         [SerializeField] private Slider spdBonusSlider;
-        private int waveOnHold;
 
         public static UIManager Instance { get; private set; }
 
@@ -22,15 +21,12 @@ namespace Assets.Scripts.UI
                 Instance = this;
             else
                 Destroy(gameObject);
-
-            waveOnHold = -1;
         }
 
         private void Start()
         {
             EnemySpawner.Instance.OnWaveCreated += OnWaveCreated;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
-            EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
         }
 
@@ -49,35 +45,6 @@ namespace Assets.Scripts.UI
         {
             _enemyCount = args.EnemyCount;
             enemies.text = $"{_enemyCount}";
-        }
-
-        private void OnWaveCompleted(object sender, EventArgs e)
-        {
-            if (waveOnHold != -1)
-            {
-                WaveManager.Instance.SetWave(waveOnHold);
-                waveOnHold = -1;
-            }
-        }
-
-        /// <summary>
-        /// Button on the UI to reduce the wave number
-        /// </summary>
-        public void ReduceWave()
-        {
-            if (waveOnHold == -1)
-            {
-                waveOnHold = WaveManager.Instance.GetCurrentWaveIndex();
-            }
-            else
-                waveOnHold = Mathf.Max(1, waveOnHold - 1);
-
-            wave.text = $"Wave\n{waveOnHold}";
-        }
-
-        public void IncreaseWave()
-        {
-            // Button that goes to the next wave, if it was already unlocked.
         }
 
         public void UpdateSpdBonus(float value)
@@ -130,15 +97,10 @@ namespace Assets.Scripts.UI
                 element.color = finalColor;
             }
         }*/
-
-
         public void UpdateMoney(ulong value)
         {
             money.SetText("$" + AbbreviateNumber(value));
         }
-
-
-
         public static string AbbreviateNumber(double number, bool showPercent = false)
         {
             const double Thousand = 1E3;
@@ -155,64 +117,39 @@ namespace Assets.Scripts.UI
             const double Undecillion = 1E36;
             const double Duodecillion = 1E39;
 
-            if (number >= Duodecillion)
+            switch (number)
             {
-                return (number / Duodecillion).ToString("0.#") + "D";
+                case >= Duodecillion:
+                    return (number / Duodecillion).ToString("0.#") + "D";
+                case >= Undecillion:
+                    return (number / Undecillion).ToString("0.#") + "U";
+                case >= Decillion:
+                    return (number / Decillion).ToString("0.#") + "d";
+                case >= Nonillion:
+                    return (number / Nonillion).ToString("0.#") + "N";
+                case >= Octillion:
+                    return (number / Octillion).ToString("0.#") + "O";
+                case >= Septillion:
+                    return (number / Septillion).ToString("0.#") + "S";
+                case >= Sextillion:
+                    return (number / Sextillion).ToString("0.#") + "s";
+                case >= Quintillion:
+                    return (number / Quintillion).ToString("0.#") + "Q";
+                case >= Quadrillion:
+                    return (number / Quadrillion).ToString("0.#") + "q";
+                case >= Trillion:
+                    return (number / Trillion).ToString("0.#") + "T";
+                case >= Billion:
+                    return (number / Billion).ToString("0.#") + "B";
+                case >= Million:
+                    return (number / Million).ToString("0.#") + "M";
+                case >= Thousand:
+                    return (number / Thousand).ToString("0.#") + "K";
+                default:
+                    {
+                        return number.ToString(showPercent ? "F2" : "F0");
+                    }
             }
-            else if (number >= Undecillion)
-            {
-                return (number / Undecillion).ToString("0.#") + "U";
-            }
-            else if (number >= Decillion)
-            {
-                return (number / Decillion).ToString("0.#") + "d";
-            }
-            else if (number >= Nonillion)
-            {
-                return (number / Nonillion).ToString("0.#") + "N";
-            }
-            else if (number >= Octillion)
-            {
-                return (number / Octillion).ToString("0.#") + "O";
-            }
-            else if (number >= Septillion)
-            {
-                return (number / Septillion).ToString("0.#") + "S";
-            }
-            else if (number >= Sextillion)
-            {
-                return (number / Sextillion).ToString("0.#") + "s";
-            }
-            else if (number >= Quintillion)
-            {
-                return (number / Quintillion).ToString("0.#") + "Q";
-            }
-            else if (number >= Quadrillion)
-            {
-                return (number / Quadrillion).ToString("0.#") + "q";
-            }
-            else if (number >= Trillion)
-            {
-                return (number / Trillion).ToString("0.#") + "T";
-            }
-            else if (number >= Billion)
-            {
-                return (number / Billion).ToString("0.#") + "B";
-            }
-            else if (number >= Million)
-            {
-                return (number / Million).ToString("0.#") + "M";
-            }
-            else if (number >= Thousand)
-            {
-                return (number / Thousand).ToString("0.#") + "K";
-            }
-            else if (showPercent)
-            {
-                return number.ToString("F2");
-            }
-            else
-                return number.ToString("F0");
         }
     }
 }

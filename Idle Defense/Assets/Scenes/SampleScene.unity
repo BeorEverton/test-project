@@ -5248,7 +5248,6 @@ GameObject:
   - component: {fileID: 1862916711}
   - component: {fileID: 1862916710}
   - component: {fileID: 1862916713}
-  - component: {fileID: 1862916714}
   m_Layer: 0
   m_Name: WaveManager
   m_TagString: Untagged
@@ -5281,9 +5280,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameRunning: 1
-  _baseWaves:
+  _baseWaveSOs:
   - {fileID: 11400000, guid: ffde4da8901287845997a8fb5b9ed184, type: 2}
   - {fileID: 11400000, guid: e23941e1289c439419e738806bf834ec, type: 2}
+  - {fileID: 11400000, guid: 60321e0a5fcb294498547b985c97b2e7, type: 2}
   _enemySpawner: {fileID: 1862916710}
   _healthMultiplierByWaveCount: 2
   _coinDropMultiplierByWaveCount: 1.05
@@ -5312,18 +5312,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0bcf99deb84d33040881e0d2b942ce70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1862916714
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1862916709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 961243e4cf94c9e4387eede9d98d5c61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1903009033 stripped

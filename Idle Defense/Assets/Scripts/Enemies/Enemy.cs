@@ -13,12 +13,11 @@ namespace Assets.Scripts.Enemies
         public event EventHandler OnMaxHealthChanged;
         public event EventHandler OnCurrentHealthChanged;
         public event EventHandler<OnDeathEventArgs> OnDeath;
-        [SerializeField] private DamageNumber damageNumber, damageNumberCritical;
-
         public class OnDeathEventArgs : EventArgs
         {
             public ulong CoinDropAmount;
         }
+
         [SerializeField] private EnemyInfoSO _info;
         public EnemyInfoSO Info
         {
@@ -35,9 +34,10 @@ namespace Assets.Scripts.Enemies
         public float MovementSpeed;
         public Vector2Int LastGridPos;
 
+        [SerializeField] private DamageNumber damageNumber, damageNumberCritical;
+
         // Laser targeting
         private float _baseMovementSpeed;
-
 
         private void OnEnable()
         {
@@ -78,7 +78,7 @@ namespace Assets.Scripts.Enemies
 
         private void ResetEnemy()
         {
-            Info = WaveSettings.Instance.WaveConfig[Info.EnemyClass];
+            Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
             CanAttack = false;
             MaxHealth = _info.MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
@@ -97,7 +97,6 @@ namespace Assets.Scripts.Enemies
             MovementSpeed = _baseMovementSpeed;
         }
 
-
         public void ReduceMovementSpeed(float percent)
         {
             // Don't reduce speed again if already slowed with equal or stronger effect
@@ -108,51 +107,5 @@ namespace Assets.Scripts.Enemies
             MovementSpeed = newSpeed;
             IsSlowed = true;
         }
-
-
-
-        //private void Update()
-        //{
-        //    if (!CanAttack)
-        //    {
-        //        MoveTowardsPlayer();
-
-        //        Vector2Int currentGridPos = GridManager.Instance.GetGridPosition(transform.position);
-
-        //        if (currentGridPos != LastGridPos)
-        //        {
-        //            GridManager.Instance.RemoveEnemy(this, LastGridPos);
-        //            GridManager.Instance.AddEnemy(this);
-        //            LastGridPos = currentGridPos;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        TryAttacking();
-        //    }
-        //}
-
-        //private void MoveTowardsPlayer()
-        //{
-        //    gameObject.transform.position += Vector3.down * MovementSpeed * Time.deltaTime;
-
-        //    if (gameObject.transform.position.y <= _info.AttackRange)
-        //        CanAttack = true;
-        //}
-
-        //private void TryAttacking()
-        //{
-        //    TimeSinceLastAttack += Time.deltaTime;
-        //    if (TimeSinceLastAttack < _info.AttackSpeed)
-        //        return;
-
-        //    Attack();
-        //    TimeSinceLastAttack = 0f;
-        //}
-
-        //protected virtual void Attack()
-        //{
-        //    Debug.Log("Attacking");
-        //}
     }
 }

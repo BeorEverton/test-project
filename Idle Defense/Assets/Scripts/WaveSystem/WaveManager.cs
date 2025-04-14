@@ -3,6 +3,7 @@ using Assets.Scripts.SO;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.WaveSystem
@@ -19,7 +20,7 @@ namespace Assets.Scripts.WaveSystem
 
         public bool GameRunning = true;
 
-        [SerializeField] private List<WaveConfigSO> _baseWaves;
+        [SerializeField] private List<WaveConfigSO> _baseWaveSOs;
         [SerializeField] private EnemySpawner _enemySpawner;
 
         [Header("Enemy Wave Bonus")]
@@ -28,14 +29,15 @@ namespace Assets.Scripts.WaveSystem
         [Tooltip("CoinDrop = Ceil(CoinDrop * coinDropmultiplier) (Default = 1.05, 5% increase per wave)")]
         [SerializeField] private float _coinDropMultiplierByWaveCount = 1.05f;
 
-        private WaveConfigSO _currentBaseWave;
-        private int _currentBaseWaveIndex = 0;
-        private int _currentWaveIndex = 0;
-        private int _waveIndexOfCurrentBaseWave = 0;
+        private WaveConfigSO _currentBaseWaveSO;
+        private int _currentBaseWaveIndex = 0; //Start with first base wave in list
+        private int _waveIndexOfCurrentBaseWave = 0; //Index of current base wave. Reset when base wave changes
 
+        private int _currentWaveIndex = 0; //Overall wave index
+
+        private Dictionary<int, Wave> _waves = new(); //Dictionary of all waves, with wave number as key
+        private int _maxWaves = 0; //Amount of waves in dictionary
         private bool _waveCompleted = false;
-
-        private bool forcedWave = false; // Used by the UI to force the next wave
 
         private void Awake()
         {
@@ -45,17 +47,22 @@ namespace Assets.Scripts.WaveSystem
                 Destroy(gameObject);
         }
 
-        private void Start()
+        private async void Start()
         {
-            if (_baseWaves != null && _baseWaves.Count > 0)
+            if (_baseWaveSOs != null && _baseWaveSOs.Count > 0)
             {
-                _currentBaseWave = _baseWaves[0];
+                _currentBaseWaveSO = _baseWaveSOs[0];
             }
+
+            await GenerateWavesAsync(startWaveNumber: 1, amountToGenerate: 100); //Generate first 100 waves, starting from wave 1
 
             StartCoroutine(StartWaveRoutine());
 
             EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
         }
+
+        public int GetCurrentWaveIndex() => _currentWaveIndex;
+        public Wave GetCurrentWave() => _waves[_currentWaveIndex];
 
         private void OnWaveCompleted(object sender, EventArgs e)
         {
@@ -68,67 +75,39 @@ namespace Assets.Scripts.WaveSystem
 
             while (GameRunning)
             {
-                if (forcedWave)
-                    forcedWave = false;
-                else
-                {
-                    _currentWaveIndex++;
-                    _waveIndexOfCurrentBaseWave++;
-                }
+                _currentWaveIndex++;
 
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
                     WaveNumber = _currentWaveIndex
                 });
 
-                UpdateCurrentBasicWave();
+                try
+                {
+                    if (_waves.TryGetValue(_currentWaveIndex, out Wave wave))
+                    {
+                        _enemySpawner.StartWave(wave.WaveConfig);
 
-                WaveConfigSO dynamicWave = GenerateDynamicWaveConfig(_currentBaseWave, _currentWaveIndex);
-                _enemySpawner.StartWave(dynamicWave);
+                    }
+                    else
+                    {
+                        throw new Exception($"Wave {_currentWaveIndex} not found in dictionary");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                }
+
+                if (_maxWaves < _currentWaveIndex + 10) //Generate new waves when only 10 left
+                {
+                    GenerateWaves(startWaveNumber: _maxWaves, amountToGenerate: 100);
+                }
 
                 yield return new WaitUntil(() => _waveCompleted);
 
                 _waveCompleted = false;
             }
-        }
-
-        private void UpdateCurrentBasicWave()
-        {
-            if (_currentBaseWaveIndex >= _baseWaves.Count - 1)
-                return;
-
-            WaveConfigSO nextBaseWave = _baseWaves[_currentBaseWaveIndex + 1];
-
-            if (_currentWaveIndex < nextBaseWave.WaveStartIndex)
-                return;
-
-            _currentBaseWaveIndex++;
-            _waveIndexOfCurrentBaseWave = 0;
-            _currentBaseWave = _baseWaves[_currentBaseWaveIndex];
-        }
-
-        private WaveConfigSO GenerateDynamicWaveConfig(WaveConfigSO baseConfig, int waveIndex)
-        {
-            WaveConfigSO newWaveConfig = ScriptableObject.CreateInstance<WaveConfigSO>();
-            newWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
-
-            foreach (EnemyWaveEntry entry in baseConfig.EnemyWaveEntries)
-            {
-                EnemyWaveEntry newEntry = CreateNewEntry(entry);
-
-                if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
-                {
-                    EnemyInfoSO clonedInfo = CloneEnemyInfoWithScale(enemy, waveIndex);
-
-                    WaveSettings.Instance.AddEnemyConfig(clonedInfo.EnemyClass, clonedInfo);
-                }
-
-                newWaveConfig.EnemyWaveEntries.Add(newEntry);
-            }
-
-            newWaveConfig.TimeBetweenSpawns = baseConfig.TimeBetweenSpawns;
-
-            return newWaveConfig;
         }
 
         private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry)
@@ -145,19 +124,69 @@ namespace Assets.Scripts.WaveSystem
             EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
             clonedInfo.MaxHealth += (waveIndex * _healthMultiplierByWaveCount);
             clonedInfo.CoinDropAmount =
-                (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount * (ulong)_currentWaveIndex * _coinDropMultiplierByWaveCount);
+                (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount * (ulong)waveIndex * _coinDropMultiplierByWaveCount);
             return clonedInfo;
         }
 
-        public int GetCurrentWaveIndex()
+        private async void GenerateWaves(int startWaveNumber = 1, int amountToGenerate = 100)
         {
-            return _currentWaveIndex;
+            await GenerateWavesAsync(startWaveNumber, amountToGenerate);
         }
 
-        public void SetWave(int waveIndex)
+        private Task GenerateWavesAsync(int startWaveNumber = 1, int amountToGenerate = 100)
         {
-            _currentWaveIndex = waveIndex;
-            forcedWave = true;
+            int waveNumber = startWaveNumber;
+            for (int i = 0; i < amountToGenerate; i++)
+            {
+                WaveConfigSO baseWave = GetBasicWaveConfigSo(waveNumber);
+                WaveConfigSO tempWaveConfig = ScriptableObject.CreateInstance<WaveConfigSO>();
+                List<EnemyInfoSO> enemyWaveEntries = new();
+
+                tempWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
+                foreach (EnemyWaveEntry entry in baseWave.EnemyWaveEntries)
+                {
+                    EnemyWaveEntry newEntry = CreateNewEntry(entry);
+
+                    if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
+                    {
+                        EnemyInfoSO clonedInfo = CloneEnemyInfoWithScale(enemy, waveNumber);
+
+                        enemyWaveEntries.Add(clonedInfo);
+                    }
+
+                    tempWaveConfig.EnemyWaveEntries.Add(newEntry);
+                }
+
+                tempWaveConfig.TimeBetweenSpawns = baseWave.TimeBetweenSpawns;
+
+                Wave wave = new(tempWaveConfig, waveNumber);
+                enemyWaveEntries.ForEach(entry => wave.AddEnemyClassToWave(entry.EnemyClass, entry));
+
+                _waves.Add(waveNumber, wave);
+                _maxWaves++;
+                waveNumber++;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private WaveConfigSO GetBasicWaveConfigSo(int waveNumber)
+        {
+            WaveConfigSO tempWaveConfig = _baseWaveSOs[0];
+
+            foreach (WaveConfigSO wave in _baseWaveSOs)
+            {
+                if (wave.WaveStartIndex == tempWaveConfig.WaveStartIndex)
+                    continue;
+
+                if (wave.WaveStartIndex <= waveNumber)
+                {
+                    tempWaveConfig = wave;
+                }
+                else
+                    break;
+            }
+            return tempWaveConfig;
         }
     }
 }
