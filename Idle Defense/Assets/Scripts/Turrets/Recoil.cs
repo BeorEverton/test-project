@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class Recoil : MonoBehaviour
-{    
+{
     [SerializeField] private Transform _barrel;
     private Vector3 _barrelOriginalLocalPos;
     private float _recoilTimer = 0f;
@@ -19,7 +19,7 @@ public class Recoil : MonoBehaviour
     }
 
     public void ApplyBarrelRecoil()
-    {      
+    {
         if (!(_recoilTimer > 0f))
             return;
 
@@ -38,5 +38,4 @@ public class Recoil : MonoBehaviour
         _recoilTimer = _recoilDuration;
         _barrel.localPosition = _barrelOriginalLocalPos + Vector3.up * _recoilDistance;
     }
-
 }

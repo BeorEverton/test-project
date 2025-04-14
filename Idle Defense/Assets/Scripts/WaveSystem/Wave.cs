@@ -1,6 +1,5 @@
 using Assets.Scripts.SO;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Assets.Scripts.WaveSystem
 {

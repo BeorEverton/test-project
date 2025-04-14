@@ -1,24 +1,23 @@
-using UnityEngine;
-using UnityEngine.UI;
 using Assets.Scripts.Systems;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
     public class HealthBarUI : MonoBehaviour
     {
-        [SerializeField] private Slider frontSlider; // instant value
-        [SerializeField] private Slider backSlider;  // delayed value
-        [SerializeField] private TextMeshProUGUI healthText;
+        [SerializeField] private Slider _frontSlider; // instant value
+        [SerializeField] private Slider _backSlider;  // delayed value
+        [SerializeField] private TextMeshProUGUI _healthText;
 
-        [SerializeField] private float lerpDuration = 0.4f; // time to fully catch up
-        private float lerpProgress = 0f;
-        private float previousBackValue;
-        private float targetValue;
+        [SerializeField] private float _lerpDuration = 0.4f; // time to fully catch up
+        private float _lerpProgress = 0f;
+        private float _previousBackValue;
+        private float _targetValue;
 
-        private bool isLerping;
-        private float lastKnownMax = -1;
-
+        private bool _isLerping;
+        private float _lastKnownMax = -1;
 
         private void Start()
         {
@@ -35,65 +34,62 @@ namespace Assets.Scripts.UI
 
         private void OnHealthChanged(float current, float max)
         {
-            if (!Mathf.Approximately(max, lastKnownMax))
+            if (!Mathf.Approximately(max, _lastKnownMax))
             {
                 SetMaxHealth(max);
-                lastKnownMax = max;
+                _lastKnownMax = max;
             }
 
             SetHealth(current);
-            healthText.SetText(UIManager.AbbreviateNumber(current) + "/" + UIManager.AbbreviateNumber(max));
+            _healthText.SetText(UIManager.AbbreviateNumber(current) + "/" + UIManager.AbbreviateNumber(max));
         }
-
 
         public void SetMaxHealth(float max)
         {
-            frontSlider.maxValue = max;
-            backSlider.maxValue = max;
+            _frontSlider.maxValue = max;
+            _backSlider.maxValue = max;
 
-            frontSlider.value = max;
-            backSlider.value = max;
+            _frontSlider.value = max;
+            _backSlider.value = max;
 
-            targetValue = max;
-            previousBackValue = max;
-            isLerping = false;
+            _targetValue = max;
+            _previousBackValue = max;
+            _isLerping = false;
         }
 
         public void SetHealth(float current)
         {
-            frontSlider.value = current;
+            _frontSlider.value = current;
 
-            if (!isLerping)
+            if (!_isLerping)
             {
-                previousBackValue = backSlider.value;
-                lerpProgress = 0f;
-                isLerping = true;
+                _previousBackValue = _backSlider.value;
+                _lerpProgress = 0f;
+                _isLerping = true;
             }
             else
             {
-                // Restart the lerp from current backSlider position to new target
-                previousBackValue = backSlider.value;
-                lerpProgress = 0f;
+                // Restart the lerp from current _backSlider position to new target
+                _previousBackValue = _backSlider.value;
+                _lerpProgress = 0f;
             }
 
-            targetValue = current;
+            _targetValue = current;
         }
-
-
 
         private void Update()
         {
-            if (!isLerping) return;
+            if (!_isLerping)
+                return;
 
-            lerpProgress += Time.deltaTime / lerpDuration;
-            backSlider.value = Mathf.Lerp(previousBackValue, targetValue, lerpProgress);
+            _lerpProgress += Time.deltaTime / _lerpDuration;
+            _backSlider.value = Mathf.Lerp(_previousBackValue, _targetValue, _lerpProgress);
 
-            if (Mathf.Approximately(backSlider.value, targetValue) || lerpProgress >= 1f)
+            if (Mathf.Approximately(_backSlider.value, _targetValue) || _lerpProgress >= 1f)
             {
-                backSlider.value = targetValue;
-                isLerping = false;
+                _backSlider.value = _targetValue;
+                _isLerping = false;
             }
         }
-
     }
 }

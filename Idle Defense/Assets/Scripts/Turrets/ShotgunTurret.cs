@@ -151,8 +151,6 @@ namespace Assets.Scripts.Turrets
                 index = (index + 1) % sortedCount;
             }
 
-
-
             _timeSinceLastShot = 0f;
         }
 
@@ -231,7 +229,6 @@ namespace Assets.Scripts.Turrets
             return Mathf.Min(damageFalloff, maxDamageFalloff);
         }
 
-
         private Vector2 RotateVector2(Vector2 v, float degrees)
         {
             float rad = degrees * Mathf.Deg2Rad;
@@ -275,8 +272,6 @@ namespace Assets.Scripts.Turrets
             // White Circle at 11 units - max range (near max falloff)
             Gizmos.color = Color.white;
             Gizmos.DrawWireSphere(turretPosition, 11f);
-
         }
     }
-
 }

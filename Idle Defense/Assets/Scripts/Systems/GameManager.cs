@@ -1,6 +1,5 @@
 using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
-using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -57,7 +56,8 @@ namespace Assets.Scripts.Systems
 
         private void OnClickStarted(InputAction.CallbackContext ctx)
         {
-            if (EventSystem.current.IsPointerOverGameObject()) return;
+            if (EventSystem.current.IsPointerOverGameObject())
+                return;
             spdBonus += initialBoost;
             isHolding = true;
             decreaseTimer = 0f;

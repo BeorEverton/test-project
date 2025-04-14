@@ -1542,17 +1542,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3853848267247782800, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
   m_PrefabInstance: {fileID: 442946419}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &494510876 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3423114139010491191, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
-  m_PrefabInstance: {fileID: 7465881596456636586}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2263,12 +2252,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8af8b486392fc0a41a0c479f819ba90d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dmgBonus: {fileID: 1907158338}
-  spdBonus: {fileID: 2058240590}
-  wave: {fileID: 8178224260527420349}
-  enemies: {fileID: 6797622795491635399}
-  money: {fileID: 5616840248210813476}
-  spdBonusSlider: {fileID: 234552608}
+  _dmgBonus: {fileID: 1907158338}
+  _spdBonus: {fileID: 2058240590}
+  _wave: {fileID: 8178224260527420349}
+  _enemies: {fileID: 6797622795491635399}
+  _money: {fileID: 5616840248210813476}
+  _spdBonusSlider: {fileID: 234552608}
 --- !u!1 &837185441 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6463036619058361839, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
@@ -2695,7 +2684,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -27.518372}
+  m_AnchoredPosition: {x: 0, y: -27.51831}
   m_SizeDelta: {x: 0, y: 55.0368}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1045016502
@@ -4474,11 +4463,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1572977009}
   m_CullTransparentMesh: 1
---- !u!1 &1574420680 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1404109076970763384, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
-  m_PrefabInstance: {fileID: 7465881596456636586}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1650619779
 GameObject:
   m_ObjectHideFlags: 0
@@ -5225,17 +5209,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1903009036}
   m_SourcePrefab: {fileID: 100100000, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
---- !u!114 &1844673110 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3435656254366332225, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
-  m_PrefabInstance: {fileID: 7465881596456636586}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1862916709
 GameObject:
   m_ObjectHideFlags: 0
@@ -12944,12 +12917,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc87f5e0c3abe1346adb888c235558d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lockedOverlay: {fileID: 1574420680}
-  turretToUnlock: {fileID: 1903009033}
-  unlockButton: {fileID: 494510876}
-  unlockText: {fileID: 1844673110}
-  requiredWave: 10
-  unlockCost: 1000
+  _lockedOverlay: {fileID: 0}
+  _turretToUnlock: {fileID: 0}
+  _unlockButton: {fileID: 0}
+  _unlockText: {fileID: 0}
+  _requiredWave: 10
+  _unlockCost: 100
 --- !u!1 &6411440722816993238
 GameObject:
   m_ObjectHideFlags: 0
@@ -14776,10 +14749,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24d4d0d30ae8d7d4bb8690d330da156c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frontSlider: {fileID: 8057202092681202605}
-  backSlider: {fileID: 931788741615105945}
-  healthText: {fileID: 4098846018540285478}
-  lerpDuration: 0.4
+  _frontSlider: {fileID: 8057202092681202605}
+  _backSlider: {fileID: 931788741615105945}
+  _healthText: {fileID: 4098846018540285478}
+  _lerpDuration: 0.4
 --- !u!114 &7842604134948263357
 MonoBehaviour:
   m_ObjectHideFlags: 0

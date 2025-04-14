@@ -26,7 +26,6 @@ namespace Assets.Scripts.Enemies
         }
 
         public float MaxHealth { get; private set; }
-        public bool IsDead => CurrentHealth <= 0;
         public float CurrentHealth { get; private set; }
         public bool IsSlowed { get; private set; }
         public bool CanAttack;

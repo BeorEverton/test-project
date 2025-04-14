@@ -11,17 +11,17 @@ namespace Assets.Scripts.Turrets
         public List<Vector2Int> pathCells = new();
         private float _cellSize = 1f;
 
-        private Recoil recoil;
+        private Recoil _recoil;
 
         private void Start()
         {
-            recoil = GetComponent<Recoil>();
+            _recoil = GetComponent<Recoil>();
         }
 
         protected override void Update()
         {
             base.Update();
-            recoil.ApplyBarrelRecoil();
+            _recoil.ApplyBarrelRecoil();
         }
 
         protected override void Shoot()
@@ -29,7 +29,7 @@ namespace Assets.Scripts.Turrets
             base.Shoot();
             _timeSinceLastShot = 0f;
 
-            recoil.AddRecoil();
+            _recoil.AddRecoil();
 
 
             float pierceDamageMultiplier = 1f - (_stats.PierceDamageFalloff / 100f);
@@ -106,9 +106,6 @@ namespace Assets.Scripts.Turrets
             }
 
         }
-
-
-
 
         public float DistanceFromBulletLine(Vector2 target, Vector2 turretPos, Vector2 enemyPos)
         {

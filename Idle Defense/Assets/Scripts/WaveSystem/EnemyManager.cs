@@ -2,7 +2,6 @@ using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
 using System;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Assets.Scripts.WaveSystem
 {

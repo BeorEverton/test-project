@@ -1,76 +1,78 @@
+using Assets.Scripts.Systems;
+using Assets.Scripts.WaveSystem;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Assets.Scripts.WaveSystem;
-using Assets.Scripts.UI;
-using Assets.Scripts.Systems;
 
-public class TurretUnlockRequirement : MonoBehaviour
+namespace Assets.Scripts.UI
 {
-    [SerializeField] private GameObject lockedOverlay, turretToUnlock;         
-    [SerializeField] private Button unlockButton;              // Button shown once unlockable
-    [SerializeField] private TextMeshProUGUI unlockText;
-    [SerializeField] private int requiredWave = 10;
-    [SerializeField] private ulong unlockCost = 100;
-
-    private bool isUnlocked = false;
-
-    private void Start()
+    public class TurretUnlockRequirement : MonoBehaviour
     {
-        WaveManager.Instance.OnWaveStarted += OnWaveStarted;
-        unlockButton.onClick.AddListener(UnlockTurret);
+        [SerializeField] private GameObject _lockedOverlay, _turretToUnlock;
+        [SerializeField] private Button _unlockButton;              // Button shown once unlockable
+        [SerializeField] private TextMeshProUGUI _unlockText;
+        [SerializeField] private int _requiredWave = 10;
+        [SerializeField] private ulong _unlockCost = 100;
 
-        RefreshState(WaveManager.Instance.GetCurrentWaveIndex());
-    }
+        private bool _isUnlocked = false;
 
-    private void OnDestroy()
-    {
-        WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
-        unlockButton.onClick.RemoveListener(UnlockTurret);
-    }
-
-    private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs e)
-    {
-        RefreshState(e.WaveNumber);
-    }
-
-    private void RefreshState(int currentWave)
-    {
-        if (isUnlocked)
+        private void Start()
         {
-            lockedOverlay.SetActive(false);
-            unlockText.gameObject.SetActive(false);
-            unlockButton.gameObject.SetActive(false);
-            return;
-        }
+            WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+            _unlockButton.onClick.AddListener(UnlockTurret);
 
-        if (currentWave >= requiredWave)
-        {
-            unlockButton.gameObject.SetActive(true);
-            lockedOverlay.SetActive(true);
-            unlockText.text = $"Unlock ${UIManager.AbbreviateNumber(unlockCost)}";
-        }
-        else
-        {
-            lockedOverlay.SetActive(true);
-            unlockButton.gameObject.SetActive(false);
-            unlockText.text = $"Locked\nWave {requiredWave}";
-        }
-    }
-
-    private void UnlockTurret()
-    {
-        if (GameManager.Instance.Money >= unlockCost)
-        {
-            GameManager.Instance.SpendMoney(unlockCost);
-            isUnlocked = true;
             RefreshState(WaveManager.Instance.GetCurrentWaveIndex());
-
-            turretToUnlock.SetActive(true);
         }
-        else
+
+        private void OnDestroy()
         {
-            // Sound to represent no money
+            WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
+            _unlockButton.onClick.RemoveListener(UnlockTurret);
+        }
+
+        private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs e)
+        {
+            RefreshState(e.WaveNumber);
+        }
+
+        private void RefreshState(int currentWave)
+        {
+            if (_isUnlocked)
+            {
+                _lockedOverlay.SetActive(false);
+                _unlockText.gameObject.SetActive(false);
+                _unlockButton.gameObject.SetActive(false);
+                return;
+            }
+
+            if (currentWave >= _requiredWave)
+            {
+                _unlockButton.gameObject.SetActive(true);
+                _lockedOverlay.SetActive(true);
+                _unlockText.text = $"Unlock ${UIManager.AbbreviateNumber(_unlockCost)}";
+            }
+            else
+            {
+                _lockedOverlay.SetActive(true);
+                _unlockButton.gameObject.SetActive(false);
+                _unlockText.text = $"Locked\nWave {_requiredWave}";
+            }
+        }
+
+        private void UnlockTurret()
+        {
+            if (GameManager.Instance.Money >= _unlockCost)
+            {
+                GameManager.Instance.SpendMoney(_unlockCost);
+                _isUnlocked = true;
+                RefreshState(WaveManager.Instance.GetCurrentWaveIndex());
+
+                _turretToUnlock.SetActive(true);
+            }
+            else
+            {
+                // Sound to represent no money
+            }
         }
     }
 }

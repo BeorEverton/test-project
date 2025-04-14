@@ -1,5 +1,4 @@
 using Assets.Scripts.SO;
-using UnityEngine;
 
 namespace Assets.Scripts.Turrets
 {

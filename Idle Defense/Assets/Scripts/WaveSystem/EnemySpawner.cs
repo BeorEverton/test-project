@@ -1,4 +1,5 @@
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Helpers;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using System;
@@ -6,7 +7,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
@@ -15,18 +15,12 @@ namespace Assets.Scripts.WaveSystem
     {
         public static EnemySpawner Instance { get; private set; }
 
+        public List<GameObject> EnemiesAlive { get; } = new();
+
         public event EventHandler OnWaveCompleted;
         public event EventHandler OnWaveStarted;
         public event EventHandler<OnWaveCreatedEventArgs> OnWaveCreated;
         public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
-
-        // Screen size control for adjustable x spawn position
-        private float _screenLeft;
-        private float _screenRight;
-        private int _lastScreenWidth;
-        private int _lastScreenHeight;
-        private const float _spawnMargin = 0.5f;
-
         public class OnEnemyDeathEventArgs : EventArgs
         {
             public ulong CoinDropAmount;
@@ -37,13 +31,16 @@ namespace Assets.Scripts.WaveSystem
             public int EnemyCount;
         }
 
-        public List<GameObject> EnemiesAlive { get; } = new();
+        // Screen size control for adjustable x spawn position
+        private float _screenLeft;
+        private float _screenRight;
+        private int _lastScreenWidth;
+        private int _lastScreenHeight;
+        private const float _spawnMargin = 0.5f;
 
-        // [SerializeField] private float _ySpawnPosition; Changed to recognize screen bounds
         private float _screenTop;
 
         private List<GameObject> _enemiesCurrentWave = new();
-
         private ObjectPool _objectPool;
         private WaveConfigSO _currentWave;
 
@@ -129,16 +126,16 @@ namespace Assets.Scripts.WaveSystem
         /// </summary>
         private void UpdateScreenBoundsIfNeeded()
         {
-            if (Screen.width != _lastScreenWidth || Screen.height != _lastScreenHeight)
-            {
-                Camera cam = Camera.main;
-                _screenLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x + _spawnMargin;
-                _screenRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x - _spawnMargin;
+            if (Screen.width == _lastScreenWidth && Screen.height == _lastScreenHeight)
+                return;
 
-                _screenTop = cam.ViewportToWorldPoint(new Vector3(0.5f, 1f, 0)).y + 1f; // 1 unit above visible top
-                _lastScreenWidth = Screen.width;
-                _lastScreenHeight = Screen.height;
-            }
+            Camera cam = Camera.main;
+            _screenLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x + _spawnMargin;
+            _screenRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x - _spawnMargin;
+
+            _screenTop = cam.ViewportToWorldPoint(new Vector3(0.5f, 1f, 0)).y + 1f; // 1 unit above visible top
+            _lastScreenWidth = Screen.width;
+            _lastScreenHeight = Screen.height;
         }
 
         private Vector3 GetRandomSpawnPosition()

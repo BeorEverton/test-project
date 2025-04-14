@@ -1,19 +1,22 @@
 using UnityEngine;
 
-public class DebugHelper : MonoBehaviour
+namespace Assets.Scripts.Helpers
 {
-    private void OnEnable()
+    public class DebugHelper : MonoBehaviour
     {
-        Debug.Log("DebugHelper enabled");
-    }
+        private void OnEnable()
+        {
+            Debug.Log("DebugHelper enabled");
+        }
 
-    private void OnDisable()
-    {
-        Debug.Log("DebugHelper disabled");
-    }
+        private void OnDisable()
+        {
+            Debug.Log("DebugHelper disabled");
+        }
 
-    private void OnDestroy()
-    {
-        Debug.Log("DebugHelper destroyed");
+        private void OnDestroy()
+        {
+            Debug.Log("DebugHelper destroyed");
+        }
     }
 }

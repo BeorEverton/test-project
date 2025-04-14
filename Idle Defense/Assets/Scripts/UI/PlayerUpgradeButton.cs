@@ -1,72 +1,87 @@
+using Assets.Scripts.Systems;
 using TMPro;
 using UnityEngine;
-using Assets.Scripts.Systems;
 
-public class PlayerUpgradeButton : MonoBehaviour
+namespace Assets.Scripts.UI
 {
-    [Header("UI Elements (Auto-Assigned)")]
-    [SerializeField] private TextMeshProUGUI statName, statValue, statUpgradeAmount, statUpgradeCost;
-
-    [Header("Upgrade Type")]
-    [SerializeField] private PlayerUpgradeType upgradeType;
-
-    private PlayerBaseManager upgradeManager;
-
-    private void Awake()
+    public class PlayerUpgradeButton : MonoBehaviour
     {
-        var tmpros = GetComponentsInChildren<TextMeshProUGUI>();
-        if (tmpros.Length >= 4)
+        [Header("UI Elements (Auto-Assigned)")]
+        [SerializeField] private TextMeshProUGUI _statName, _statValue, _statUpgradeAmount, _statUpgradeCost;
+
+        [Header("Upgrade Type")]
+        [SerializeField] private PlayerUpgradeType _upgradeType;
+
+        private PlayerBaseManager _upgradeManager;
+
+        private void Awake()
         {
-            statName = tmpros[0];
-            statValue = tmpros[1];
-            statUpgradeAmount = tmpros[2];
-            statUpgradeCost = tmpros[3];
+            var tmpros = GetComponentsInChildren<TextMeshProUGUI>();
+            if (tmpros.Length >= 4)
+            {
+                _statName = tmpros[0];
+                _statValue = tmpros[1];
+                _statUpgradeAmount = tmpros[2];
+                _statUpgradeCost = tmpros[3];
+            }
         }
-    }
 
-    private void Start()
-    {
-        upgradeManager = PlayerBaseManager.Instance;
-        statName.SetText(GetDisplayNameForUpgrade(upgradeType));
-        UpdateDisplayFromType();
-    }
-
-    public void OnClick()
-    {
-        switch (upgradeType)
+        private void Start()
         {
-            case PlayerUpgradeType.MaxHealth: upgradeManager.UpgradeMaxHealth(); break;
-            case PlayerUpgradeType.RegenAmount: upgradeManager.UpgradeRegenAmount(); break;
-            case PlayerUpgradeType.RegenInterval: upgradeManager.UpgradeRegenInterval(); break;
+            _upgradeManager = PlayerBaseManager.Instance;
+            _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
+            UpdateDisplayFromType();
         }
-        UpdateDisplayFromType();
-    }
 
-    public void UpdateStats(string value, string bonus, string cost)
-    {
-        statValue.SetText(value);
-        statUpgradeAmount.SetText(bonus);
-        statUpgradeCost.SetText(cost);
-    }
-
-    public void UpdateDisplayFromType()
-    {
-        switch (upgradeType)
+        public void OnClick()
         {
-            case PlayerUpgradeType.MaxHealth: upgradeManager.UpdateMaxHealthDisplay(this); break;
-            case PlayerUpgradeType.RegenAmount: upgradeManager.UpdateRegenAmountDisplay(this); break;
-            case PlayerUpgradeType.RegenInterval: upgradeManager.UpdateRegenIntervalDisplay(this); break;
+            switch (_upgradeType)
+            {
+                case PlayerUpgradeType.MaxHealth:
+                    _upgradeManager.UpgradeMaxHealth();
+                    break;
+                case PlayerUpgradeType.RegenAmount:
+                    _upgradeManager.UpgradeRegenAmount();
+                    break;
+                case PlayerUpgradeType.RegenInterval:
+                    _upgradeManager.UpgradeRegenInterval();
+                    break;
+            }
+            UpdateDisplayFromType();
         }
-    }
 
-    private string GetDisplayNameForUpgrade(PlayerUpgradeType type)
-    {
-        return type switch
+        public void UpdateStats(string value, string bonus, string cost)
         {
-            PlayerUpgradeType.MaxHealth => "Max Health",
-            PlayerUpgradeType.RegenAmount => "Regen / Tick",
-            PlayerUpgradeType.RegenInterval => "Regen Rate",
-            _ => type.ToString()
-        };
+            _statValue.SetText(value);
+            _statUpgradeAmount.SetText(bonus);
+            _statUpgradeCost.SetText(cost);
+        }
+
+        public void UpdateDisplayFromType()
+        {
+            switch (_upgradeType)
+            {
+                case PlayerUpgradeType.MaxHealth:
+                    _upgradeManager.UpdateMaxHealthDisplay(this);
+                    break;
+                case PlayerUpgradeType.RegenAmount:
+                    _upgradeManager.UpdateRegenAmountDisplay(this);
+                    break;
+                case PlayerUpgradeType.RegenInterval:
+                    _upgradeManager.UpdateRegenIntervalDisplay(this);
+                    break;
+            }
+        }
+
+        private string GetDisplayNameForUpgrade(PlayerUpgradeType type)
+        {
+            return type switch
+            {
+                PlayerUpgradeType.MaxHealth => "Max Health",
+                PlayerUpgradeType.RegenAmount => "Regen / Tick",
+                PlayerUpgradeType.RegenInterval => "Regen Rate",
+                _ => type.ToString()
+            };
+        }
     }
 }

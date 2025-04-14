@@ -24,10 +24,8 @@ namespace Assets.Scripts.Systems
         private float _runtimeRegenInterval;
         private const float MinRegenInterval = 0.5f;
 
-
         public float CurrentHealth => _currentHealth;
         public float MaxHealth => _runtimeMaxHealth;
-
 
         private bool _isDead => _currentHealth <= 0f;
 
@@ -61,16 +59,15 @@ namespace Assets.Scripts.Systems
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
         }
 
-
         private void Start()
         {
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
         }
 
-
         public void TakeDamage(float amount)
         {
-            if (_isDead) return;
+            if (_isDead)
+                return;
 
             _currentHealth = Mathf.Max(0f, _currentHealth - amount);
             _regenDelayTimer = 0f;
@@ -84,7 +81,6 @@ namespace Assets.Scripts.Systems
                 InitializeGame();
             }
         }
-
 
         private void Update()
         {
@@ -123,7 +119,8 @@ namespace Assets.Scripts.Systems
         {
             float level = _info.MaxHealthLevel;
             float cost = _info.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, level);
-            if (!TrySpend(cost)) return;
+            if (!TrySpend(cost))
+                return;
 
             _info.MaxHealthLevel += 1f;
             _runtimeMaxHealth += _info.MaxHealthUpgradeAmount;
@@ -135,18 +132,16 @@ namespace Assets.Scripts.Systems
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
         }
 
-
-
         public void UpgradeRegenAmount()
         {
             float level = _info.RegenAmountLevel;
             float cost = _info.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, level);
-            if (!TrySpend(cost)) return;
+            if (!TrySpend(cost))
+                return;
 
             _info.RegenAmountLevel += 1f;
             _runtimeRegenAmount += _info.RegenAmountUpgradeAmount;
         }
-
 
         public void UpgradeRegenInterval()
         {
@@ -156,7 +151,8 @@ namespace Assets.Scripts.Systems
             float level = _info.RegenIntervalLevel;
             float cost = _info.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, level);
 
-            if (!TrySpend(cost)) return;
+            if (!TrySpend(cost))
+                return;
 
             _info.RegenIntervalLevel += 1f;
             _runtimeRegenInterval = Mathf.Max(MinRegenInterval, _runtimeRegenInterval - _info.RegenIntervalUpgradeAmount);
@@ -189,8 +185,6 @@ namespace Assets.Scripts.Systems
             else
                 button.UpdateStats($"{current:F2}s", $"-{bonus:F2}s", $"${UIManager.AbbreviateNumber(cost)}");
         }
-
-
     }
 
     public enum PlayerUpgradeType
@@ -199,5 +193,4 @@ namespace Assets.Scripts.Systems
         RegenAmount,
         RegenInterval
     }
-
 }

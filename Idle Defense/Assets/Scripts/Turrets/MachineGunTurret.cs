@@ -1,29 +1,28 @@
 using Assets.Scripts.Enemies;
-using Assets.Scripts.Systems;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
 {
     public class MachineGunTurret : BaseTurret
     {
-        private Recoil recoil;
+        private Recoil _recoil;
 
         private void Start()
         {
-            recoil = GetComponent<Recoil>();
+            _recoil = GetComponent<Recoil>();
         }
 
         protected override void Update()
         {
             base.Update();
-            recoil.ApplyBarrelRecoil();
+            _recoil.ApplyBarrelRecoil();
         }
 
         protected override void Shoot()
         {
             base.Shoot();
 
-            recoil.AddRecoil();
+            _recoil.AddRecoil();
 
             float finalDamage = _damage;
             bool isCritical = IsCriticalHit();
