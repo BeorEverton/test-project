@@ -46,6 +46,9 @@ namespace Assets.Scripts.WaveSystem
             foreach (GameObject enemy in EnemySpawner.Instance.EnemiesAlive)
             {
                 Enemy enemyComponent = enemy.GetComponent<Enemy>();
+                if (!enemyComponent.IsAlive)
+                    continue;
+
                 if (!enemyComponent.CanAttack)
                 {
                     MoveEnemy(enemyComponent);

@@ -3,6 +3,8 @@ using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using DamageNumbersPro;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -28,6 +30,7 @@ namespace Assets.Scripts.Enemies
         public float MaxHealth { get; private set; }
         public float CurrentHealth { get; private set; }
         public bool IsSlowed { get; private set; }
+        public bool IsAlive;
         public bool CanAttack;
         public float TimeSinceLastAttack = 0f;
         public float MovementSpeed;
@@ -37,6 +40,13 @@ namespace Assets.Scripts.Enemies
 
         // Laser targeting
         private float _baseMovementSpeed;
+
+        private EnemyDeathEffect _enemyDeathEffect;
+
+        private void Start()
+        {
+            _enemyDeathEffect = GetComponent<EnemyDeathEffect>();
+        }
 
         private void OnEnable()
         {
@@ -66,19 +76,28 @@ namespace Assets.Scripts.Enemies
 
         private void CheckIfDead()
         {
-            if (CurrentHealth <= 0)
+            if (!(CurrentHealth <= 0))
+                return;
+
+            StartCoroutine(OnenemyDeath());
+        }
+
+        private IEnumerator OnenemyDeath()
+        {
+            IsAlive = false;
+            yield return StartCoroutine(_enemyDeathEffect.PlayEffectRoutine());
+
+            OnDeath?.Invoke(this, new OnDeathEventArgs
             {
-                OnDeath?.Invoke(this, new OnDeathEventArgs
-                {
-                    CoinDropAmount = _info.CoinDropAmount
-                });
-            }
+                CoinDropAmount = _info.CoinDropAmount
+            });
         }
 
         private void ResetEnemy()
         {
             Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
             CanAttack = false;
+            IsAlive = true;
             MaxHealth = _info.MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
             TimeSinceLastAttack = 0f;

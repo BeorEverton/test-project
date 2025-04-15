@@ -1,64 +1,60 @@
 using System.Collections;
 using UnityEngine;
 
-public class EnemyDeathEffect : MonoBehaviour
+namespace Assets.Scripts.Systems
 {
-    [Header("Effect Settings")]
-    [SerializeField] private float scaleUpAmount = 1.1f;
-    [SerializeField] private float scaleDownDuration = 0.2f;
-    [SerializeField] private float fadeDuration = 0.2f;
-    [SerializeField] private SpriteRenderer burstSprite; // A red star/splash sprite
-    [SerializeField] private float burstDuration = 0.08f;
-
-    private SpriteRenderer[] spriteRenderers;
-    private Vector3 originalScale;
-
-    private void Awake()
+    public class EnemyDeathEffect : MonoBehaviour
     {
-        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
-        originalScale = transform.localScale;
+        [Header("Effect Settings")]
+        [SerializeField] private float _scaleUpAmount = 1.1f;
+        [SerializeField] private float _scaleDownDuration = 0.2f;
+        [SerializeField] private float _fadeDuration = 0.2f;
+        [SerializeField] private SpriteRenderer _burstSprite; // A red star/splash sprite
+        [SerializeField] private float _burstDuration = 0.08f;
 
-        if (burstSprite != null)
-            burstSprite.gameObject.SetActive(false);
-    }
+        private SpriteRenderer[] _spriteRenderers;
+        private Vector3 _originalScale;
 
-    public void PlayDeathEffect()
-    {
-        StartCoroutine(PlayEffectRoutine());
-    }
-
-    private IEnumerator PlayEffectRoutine()
-    {
-        // Show burst sprite
-        if (burstSprite != null)
+        private void Awake()
         {
-            burstSprite.gameObject.SetActive(true);
-            burstSprite.color = Color.red;
-            yield return new WaitForSeconds(burstDuration);
-            burstSprite.gameObject.SetActive(false);
+            _spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+            _originalScale = transform.localScale;
+
+            if (_burstSprite != null)
+                _burstSprite.gameObject.SetActive(false);
         }
 
-        // Scale up
-        transform.localScale = originalScale * scaleUpAmount;
-
-        // Fade and scale down
-        float t = 0f;
-        while (t < scaleDownDuration)
+        public IEnumerator PlayEffectRoutine()
         {
-            t += Time.deltaTime;
-            float progress = t / scaleDownDuration;
-            transform.localScale = Vector3.Lerp(originalScale * scaleUpAmount, Vector3.zero, progress);
-
-            foreach (var sr in spriteRenderers)
+            // Show burst sprite
+            if (_burstSprite != null)
             {
-                Color c = sr.color;
-                c.a = Mathf.Lerp(1f, 0f, progress);
-                sr.color = c;
+                _burstSprite.gameObject.SetActive(true);
+                _burstSprite.color = Color.red;
+                yield return new WaitForSeconds(_burstDuration);
+                _burstSprite.gameObject.SetActive(false);
             }
 
-            yield return null;
-        }
+            // Scale up
+            transform.localScale = _originalScale * _scaleUpAmount;
 
-        gameObject.SetActive(false); // Return to pool or destroy
+            // Fade and scale down
+            float t = 0f;
+            while (t < _scaleDownDuration)
+            {
+                t += Time.deltaTime;
+                float progress = t / _scaleDownDuration;
+                transform.localScale = Vector3.Lerp(_originalScale * _scaleUpAmount, Vector3.zero, progress);
+
+                foreach (var sr in _spriteRenderers)
+                {
+                    Color c = sr.color;
+                    c.a = Mathf.Lerp(1f, 0f, progress);
+                    sr.color = c;
+                }
+
+                yield return null;
+            }
+        }
     }
 }

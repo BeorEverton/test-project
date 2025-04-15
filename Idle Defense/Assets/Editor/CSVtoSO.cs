@@ -1,5 +1,6 @@
 using Assets.Scripts.SO;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -28,13 +29,13 @@ namespace Assets.Editor
                 enemyInfo.name = lines[1];
                 enemyInfo.Name = lines[1];
                 enemyInfo.EnemyClass = enemyClass;
-                enemyInfo.MaxHealth = float.Parse(lines[3]);
-                enemyInfo.MovementSpeed = float.Parse(lines[4]);
-                enemyInfo.MovementSpeedDifference = float.Parse(lines[5]);
-                enemyInfo.CoinDropAmount = ulong.Parse(lines[6]);
-                enemyInfo.Damage = float.Parse(lines[7]);
-                enemyInfo.AttackRange = float.Parse(lines[8]);
-                enemyInfo.AttackSpeed = float.Parse(lines[9]);
+                enemyInfo.MaxHealth = float.Parse(lines[3], CultureInfo.InvariantCulture);
+                enemyInfo.MovementSpeed = float.Parse(lines[4], CultureInfo.InvariantCulture);
+                enemyInfo.MovementSpeedDifference = float.Parse(lines[5], CultureInfo.InvariantCulture);
+                enemyInfo.CoinDropAmount = ulong.Parse(lines[6], CultureInfo.InvariantCulture);
+                enemyInfo.Damage = float.Parse(lines[7], CultureInfo.InvariantCulture);
+                enemyInfo.AttackRange = float.Parse(lines[8], CultureInfo.InvariantCulture);
+                enemyInfo.AttackSpeed = float.Parse(lines[9], CultureInfo.InvariantCulture);
 
                 AssetDatabase.CreateAsset(enemyInfo, $"Assets/Scriptable Objects/Enemies/{enemyInfo.name}.asset");
             }
