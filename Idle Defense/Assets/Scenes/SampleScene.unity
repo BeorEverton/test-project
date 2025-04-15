@@ -419,6 +419,14 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1566278414}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1566278414}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Laser Upgrades View
@@ -431,12 +439,24 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1566278414}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1566278414}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1566278414}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1566278414}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
@@ -548,7 +568,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1566278414}
     - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1566278414}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1457,6 +1485,10 @@ PrefabInstance:
       propertyPath: upgradeType
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1361450076336013072, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: _upgradeType
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3853848267247782800, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2248,7 +2280,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3206999689089362432, guid: d90f1d543089d534693699decadbf149, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8147607113893816477, guid: d90f1d543089d534693699decadbf149, type: 3}
       propertyPath: _attackRange
@@ -3407,6 +3439,10 @@ PrefabInstance:
       propertyPath: upgradeType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1361450076336013072, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: _upgradeType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3853848267247782800, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -3891,7 +3927,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.3266666, y: 1.5333333}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -3981,6 +4017,14 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1989609175}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1989609175}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Sniper Upgrades View
@@ -3993,12 +4037,24 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1989609175}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1989609175}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1989609175}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1989609175}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
@@ -4110,7 +4166,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1989609175}
     - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1989609175}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -4212,6 +4276,14 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1325377965}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1325377965}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Missile Launcher Upgrades View
@@ -4224,12 +4296,24 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1325377965}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1325377965}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1325377965}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1325377965}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
@@ -4341,7 +4425,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1325377965}
     - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1325377965}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -4687,6 +4779,18 @@ PrefabInstance:
       value: -0.15
       objectReference: {fileID: 0}
     - target: {fileID: 672767675903866823, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.6909
+      objectReference: {fileID: 0}
+    - target: {fileID: 672767675903866823, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.6909
+      objectReference: {fileID: 0}
+    - target: {fileID: 672767675903866823, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.6909
+      objectReference: {fileID: 0}
+    - target: {fileID: 672767675903866823, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.67
       objectReference: {fileID: 0}
@@ -4716,7 +4820,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2906797065888577587, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2948967594423300107, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: m_LocalScale.x
@@ -4788,7 +4892,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: _muzzleFlashSprites.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: '_mussleFlashSprites.Array.data[0]'
@@ -4801,7 +4905,11 @@ PrefabInstance:
     - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
       propertyPath: '_muzzleFlashSprites.Array.data[0]'
       value: 
-      objectReference: {fileID: 703903316360307281, guid: 5afae8ecd66ea0641900e492d1d3d04c, type: 3}
+      objectReference: {fileID: 407011343619612724, guid: 5afae8ecd66ea0641900e492d1d3d04c, type: 3}
+    - target: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+      propertyPath: '_muzzleFlashSprites.Array.data[1]'
+      value: 
+      objectReference: {fileID: -3323732126268073275, guid: 5afae8ecd66ea0641900e492d1d3d04c, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4969,6 +5077,14 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1903009034}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009034}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Shotgun Upgrades View
@@ -4981,12 +5097,24 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1903009034}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009034}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1903009034}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009034}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
@@ -5098,7 +5226,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1903009034}
     - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009034}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: upgradeType
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
       value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -6674,7 +6810,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!222 &685799724918866819
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7660,6 +7796,14 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1240474255}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1240474255}
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Machine Gun Upgrades View
@@ -7668,10 +7812,22 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1240474255}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1240474255}
     - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1240474255}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1240474255}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -7780,6 +7936,14 @@ PrefabInstance:
       propertyPath: baseTurret
       value: 
       objectReference: {fileID: 1240474255}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1240474255}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _upgradeType
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8586,7 +8750,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &2662989783491297905
 GameObject:
   m_ObjectHideFlags: 0
