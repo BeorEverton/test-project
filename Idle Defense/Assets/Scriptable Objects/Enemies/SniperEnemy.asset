@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
-  m_Name: RangedEnemy
+  m_Name: SniperEnemy
   m_EditorClassIdentifier: 
-  Name: RangedEnemy
-  EnemyClass: 1
-  MaxHealth: 2
+  Name: SniperEnemy
+  EnemyClass: 5
+  MaxHealth: 1
   MovementSpeed: 0.5
   MovementSpeedDifference: 0.2
-  CoinDropAmount: 7
-  Damage: 1
-  AttackRange: 2
+  CoinDropAmount: 11
+  Damage: 3
+  AttackRange: 4
   AttackSpeed: 1

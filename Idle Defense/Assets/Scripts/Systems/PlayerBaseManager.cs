@@ -59,11 +59,6 @@ namespace Assets.Scripts.Systems
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
         }
 
-        private void Start()
-        {
-            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
-        }
-
         public void TakeDamage(float amount)
         {
             if (_isDead)

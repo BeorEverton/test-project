@@ -24,6 +24,24 @@ namespace Assets.Scripts.Systems
                 _burstSprite.gameObject.SetActive(false);
         }
 
+        private void OnEnable()
+        {
+            if (_spriteRenderers.Length >= 1)
+            {
+                for (int i = 0; i < _spriteRenderers.Length; i++)
+                {
+                    Color c = _spriteRenderers[i].color;
+                    c.a = 1f;
+                    _spriteRenderers[i].color = c; // ? You forgot this line
+                }
+
+                transform.localScale = _originalScale;
+            }
+            float angle = Random.Range(0f, 180f);
+            _burstSprite.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        }
+
+
         public IEnumerator PlayEffectRoutine()
         {
             // Show burst sprite

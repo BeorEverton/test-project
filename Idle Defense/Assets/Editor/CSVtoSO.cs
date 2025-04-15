@@ -30,7 +30,8 @@ namespace Assets.Editor
                 if (enemyInfo == null)
                 {
                     enemyInfo = ScriptableObject.CreateInstance<EnemyInfoSO>();
-                    AssetDatabase.CreateAsset(enemyInfo, $"Assets/Scriptable Objects/Enemies/{enemyInfo.name}.asset");
+                    AssetDatabase.CreateAsset(enemyInfo, $"Assets/Scriptable Objects/Enemies/{lines[1]}.asset");
+
                 }
 
                 //Update asset's data
