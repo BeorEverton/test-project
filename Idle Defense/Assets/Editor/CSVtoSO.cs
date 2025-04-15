@@ -25,19 +25,28 @@ namespace Assets.Editor
                     continue;
                 Enum.TryParse(lines[2], out EnemyClass enemyClass);
 
-                EnemyInfoSO enemyInfo = ScriptableObject.CreateInstance<EnemyInfoSO>();
+                EnemyInfoSO enemyInfo = AssetDatabase.LoadAssetAtPath<EnemyInfoSO>($"Assets/Scriptable Objects/Enemies/{lines[1]}.asset");
+
+                if (enemyInfo == null)
+                {
+                    enemyInfo = ScriptableObject.CreateInstance<EnemyInfoSO>();
+                    AssetDatabase.CreateAsset(enemyInfo, $"Assets/Scriptable Objects/Enemies/{enemyInfo.name}.asset");
+                }
+
+                //Update asset's data
                 enemyInfo.name = lines[1];
                 enemyInfo.Name = lines[1];
                 enemyInfo.EnemyClass = enemyClass;
                 enemyInfo.MaxHealth = float.Parse(lines[3], CultureInfo.InvariantCulture);
                 enemyInfo.MovementSpeed = float.Parse(lines[4], CultureInfo.InvariantCulture);
                 enemyInfo.MovementSpeedDifference = float.Parse(lines[5], CultureInfo.InvariantCulture);
-                enemyInfo.CoinDropAmount = ulong.Parse(lines[6], CultureInfo.InvariantCulture);
+                enemyInfo.CoinDropAmount = ulong.Parse(lines[6]);
                 enemyInfo.Damage = float.Parse(lines[7], CultureInfo.InvariantCulture);
                 enemyInfo.AttackRange = float.Parse(lines[8], CultureInfo.InvariantCulture);
                 enemyInfo.AttackSpeed = float.Parse(lines[9], CultureInfo.InvariantCulture);
 
-                AssetDatabase.CreateAsset(enemyInfo, $"Assets/Scriptable Objects/Enemies/{enemyInfo.name}.asset");
+                //Mark asset dirty so that the changes are saved
+                EditorUtility.SetDirty(enemyInfo);
             }
 
             AssetDatabase.SaveAssets();
