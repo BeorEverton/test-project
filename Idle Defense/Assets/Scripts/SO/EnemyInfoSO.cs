@@ -34,5 +34,10 @@ namespace Assets.Scripts.SO
         Melee,
         Ranged,
         Tank,
+        Scout,
+        Charger,
+        Sniper, 
+        Assassin,
+        Champion
     }
 }

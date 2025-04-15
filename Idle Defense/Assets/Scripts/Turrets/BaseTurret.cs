@@ -14,13 +14,13 @@ namespace Assets.Scripts.Turrets
     public abstract class BaseTurret : MonoBehaviour
     {
 
-        public EnemyTarget EnemyTargetChoise = EnemyTarget.First;
+        public EnemyTarget EnemyTargetChoice = EnemyTarget.First;
 
         [SerializeField] protected TurretInfoSO _turretInfo;
         protected TurretStatsInstance _stats;
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
-        [SerializeField] private List<Sprite> _muzzleFlashSprites;
+        [SerializeField] protected List<Sprite> _muzzleFlashSprites;
         [SerializeField] private float _attackRange;
 
         protected GameObject _targetEnemy;
@@ -92,7 +92,7 @@ namespace Assets.Scripts.Turrets
         protected virtual void TargetEnemy()
         {
             List<GameObject> enemiesAlive = EnemySpawner.Instance.EnemiesAlive;
-            _targetEnemy = EnemyTargetChoise switch
+            _targetEnemy = EnemyTargetChoice switch
             {
                 EnemyTarget.First => enemiesAlive
                     .OrderBy(enemy => enemy.transform.position.y)
@@ -212,6 +212,27 @@ namespace Assets.Scripts.Turrets
 
                 _lastScreenWidth = Screen.width;
                 _lastScreenHeight = Screen.height;
+            }
+        }
+
+        public void SetTarget(int index)
+        {
+            Debug.Log("Setting index on " + name + "" + index);
+            switch (index)
+            {
+                case 0:
+                    EnemyTargetChoice = EnemyTarget.First;
+                    break;
+                case 1:
+                    EnemyTargetChoice = EnemyTarget.Strongest;
+                    break;
+                case 2:
+                    EnemyTargetChoice = EnemyTarget.Random;
+                    break;
+                default:
+                    EnemyTargetChoice = EnemyTarget.First;
+                    break;
+
             }
         }
     }

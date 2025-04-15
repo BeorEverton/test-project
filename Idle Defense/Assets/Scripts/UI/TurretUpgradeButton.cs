@@ -12,7 +12,7 @@ namespace Assets.Scripts.UI
         private TurretUpgradeManager _upgradeManager;
 
         [Header("Assigned in Inspector")]
-        [SerializeField] private BaseTurret _baseTurret;
+        public BaseTurret _baseTurret;
         [SerializeField] private TurretStatsInstance _turret;
 
         [Header("UI Elements (Auto-Assigned)")]

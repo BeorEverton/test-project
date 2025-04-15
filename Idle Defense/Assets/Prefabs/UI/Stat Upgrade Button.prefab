@@ -171,8 +171,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 115, y: -21.5425}
-  m_SizeDelta: {x: 210, y: 43.085}
+  m_AnchoredPosition: {x: 115, y: -14.8912}
+  m_SizeDelta: {x: 210, y: 29.7823}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6211729630297669210
 CanvasRenderer:
@@ -453,8 +453,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 54.920586, y: -23.428587}
-  m_SizeDelta: {x: -116.0911, y: 46.857113}
+  m_AnchoredPosition: {x: 54.920586, y: -14.891}
+  m_SizeDelta: {x: -116.0911, y: 29.782}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &150122148933830622
 CanvasRenderer:
@@ -782,8 +782,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef12ba00b5bc13844a6a6c7d8fee102a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseTurret: {fileID: 0}
-  turret:
+  _baseTurret: {fileID: 0}
+  _turret:
     Damage: 0
     DamageLevel: 0
     DamageUpgradeAmount: 0
@@ -832,11 +832,11 @@ MonoBehaviour:
     SlowEffectLevel: 0
     SlowEffectUpgradeAmount: 0
     SlowEffectUpgradeBaseCost: 0
-  statName: {fileID: 0}
-  statValue: {fileID: 0}
-  statUpgradeAmount: {fileID: 0}
-  statUpgradeCost: {fileID: 0}
-  upgradeType: 0
+  _statName: {fileID: 0}
+  _statValue: {fileID: 0}
+  _statUpgradeAmount: {fileID: 0}
+  _statUpgradeCost: {fileID: 0}
+  _upgradeType: 0
 --- !u!114 &1738818219752017755
 MonoBehaviour:
   m_ObjectHideFlags: 0

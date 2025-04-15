@@ -13,7 +13,7 @@ namespace Assets.Scripts.Turrets
 
         protected override void Shoot()
         {
-            base.Shoot();
+            //base.Shoot(); has custom muzzle flash
 
             if (_timeSinceLastShot < _stats.FireRate)
                 return;
@@ -42,6 +42,8 @@ namespace Assets.Scripts.Turrets
 
             LaunchMissile(predictedPosition, travelTime);
 
+            StartCoroutine(PlayMuzzleFlashWhileMissileFlying(travelTime));
+
             // Trigger explosion when missile "arrives"
             StartCoroutine(DelayedExplosion(predictedPosition, travelTime));
 
@@ -52,6 +54,29 @@ namespace Assets.Scripts.Turrets
         {
             _missile.Launch(targetPosition, timeToImpact);
         }
+
+        private IEnumerator PlayMuzzleFlashWhileMissileFlying(float duration)
+        {
+            SpriteRenderer sr = _muzzleFlashPosition.GetComponent<SpriteRenderer>();
+            float timer = 0f;
+            float flashInterval = 0.06f;
+
+            while (timer < duration)
+            {
+                if (_muzzleFlashSprites.Count > 0)
+                {
+                    Sprite randomMuzzleFlash = _muzzleFlashSprites[Random.Range(0, _muzzleFlashSprites.Count)];
+                    sr.sprite = randomMuzzleFlash;
+                }
+
+                yield return new WaitForSeconds(flashInterval);
+                timer += flashInterval;
+            }
+
+            // Clear the muzzle flash when missile hits
+            sr.sprite = null;
+        }
+
 
         private IEnumerator DelayedExplosion(Vector3 target, float delay)
         {
