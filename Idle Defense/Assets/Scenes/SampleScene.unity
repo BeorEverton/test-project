@@ -348,6 +348,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1146167883132602867}
     m_Modifications:
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1502747103}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Laser Upgrades View
@@ -356,6 +360,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1502747103}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1502747103}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -436,6 +448,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1502747103}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1723,6 +1739,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3206999689089362432, guid: d90f1d543089d534693699decadbf149, type: 3}
   m_PrefabInstance: {fileID: 818134942}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &553529173 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8147607113893816477, guid: d90f1d543089d534693699decadbf149, type: 3}
+  m_PrefabInstance: {fileID: 818134942}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 553529171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 684478f2609172942bc5bd9b7a992031, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &575179342 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2573427904044736469, guid: d90f1d543089d534693699decadbf149, type: 3}
@@ -2417,6 +2444,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6463036619058361839, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
   m_PrefabInstance: {fileID: 296267286}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &837185442 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 661742800451786820, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
+  m_PrefabInstance: {fileID: 296267286}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 837185441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12a70e5973a11b74695c7e1a6ff1a391, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &887693531
 GameObject:
   m_ObjectHideFlags: 0
@@ -4049,6 +4087,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1146167883132602867}
     m_Modifications:
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 553529173}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Sniper Upgrades View
@@ -4057,6 +4099,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 553529173}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 553529173}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -4137,6 +4187,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 553529173}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4160,6 +4214,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1146167883132602867}
     m_Modifications:
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 837185442}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Missile Launcher Upgrades View
@@ -4168,6 +4226,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 837185442}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 837185442}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -4248,6 +4314,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 837185442}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4406,6 +4476,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4549154123848940232, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
   m_PrefabInstance: {fileID: 1046353988}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1502747103 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4696110832135599143, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
+  m_PrefabInstance: {fileID: 1046353988}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502747102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53f230fba6b2f9540a062656d0cd45ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1572977009
 GameObject:
   m_ObjectHideFlags: 0
@@ -4802,6 +4883,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1146167883132602867}
     m_Modifications:
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009037}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Shotgun Upgrades View
@@ -4810,6 +4895,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009037}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009037}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -4890,6 +4983,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 1903009037}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5296,6 +5393,17 @@ MonoBehaviour:
   _barrel: {fileID: 1917206758}
   _recoilDuration: 0.3
   _recoilDistance: -0.3
+--- !u!114 &1903009037 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3301549281895169227, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+  m_PrefabInstance: {fileID: 1821057556}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903009033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee3786d7be81a34fbd537ca0d499923, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1907158336
 GameObject:
   m_ObjectHideFlags: 0
@@ -5526,6 +5634,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1976050375}
   m_CullTransparentMesh: 1
+--- !u!114 &2034135072 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6844404436691851304, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+  m_PrefabInstance: {fileID: 1650681813}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb975e8e1c83664398f72d88508c61f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2058240588
 GameObject:
   m_ObjectHideFlags: 0
@@ -7402,10 +7521,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1146167883132602867}
     m_Modifications:
+    - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 2034135072}
     - target: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Name
       value: Machine Gun Upgrades View
       objectReference: {fileID: 0}
+    - target: {fileID: 5098573618018039196, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 2034135072}
+    - target: {fileID: 6251340629194385450, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 2034135072}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -7486,6 +7617,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: _baseTurret
+      value: 
+      objectReference: {fileID: 2034135072}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
