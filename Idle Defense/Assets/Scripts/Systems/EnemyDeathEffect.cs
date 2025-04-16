@@ -19,9 +19,6 @@ namespace Assets.Scripts.Systems
         {
             _spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
             _originalScale = transform.localScale;
-
-            if (_burstSprite != null)
-                _burstSprite.gameObject.SetActive(false);
         }
 
         private void OnEnable()
@@ -32,13 +29,18 @@ namespace Assets.Scripts.Systems
                 {
                     Color c = _spriteRenderers[i].color;
                     c.a = 1f;
-                    _spriteRenderers[i].color = c; // ? You forgot this line
+                    _spriteRenderers[i].color = c;
                 }
 
                 transform.localScale = _originalScale;
             }
-            float angle = Random.Range(0f, 180f);
-            _burstSprite.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+            if (_burstSprite != null)
+            {
+                _burstSprite.gameObject.SetActive(false); // Always hide on spawn
+                float angle = Random.Range(0f, 180f);
+                _burstSprite.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            }
         }
 
 

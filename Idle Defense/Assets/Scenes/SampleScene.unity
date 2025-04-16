@@ -322,6 +322,10 @@ PrefabInstance:
       value: Shotgun Unlock Button
       objectReference: {fileID: 0}
     - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
+      propertyPath: _unlockCost
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7068401216852173738, guid: a218df82cd976eb449d7d61a8879a364, type: 3}
       propertyPath: _turretToUnlock
       value: 
       objectReference: {fileID: 1903009033}
@@ -1016,6 +1020,10 @@ PrefabInstance:
       propertyPath: _attackRange
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 661742800451786820, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
+      propertyPath: _muzzleFlashPosition
+      value: 
+      objectReference: {fileID: 209161934}
     - target: {fileID: 661742800451786820, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
       propertyPath: _muzzleFlashSprites.Array.size
       value: 2
@@ -2999,6 +3007,11 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!4 &1048221275 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6098369391239653284, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+  m_PrefabInstance: {fileID: 1821057556}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1074743224
 GameObject:
   m_ObjectHideFlags: 0
@@ -4791,6 +4804,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3301549281895169227, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+      propertyPath: _muzzleFlashPosition
+      value: 
+      objectReference: {fileID: 1048221275}
+    - target: {fileID: 3301549281895169227, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
       propertyPath: _muzzleFlashSprites.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -4960,6 +4977,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ffde4da8901287845997a8fb5b9ed184, type: 2}
   - {fileID: 11400000, guid: e23941e1289c439419e738806bf834ec, type: 2}
   - {fileID: 11400000, guid: 60321e0a5fcb294498547b985c97b2e7, type: 2}
+  - {fileID: 11400000, guid: a5adb670a464f26439acd95e5606e9bb, type: 2}
+  - {fileID: 11400000, guid: 3380759127691344ea7964a1b3680b78, type: 2}
+  - {fileID: 11400000, guid: fff9afce332353f469e07f619baf1184, type: 2}
+  - {fileID: 11400000, guid: 8c210fbefef7c8445a241844fb6211e8, type: 2}
+  - {fileID: 11400000, guid: 68fae78a2d468fc44b65b2fb681f69dd, type: 2}
+  - {fileID: 11400000, guid: 9de97f7dd4c7ff5468ddeaaa38e2fc61, type: 2}
   _enemySpawner: {fileID: 1862916710}
   _healthMultiplierByWaveCount: 2
   _coinDropMultiplierByWaveCount: 1.05
