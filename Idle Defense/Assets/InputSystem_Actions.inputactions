@@ -555,6 +555,94 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "GameSpeed",
+            "id": "8c2d4246-a1cb-4de2-8f77-78d2496b3bcb",
+            "actions": [
+                {
+                    "name": "x1",
+                    "type": "Button",
+                    "id": "5e54d444-e788-4313-bbfe-16489550b370",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "x2",
+                    "type": "Button",
+                    "id": "b61842ce-433b-4a74-ae9d-c37dad7265c3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "x3",
+                    "type": "Button",
+                    "id": "873a1d78-4028-42f5-a45a-e4efa2312224",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "x5",
+                    "type": "Button",
+                    "id": "d1e1e5c7-c87a-4cb1-88bc-3e28336d8e29",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "31495366-91ca-437d-ba62-314e2a49fa5e",
+                    "path": "<Keyboard>/f1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "x1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2d403860-26b2-4bfa-805a-2ba4c8834e68",
+                    "path": "<Keyboard>/f2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "x2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d619a60d-659e-40e1-a791-9b988df79607",
+                    "path": "<Keyboard>/f3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "x3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e310992f-6c63-4f2c-9e19-117dd99b49e6",
+                    "path": "<Keyboard>/f4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "x5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

@@ -577,6 +577,94 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""GameSpeed"",
+            ""id"": ""8c2d4246-a1cb-4de2-8f77-78d2496b3bcb"",
+            ""actions"": [
+                {
+                    ""name"": ""x1"",
+                    ""type"": ""Button"",
+                    ""id"": ""5e54d444-e788-4313-bbfe-16489550b370"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""x2"",
+                    ""type"": ""Button"",
+                    ""id"": ""b61842ce-433b-4a74-ae9d-c37dad7265c3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""x3"",
+                    ""type"": ""Button"",
+                    ""id"": ""873a1d78-4028-42f5-a45a-e4efa2312224"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""x5"",
+                    ""type"": ""Button"",
+                    ""id"": ""d1e1e5c7-c87a-4cb1-88bc-3e28336d8e29"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""31495366-91ca-437d-ba62-314e2a49fa5e"",
+                    ""path"": ""<Keyboard>/f1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""x1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2d403860-26b2-4bfa-805a-2ba4c8834e68"",
+                    ""path"": ""<Keyboard>/f2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""x2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d619a60d-659e-40e1-a791-9b988df79607"",
+                    ""path"": ""<Keyboard>/f3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""x3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e310992f-6c63-4f2c-9e19-117dd99b49e6"",
+                    ""path"": ""<Keyboard>/f4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""x5"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -657,12 +745,19 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_UI_ScrollWheel = m_UI.FindAction("ScrollWheel", throwIfNotFound: true);
         m_UI_TrackedDevicePosition = m_UI.FindAction("TrackedDevicePosition", throwIfNotFound: true);
         m_UI_TrackedDeviceOrientation = m_UI.FindAction("TrackedDeviceOrientation", throwIfNotFound: true);
+        // GameSpeed
+        m_GameSpeed = asset.FindActionMap("GameSpeed", throwIfNotFound: true);
+        m_GameSpeed_x1 = m_GameSpeed.FindAction("x1", throwIfNotFound: true);
+        m_GameSpeed_x2 = m_GameSpeed.FindAction("x2", throwIfNotFound: true);
+        m_GameSpeed_x3 = m_GameSpeed.FindAction("x3", throwIfNotFound: true);
+        m_GameSpeed_x5 = m_GameSpeed.FindAction("x5", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
     {
         UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, PlayerInput.Player.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, PlayerInput.UI.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_GameSpeed.enabled, "This will cause a leak and performance issues, PlayerInput.GameSpeed.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -884,6 +979,76 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
+
+    // GameSpeed
+    private readonly InputActionMap m_GameSpeed;
+    private List<IGameSpeedActions> m_GameSpeedActionsCallbackInterfaces = new List<IGameSpeedActions>();
+    private readonly InputAction m_GameSpeed_x1;
+    private readonly InputAction m_GameSpeed_x2;
+    private readonly InputAction m_GameSpeed_x3;
+    private readonly InputAction m_GameSpeed_x5;
+    public struct GameSpeedActions
+    {
+        private @PlayerInput m_Wrapper;
+        public GameSpeedActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @x1 => m_Wrapper.m_GameSpeed_x1;
+        public InputAction @x2 => m_Wrapper.m_GameSpeed_x2;
+        public InputAction @x3 => m_Wrapper.m_GameSpeed_x3;
+        public InputAction @x5 => m_Wrapper.m_GameSpeed_x5;
+        public InputActionMap Get() { return m_Wrapper.m_GameSpeed; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GameSpeedActions set) { return set.Get(); }
+        public void AddCallbacks(IGameSpeedActions instance)
+        {
+            if (instance == null || m_Wrapper.m_GameSpeedActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameSpeedActionsCallbackInterfaces.Add(instance);
+            @x1.started += instance.OnX1;
+            @x1.performed += instance.OnX1;
+            @x1.canceled += instance.OnX1;
+            @x2.started += instance.OnX2;
+            @x2.performed += instance.OnX2;
+            @x2.canceled += instance.OnX2;
+            @x3.started += instance.OnX3;
+            @x3.performed += instance.OnX3;
+            @x3.canceled += instance.OnX3;
+            @x5.started += instance.OnX5;
+            @x5.performed += instance.OnX5;
+            @x5.canceled += instance.OnX5;
+        }
+
+        private void UnregisterCallbacks(IGameSpeedActions instance)
+        {
+            @x1.started -= instance.OnX1;
+            @x1.performed -= instance.OnX1;
+            @x1.canceled -= instance.OnX1;
+            @x2.started -= instance.OnX2;
+            @x2.performed -= instance.OnX2;
+            @x2.canceled -= instance.OnX2;
+            @x3.started -= instance.OnX3;
+            @x3.performed -= instance.OnX3;
+            @x3.canceled -= instance.OnX3;
+            @x5.started -= instance.OnX5;
+            @x5.performed -= instance.OnX5;
+            @x5.canceled -= instance.OnX5;
+        }
+
+        public void RemoveCallbacks(IGameSpeedActions instance)
+        {
+            if (m_Wrapper.m_GameSpeedActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IGameSpeedActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GameSpeedActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GameSpeedActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public GameSpeedActions @GameSpeed => new GameSpeedActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     public InputControlScheme KeyboardMouseScheme
     {
@@ -945,5 +1110,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         void OnScrollWheel(InputAction.CallbackContext context);
         void OnTrackedDevicePosition(InputAction.CallbackContext context);
         void OnTrackedDeviceOrientation(InputAction.CallbackContext context);
+    }
+    public interface IGameSpeedActions
+    {
+        void OnX1(InputAction.CallbackContext context);
+        void OnX2(InputAction.CallbackContext context);
+        void OnX3(InputAction.CallbackContext context);
+        void OnX5(InputAction.CallbackContext context);
     }
 }
