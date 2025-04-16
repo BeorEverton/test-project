@@ -24,7 +24,7 @@ namespace Assets.Scripts.Turrets
 
             _recoil.AddRecoil();
 
-            float finalDamage = _damage;
+            float finalDamage = _stats.Damage;
             bool isCritical = IsCriticalHit();
 
             if (isCritical)

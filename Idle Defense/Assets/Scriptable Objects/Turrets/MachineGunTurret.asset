@@ -24,12 +24,12 @@ MonoBehaviour:
   AngleThreshold: 5
   CriticalChance: 5
   CriticalChanceLevel: 0
-  CriticalChanceUpgradeAmount: 2
-  CriticalChanceUpgradeBaseCost: 5
+  CriticalChanceUpgradeAmount: 1
+  CriticalChanceUpgradeBaseCost: 100
   CriticalDamageMultiplier: 20
   CriticalDamageMultiplierLevel: 0
   CriticalDamageMultiplierUpgradeAmount: 5
-  CriticalDamageMultiplierUpgradeBaseCost: 10
+  CriticalDamageMultiplierUpgradeBaseCost: 50
   ExplosionRadius: 0
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0
@@ -38,10 +38,10 @@ MonoBehaviour:
   SplashDamageLevel: 0
   SplashDamageUpgradeAmount: 0
   SplashDamageUpgradeBaseCost: 0
-  PierceCount: 0
-  PierceCountLevel: 0
-  PierceCountUpgradeAmount: 0
-  PierceCountUpgradeBaseCost: 0
+  PierceChance: 0
+  PierceChanceLevel: 0
+  PierceChanceUpgradeAmount: 0
+  PierceChanceUpgradeBaseCost: 0
   PierceDamageFalloff: 0
   PierceDamageFalloffLevel: 0
   PierceDamageFalloffUpgradeAmount: 0

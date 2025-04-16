@@ -73,7 +73,7 @@ namespace Assets.Scripts.Systems
 
         public void UpgradeCriticalChance()
         {
-            if (turret.CriticalChance >= 100f)
+            if (turret.CriticalChance >= 50f)
                 return;
 
             float cost = GetHybridCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel);
@@ -262,7 +262,7 @@ namespace Assets.Scripts.Systems
             float current = turret.CriticalChance;
             float bonus = turret.CriticalChanceUpgradeAmount;
             float cost = GetHybridCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel);
-            if (current >= 100f)
+            if (current >= 50f)
             {
                 turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
             }

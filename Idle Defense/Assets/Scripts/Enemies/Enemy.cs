@@ -65,10 +65,13 @@ namespace Assets.Scripts.Enemies
         {
             CurrentHealth -= amount;
 
-            if (damageNumberCritical && isCritical)
-                damageNumberCritical.Spawn(transform.position, amount);
-            else if (damageNumber)
-                damageNumber.Spawn(transform.position, amount);
+            if (SettingsManager.Instance.AllowPopups)
+            {
+                if (damageNumberCritical && isCritical)
+                    damageNumberCritical.Spawn(transform.position, amount);
+                else if (damageNumber)
+                    damageNumber.Spawn(transform.position, amount);
+            }
 
             OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
 
