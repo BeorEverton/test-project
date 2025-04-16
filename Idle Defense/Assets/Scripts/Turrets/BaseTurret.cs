@@ -21,7 +21,6 @@ namespace Assets.Scripts.Turrets
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] protected List<Sprite> _muzzleFlashSprites;
-        [SerializeField] private float _attackRange;
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -46,10 +45,12 @@ namespace Assets.Scripts.Turrets
 
         // How far from the top the enemy needs to be for the turrets to shoot
         private const float _topSpawnMargin = 1f;
+        private float _attackRange;
 
         protected virtual void OnEnable()
         {
             _stats = new TurretStatsInstance(_turretInfo);
+            UpdateScreenBoundsIfNeeded();
         }
 
         protected virtual void Update()
@@ -72,6 +73,7 @@ namespace Assets.Scripts.Turrets
 
             if (_targetEnemy == null || !_targetEnemy.activeInHierarchy)
             {
+                _targetInRange = false;
                 TargetEnemy();
             }
 
@@ -136,7 +138,7 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void AimTowardsTarget(float bonusMultiplier)
         {
-            if (_targetEnemy == null) // Wait for muzzle flash to deactivate before rotating
+            if (_targetEnemy == null)
             {
                 _targetInRange = false;
                 return;
@@ -202,17 +204,24 @@ namespace Assets.Scripts.Turrets
 
         private void UpdateScreenBoundsIfNeeded()
         {
-            if (Screen.width != _lastScreenWidth || Screen.height != _lastScreenHeight)
-            {
-                Camera cam = Camera.main;
-                _screenLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
-                _screenRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
-                _screenBottom = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).y;
-                _screenTop = cam.ViewportToWorldPoint(new Vector3(0, 1, 0)).y;
+            if (Screen.width == _lastScreenWidth && Screen.height == _lastScreenHeight)
+                return;
 
-                _lastScreenWidth = Screen.width;
-                _lastScreenHeight = Screen.height;
-            }
+            Camera cam = Camera.main;
+            _screenLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
+            _screenRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
+            _screenBottom = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).y;
+            _screenTop = cam.ViewportToWorldPoint(new Vector3(0, 1, 0)).y;
+
+            _lastScreenWidth = Screen.width;
+            _lastScreenHeight = Screen.height;
+
+            UpdateAttackRange();
+        }
+
+        private void UpdateAttackRange()
+        {
+            _attackRange = _screenTop - _topSpawnMargin;
         }
 
         public void SetTarget(int index)
