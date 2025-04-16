@@ -30,6 +30,8 @@ namespace Assets.Scripts.Enemies
         public float MaxHealth { get; private set; }
         public float CurrentHealth { get; private set; }
         public bool IsSlowed { get; private set; }
+        public EnemyDeathEffect EnemyDeathEffect { get; private set; }
+
         public bool IsAlive;
         public bool CanAttack;
         public float TimeSinceLastAttack = 0f;
@@ -41,11 +43,10 @@ namespace Assets.Scripts.Enemies
         // Laser targeting
         private float _baseMovementSpeed;
 
-        private EnemyDeathEffect _enemyDeathEffect;
 
         private void Start()
         {
-            _enemyDeathEffect = GetComponent<EnemyDeathEffect>();
+            EnemyDeathEffect = GetComponent<EnemyDeathEffect>();
         }
 
         private void OnEnable()
@@ -79,13 +80,7 @@ namespace Assets.Scripts.Enemies
             if (!(CurrentHealth <= 0))
                 return;
 
-            StartCoroutine(OnenemyDeath());
-        }
-
-        private IEnumerator OnenemyDeath()
-        {
             IsAlive = false;
-            yield return StartCoroutine(_enemyDeathEffect.PlayEffectRoutine());
 
             OnDeath?.Invoke(this, new OnDeathEventArgs
             {

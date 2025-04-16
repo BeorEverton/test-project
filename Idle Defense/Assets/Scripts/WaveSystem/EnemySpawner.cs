@@ -149,9 +149,7 @@ namespace Assets.Scripts.WaveSystem
         {
             if (sender is Enemy enemy)
             {
-                enemy.OnDeath -= Enemy_OnEnemyDeath;
-                EnemiesAlive.Remove(enemy.gameObject);
-                _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
+                StartCoroutine(HandleEnemyDeath(enemy));
 
                 OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
                 {
@@ -160,6 +158,16 @@ namespace Assets.Scripts.WaveSystem
             }
 
             CheckIfWaveCompleted();
+        }
+
+        private IEnumerator HandleEnemyDeath(Enemy enemy)
+        {
+            enemy.OnDeath -= Enemy_OnEnemyDeath;
+            EnemiesAlive.Remove(enemy.gameObject);
+
+            yield return StartCoroutine(enemy.EnemyDeathEffect.PlayEffectRoutine());
+
+            _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
         }
 
         private void CheckIfWaveCompleted()
