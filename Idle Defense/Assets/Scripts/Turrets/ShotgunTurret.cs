@@ -20,15 +20,16 @@ namespace Assets.Scripts.Turrets
 
         private Recoil _recoil;
 
+        protected override void Start()
+        {
+            base.Start();
+            _recoil = GetComponent<Recoil>();
+        }
+
         protected override void Update()
         {
             base.Update();
             _recoil.ApplyBarrelRecoil();
-        }
-
-        private void Start()
-        {
-            _recoil = GetComponent<Recoil>();
         }
 
         protected override void Shoot()

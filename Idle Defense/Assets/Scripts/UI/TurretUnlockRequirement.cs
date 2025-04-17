@@ -1,4 +1,5 @@
 using Assets.Scripts.Systems;
+using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
 using TMPro;
 using UnityEngine;
@@ -70,6 +71,7 @@ namespace Assets.Scripts.UI
                 RefreshState(WaveManager.Instance.GetCurrentWaveIndex());
 
                 _turretToUnlock.SetActive(true);
+                _turretToUnlock.GetComponent<BaseTurret>().UnlockTurret();
             }
             else
             {

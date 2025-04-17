@@ -8,6 +8,8 @@ namespace Assets.Scripts.Turrets
     [System.Serializable]
     public class TurretStatsInstance
     {
+        public bool IsUnlocked;
+
         public float Damage;
         public float DamageLevel;
         public float DamageUpgradeAmount;
@@ -68,11 +70,13 @@ namespace Assets.Scripts.Turrets
         public float SlowEffectUpgradeAmount;
         public float SlowEffectUpgradeBaseCost;
 
-        public readonly float RotationSpeed;
-        public readonly float AngleThreshold;
+        public float RotationSpeed;
+        public float AngleThreshold;
 
         public TurretStatsInstance(TurretInfoSO source)
         {
+            IsUnlocked = source.IsUnlocked;
+
             Damage = source.Damage;
             DamageLevel = source.DamageLevel;
             DamageUpgradeAmount = source.DamageUpgradeAmount;
@@ -137,6 +141,10 @@ namespace Assets.Scripts.Turrets
             AngleThreshold = source.AngleThreshold;
         }
 
+        public TurretStatsInstance() //Used to load from DTO
+        {
+        }
+
         public int GetUpgradeCost(string statName)
         {
             return statName switch
@@ -156,6 +164,5 @@ namespace Assets.Scripts.Turrets
                 _ => 0
             };
         }
-
     }
 }

@@ -13,10 +13,10 @@ namespace Assets.Scripts.Turrets
 {
     public abstract class BaseTurret : MonoBehaviour
     {
-
         public EnemyTarget EnemyTargetChoice = EnemyTarget.First;
 
         [SerializeField] protected TurretInfoSO _turretInfo;
+        [HideInInspector] public TurretStatsInstance SavedStats;
         protected TurretStatsInstance _stats;
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
@@ -47,9 +47,14 @@ namespace Assets.Scripts.Turrets
         private const float _topSpawnMargin = 1f;
         private float _attackRange;
 
+        protected virtual void Start()
+        {
+            _stats = SavedStats is { IsUnlocked: true } ? SavedStats : //If the turret is unlocked, use the saved stats
+                new TurretStatsInstance(_turretInfo); //If turret is not yet unlocked, use the default stats from the turret info
+        }
+
         protected virtual void OnEnable()
         {
-            _stats = new TurretStatsInstance(_turretInfo);
             UpdateScreenBoundsIfNeeded();
         }
 
@@ -197,10 +202,8 @@ namespace Assets.Scripts.Turrets
             Gizmos.DrawLine(position + new Vector3(-aimSize, aimSize, 0), position + new Vector3(aimSize, -aimSize, 0));
         }
 
-        public TurretStatsInstance GetStats()
-        {
-            return _stats;
-        }
+        public TurretStatsInstance GetStats() => _stats;
+        public void UnlockTurret() => _stats.IsUnlocked = true;
 
         private void UpdateScreenBoundsIfNeeded()
         {

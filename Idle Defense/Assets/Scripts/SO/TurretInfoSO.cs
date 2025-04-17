@@ -6,6 +6,9 @@ namespace Assets.Scripts.SO
     public class TurretInfoSO : ScriptableObject
     {
         [Header("Base Turret")]
+        [Tooltip("Is the turret unlocked?")]
+        public bool IsUnlocked;
+
         [Tooltip("Amount of damage dealt per hit")]
         public float Damage;
         public float DamageLevel;

@@ -7,8 +7,9 @@ namespace Assets.Scripts.Turrets
     {
         private Recoil _recoil;
 
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             _recoil = GetComponent<Recoil>();
         }
 

@@ -124,9 +124,10 @@ namespace Assets.Scripts.Systems
             UIManager.Instance.UpdateMoney(money);
         }
 
-        public void DebugAddMOney(int amount)
+        public void LoadMoney(ulong amount)
         {
-            AddMoney((ulong)amount);
+            money = amount;
+            UIManager.Instance.UpdateMoney(money);
         }
     }
 }

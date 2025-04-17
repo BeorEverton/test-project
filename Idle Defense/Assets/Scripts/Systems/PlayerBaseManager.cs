@@ -8,11 +8,12 @@ namespace Assets.Scripts.Systems
     public class PlayerBaseManager : MonoBehaviour
     {
         public static PlayerBaseManager Instance { get; private set; }
+
         public event EventHandler OnWaveFailed; // TO-DO, Used to roll back 10 waves
         public event Action<float, float> OnHealthChanged; // (currentHealth, maxHealth)
 
         [SerializeField] private PlayerBaseSO _baseInfo;  // The original SO from the inspector
-        private PlayerBaseSO _info;                      // The runtime clone
+        public PlayerBaseSO Info { get; private set; }    // The runtime clone
 
         private float _currentHealth;
         private float _regenDelayTimer;
@@ -36,7 +37,7 @@ namespace Assets.Scripts.Systems
             else
                 Destroy(gameObject);
 
-            _info = Instantiate(_baseInfo); // Copy the SO
+            Info = Instantiate(_baseInfo); // Copy the SO
 
             InitializeGame();
         }
@@ -44,12 +45,12 @@ namespace Assets.Scripts.Systems
         private void InitializeGame()
         {
             // Recalculate values based on upgrade levels
-            _runtimeMaxHealth = _info.MaxHealth + _info.MaxHealthLevel * _info.MaxHealthUpgradeAmount;
-            _runtimeRegenAmount = _info.RegenAmount + _info.RegenAmountLevel * _info.RegenAmountUpgradeAmount;
-            _runtimeRegenDelay = _info.RegenDelay; // This one is fixed
+            _runtimeMaxHealth = Info.MaxHealth + Info.MaxHealthLevel * Info.MaxHealthUpgradeAmount;
+            _runtimeRegenAmount = Info.RegenAmount + Info.RegenAmountLevel * Info.RegenAmountUpgradeAmount;
+            _runtimeRegenDelay = Info.RegenDelay; // This one is fixed
             _runtimeRegenInterval = Mathf.Max(
                 MinRegenInterval,
-                _info.RegenInterval - _info.RegenIntervalLevel * _info.RegenIntervalUpgradeAmount
+                Info.RegenInterval - Info.RegenIntervalLevel * Info.RegenIntervalUpgradeAmount
             );
 
             _currentHealth = _runtimeMaxHealth;
@@ -93,7 +94,6 @@ namespace Assets.Scripts.Systems
                     _regenTickTimer = 0f;
 
                     OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
-
                 }
             }
         }
@@ -112,16 +112,16 @@ namespace Assets.Scripts.Systems
 
         public void UpgradeMaxHealth()
         {
-            float level = _info.MaxHealthLevel;
-            float cost = _info.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, level);
+            float level = Info.MaxHealthLevel;
+            float cost = Info.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, level);
             if (!TrySpend(cost))
                 return;
 
-            _info.MaxHealthLevel += 1f;
-            _runtimeMaxHealth += _info.MaxHealthUpgradeAmount;
+            Info.MaxHealthLevel += 1f;
+            _runtimeMaxHealth += Info.MaxHealthUpgradeAmount;
 
             // Heal by the upgraded amount
-            _currentHealth += _info.MaxHealthUpgradeAmount;
+            _currentHealth += Info.MaxHealthUpgradeAmount;
             _currentHealth = Mathf.Min(_currentHealth, _runtimeMaxHealth);
 
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
@@ -129,13 +129,13 @@ namespace Assets.Scripts.Systems
 
         public void UpgradeRegenAmount()
         {
-            float level = _info.RegenAmountLevel;
-            float cost = _info.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, level);
+            float level = Info.RegenAmountLevel;
+            float cost = Info.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, level);
             if (!TrySpend(cost))
                 return;
 
-            _info.RegenAmountLevel += 1f;
-            _runtimeRegenAmount += _info.RegenAmountUpgradeAmount;
+            Info.RegenAmountLevel += 1f;
+            _runtimeRegenAmount += Info.RegenAmountUpgradeAmount;
         }
 
         public void UpgradeRegenInterval()
@@ -143,42 +143,48 @@ namespace Assets.Scripts.Systems
             if (_runtimeRegenInterval <= MinRegenInterval)
                 return;
 
-            float level = _info.RegenIntervalLevel;
-            float cost = _info.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, level);
+            float level = Info.RegenIntervalLevel;
+            float cost = Info.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, level);
 
             if (!TrySpend(cost))
                 return;
 
-            _info.RegenIntervalLevel += 1f;
-            _runtimeRegenInterval = Mathf.Max(MinRegenInterval, _runtimeRegenInterval - _info.RegenIntervalUpgradeAmount);
+            Info.RegenIntervalLevel += 1f;
+            _runtimeRegenInterval = Mathf.Max(MinRegenInterval, _runtimeRegenInterval - Info.RegenIntervalUpgradeAmount);
         }
 
         public void UpdateMaxHealthDisplay(PlayerUpgradeButton button)
         {
             float current = _runtimeMaxHealth;
-            float bonus = _info.MaxHealthUpgradeAmount;
-            float cost = _info.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, _info.MaxHealthLevel);
+            float bonus = Info.MaxHealthUpgradeAmount;
+            float cost = Info.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, Info.MaxHealthLevel);
             button.UpdateStats($"{current:F0}", $"+{bonus:F0}", $"${UIManager.AbbreviateNumber(cost)}");
         }
 
         public void UpdateRegenAmountDisplay(PlayerUpgradeButton button)
         {
             float current = _runtimeRegenAmount;
-            float bonus = _info.RegenAmountUpgradeAmount;
-            float cost = _info.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, _info.RegenAmountLevel);
+            float bonus = Info.RegenAmountUpgradeAmount;
+            float cost = Info.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, Info.RegenAmountLevel);
             button.UpdateStats($"{current:F1}", $"+{bonus:F1}", $"${UIManager.AbbreviateNumber(cost)}");
         }
 
         public void UpdateRegenIntervalDisplay(PlayerUpgradeButton button)
         {
             float current = _runtimeRegenInterval;
-            float bonus = _info.RegenIntervalUpgradeAmount;
-            float cost = _info.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, _info.RegenIntervalLevel);
+            float bonus = Info.RegenIntervalUpgradeAmount;
+            float cost = Info.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, Info.RegenIntervalLevel);
 
             if (_runtimeRegenInterval <= 0.5f)
                 button.UpdateStats($"{current:F2}s", "Max", "");
             else
                 button.UpdateStats($"{current:F2}s", $"-{bonus:F2}s", $"${UIManager.AbbreviateNumber(cost)}");
+        }
+
+        public void LoadPlayerBase(PlayerBaseSO savedStats)
+        {
+            Info = savedStats;
+            InitializeGame();
         }
     }
 

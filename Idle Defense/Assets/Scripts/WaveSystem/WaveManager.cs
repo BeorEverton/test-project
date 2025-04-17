@@ -1,6 +1,7 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Save;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -55,6 +56,7 @@ namespace Assets.Scripts.WaveSystem
 
         public int GetCurrentWaveIndex() => _currentWave;
         public Wave GetCurrentWave() => _waves[_currentWave];
+        public void LoadWave(int waveNumber) => _currentWave = waveNumber - 1; //Load previous wave, since StartWaveRoutine count +1 before initializing
 
         private void OnWaveCompleted(object sender, EventArgs e)
         {
@@ -70,8 +72,6 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator StartWaveRoutine()
         {
-            yield return new WaitForSeconds(2); //Let the game start, and show some UI?
-
             while (GameRunning)
             {
                 _currentWave++;
@@ -104,6 +104,8 @@ namespace Assets.Scripts.WaveSystem
                 }
 
                 yield return new WaitUntil(() => _waveCompleted);
+
+                SaveGameManager.Instance.SaveGame(); //Save game at the start of each round
 
                 _waveCompleted = false;
             }
