@@ -15,7 +15,7 @@ namespace Assets.Scripts.Systems
         public float dmgBonus { get; private set; }
         public float spdBonus { get; private set; }
 
-        private const float maxSpdBonus = 200f;
+        private const float maxSpdBonus = 100f;
         private const float holdIncreaseRate = 5f;
         private const float initialBoost = 5f;
 
