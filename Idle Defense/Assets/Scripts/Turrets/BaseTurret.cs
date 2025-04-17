@@ -51,6 +51,8 @@ namespace Assets.Scripts.Turrets
         {
             _stats = SavedStats is { IsUnlocked: true } ? SavedStats : //If the turret is unlocked, use the saved stats
                 new TurretStatsInstance(_turretInfo); //If turret is not yet unlocked, use the default stats from the turret info
+
+            gameObject.SetActive(_stats.IsUnlocked);
         }
 
         protected virtual void OnEnable()
@@ -203,6 +205,7 @@ namespace Assets.Scripts.Turrets
         }
 
         public TurretStatsInstance GetStats() => _stats;
+        public bool IsUnlocked() => _stats.IsUnlocked;
         public void UnlockTurret() => _stats.IsUnlocked = true;
 
         private void UpdateScreenBoundsIfNeeded()

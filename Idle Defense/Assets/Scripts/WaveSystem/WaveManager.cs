@@ -33,7 +33,7 @@ namespace Assets.Scripts.WaveSystem
 
         private Dictionary<int, Wave> _waves = new(); //Dictionary of all waves, with wave number as key
         private int _maxWaves = 0; //Amount of waves in dictionary
-        private int _currentWave = 0; //Overall wave index
+        private int _currentWave = 1; //Overall wave index
         private bool _waveCompleted = false;
 
         private void Awake()
@@ -56,7 +56,7 @@ namespace Assets.Scripts.WaveSystem
 
         public int GetCurrentWaveIndex() => _currentWave;
         public Wave GetCurrentWave() => _waves[_currentWave];
-        public void LoadWave(int waveNumber) => _currentWave = waveNumber - 1; //Load previous wave, since StartWaveRoutine count +1 before initializing
+        public void LoadWave(int waveNumber) => _currentWave = waveNumber; //Load previous wave, since StartWaveRoutine count +1 before initializing
 
         private void OnWaveCompleted(object sender, EventArgs e)
         {
@@ -65,7 +65,7 @@ namespace Assets.Scripts.WaveSystem
 
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
-            _currentWave -= 11; //11 due to StartWaveRoutine count +1 before initializing
+            _currentWave -= 10;
             if (_currentWave < 1)
                 _currentWave = 0;
         }
@@ -74,8 +74,6 @@ namespace Assets.Scripts.WaveSystem
         {
             while (GameRunning)
             {
-                _currentWave++;
-
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
                     WaveNumber = _currentWave
@@ -104,6 +102,8 @@ namespace Assets.Scripts.WaveSystem
                 }
 
                 yield return new WaitUntil(() => _waveCompleted);
+
+                _currentWave++;
 
                 SaveGameManager.Instance.SaveGame(); //Save game at the start of each round
 

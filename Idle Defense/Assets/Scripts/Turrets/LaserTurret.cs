@@ -15,9 +15,9 @@ namespace Assets.Scripts.Turrets
 
         [SerializeField] private LineRenderer _laserLine;
 
-        protected override void OnEnable()
+        protected override void Start()
         {
-            base.OnEnable();
+            base.Start();
 
             _bonusDmgPerSec = 1f + _stats.PercentBonusDamagePerSec / 100f;
         }

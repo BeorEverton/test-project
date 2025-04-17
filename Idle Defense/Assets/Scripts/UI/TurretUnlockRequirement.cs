@@ -15,12 +15,14 @@ namespace Assets.Scripts.UI
         [SerializeField] private int _requiredWave = 10;
         [SerializeField] private ulong _unlockCost = 100;
 
-        private bool _isUnlocked = false;
+        private bool _isUnlocked;
 
         private void Start()
         {
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
             _unlockButton.onClick.AddListener(UnlockTurret);
+
+            _isUnlocked = _turretToUnlock.GetComponent<BaseTurret>().IsUnlocked();
 
             RefreshState(WaveManager.Instance.GetCurrentWaveIndex());
         }

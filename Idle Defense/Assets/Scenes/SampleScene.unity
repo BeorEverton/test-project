@@ -1095,6 +1095,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   turret:
+    IsUnlocked: 0
     Damage: 0
     DamageLevel: 0
     DamageUpgradeAmount: 0
@@ -1143,6 +1144,8 @@ MonoBehaviour:
     SlowEffectLevel: 0
     SlowEffectUpgradeAmount: 0
     SlowEffectUpgradeBaseCost: 0
+    RotationSpeed: 0
+    AngleThreshold: 0
   hybridThreshold: 10
   quadraticFactor: 0.1
   exponentialPower: 1.15
@@ -1370,7 +1373,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6463036619058361839, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5117,7 +5120,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3206999689089362432, guid: d90f1d543089d534693699decadbf149, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8147607113893816477, guid: d90f1d543089d534693699decadbf149, type: 3}
       propertyPath: _attackRange
@@ -6621,7 +6624,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4549154123848940232, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4582981559888802544, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
       propertyPath: m_LocalScale.x
@@ -10393,7 +10396,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8476021348886816848, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
