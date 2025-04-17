@@ -46,7 +46,7 @@ namespace Assets.Scripts.WaveSystem
 
         private async void Start()
         {
-            await GenerateWavesAsync(startWaveNumber: 1, amountToGenerate: 100); //Generate first 100 waves, starting from wave 1
+            await GenerateWavesAsync(startWaveNumber: 1, amountToGenerate: 25); //Generate first 100 waves, starting from wave 1
 
             StartCoroutine(StartWaveRoutine());
 
@@ -79,6 +79,11 @@ namespace Assets.Scripts.WaveSystem
                     WaveNumber = _currentWave
                 });
 
+                while (_maxWaves < _currentWave + 10) //Generate new waves when only 10 left
+                {
+                    GenerateWaves(startWaveNumber: _maxWaves + 1, amountToGenerate: 25);
+                }
+
                 try
                 {
                     if (_waves.TryGetValue(_currentWave, out Wave wave))
@@ -94,11 +99,6 @@ namespace Assets.Scripts.WaveSystem
                 catch (Exception e)
                 {
                     Debug.LogError(e.Message);
-                }
-
-                if (_maxWaves < _currentWave + 10) //Generate new waves when only 10 left
-                {
-                    GenerateWaves(startWaveNumber: _maxWaves, amountToGenerate: 100);
                 }
 
                 yield return new WaitUntil(() => _waveCompleted);
