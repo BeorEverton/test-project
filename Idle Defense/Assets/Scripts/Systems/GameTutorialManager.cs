@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
 using System;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 using Assets.Scripts.WaveSystem;
 
 namespace Assets.Scripts.Systems
 {
-
     public class GameTutorialManager : MonoBehaviour
     {
         [Header("UI Reference")]
@@ -19,6 +17,7 @@ namespace Assets.Scripts.Systems
 
         private int _currentStep = 0;
         private bool _tutorialRunning = false;
+        private bool _waitingToStartStep = true;
         private GameObject _lastActiveObject;
 
         private void Start()
@@ -34,58 +33,95 @@ namespace Assets.Scripts.Systems
 
             _tutorialRunning = true;
             tutorialPanel.SetActive(true);
-            ShowStep(_currentStep);
+            _waitingToStartStep = true;
 
+            SubscribeToEvents();
+            Debug.Log("Tutorial started!");
         }
 
-
-        private void Update()
+        private void SubscribeToEvents()
         {
-            if (!_tutorialRunning || _currentStep >= tutorialSteps.Count) return;
+            GameManager.OnSpdBonusChanged += OnGameEventTriggered;
+            PlayerBaseManager.Instance.OnHealthChanged += OnHealthChanged;
+            WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+        }
 
-            if (CheckCondition(tutorialSteps[_currentStep]))
+        private void UnsubscribeFromEvents()
+        {
+            GameManager.OnSpdBonusChanged -= OnGameEventTriggered;
+            PlayerBaseManager.Instance.OnHealthChanged -= OnHealthChanged;
+            WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
+        }
+
+        private void OnGameEventTriggered(float _)
+        {
+            TryAdvanceTutorial();
+        }
+
+        private void OnHealthChanged(float current, float max)
+        {
+            TryAdvanceTutorial();
+        }
+
+        private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs e)
+        {
+            TryAdvanceTutorial();
+        }
+
+        private void TryAdvanceTutorial()
+        {
+            if (!_tutorialRunning || _currentStep >= tutorialSteps.Count)
+                return;
+
+            var step = tutorialSteps[_currentStep];
+
+            if (_waitingToStartStep)
             {
-                _currentStep++;
-
-                if (_currentStep >= tutorialSteps.Count)
-                {
-                    CompleteTutorial();
-                }
-                else
+                if (CheckCondition(step.startCondition, step.startThreshold))
                 {
                     ShowStep(_currentStep);
+                    _waitingToStartStep = false;
+                }
+            }
+            else
+            {
+                if (CheckCondition(step.completeCondition, step.completeThreshold))
+                {
+                    _currentStep++;
 
+                    if (_currentStep >= tutorialSteps.Count)
+                    {
+                        CompleteTutorial();
+                    }
+                    else
+                    {
+                        _waitingToStartStep = true;
+                    }
                 }
             }
         }
 
-        private bool CheckCondition(TutorialStep step)
+        private bool CheckCondition(TutorialConditionType condition, float threshold)
         {
-            switch (step.conditionType)
+            switch (condition)
             {
                 case TutorialConditionType.SpdBonusAbove:
-                    return GameManager.Instance.spdBonus >= step.threshold;
-
+                    return GameManager.Instance.spdBonus >= threshold;
                 case TutorialConditionType.HealthBelow:
-                    return PlayerBaseManager.Instance.CurrentHealth < step.threshold;
-
+                    return PlayerBaseManager.Instance.CurrentHealth < threshold;
                 case TutorialConditionType.WaveReached:
-                    return WaveManager.Instance.GetCurrentWaveIndex() >= (int)step.threshold;
-
+                    return WaveManager.Instance.GetCurrentWaveIndex() >= (int)threshold;
                 default:
                     return false;
             }
         }
 
-        
-
         private void ShowStep(int index)
         {
-            // Deactivate previous step's object
+            if (!tutorialPanel.activeInHierarchy) tutorialPanel.SetActive(true);
             if (_lastActiveObject != null)
                 _lastActiveObject.SetActive(false);
 
-            // Activate new step object if it exists
             var step = tutorialSteps[index];
             if (step.associatedObject != null)
             {
@@ -100,13 +136,16 @@ namespace Assets.Scripts.Systems
             typingText.StartTyping(step.instructionText);
         }
 
-
         private void CompleteTutorial()
         {
             _tutorialRunning = false;
             tutorialPanel.SetActive(false);
+            UnsubscribeFromEvents();
             if (_lastActiveObject != null)
                 _lastActiveObject.SetActive(false);
+
+            PlayerPrefs.SetInt("Tutorial_Completed", 1);
+            PlayerPrefs.Save();
 
             Debug.Log("Tutorial completed!");
         }
@@ -117,24 +156,27 @@ namespace Assets.Scripts.Systems
             PlayerPrefs.DeleteKey("Tutorial_Completed");
             _currentStep = 0;
             _tutorialRunning = true;
-            tutorialPanel.SetActive(true);
-            typingText.StartTyping(tutorialSteps[_currentStep].instructionText);
+            _waitingToStartStep = true;
+            SubscribeToEvents();
         }
-
     }
-
 
     [Serializable]
     public class TutorialStep
     {
+        [TextArea(3, 10)]
         public string instructionText;
-        public TutorialConditionType conditionType;
-        public float threshold = 0f;
+
+        [Header("Conditions")]
+        public TutorialConditionType startCondition;
+        public float startThreshold;
+
+        public TutorialConditionType completeCondition;
+        public float completeThreshold;
 
         [Tooltip("Optional object to activate while this step is active")]
         public GameObject associatedObject;
     }
-
 
     public enum TutorialConditionType
     {
@@ -142,9 +184,4 @@ namespace Assets.Scripts.Systems
         HealthBelow,
         WaveReached,
     }
-
-
-    
-
-
 }

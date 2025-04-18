@@ -1,5 +1,6 @@
 using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -22,6 +23,8 @@ namespace Assets.Scripts.Systems
         private bool isHolding;
         private float decreaseDelay = 1f;
         private float decreaseTimer = 0f;
+
+        public static event Action<float> OnSpdBonusChanged; // Used for the tutorial
 
         private ulong money;
         public ulong Money => money;
@@ -61,6 +64,7 @@ namespace Assets.Scripts.Systems
             spdBonus += initialBoost;
             isHolding = true;
             decreaseTimer = 0f;
+            OnSpdBonusChanged?.Invoke(spdBonus);
         }
 
         private void OnClickReleased(InputAction.CallbackContext ctx)

@@ -3,53 +3,81 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class HeartbeatLine : MonoBehaviour
 {
-    public int points = 200;
-    public float width = 0.05f;
-    public float waveAmplitude = 0.5f;
-    public float speed = 5f;
+    public int bars = 64;
+    public float barSpacing = 0.15f;
+    public float maxAmplitude = 1.2f;
+    public float pulseSpeed = 10f;
+    public bool isTyping = false;
 
     private LineRenderer lr;
     private Vector3[] positions;
-    public bool isTyping = false;
+    private float[] barHeights;
+    private float noiseOffset;
 
     void Start()
     {
         lr = GetComponent<LineRenderer>();
-        lr.positionCount = points;
-        lr.startWidth = lr.endWidth = width;
-        positions = new Vector3[points];
-        ResetLine();
+        lr.positionCount = bars * 2; // each bar = 2 points (bottom & top)
+        lr.widthMultiplier = 0.02f;
+
+        positions = new Vector3[lr.positionCount];
+        barHeights = new float[bars];
+
+        ResetWaveform();
     }
 
     void Update()
     {
-        if (!isTyping) return;
-
-        float time = Time.time * speed;
-        for (int i = 0; i < points; i++)
+        if (isTyping)
         {
-            float x = i * 0.05f;
-            float y = Mathf.PerlinNoise(time + i * 0.1f, 0f) * waveAmplitude;
-            positions[i] = new Vector3(x, y, 0);
+            AnimateWaveform();
+            ApplyWaveform();
+        }
+    }
+
+    void AnimateWaveform()
+    {
+        noiseOffset += Time.deltaTime * pulseSpeed;
+
+        for (int i = 0; i < bars; i++)
+        {
+            float randomPulse = Mathf.PerlinNoise(i * 0.5f, noiseOffset);
+            barHeights[i] = randomPulse * maxAmplitude;
+        }
+    }
+
+    void ApplyWaveform()
+    {
+        for (int i = 0; i < bars; i++)
+        {
+            float x = i * barSpacing;
+            float height = barHeights[i];
+
+            positions[i * 2] = new Vector3(x, -height / 2f, 0f); // bottom of bar
+            positions[i * 2 + 1] = new Vector3(x, height / 2f, 0f); // top of bar
         }
 
+        lr.positionCount = positions.Length;
         lr.SetPositions(positions);
     }
 
     public void SetTypingActive(bool state)
     {
         isTyping = state;
-
         if (!state)
-            ResetLine();
+            ResetWaveform();
     }
 
-    private void ResetLine()
+    void ResetWaveform()
     {
-        for (int i = 0; i < points; i++)
-            positions[i] = new Vector3(i * 0.05f, 0, 0);
+        for (int i = 0; i < bars; i++)
+        {
+            float x = i * barSpacing;
+            positions[i * 2] = new Vector3(x, 0f, 0f);
+            positions[i * 2 + 1] = new Vector3(x, 0f, 0f);
+        }
 
-        if (lr != null)
-            lr.SetPositions(positions);
+        lr.positionCount = positions.Length;
+        lr.SetPositions(positions);
     }
 }
