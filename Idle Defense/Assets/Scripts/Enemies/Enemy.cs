@@ -21,6 +21,13 @@ namespace Assets.Scripts.Enemies
         }
 
         [SerializeField] private EnemyInfoSO _info;
+        private EnemyInfoSO _originalInfo; // Keeps the reference to the base SO
+        private bool _wasBossInstance;
+
+        private Vector3? _originalScale;
+        private Color? _originalColor;
+
+
         public EnemyInfoSO Info
         {
             get => _info;
@@ -93,15 +100,59 @@ namespace Assets.Scripts.Enemies
 
         private void ResetEnemy()
         {
+            // Reset visual state if modified
+            if (_originalScale.HasValue)
+                transform.localScale = _originalScale.Value;
+
+            if (_originalColor.HasValue && TryGetSpriteRendererInChildren(out var sr))
+                sr.color = _originalColor.Value;
+
+            if (Camera.main != null)
+                Camera.main.backgroundColor = Color.black;
+
+            _originalScale = null;
+            _originalColor = null;
+
+            // Regular reset logic
             Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
             CanAttack = false;
             IsAlive = true;
-            MaxHealth = _info.MaxHealth;
-            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
-            TimeSinceLastAttack = 0f;
+            MaxHealth = Info.MaxHealth;
             CurrentHealth = MaxHealth;
+            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
             SetRandomMovementSpeed();
         }
+
+
+        public void SetAsBoss(bool isMini)
+        {
+            Debug.Log("SetAsBoss called on " + name);
+            if (_originalScale == null)
+                _originalScale = transform.localScale;
+
+            var sr = GetComponentInChildren<SpriteRenderer>();
+            if (_originalColor == null && sr)
+                _originalColor = sr.color;
+
+            if (isMini)
+            {
+                transform.localScale = _originalScale.Value * 2f;
+                sr.color = Color.red;
+            }
+            else
+            {
+                transform.localScale = _originalScale.Value * 4f;
+                sr.color = Color.black;
+                Camera.main.backgroundColor = new Color(0.3f, 0, 0); // dark red
+            }
+        }
+
+        private bool TryGetSpriteRendererInChildren(out SpriteRenderer sr)
+        {
+            sr = GetComponentInChildren<SpriteRenderer>();
+            return sr != null;
+        }
+
 
         private void SetRandomMovementSpeed()
         {

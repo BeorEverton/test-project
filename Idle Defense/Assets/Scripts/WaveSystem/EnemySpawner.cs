@@ -87,24 +87,34 @@ namespace Assets.Scripts.WaveSystem
 
         private void CheckIfBossWave(Wave wave)
         {
-            if (wave.IsMiniBossWave())
+            if (wave.IsMiniBossWave() || wave.IsBossWave())
             {
-                EnemyInfoSO miniBoss = GetRandomEnemyFromWave();
-                miniBoss.Damage *= 3f;
-                miniBoss.MaxHealth *= 6f;
-                miniBoss.CoinDropAmount *= 5;
-                miniBoss.MovementSpeed *= 0.5f;
-            }
+                Enemy bossEnemy = _enemiesCurrentWave[Random.Range(0, _enemiesCurrentWave.Count)].GetComponent<Enemy>();
+                EnemyInfoSO baseInfo = bossEnemy.Info;
+                EnemyInfoSO clonedInfo = Instantiate(baseInfo);
 
-            if (wave.IsBossWave())
-            {
-                EnemyInfoSO boss = GetRandomEnemyFromWave();
-                boss.Damage *= 5f;
-                boss.MaxHealth *= 10f;
-                boss.CoinDropAmount *= 10;
-                boss.MovementSpeed *= 0.3f;
+                if (wave.IsMiniBossWave())
+                {
+                    clonedInfo.Damage *= 3f;
+                    clonedInfo.MaxHealth *= 6f;
+                    clonedInfo.CoinDropAmount *= 5;
+                    clonedInfo.MovementSpeed *= 0.5f;
+                }
+
+                if (wave.IsBossWave())
+                {
+                    clonedInfo.Damage *= 5f;
+                    clonedInfo.MaxHealth *= 10f;
+                    clonedInfo.CoinDropAmount *= 10;
+                    clonedInfo.MovementSpeed *= 0.3f;
+                }
+
+                bossEnemy.Info = clonedInfo;
+                bossEnemy.SetAsBoss(wave.IsMiniBossWave());
+
             }
         }
+
 
         private EnemyInfoSO GetRandomEnemyFromWave()
         {
