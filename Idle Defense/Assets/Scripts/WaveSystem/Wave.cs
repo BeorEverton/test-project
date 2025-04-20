@@ -23,5 +23,8 @@ namespace Assets.Scripts.WaveSystem
             }
             WaveEnemies.Add(enemyClass, enemyConfig);
         }
+
+        public bool IsMiniBossWave() => WaveNumber % 5 == 0 && WaveNumber % 10 != 0; //Every 5th wave is a miniboss wave
+        public bool IsBossWave() => WaveNumber % 10 == 0; //Every 10th wave is a boss wave
     }
 }

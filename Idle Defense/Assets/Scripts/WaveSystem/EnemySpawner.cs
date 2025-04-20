@@ -42,7 +42,7 @@ namespace Assets.Scripts.WaveSystem
 
         private List<GameObject> _enemiesCurrentWave = new();
         private ObjectPool _objectPool;
-        private WaveConfigSO _currentWave;
+        private WaveConfigSO _currentWaveConfig;
 
         private bool _waveSpawned;
         private bool _canSpawnEnemies;
@@ -62,14 +62,16 @@ namespace Assets.Scripts.WaveSystem
             PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
         }
 
-        public void StartWave(WaveConfigSO wave)
+        public void StartWave(Wave wave)
         {
-            _currentWave = wave;
+            _currentWaveConfig = wave.WaveConfig;
             _waveSpawned = false;
             OnWaveStarted?.Invoke(this, EventArgs.Empty);
 
             CreateWave();
             Shuffle.ShuffleList(_enemiesCurrentWave);
+            CheckIfBossWave(wave);
+
             _canSpawnEnemies = true;
             StartCoroutine(SpawnEnemies());
         }
@@ -77,10 +79,37 @@ namespace Assets.Scripts.WaveSystem
         private void CreateWave()
         {
             _enemiesCurrentWave.Clear();
-            foreach (EnemyWaveEntry entry in _currentWave.EnemyWaveEntries)
+            foreach (EnemyWaveEntry entry in _currentWaveConfig.EnemyWaveEntries)
             {
                 CreateEnemiesFromEntry(entry);
             }
+        }
+
+        private void CheckIfBossWave(Wave wave)
+        {
+            if (wave.IsMiniBossWave())
+            {
+                EnemyInfoSO miniBoss = GetRandomEnemyFromWave();
+                miniBoss.Damage *= 3f;
+                miniBoss.MaxHealth *= 6f;
+                miniBoss.CoinDropAmount *= 5;
+                miniBoss.MovementSpeed *= 0.5f;
+            }
+
+            if (wave.IsBossWave())
+            {
+                EnemyInfoSO boss = GetRandomEnemyFromWave();
+                boss.Damage *= 5f;
+                boss.MaxHealth *= 10f;
+                boss.CoinDropAmount *= 10;
+                boss.MovementSpeed *= 0.3f;
+            }
+        }
+
+        private EnemyInfoSO GetRandomEnemyFromWave()
+        {
+            int randomIndex = Random.Range(0, _currentWaveConfig.EnemyWaveEntries.Count);
+            return _enemiesCurrentWave[randomIndex].GetComponent<Enemy>().Info;
         }
 
         private void CreateEnemiesFromEntry(EnemyWaveEntry entry)
@@ -115,7 +144,7 @@ namespace Assets.Scripts.WaveSystem
                 enemy.GetComponent<Enemy>().OnDeath += Enemy_OnEnemyDeath;
                 EnemiesAlive.Add(enemy);
 
-                yield return new WaitForSeconds(_currentWave.TimeBetweenSpawns);
+                yield return new WaitForSeconds(_currentWaveConfig.TimeBetweenSpawns);
             }
 
             _waveSpawned = true;

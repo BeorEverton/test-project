@@ -2332,6 +2332,10 @@ PrefabInstance:
       propertyPath: _upgradeType
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 3278400546903909924, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c211901c207c88c4c85e86a946727982, type: 3}
     - target: {fileID: 3853848267247782800, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2416,6 +2420,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Upgrade Button (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 7503310728893384773, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5987,7 +5995,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6469ae336d7b6494da5dd1416bf30eee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7472,6 +7480,10 @@ PrefabInstance:
       propertyPath: _upgradeType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3278400546903909924, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c211901c207c88c4c85e86a946727982, type: 3}
     - target: {fileID: 3853848267247782800, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -7556,6 +7568,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Upgrade Button (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 7503310728893384773, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -14758,7 +14774,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6469ae336d7b6494da5dd1416bf30eee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -15487,7 +15503,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a08bb88dc6ecd4f3ca3aa827e959e54f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c211901c207c88c4c85e86a946727982, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -16600,7 +16616,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6469ae336d7b6494da5dd1416bf30eee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -17954,7 +17970,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a08bb88dc6ecd4f3ca3aa827e959e54f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c211901c207c88c4c85e86a946727982, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -18373,7 +18389,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a08bb88dc6ecd4f3ca3aa827e959e54f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c211901c207c88c4c85e86a946727982, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -21105,6 +21121,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 350917306581573096}
     m_Modifications:
+    - target: {fileID: 3278400546903909924, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3278400546903909924, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c211901c207c88c4c85e86a946727982, type: 3}
     - target: {fileID: 3853848267247782800, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -21189,6 +21213,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Upgrade Button
       objectReference: {fileID: 0}
+    - target: {fileID: 7503310728893384773, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7503310728893384773, guid: ed69127fad944874b87dc3a1d9dbdb19, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

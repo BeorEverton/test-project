@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
 {
@@ -88,7 +89,7 @@ namespace Assets.Scripts.WaveSystem
                 {
                     if (_waves.TryGetValue(_currentWave, out Wave wave))
                     {
-                        _enemySpawner.StartWave(wave.WaveConfig);
+                        _enemySpawner.StartWave(wave);
 
                     }
                     else
@@ -140,23 +141,8 @@ namespace Assets.Scripts.WaveSystem
             for (int i = 0; i < amountToGenerate; i++)
             {
                 WaveConfigSO baseWave = GetBasicWaveConfigSo(waveNumber);
-                WaveConfigSO tempWaveConfig = ScriptableObject.CreateInstance<WaveConfigSO>();
-                List<EnemyInfoSO> enemyWaveEntries = new();
 
-                tempWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
-                foreach (EnemyWaveEntry entry in baseWave.EnemyWaveEntries)
-                {
-                    EnemyWaveEntry newEntry = CreateNewEntry(entry, waveNumber);
-
-                    if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
-                    {
-                        EnemyInfoSO clonedInfo = CloneEnemyInfoWithScale(enemy, waveNumber);
-
-                        enemyWaveEntries.Add(clonedInfo);
-                    }
-
-                    tempWaveConfig.EnemyWaveEntries.Add(newEntry);
-                }
+                CreateTempWaveConfig(baseWave, waveNumber, out List<EnemyInfoSO> enemyWaveEntries, out WaveConfigSO tempWaveConfig);
 
                 tempWaveConfig.TimeBetweenSpawns = baseWave.TimeBetweenSpawns;
 
@@ -169,6 +155,27 @@ namespace Assets.Scripts.WaveSystem
             }
 
             return Task.CompletedTask;
+        }
+
+        private void CreateTempWaveConfig(WaveConfigSO baseWave, int waveNumber, out List<EnemyInfoSO> enemyWaveEntries, out WaveConfigSO tempWaveConfig)
+        {
+            enemyWaveEntries = new List<EnemyInfoSO>();
+            tempWaveConfig = ScriptableObject.CreateInstance<WaveConfigSO>();
+            tempWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
+
+            foreach (EnemyWaveEntry entry in baseWave.EnemyWaveEntries)
+            {
+                EnemyWaveEntry newEntry = CreateNewEntry(entry, waveNumber);
+
+                if (newEntry.EnemyPrefab.TryGetComponent(out Enemy enemy))
+                {
+                    EnemyInfoSO clonedInfo = CloneEnemyInfoWithScale(enemy, waveNumber);
+
+                    enemyWaveEntries.Add(clonedInfo);
+                }
+
+                tempWaveConfig.EnemyWaveEntries.Add(newEntry);
+            }
         }
 
         private WaveConfigSO GetBasicWaveConfigSo(int waveNumber)
