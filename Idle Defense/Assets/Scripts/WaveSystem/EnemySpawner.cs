@@ -98,7 +98,7 @@ namespace Assets.Scripts.WaveSystem
                     clonedInfo.Damage *= 3f;
                     clonedInfo.MaxHealth *= 6f;
                     clonedInfo.CoinDropAmount *= 5;
-                    clonedInfo.MovementSpeed *= 0.5f;
+                    clonedInfo.MovementSpeed *= 0.8f;
                 }
 
                 if (wave.IsBossWave())
@@ -106,13 +106,13 @@ namespace Assets.Scripts.WaveSystem
                     clonedInfo.Damage *= 5f;
                     clonedInfo.MaxHealth *= 10f;
                     clonedInfo.CoinDropAmount *= 10;
-                    clonedInfo.MovementSpeed *= 0.3f;
+                    clonedInfo.MovementSpeed *= 0.6f;
                 }
 
-                bossEnemy.Info = clonedInfo;
-                bossEnemy.SetAsBoss(wave.IsMiniBossWave());
-
+                bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
+            else if (Camera.main != null)
+                Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
         }
 
 

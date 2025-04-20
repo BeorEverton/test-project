@@ -23,6 +23,9 @@ namespace Assets.Scripts.Enemies
         [SerializeField] private EnemyInfoSO _info;
         private EnemyInfoSO _originalInfo; // Keeps the reference to the base SO
         private bool _wasBossInstance;
+        private bool _applyBossVisualsAfterReset = false;
+        private bool _isMiniBoss = false;
+
 
         private Vector3? _originalScale;
         private Color? _originalColor;
@@ -54,6 +57,7 @@ namespace Assets.Scripts.Enemies
         private void Start()
         {
             EnemyDeathEffect = GetComponent<EnemyDeathEffect>();
+            _originalInfo = _info;
         }
 
         private void OnEnable()
@@ -102,56 +106,105 @@ namespace Assets.Scripts.Enemies
         {
             // Reset visual state if modified
             if (_originalScale.HasValue)
-                transform.localScale = _originalScale.Value;
+            {
+                Transform bodyTransform = transform.Find("Body");
+                bodyTransform.localScale = _originalScale.Value;
+            }
 
-            if (_originalColor.HasValue && TryGetSpriteRendererInChildren(out var sr))
+            if (_originalColor.HasValue && TryGetBodySpriteRenderer(out var sr))
                 sr.color = _originalColor.Value;
 
             if (Camera.main != null)
-                Camera.main.backgroundColor = Color.black;
+                Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
 
             _originalScale = null;
             _originalColor = null;
 
-            // Regular reset logic
-            Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
+            // Only reset info if not overridden (i.e., not a boss clone)
+            if (!_wasBossInstance)
+            {
+                Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
+            }
+
             CanAttack = false;
             IsAlive = true;
             MaxHealth = Info.MaxHealth;
             CurrentHealth = MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
             SetRandomMovementSpeed();
-        }
 
+            SetRandomMovementSpeed();
+
+            // Apply boss visuals only after reset
+            if (_applyBossVisualsAfterReset)
+            {
+                _applyBossVisualsAfterReset = false;
+                SetAsBoss(_isMiniBoss);
+            }
+        }
 
         public void SetAsBoss(bool isMini)
         {
             Debug.Log("SetAsBoss called on " + name);
-            if (_originalScale == null)
-                _originalScale = transform.localScale;
 
-            var sr = GetComponentInChildren<SpriteRenderer>();
-            if (_originalColor == null && sr)
+            _originalInfo = _info;
+
+            Transform bodyTransform = transform.Find("Body");
+            if (bodyTransform == null)
+            {
+                Debug.LogWarning("Body not found on " + name);
+                return;
+            }
+
+            // Store original state
+            if (_originalScale == null)
+                _originalScale = bodyTransform.localScale;
+
+            if (TryGetBodySpriteRenderer(out var sr) && _originalColor == null)
                 _originalColor = sr.color;
 
+            // Apply boss scaling + color
             if (isMini)
             {
-                transform.localScale = _originalScale.Value * 2f;
+                Debug.Log("Is mini boss " + name);
+                bodyTransform.localScale = _originalScale.Value * 2f;
                 sr.color = Color.red;
             }
             else
             {
-                transform.localScale = _originalScale.Value * 4f;
+                Debug.Log("Is boss " + name);
+                bodyTransform.localScale = _originalScale.Value * 4f;
                 sr.color = Color.black;
-                Camera.main.backgroundColor = new Color(0.3f, 0, 0); // dark red
+                Camera.main.backgroundColor = new Color(0.3f, 0, 0);
             }
+            _applyBossVisualsAfterReset = false;
+            _wasBossInstance = false;
         }
 
-        private bool TryGetSpriteRendererInChildren(out SpriteRenderer sr)
+        public void ApplyBossInfo(EnemyInfoSO clone, bool isMini)
         {
-            sr = GetComponentInChildren<SpriteRenderer>();
-            return sr != null;
+            _wasBossInstance = true;
+            Info = clone;
+
+            _applyBossVisualsAfterReset = true;
+            _isMiniBoss = isMini;
         }
+
+
+
+        private bool TryGetBodySpriteRenderer(out SpriteRenderer sr)
+        {
+            Transform bodyTransform = transform.Find("Body");
+            if (bodyTransform != null)
+            {
+                sr = bodyTransform.GetComponent<SpriteRenderer>();
+                return sr != null;
+            }
+
+            sr = null;
+            return false;
+        }
+
 
 
         private void SetRandomMovementSpeed()
