@@ -11,6 +11,8 @@ namespace Assets.Scripts.Systems
 
         public event EventHandler OnWaveFailed; // TO-DO, Used to roll back 10 waves
         public event Action<float, float> OnHealthChanged; // (currentHealth, maxHealth)
+        public event Action<float, float> OnMaxHealthChanged; // (newMaxHealth, currentHealth)
+
 
         [SerializeField] private PlayerBaseSO _baseInfo;  // The original SO from the inspector
         public PlayerBaseSO Info { get; private set; }    // The runtime clone
@@ -124,6 +126,7 @@ namespace Assets.Scripts.Systems
             _currentHealth += Info.MaxHealthUpgradeAmount;
             _currentHealth = Mathf.Min(_currentHealth, _runtimeMaxHealth);
 
+            OnMaxHealthChanged?.Invoke(_runtimeMaxHealth, _currentHealth);
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
         }
 
@@ -186,6 +189,52 @@ namespace Assets.Scripts.Systems
             Info = savedStats;
             InitializeGame();
         }
+
+
+
+        /* Upgrade Base visual and color
+        [SerializeField] private SpriteRenderer wallSprite;
+        [SerializeField] private float baseMaxHealth = 100f;
+        [SerializeField] private float maxWallHeight = 1.5f;
+        [SerializeField] private float maxWallWidth = 2f;
+
+        private void UpdateWallScale()
+        {
+            float healthRatio = _runtimeMaxHealth / baseMaxHealth;
+            float newHeight = Mathf.Min(maxWallHeight * healthRatio, maxWallHeight);
+            float newWidth = Mathf.Min(maxWallWidth * healthRatio, maxWallWidth);
+
+            // Grow only downward in Y
+            wallSprite.transform.localScale = new Vector3(newWidth, newHeight, 1f);
+            wallSprite.transform.localPosition = new Vector3(0f, -newHeight / 2f, 0f);
+        }
+
+
+        [SerializeField] private float flashDuration = 0.1f;
+        private Coroutine flashCoroutine;
+
+        private void FlashOnDamage()
+        {
+            if (flashCoroutine != null) StopCoroutine(flashCoroutine);
+            flashCoroutine = StartCoroutine(FlashRoutine());
+        }
+
+        private IEnumerator FlashRoutine()
+        {
+            wallSprite.color = Color.red;
+            yield return new WaitForSeconds(flashDuration);
+            UpdateWallColorByHealth(); // Reset to correct health color
+        }
+
+        private void UpdateWallColorByHealth()
+        {
+            float healthRatio = _currentHealth / _runtimeMaxHealth;
+            Color baseColor = Color.Lerp(Color.black, Color.white, healthRatio);
+            baseColor.a = Mathf.Clamp01(healthRatio);
+            wallSprite.color = baseColor;
+        }
+        */
+
     }
 
     public enum PlayerUpgradeType

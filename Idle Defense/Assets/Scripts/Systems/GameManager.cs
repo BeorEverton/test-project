@@ -28,6 +28,7 @@ namespace Assets.Scripts.Systems
 
         private ulong money;
         public ulong Money => money;
+        public event Action<ulong> OnMoneyChanged;
 
         private void Awake()
         {
@@ -119,13 +120,13 @@ namespace Assets.Scripts.Systems
         public void AddMoney(ulong amount)
         {
             money += amount;
-            UIManager.Instance.UpdateMoney(money);
+            OnMoneyChanged?.Invoke(money);
         }
 
         public void SpendMoney(ulong amount)
         {
             money -= amount;
-            UIManager.Instance.UpdateMoney(money);
+            OnMoneyChanged?.Invoke(money);
         }
 
         public void LoadMoney(ulong amount)

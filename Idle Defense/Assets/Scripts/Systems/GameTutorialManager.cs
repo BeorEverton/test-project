@@ -19,6 +19,8 @@ namespace Assets.Scripts.Systems
         private bool _tutorialRunning = false;
         private bool _waitingToStartStep = true;
         private GameObject _lastActiveObject;
+        private ulong _lastKnownMoney = 0;
+
 
         private void Start()
         {
@@ -44,6 +46,9 @@ namespace Assets.Scripts.Systems
             GameManager.OnSpdBonusChanged += OnGameEventTriggered;
             PlayerBaseManager.Instance.OnHealthChanged += OnHealthChanged;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+            GameManager.Instance.OnMoneyChanged += OnMoneyChanged;
+            PlayerBaseManager.Instance.OnMaxHealthChanged += OnMaxHealthChanged;
+
         }
 
         private void UnsubscribeFromEvents()
@@ -51,9 +56,15 @@ namespace Assets.Scripts.Systems
             GameManager.OnSpdBonusChanged -= OnGameEventTriggered;
             PlayerBaseManager.Instance.OnHealthChanged -= OnHealthChanged;
             WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
+            GameManager.Instance.OnMoneyChanged -= OnMoneyChanged;
+            PlayerBaseManager.Instance.OnMaxHealthChanged -= OnHealthChanged;
         }
 
         private void OnGameEventTriggered(float _)
+        {
+            TryAdvanceTutorial();
+        }
+        private void OnMaxHealthChanged(float maxHealth, float current)
         {
             TryAdvanceTutorial();
         }
@@ -68,12 +79,20 @@ namespace Assets.Scripts.Systems
             TryAdvanceTutorial();
         }
 
+        private void OnMoneyChanged(ulong currentMoney)
+        {
+            TryAdvanceTutorial();
+            _lastKnownMoney = currentMoney;
+        }
+
         private void TryAdvanceTutorial()
         {
             if (!_tutorialRunning || _currentStep >= tutorialSteps.Count)
                 return;
 
             var step = tutorialSteps[_currentStep];
+
+            Debug.Log($"Checking condition {step.completeCondition} with threshold {step.completeThreshold}");
 
             if (_waitingToStartStep)
             {
@@ -92,13 +111,26 @@ namespace Assets.Scripts.Systems
                     if (_currentStep >= tutorialSteps.Count)
                     {
                         CompleteTutorial();
+                        return;
+                    }
+
+                    var nextStep = tutorialSteps[_currentStep];
+                    if (CheckCondition(nextStep.startCondition, nextStep.startThreshold))
+                    {
+                        ShowStep(_currentStep);
+                        _waitingToStartStep = false;
                     }
                     else
                     {
+                        tutorialPanel.SetActive(false); // Hide while waiting
+                        if (_lastActiveObject)
+                            _lastActiveObject.SetActive(false); // Hide while waiting
                         _waitingToStartStep = true;
                     }
+
                 }
             }
+
         }
 
         private bool CheckCondition(TutorialConditionType condition, float threshold)
@@ -109,8 +141,23 @@ namespace Assets.Scripts.Systems
                     return GameManager.Instance.spdBonus >= threshold;
                 case TutorialConditionType.HealthBelow:
                     return PlayerBaseManager.Instance.CurrentHealth < threshold;
+                case TutorialConditionType.HealthAbove:
+                    return PlayerBaseManager.Instance.CurrentHealth > threshold;
+                case TutorialConditionType.MaxHealthAbove:
+                    return PlayerBaseManager.Instance.MaxHealth > threshold;
                 case TutorialConditionType.WaveReached:
                     return WaveManager.Instance.GetCurrentWaveIndex() >= (int)threshold;
+                case TutorialConditionType.MoneyChanged:
+                    return true;
+                case TutorialConditionType.MoneyAbove:
+                    return GameManager.Instance.Money > threshold;
+                case TutorialConditionType.MoneyBelow:
+                    return GameManager.Instance.Money < threshold;
+                case TutorialConditionType.MoneyIncreased:
+                    return GameManager.Instance.Money > _lastKnownMoney;
+                case TutorialConditionType.MoneyDecreased:
+                    return GameManager.Instance.Money < _lastKnownMoney;
+
                 default:
                     return false;
             }
@@ -118,7 +165,9 @@ namespace Assets.Scripts.Systems
 
         private void ShowStep(int index)
         {
-            if (!tutorialPanel.activeInHierarchy) tutorialPanel.SetActive(true);
+            if (!tutorialPanel.activeInHierarchy)
+                tutorialPanel.SetActive(true);
+
             if (_lastActiveObject != null)
                 _lastActiveObject.SetActive(false);
 
@@ -135,6 +184,7 @@ namespace Assets.Scripts.Systems
 
             typingText.StartTyping(step.instructionText);
         }
+
 
         private void CompleteTutorial()
         {
@@ -182,6 +232,13 @@ namespace Assets.Scripts.Systems
     {
         SpdBonusAbove,
         HealthBelow,
+        MaxHealthAbove,
+        HealthAbove,
         WaveReached,
+        MoneyChanged,
+        MoneyAbove,
+        MoneyBelow,
+        MoneyIncreased,
+        MoneyDecreased
     }
 }

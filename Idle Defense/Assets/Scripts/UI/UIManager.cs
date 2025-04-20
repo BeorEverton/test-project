@@ -1,3 +1,4 @@
+using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using System;
 using TMPro;
@@ -28,6 +29,7 @@ namespace Assets.Scripts.UI
             EnemySpawner.Instance.OnWaveCreated += OnWaveCreated;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+            GameManager.Instance.OnMoneyChanged += UpdateMoney;
         }
 
         private void OnEnemyDeath(object sender, EventArgs _)
@@ -70,37 +72,11 @@ namespace Assets.Scripts.UI
             element.color = Color.Lerp(Color.black, Color.red, t);
         }
 
-        /*public void UpdateBonusColor(TextMeshProUGUI element, float value)
-        {
-            Color startColor = Color.white;
-            Color midColor = new Color(1f, 1f, 0.5f);       // Pale yellow
-            Color endColor = new Color(1f, 0.5f, 0.5f);      // Pale red
-            Color finalColor = new Color(0.5f, 0.5f, 1f);    // Pale electric blue
-
-            if (value <= 50f)
-            {
-                float t = value / 50f;
-                element.color = Color.Lerp(startColor, midColor, t);
-            }
-            else if (value <= 100f)
-            {
-                float t = (value - 50f) / 50f;
-                element.color = Color.Lerp(midColor, endColor, t);
-            }
-            else if (value <= 200f)
-            {
-                float t = (value - 100f) / 100f;
-                element.color = Color.Lerp(endColor, finalColor, t);
-            }
-            else
-            {
-                element.color = finalColor;
-            }
-        }*/
         public void UpdateMoney(ulong value)
         {
             _money.SetText("$" + AbbreviateNumber(value));
         }
+
         public static string AbbreviateNumber(double number, bool showPercent = false)
         {
             const double Thousand = 1E3;

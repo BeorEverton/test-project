@@ -23,6 +23,8 @@ namespace Assets.Scripts.UI
             _unlockButton.onClick.AddListener(UnlockTurret);
 
             _isUnlocked = _turretToUnlock.GetComponent<BaseTurret>().IsUnlocked();
+            if (!_isUnlocked)
+                _turretToUnlock.SetActive(false);
 
             RefreshState(WaveManager.Instance.GetCurrentWaveIndex());
         }

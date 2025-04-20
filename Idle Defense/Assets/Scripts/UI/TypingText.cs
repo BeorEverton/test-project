@@ -23,6 +23,7 @@ public class TypingText : MonoBehaviour
         foreach (char c in fullText)
         {
             textUI.text += c;
+            textUI.ForceMeshUpdate();
             yield return new WaitForSeconds(typingSpeed);
         }
 

@@ -18,7 +18,7 @@ public class HeartbeatLine : MonoBehaviour
     {
         lr = GetComponent<LineRenderer>();
         lr.positionCount = bars * 2; // each bar = 2 points (bottom & top)
-        lr.widthMultiplier = 0.02f;
+        lr.widthMultiplier = 0.1f;
 
         positions = new Vector3[lr.positionCount];
         barHeights = new float[bars];
