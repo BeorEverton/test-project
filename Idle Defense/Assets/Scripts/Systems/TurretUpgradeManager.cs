@@ -239,20 +239,12 @@ namespace Assets.Scripts.Systems
             float currentAttackSpeed = turret.FireRate;
             float bonusSPS = turret.FireRateUpgradeAmount;
             float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
-            //string currentDisplay = FormatFireRate(1f / currentDelay);
 
-            //if (turret.FireRate <= turret.FireRateUpgradeAmount)
-            //{
-            //    turretUpgradeButton.UpdateStats(currentDisplay, "Max", "");
-            //}
-            //else
-            //{
             turretUpgradeButton.UpdateStats(
                 $"{currentAttackSpeed}",
                 $"+{bonusSPS:F2}/s",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
-            //}
         }
 
         public void UpdateCriticalChanceDisplay()
