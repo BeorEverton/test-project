@@ -15,7 +15,7 @@ namespace Assets.Scripts.SO
         public float DamageUpgradeAmount;
         public float DamageUpgradeBaseCost;
 
-        [Tooltip("Amount of time between shots")]
+        [Tooltip("Amount of shots per second")]
         public float FireRate;
         public float FireRateLevel;
         public float FireRateUpgradeAmount;

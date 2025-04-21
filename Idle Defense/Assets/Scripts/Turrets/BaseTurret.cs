@@ -68,7 +68,7 @@ namespace Assets.Scripts.Turrets
 
             // Calculate attack speed and damage
             _damage = _stats.Damage * _bonusDmgMultiplier;
-            _atkSpeed = _stats.FireRate / _bonusSpdMultiplier;
+            _atkSpeed = (1 / _stats.FireRate) / _bonusSpdMultiplier;
 
             _timeSinceLastShot += Time.deltaTime;
             Attack();
