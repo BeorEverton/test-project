@@ -2,6 +2,7 @@ using Assets.Scripts.SO;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.Systems.Save
 {
@@ -69,6 +70,15 @@ namespace Assets.Scripts.Systems.Save
 
             GameManager.Instance.LoadMoney(gameData.GameDataDTO.Money);
             WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
+        }
+
+        public void DeleteSave()
+        {
+            SaveGameToFile.DeleteSaveGameFile();
+            PlayerBaseManager.Instance.ResetPlayerBase();
+            GameManager.Instance.ResetGame();
+            WaveManager.Instance.ResetWave();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }

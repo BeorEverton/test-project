@@ -96,16 +96,16 @@ namespace Assets.Scripts.WaveSystem
                 if (wave.IsMiniBossWave())
                 {
                     clonedInfo.Damage *= 3f;
-                    clonedInfo.MaxHealth *= 10f;
-                    clonedInfo.CoinDropAmount *= 5;
+                    clonedInfo.MaxHealth *= 50f;
+                    clonedInfo.CoinDropAmount *= 10;
                     clonedInfo.MovementSpeed *= 0.8f;
                 }
 
                 if (wave.IsBossWave())
                 {
                     clonedInfo.Damage *= 5f;
-                    clonedInfo.MaxHealth *= 30f;
-                    clonedInfo.CoinDropAmount *= 10;
+                    clonedInfo.MaxHealth *= 100f;
+                    clonedInfo.CoinDropAmount *= 20;
                     clonedInfo.MovementSpeed *= 0.6f;
                 }
 
@@ -239,5 +239,6 @@ namespace Assets.Scripts.WaveSystem
 
             OnWaveCompleted?.Invoke(this, EventArgs.Empty);
         }
+
     }
 }

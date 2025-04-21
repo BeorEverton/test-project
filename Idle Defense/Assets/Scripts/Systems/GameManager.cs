@@ -134,5 +134,13 @@ namespace Assets.Scripts.Systems
             money = amount;
             UIManager.Instance.UpdateMoney(money);
         }
+
+        public void ResetGame()
+        {
+            money = 0;
+            spdBonus = 0;
+            UIManager.Instance.UpdateMoney(money);
+            UIManager.Instance.UpdateSpdBonus(spdBonus);
+        }
     }
 }

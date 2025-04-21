@@ -28,5 +28,19 @@ namespace Assets.Scripts.Systems.Save
             Debug.Log($"Game loaded from: {path}");
             return gameData;
         }
+
+        public static void DeleteSaveGameFile()
+        {
+            string path = Path.Combine(Application.persistentDataPath, FileName);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+                Debug.Log($"Game save deleted from: {path}");
+            }
+            else
+            {
+                Debug.LogWarning($"No save file found at: {path}");
+            }
+        }
     }
 }

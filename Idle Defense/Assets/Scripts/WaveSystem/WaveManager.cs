@@ -196,5 +196,13 @@ namespace Assets.Scripts.WaveSystem
             }
             return tempWaveConfig;
         }
+
+        public void ResetWave()
+        {
+            _currentWave = 1;
+            _maxWaves = 0;
+            _waves.Clear();
+            GameRunning = true;
+        }
     }
 }

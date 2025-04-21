@@ -190,7 +190,11 @@ namespace Assets.Scripts.Systems
             InitializeGame();
         }
 
-
+        public void ResetPlayerBase()
+        {
+            Info = Instantiate(_baseInfo); // Copy the SO
+            InitializeGame();
+        }
 
         /* Upgrade Base visual and color
         [SerializeField] private SpriteRenderer wallSprite;
