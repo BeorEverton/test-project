@@ -1474,7 +1474,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -4.9999695, y: 0}
+  m_AnchoredPosition: {x: -5, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &291233319
@@ -10708,7 +10708,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -4.9999695, y: 0}
+  m_AnchoredPosition: {x: -5, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1795555424
@@ -14984,6 +14984,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1146167883132602867}
     m_Modifications:
+    - target: {fileID: 270157137564950257, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
     - target: {fileID: 3852269010086017588, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: _baseTurret
       value: 
@@ -15000,6 +15004,10 @@ PrefabInstance:
       propertyPath: _baseTurret
       value: 
       objectReference: {fileID: 2034135072}
+    - target: {fileID: 6550109116390981071, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
     - target: {fileID: 6752375561347029999, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -15080,10 +15088,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6920045893415423215, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
     - target: {fileID: 7795556908105750794, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
       propertyPath: _baseTurret
       value: 
       objectReference: {fileID: 2034135072}
+    - target: {fileID: 8072717227751690585, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ea0d7328bce7841bc28e8778ed801b, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

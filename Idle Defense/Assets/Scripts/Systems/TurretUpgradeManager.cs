@@ -65,7 +65,7 @@ namespace Assets.Scripts.Systems
             float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
             if (TrySpend(cost))
             {
-                turret.FireRate = Mathf.Max(turret.FireRateUpgradeAmount, turret.FireRate - turret.FireRateUpgradeAmount);
+                turret.FireRate = Mathf.Max(turret.FireRateUpgradeAmount, turret.FireRate + turret.FireRateUpgradeAmount);
                 turret.FireRateLevel += 1f;
                 UpdateFireRateDisplay();
             }
@@ -213,7 +213,7 @@ namespace Assets.Scripts.Systems
 
         private string FormatFireRate(float shotsPerSecond)
         {
-            return shotsPerSecond >= 1f ? $"{shotsPerSecond:F2}/s" : $"1/{(1f / shotsPerSecond):F2}s";
+            return $"{shotsPerSecond:F2}/s";
         }
 
         // Update Display Methods
@@ -236,23 +236,23 @@ namespace Assets.Scripts.Systems
         {
             if (turret == null)
                 return;
-            float currentDelay = turret.FireRate;
+            float currentAttackSpeed = turret.FireRate;
             float bonusSPS = turret.FireRateUpgradeAmount;
             float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
-            string currentDisplay = FormatFireRate(1f / currentDelay);
+            //string currentDisplay = FormatFireRate(1f / currentDelay);
 
-            if (turret.FireRate <= turret.FireRateUpgradeAmount)
-            {
-                turretUpgradeButton.UpdateStats(currentDisplay, "Max", "");
-            }
-            else
-            {
-                turretUpgradeButton.UpdateStats(
-                    currentDisplay,
-                    $"+{bonusSPS:F2}/s",
-                    $"${UIManager.AbbreviateNumber(cost)}"
-                );
-            }
+            //if (turret.FireRate <= turret.FireRateUpgradeAmount)
+            //{
+            //    turretUpgradeButton.UpdateStats(currentDisplay, "Max", "");
+            //}
+            //else
+            //{
+            turretUpgradeButton.UpdateStats(
+                $"{currentAttackSpeed}",
+                $"+{bonusSPS:F2}/s",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+            //}
         }
 
         public void UpdateCriticalChanceDisplay()
