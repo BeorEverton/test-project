@@ -90,9 +90,7 @@ namespace Assets.Scripts.Systems
             if (!_tutorialRunning || _currentStep >= tutorialSteps.Count)
                 return;
 
-            var step = tutorialSteps[_currentStep];
-
-            Debug.Log($"Checking condition {step.completeCondition} with threshold {step.completeThreshold}");
+            var step = tutorialSteps[_currentStep];            
 
             if (_waitingToStartStep)
             {

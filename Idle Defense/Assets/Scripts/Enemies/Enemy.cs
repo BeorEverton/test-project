@@ -112,10 +112,7 @@ namespace Assets.Scripts.Enemies
             }
 
             if (_originalColor.HasValue && TryGetBodySpriteRenderer(out var sr))
-                sr.color = _originalColor.Value;
-
-            if (Camera.main != null)
-                Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
+                sr.color = _originalColor.Value;            
 
             _originalScale = null;
             _originalColor = null;
@@ -145,8 +142,6 @@ namespace Assets.Scripts.Enemies
 
         public void SetAsBoss(bool isMini)
         {
-            Debug.Log("SetAsBoss called on " + name);
-
             _originalInfo = _info;
 
             Transform bodyTransform = transform.Find("Body");
@@ -166,13 +161,11 @@ namespace Assets.Scripts.Enemies
             // Apply boss scaling + color
             if (isMini)
             {
-                Debug.Log("Is mini boss " + name);
                 bodyTransform.localScale = _originalScale.Value * 2f;
                 sr.color = Color.red;
             }
             else
             {
-                Debug.Log("Is boss " + name);
                 bodyTransform.localScale = _originalScale.Value * 4f;
                 sr.color = Color.black;
                 Camera.main.backgroundColor = new Color(0.3f, 0, 0);
