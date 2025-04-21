@@ -56,7 +56,7 @@ MonoBehaviour:
   _unlockButton: {fileID: 3423114139010491191}
   _unlockText: {fileID: 3435656254366332225}
   _requiredWave: 10
-  _unlockCost: 100
+  _unlockCost: 5000
 --- !u!1 &1404109076970763384
 GameObject:
   m_ObjectHideFlags: 0
@@ -224,8 +224,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 10.5
+  m_fontSizeBase: 10.5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
