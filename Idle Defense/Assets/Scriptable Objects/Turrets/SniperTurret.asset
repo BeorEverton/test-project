@@ -16,14 +16,14 @@ MonoBehaviour:
   IsUnlocked: 0
   Damage: 100
   DamageLevel: 0
-  DamageUpgradeAmount: 10
+  DamageUpgradeAmount: 1.04
   DamageUpgradeBaseCost: 2000
-  DamageCostExponentialMultiplier: 0
-  FireRate: 4
+  DamageCostExponentialMultiplier: 1.08
+  FireRate: 0.25
   FireRateLevel: 0
-  FireRateUpgradeAmount: 0.01
+  FireRateUpgradeAmount: 0.04
   FireRateUpgradeBaseCost: 3000
-  FireRateCostExponentialMultiplier: 0
+  FireRateCostExponentialMultiplier: 1.078
   RotationSpeed: 8
   AngleThreshold: 1
   CriticalChance: 0
@@ -40,31 +40,39 @@ MonoBehaviour:
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0
   ExplosionRadiusUpgradeBaseCost: 0
+  ExplosionRadiusCostExponentialMultiplier: 0
   SplashDamage: 0
   SplashDamageLevel: 0
   SplashDamageUpgradeAmount: 0
   SplashDamageUpgradeBaseCost: 0
+  SplashDamageCostExponentialMultiplier: 0
   PierceChance: 70
   PierceChanceLevel: 0
   PierceChanceUpgradeAmount: 0.5
   PierceChanceUpgradeBaseCost: 5000
+  PierceChanceCostExponentialMultiplier: 1.075
   PierceDamageFalloff: 95
   PierceDamageFalloffLevel: 0
   PierceDamageFalloffUpgradeAmount: 5
   PierceDamageFalloffUpgradeBaseCost: 6000
+  PierceDamageFalloffCostExponentialMultiplier: 1.079
   PelletCount: 0
   PelletCountLevel: 0
   PelletCountUpgradeAmount: 0
   PelletCountUpgradeBaseCost: 0
+  PelletCountCostExponentialMultiplier: 0
   DamageFalloffOverDistance: 0
   DamageFalloffOverDistanceLevel: 0
   DamageFalloffOverDistanceUpgradeAmount: 0
   DamageFalloffOverDistanceUpgradeBaseCost: 0
+  DamageFalloffOverDistanceCostExponentialMultiplier: 0
   PercentBonusDamagePerSec: 0
   PercentBonusDamagePerSecLevel: 0
   PercentBonusDamagePerSecUpgradeAmount: 0
   PercentBonusDamagePerSecUpgradeBaseCost: 0
+  PercentBonusDamagePerSecCostExponentialMultiplier: 0
   SlowEffect: 0
   SlowEffectLevel: 0
   SlowEffectUpgradeAmount: 0
   SlowEffectUpgradeBaseCost: 0
+  SlowEffectCostExponentialMultiplier: 0

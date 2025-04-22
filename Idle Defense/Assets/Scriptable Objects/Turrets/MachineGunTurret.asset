@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6153e066477abf4990f9076288a6088, type: 3}
   m_Name: MachineGunTurret
   m_EditorClassIdentifier: 
+  TurretType: 0
   IsUnlocked: 1
   Damage: 5
   DamageLevel: 0
@@ -39,31 +40,39 @@ MonoBehaviour:
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0
   ExplosionRadiusUpgradeBaseCost: 0
+  ExplosionRadiusCostExponentialMultiplier: 0
   SplashDamage: 0
   SplashDamageLevel: 0
   SplashDamageUpgradeAmount: 0
   SplashDamageUpgradeBaseCost: 0
+  SplashDamageCostExponentialMultiplier: 0
   PierceChance: 0
   PierceChanceLevel: 0
   PierceChanceUpgradeAmount: 0
   PierceChanceUpgradeBaseCost: 0
+  PierceChanceCostExponentialMultiplier: 0
   PierceDamageFalloff: 0
   PierceDamageFalloffLevel: 0
   PierceDamageFalloffUpgradeAmount: 0
   PierceDamageFalloffUpgradeBaseCost: 0
+  PierceDamageFalloffCostExponentialMultiplier: 0
   PelletCount: 0
   PelletCountLevel: 0
   PelletCountUpgradeAmount: 0
   PelletCountUpgradeBaseCost: 0
+  PelletCountCostExponentialMultiplier: 0
   DamageFalloffOverDistance: 0
   DamageFalloffOverDistanceLevel: 0
   DamageFalloffOverDistanceUpgradeAmount: 0
   DamageFalloffOverDistanceUpgradeBaseCost: 0
+  DamageFalloffOverDistanceCostExponentialMultiplier: 0
   PercentBonusDamagePerSec: 0
   PercentBonusDamagePerSecLevel: 0
   PercentBonusDamagePerSecUpgradeAmount: 0
   PercentBonusDamagePerSecUpgradeBaseCost: 0
+  PercentBonusDamagePerSecCostExponentialMultiplier: 0
   SlowEffect: 0
   SlowEffectLevel: 0
   SlowEffectUpgradeAmount: 0
   SlowEffectUpgradeBaseCost: 0
+  SlowEffectCostExponentialMultiplier: 0

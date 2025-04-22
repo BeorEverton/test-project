@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace Assets.Editor
 {
-    public class CSVtoSO
+    public class EnemyCSVtoSO
     {
-        private static string _enemyCsvPath = "/Editor/EnemyInfoCSV.csv";
+        private static string _enemyCsvPath = "/Editor/CSVs/EnemyInfoCSV.csv";
 
         [MenuItem("Utilities/Generate EnemyInfoSo")]
         public static void GenerateEnemies()
