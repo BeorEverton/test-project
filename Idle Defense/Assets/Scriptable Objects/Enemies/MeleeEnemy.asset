@@ -17,7 +17,9 @@ MonoBehaviour:
   MaxHealth: 1
   MovementSpeed: 0.5
   MovementSpeedDifference: 0.2
-  CoinDropAmount: 5
+  CoinDropAmount: 2
+  CoinDropMultiplierByWaveCount: 1.1
+  HealthMultiplierByWaveCount: 1.09
   Damage: 1
   AttackRange: 0.3
-  AttackSpeed: 1
+  AttackSpeed: 1.3

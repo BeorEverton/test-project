@@ -85,7 +85,7 @@ namespace Assets.Scripts.WaveSystem
         private void TryAttack(Enemy enemy)
         {
             enemy.TimeSinceLastAttack += Time.deltaTime;
-            if (enemy.TimeSinceLastAttack < enemy.Info.AttackSpeed)
+            if (enemy.TimeSinceLastAttack < 1 / enemy.Info.AttackSpeed)
                 return;
 
             Attack(enemy.Info.Damage);

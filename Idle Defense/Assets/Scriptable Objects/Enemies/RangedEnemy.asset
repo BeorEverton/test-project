@@ -15,9 +15,11 @@ MonoBehaviour:
   Name: RangedEnemy
   EnemyClass: 1
   MaxHealth: 3
-  MovementSpeed: 0.5
-  MovementSpeedDifference: 0.2
-  CoinDropAmount: 8
+  MovementSpeed: 0.6
+  MovementSpeedDifference: 0.22
+  CoinDropAmount: 4
+  CoinDropMultiplierByWaveCount: 1.15
+  HealthMultiplierByWaveCount: 1.06
   Damage: 1
   AttackRange: 2
   AttackSpeed: 1

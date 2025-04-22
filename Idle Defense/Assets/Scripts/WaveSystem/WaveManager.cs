@@ -26,12 +26,6 @@ namespace Assets.Scripts.WaveSystem
         [SerializeField] private List<WaveConfigSO> _baseWaveSOs;
         [SerializeField] private EnemySpawner _enemySpawner;
 
-        [Header("Enemy Wave Bonus")]
-        [Tooltip("Maxhealth += waveCount * healthMultiplier (Default = 2)")]
-        [SerializeField] private float _healthMultiplierByWaveCount = 2f;
-        [Tooltip("CoinDrop = Ceil(CoinDrop * coinDropmultiplier) (Default = 1.05, 5% increase per wave)")]
-        [SerializeField] private float _coinDropMultiplierByWaveCount = 1.05f;
-
         private Dictionary<int, Wave> _waves = new(); //Dictionary of all waves, with wave number as key
         private int _maxWaves = 0; //Amount of waves in dictionary
         private int _currentWave = 1; //Overall wave index
@@ -124,9 +118,9 @@ namespace Assets.Scripts.WaveSystem
         private EnemyInfoSO CloneEnemyInfoWithScale(Enemy enemy, int waveIndex)
         {
             EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
-            clonedInfo.MaxHealth += (waveIndex * _healthMultiplierByWaveCount);
+            clonedInfo.MaxHealth += (waveIndex * clonedInfo.HealthMultiplierByWaveCount);
             clonedInfo.CoinDropAmount =
-                (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount + (ulong)waveIndex * _coinDropMultiplierByWaveCount);
+                (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount + (ulong)waveIndex * clonedInfo.CoinDropMultiplierByWaveCount);
             return clonedInfo;
         }
 

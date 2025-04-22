@@ -52,6 +52,7 @@ namespace Assets.Scripts.Enemies
 
         // Laser targeting
         private float _baseMovementSpeed;
+        private ulong _coinDropAmount;
 
 
         private void Start()
@@ -65,6 +66,7 @@ namespace Assets.Scripts.Enemies
             ResetEnemy();
             LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
             GridManager.Instance.AddEnemy(this);
+            _coinDropAmount = _info.CoinDropAmount;
         }
 
         private void OnDisable()
@@ -112,7 +114,7 @@ namespace Assets.Scripts.Enemies
             }
 
             if (_originalColor.HasValue && TryGetBodySpriteRenderer(out var sr))
-                sr.color = _originalColor.Value;            
+                sr.color = _originalColor.Value;
 
             _originalScale = null;
             _originalColor = null;

@@ -20,12 +20,18 @@ namespace Assets.Scripts.SO
         [Tooltip("Amount of coins to drop on death. Will be randomized with +- 5%")]
         public ulong CoinDropAmount;
 
+        [Header("Wave Multipliers")]
+        [Tooltip("CoinDrop = Ceil(CoinDrop * coinDropmultiplier) (Default = 1.05, 5% increase per wave)")]
+        public float CoinDropMultiplierByWaveCount = 1.05f;
+        [Tooltip("Maxhealth += waveCount * healthMultiplier (Default = 2)")]
+        public float HealthMultiplierByWaveCount = 2f;
+
         [Header("Attack stats")]
         [Tooltip("Damage dealth to the player per attack")]
         public float Damage;
         [Tooltip("Attack range for the enemy, before attacking the player")]
         public float AttackRange;
-        [Tooltip("Time between each attack. - 0.5 makes the enemy attack twice per second")]
+        [Tooltip("Attacks per second. - 0.5 makes the enemy attack once every two second")]
         public float AttackSpeed;
     }
 
@@ -36,7 +42,7 @@ namespace Assets.Scripts.SO
         Tank,
         Scout,
         Charger,
-        Sniper, 
+        Sniper,
         Assassin,
         Champion
     }

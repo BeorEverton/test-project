@@ -16,8 +16,10 @@ MonoBehaviour:
   EnemyClass: 4
   MaxHealth: 4
   MovementSpeed: 1.5
-  MovementSpeedDifference: 0.2
-  CoinDropAmount: 15
+  MovementSpeedDifference: 0.23
+  CoinDropAmount: 8
+  CoinDropMultiplierByWaveCount: 1.5
+  HealthMultiplierByWaveCount: 1.075
   Damage: 5
   AttackRange: 0.3
-  AttackSpeed: 1
+  AttackSpeed: 0.55
