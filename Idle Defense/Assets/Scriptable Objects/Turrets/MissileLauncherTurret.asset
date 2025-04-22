@@ -12,25 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6153e066477abf4990f9076288a6088, type: 3}
   m_Name: MissileLauncherTurret
   m_EditorClassIdentifier: 
+  TurretType: 3
   IsUnlocked: 0
   Damage: 400
   DamageLevel: 0
   DamageUpgradeAmount: 50
   DamageUpgradeBaseCost: 8000
+  DamageCostExponentialMultiplier: 0
   FireRate: 2.5
   FireRateLevel: 0
   FireRateUpgradeAmount: 0.01
   FireRateUpgradeBaseCost: 6000
+  FireRateCostExponentialMultiplier: 0
   RotationSpeed: 3
   AngleThreshold: 10
   CriticalChance: 0
   CriticalChanceLevel: 0
   CriticalChanceUpgradeAmount: 0
   CriticalChanceUpgradeBaseCost: 0
+  CriticalChanceCostExponentialMultiplier: 0
   CriticalDamageMultiplier: 0
   CriticalDamageMultiplierLevel: 0
   CriticalDamageMultiplierUpgradeAmount: 0
   CriticalDamageMultiplierUpgradeBaseCost: 0
+  CriticalDamageCostExponentialMultiplier: 0
   ExplosionRadius: 1
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0.2

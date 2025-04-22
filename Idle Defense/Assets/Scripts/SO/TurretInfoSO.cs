@@ -6,6 +6,8 @@ namespace Assets.Scripts.SO
     public class TurretInfoSO : ScriptableObject
     {
         [Header("Base Turret")]
+        [Tooltip("What type of turret is this?")]
+        public TurretType TurretType;
         [Tooltip("Is the turret unlocked?")]
         public bool IsUnlocked;
 
@@ -105,5 +107,14 @@ namespace Assets.Scripts.SO
         {
             CriticalChance = Mathf.Clamp(CriticalChance, 0, 100);
         }
+    }
+
+    public enum TurretType
+    {
+        MachineGun,
+        Shotgun,
+        Sniper,
+        MissileLauncher,
+        Laser
     }
 }

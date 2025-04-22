@@ -12,25 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6153e066477abf4990f9076288a6088, type: 3}
   m_Name: ShotgunTurret
   m_EditorClassIdentifier: 
+  TurretType: 1
   IsUnlocked: 0
   Damage: 30
   DamageLevel: 0
   DamageUpgradeAmount: 5
   DamageUpgradeBaseCost: 60
+  DamageCostExponentialMultiplier: 0
   FireRate: 2
   FireRateLevel: 0
   FireRateUpgradeAmount: 0.05
   FireRateUpgradeBaseCost: 100
+  FireRateCostExponentialMultiplier: 0
   RotationSpeed: 6
   AngleThreshold: 4
   CriticalChance: 0
   CriticalChanceLevel: 0
   CriticalChanceUpgradeAmount: 0
   CriticalChanceUpgradeBaseCost: 0
+  CriticalChanceCostExponentialMultiplier: 0
   CriticalDamageMultiplier: 0
   CriticalDamageMultiplierLevel: 0
   CriticalDamageMultiplierUpgradeAmount: 0
   CriticalDamageMultiplierUpgradeBaseCost: 0
+  CriticalDamageCostExponentialMultiplier: 0
   ExplosionRadius: 0
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0
