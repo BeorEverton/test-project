@@ -126,7 +126,7 @@ namespace Assets.Scripts.WaveSystem
             EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
             clonedInfo.MaxHealth += (waveIndex * _healthMultiplierByWaveCount);
             clonedInfo.CoinDropAmount =
-                (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount * (ulong)waveIndex * _coinDropMultiplierByWaveCount);
+                (ulong)Mathf.CeilToInt(clonedInfo.CoinDropAmount + (ulong)waveIndex * _coinDropMultiplierByWaveCount);
             return clonedInfo;
         }
 
