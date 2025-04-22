@@ -180,8 +180,6 @@ namespace Assets.Scripts.Systems
             }
         }
 
-
-
         public void UpgradePercentBonusDamagePerSec()
         {
             float cost = GetHybridCost(turret.PercentBonusDamagePerSecUpgradeBaseCost, turret.PercentBonusDamagePerSecLevel);
@@ -236,12 +234,13 @@ namespace Assets.Scripts.Systems
         {
             if (turret == null)
                 return;
+
             float currentAttackSpeed = turret.FireRate;
             float bonusSPS = turret.FireRateUpgradeAmount;
             float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
 
             turretUpgradeButton.UpdateStats(
-                $"{currentAttackSpeed}",
+                $"{currentAttackSpeed:F2}/s",
                 $"+{bonusSPS:F2}/s",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
