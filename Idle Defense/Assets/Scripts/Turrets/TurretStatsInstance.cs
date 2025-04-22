@@ -1,4 +1,5 @@
 using Assets.Scripts.SO;
+using UnityEngine;
 
 namespace Assets.Scripts.Turrets
 {
@@ -10,25 +11,36 @@ namespace Assets.Scripts.Turrets
     {
         public bool IsUnlocked;
 
+        [Header("Base Stats")]
+        //DO NOT TOUCH AT RUNTIME
+        public float BaseDamage;
+        public float BaseFireRate;
+        public float BaseCritChance;
+        public float BaseCritDamage;
+
         public float Damage;
         public float DamageLevel;
         public float DamageUpgradeAmount;
         public float DamageUpgradeBaseCost;
+        public float DamageCostExponentialMultiplier;
 
         public float FireRate;
         public float FireRateLevel;
         public float FireRateUpgradeAmount;
         public float FireRateUpgradeBaseCost;
+        public float FireRateCostExponentialMultiplier;
 
         public float CriticalChance;
         public float CriticalChanceLevel;
         public float CriticalChanceUpgradeAmount;
         public float CriticalChanceUpgradeBaseCost;
+        public float CriticalChanceCostExponentialMultiplier;
 
         public float CriticalDamageMultiplier;
         public float CriticalDamageMultiplierLevel;
         public float CriticalDamageMultiplierUpgradeAmount;
         public float CriticalDamageMultiplierUpgradeBaseCost;
+        public float CriticalDamageCostExponentialMultiplier;
 
         public float ExplosionRadius;
         public float ExplosionRadiusLevel;
@@ -76,26 +88,34 @@ namespace Assets.Scripts.Turrets
         public TurretStatsInstance(TurretInfoSO source)
         {
             IsUnlocked = source.IsUnlocked;
+            BaseDamage = source.Damage;
+            BaseFireRate = source.FireRate;
+            BaseCritChance = source.CriticalChance;
+            BaseCritDamage = source.CriticalDamageMultiplier;
 
             Damage = source.Damage;
             DamageLevel = source.DamageLevel;
             DamageUpgradeAmount = source.DamageUpgradeAmount;
             DamageUpgradeBaseCost = source.DamageUpgradeBaseCost;
+            DamageCostExponentialMultiplier = source.DamageCostExponentialMultiplier;
 
             FireRate = source.FireRate;
             FireRateLevel = source.FireRateLevel;
             FireRateUpgradeAmount = source.FireRateUpgradeAmount;
             FireRateUpgradeBaseCost = source.FireRateUpgradeBaseCost;
+            FireRateCostExponentialMultiplier = source.FireRateCostExponentialMultiplier;
 
             CriticalChance = source.CriticalChance;
             CriticalChanceLevel = source.CriticalChanceLevel;
             CriticalChanceUpgradeAmount = source.CriticalChanceUpgradeAmount;
             CriticalChanceUpgradeBaseCost = source.CriticalChanceUpgradeBaseCost;
+            CriticalChanceCostExponentialMultiplier = source.CriticalChanceCostExponentialMultiplier;
 
             CriticalDamageMultiplier = source.CriticalDamageMultiplier;
             CriticalDamageMultiplierLevel = source.CriticalDamageMultiplierLevel;
             CriticalDamageMultiplierUpgradeAmount = source.CriticalDamageMultiplierUpgradeAmount;
             CriticalDamageMultiplierUpgradeBaseCost = source.CriticalDamageMultiplierUpgradeBaseCost;
+            CriticalDamageCostExponentialMultiplier = source.CriticalDamageCostExponentialMultiplier;
 
             ExplosionRadius = source.ExplosionRadius;
             ExplosionRadiusLevel = source.ExplosionRadiusLevel;

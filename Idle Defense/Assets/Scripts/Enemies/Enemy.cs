@@ -3,8 +3,6 @@ using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using DamageNumbersPro;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -52,7 +50,11 @@ namespace Assets.Scripts.Enemies
 
         // Laser targeting
         private float _baseMovementSpeed;
+
+#if UNITY_EDITOR //To display coinDrop and damage in the inspector debug mode
         private ulong _coinDropAmount;
+        private float _damage;
+#endif
 
 
         private void Start()
@@ -66,7 +68,10 @@ namespace Assets.Scripts.Enemies
             ResetEnemy();
             LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
             GridManager.Instance.AddEnemy(this);
+#if UNITY_EDITOR
             _coinDropAmount = _info.CoinDropAmount;
+            _damage = _info.Damage;
+#endif
         }
 
         private void OnDisable()

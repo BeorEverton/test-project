@@ -15,22 +15,26 @@ MonoBehaviour:
   IsUnlocked: 1
   Damage: 5
   DamageLevel: 0
-  DamageUpgradeAmount: 1
+  DamageUpgradeAmount: 1.04
   DamageUpgradeBaseCost: 1
+  DamageCostExponentialMultiplier: 1.08
   FireRate: 0.5
   FireRateLevel: 0
   FireRateUpgradeAmount: 0.04
-  FireRateUpgradeBaseCost: 10
+  FireRateUpgradeBaseCost: 7
+  FireRateCostExponentialMultiplier: 1.078
   RotationSpeed: 5
   AngleThreshold: 5
   CriticalChance: 5
   CriticalChanceLevel: 0
   CriticalChanceUpgradeAmount: 1
   CriticalChanceUpgradeBaseCost: 100
-  CriticalDamageMultiplier: 20
+  CriticalChanceCostExponentialMultiplier: 1.075
+  CriticalDamageMultiplier: 120
   CriticalDamageMultiplierLevel: 0
   CriticalDamageMultiplierUpgradeAmount: 5
   CriticalDamageMultiplierUpgradeBaseCost: 50
+  CriticalDamageCostExponentialMultiplier: 1.079
   ExplosionRadius: 0
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0

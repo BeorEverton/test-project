@@ -37,6 +37,24 @@ namespace Assets.Scripts.Systems.Save
             };
         }
 
+        public static TurretBaseInfoDTO? CreateTurretBaseInfoDTO(TurretStatsInstance? turret)
+        {
+            if (turret == null)
+                return null;
+
+            return new TurretBaseInfoDTO
+            {
+                BaseDamage = turret.BaseDamage,
+                BaseFireRate = turret.BaseFireRate,
+                BaseCritChance = turret.BaseCritChance,
+                BaseCritDamage = turret.BaseCritDamage,
+                DamageCostExponentialMultiplier = turret.DamageCostExponentialMultiplier,
+                FireRateCostExponentialMultiplier = turret.FireRateCostExponentialMultiplier,
+                CriticalChanceCostExponentialMultiplier = turret.CriticalChanceCostExponentialMultiplier,
+                CriticalDamageCostExponentialMultiplier = turret.CriticalDamageCostExponentialMultiplier,
+            };
+        }
+
         public static TurretInfoDTO? CreateTurretInfoDTO(TurretStatsInstance? turret)
         {
             if (turret == null)
@@ -121,13 +139,22 @@ namespace Assets.Scripts.Systems.Save
             };
         }
 
-        public static TurretStatsInstance CreateTurretStatsInstance(TurretInfoDTO turret)
+        public static TurretStatsInstance CreateTurretStatsInstance(TurretInfoDTO turret, TurretBaseInfoDTO baseInfo)
         {
             return new TurretStatsInstance
             {
                 IsUnlocked = turret.IsUnlocked,
-                Damage = turret.Damage,
+                BaseDamage = baseInfo.BaseDamage,
+                BaseFireRate = baseInfo.BaseFireRate,
+                BaseCritChance = baseInfo.BaseCritChance,
+                BaseCritDamage = baseInfo.BaseCritDamage,
+                DamageCostExponentialMultiplier = baseInfo.DamageCostExponentialMultiplier,
+                FireRateCostExponentialMultiplier = baseInfo.FireRateCostExponentialMultiplier,
+                CriticalChanceCostExponentialMultiplier = baseInfo.CriticalChanceCostExponentialMultiplier,
+                CriticalDamageCostExponentialMultiplier = baseInfo.CriticalDamageCostExponentialMultiplier,
+
                 DamageLevel = turret.DamageLevel,
+                Damage = turret.Damage,
                 DamageUpgradeAmount = turret.DamageUpgradeAmount,
                 DamageUpgradeBaseCost = turret.DamageUpgradeBaseCost,
                 FireRate = turret.FireRate,
@@ -207,6 +234,19 @@ public class PlayerInfoDTO
     public float RegenIntervalUpgradeAmount;
     public float RegenIntervalUpgradeBaseCost;
     public float RegenIntervalLevel;
+}
+
+[Serializable]
+public class TurretBaseInfoDTO
+{
+    public float BaseDamage;
+    public float BaseFireRate;
+    public float BaseCritChance;
+    public float BaseCritDamage;
+    public float DamageCostExponentialMultiplier;
+    public float FireRateCostExponentialMultiplier;
+    public float CriticalChanceCostExponentialMultiplier;
+    public float CriticalDamageCostExponentialMultiplier;
 }
 
 [Serializable]

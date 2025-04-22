@@ -46,27 +46,36 @@ namespace Assets.Scripts.Systems
             }
         }
 
+        private float GetExponentialCost_PlusLevel(float baseCost, float level, float exponentialMultiplier)
+        {
+            return baseCost + Mathf.Pow(exponentialMultiplier, level) + level;
+        }
+
+        private float GetExponentialCost(float baseCost, float level, float exponentialMultiplier)
+        {
+            return baseCost + Mathf.Pow(exponentialMultiplier, level);
+        }
+
         public void UpgradeDamage()
         {
-            float cost = GetHybridCost(turret.DamageUpgradeBaseCost, turret.DamageLevel);
+            float cost = GetExponentialCost_PlusLevel(turret.DamageUpgradeBaseCost, turret.DamageLevel, turret.DamageCostExponentialMultiplier);
+
             if (TrySpend(cost))
             {
-                turret.Damage += turret.DamageUpgradeAmount;
                 turret.DamageLevel += 1f;
+                turret.Damage = turret.BaseDamage * Mathf.Pow(turret.DamageUpgradeAmount, turret.DamageLevel) + turret.DamageLevel;
                 UpdateDamageDisplay();
             }
         }
 
         public void UpgradeFireRate()
         {
-            if (turret.FireRate <= turret.FireRateUpgradeAmount)
-                return;
+            float cost = GetExponentialCost_PlusLevel(turret.FireRateUpgradeBaseCost, turret.FireRateLevel, turret.FireRateCostExponentialMultiplier);
 
-            float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
             if (TrySpend(cost))
             {
-                turret.FireRate = Mathf.Max(turret.FireRateUpgradeAmount, turret.FireRate + turret.FireRateUpgradeAmount);
                 turret.FireRateLevel += 1f;
+                turret.FireRate = turret.BaseFireRate + turret.FireRateUpgradeAmount * turret.FireRateLevel;
                 UpdateFireRateDisplay();
             }
         }
@@ -76,22 +85,24 @@ namespace Assets.Scripts.Systems
             if (turret.CriticalChance >= 50f)
                 return;
 
-            float cost = GetHybridCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel);
+            float cost = GetExponentialCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel, turret.CriticalChanceCostExponentialMultiplier);
+
             if (TrySpend(cost))
             {
-                turret.CriticalChance = Mathf.Min(100f, turret.CriticalChance + turret.CriticalChanceUpgradeAmount);
                 turret.CriticalChanceLevel += 1f;
+                turret.CriticalChance = Mathf.Min(50f, turret.BaseCritChance + turret.CriticalChanceUpgradeAmount * turret.CriticalChanceLevel);
                 UpdateCriticalChanceDisplay();
             }
         }
 
         public void UpgradeCriticalDamageMultiplier()
         {
-            float cost = GetHybridCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel);
+            float cost = GetExponentialCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel, turret.CriticalDamageCostExponentialMultiplier);
+
             if (TrySpend(cost))
             {
-                turret.CriticalDamageMultiplier += turret.CriticalDamageMultiplierUpgradeAmount;
                 turret.CriticalDamageMultiplierLevel += 1f;
+                turret.CriticalDamageMultiplier = turret.BaseCritDamage + turret.CriticalDamageMultiplierUpgradeAmount * turret.CriticalDamageMultiplierLevel;
                 UpdateCriticalDamageMultiplierDisplay();
             }
         }
@@ -209,11 +220,6 @@ namespace Assets.Scripts.Systems
             }
         }
 
-        private string FormatFireRate(float shotsPerSecond)
-        {
-            return $"{shotsPerSecond:F2}/s";
-        }
-
         // Update Display Methods
 
         public void UpdateDamageDisplay()
@@ -222,7 +228,7 @@ namespace Assets.Scripts.Systems
                 return;
             float current = turret.Damage;
             float bonus = turret.DamageUpgradeAmount;
-            float cost = GetHybridCost(turret.DamageUpgradeBaseCost, turret.DamageLevel);
+            float cost = GetExponentialCost_PlusLevel(turret.DamageUpgradeBaseCost, turret.DamageLevel, turret.DamageCostExponentialMultiplier);
             turretUpgradeButton.UpdateStats(
                 UIManager.AbbreviateNumber(current),
                 $"+{UIManager.AbbreviateNumber(bonus)}",
@@ -237,7 +243,7 @@ namespace Assets.Scripts.Systems
 
             float currentAttackSpeed = turret.FireRate;
             float bonusSPS = turret.FireRateUpgradeAmount;
-            float cost = GetHybridCost(turret.FireRateUpgradeBaseCost, turret.FireRateLevel);
+            float cost = GetExponentialCost_PlusLevel(turret.FireRateUpgradeBaseCost, turret.FireRateLevel, turret.FireRateCostExponentialMultiplier);
 
             turretUpgradeButton.UpdateStats(
                 $"{currentAttackSpeed:F2}/s",
@@ -252,7 +258,7 @@ namespace Assets.Scripts.Systems
                 return;
             float current = turret.CriticalChance;
             float bonus = turret.CriticalChanceUpgradeAmount;
-            float cost = GetHybridCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel);
+            float cost = GetExponentialCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel, turret.CriticalChanceCostExponentialMultiplier);
             if (current >= 50f)
             {
                 turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
@@ -271,12 +277,12 @@ namespace Assets.Scripts.Systems
         {
             if (turret == null)
                 return;
-            float current = 1 + turret.CriticalDamageMultiplier;
+            float current = turret.CriticalDamageMultiplier;
             float bonus = turret.CriticalDamageMultiplierUpgradeAmount;
-            float cost = GetHybridCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel);
+            float cost = GetExponentialCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel, turret.CriticalDamageCostExponentialMultiplier);
             turretUpgradeButton.UpdateStats(
-                $"{current:F1}%",
-                $"+{bonus:F1}%",
+                $"{current:F2}%",
+                $"+{bonus:F2}%",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
         }

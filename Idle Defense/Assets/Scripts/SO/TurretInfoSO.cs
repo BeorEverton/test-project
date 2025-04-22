@@ -12,14 +12,18 @@ namespace Assets.Scripts.SO
         [Tooltip("Amount of damage dealt per hit")]
         public float Damage;
         public float DamageLevel;
+        [Tooltip("Exponential damage upgrade amount")]
         public float DamageUpgradeAmount;
         public float DamageUpgradeBaseCost;
+        public float DamageCostExponentialMultiplier;
 
         [Tooltip("Amount of shots per second")]
         public float FireRate;
         public float FireRateLevel;
+        [Tooltip("Exponential fire rate upgrade amount")]
         public float FireRateUpgradeAmount;
         public float FireRateUpgradeBaseCost;
+        public float FireRateCostExponentialMultiplier;
 
         [Tooltip("How fast the turretHead rotates towards the target")]
         public float RotationSpeed;
@@ -31,14 +35,19 @@ namespace Assets.Scripts.SO
         [Tooltip("Chance for a critical attack in Percent")]
         public float CriticalChance;
         public float CriticalChanceLevel;
+        [Tooltip("Linear critical chance upgrade amount")]
         public float CriticalChanceUpgradeAmount;
         public float CriticalChanceUpgradeBaseCost;
+        public float CriticalChanceCostExponentialMultiplier;
+
 
         [Tooltip("Multiplier for critical damage in Percent")]
         public float CriticalDamageMultiplier;
         public float CriticalDamageMultiplierLevel;
+        [Tooltip("Linear critical damage upgrade amount")]
         public float CriticalDamageMultiplierUpgradeAmount;
         public float CriticalDamageMultiplierUpgradeBaseCost;
+        public float CriticalDamageCostExponentialMultiplier;
 
         [Header("Missile Launcher Turret")]
         [Tooltip("Radius of the explosion")]
