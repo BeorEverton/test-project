@@ -98,7 +98,7 @@ namespace Assets.Scripts.Turrets
         protected virtual void Shoot()
         {
             StartCoroutine(ShowMuzzleFlash());
-            AudioManager.Instance.PlayWithVariation(_shotSounds[Random.Range(0, _shotSounds.Length)], 0.8f, 10f);
+            AudioManager.Instance.PlayWithVariation(_shotSounds[Random.Range(0, _shotSounds.Length)], 0.8f, 1f);
         }
 
         protected virtual void TargetEnemy()

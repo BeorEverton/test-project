@@ -75,11 +75,7 @@ namespace Assets.Scripts.Enemies
         }
 
         private void OnDisable()
-        {
-            if (activeBoss)
-            {
-                AudioManager.Instance.PlayMusic("Main");
-            }
+        {            
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
         }
 
@@ -106,6 +102,12 @@ namespace Assets.Scripts.Enemies
                 return;
 
             IsAlive = false;
+
+            if (activeBoss)
+            {
+                AudioManager.Instance.PlayMusic("Main");
+                activeBoss = false;
+            }
 
             OnDeath?.Invoke(this, new OnDeathEventArgs
             {
@@ -154,6 +156,7 @@ namespace Assets.Scripts.Enemies
         public void SetAsBoss(bool isMini)
         {
             _originalInfo = _info;
+            activeBoss = true;
 
             Transform bodyTransform = transform.Find("Body");
             if (bodyTransform == null)
