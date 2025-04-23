@@ -1,3 +1,4 @@
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
 using System;
@@ -98,6 +99,10 @@ namespace Assets.Scripts.Systems
             }
 
             spdBonus = Mathf.Clamp(spdBonus, 0f, maxSpdBonus);
+            if (spdBonus >= maxSpdBonus)
+            {
+                AudioManager.Instance.Play("Max Speed");
+            }
             UIManager.Instance.UpdateSpdBonus(spdBonus);
 
         }

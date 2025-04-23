@@ -2,6 +2,7 @@ using Assets.Scripts.Enemies;
 using Assets.Scripts.Helpers;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Audio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -96,19 +97,23 @@ namespace Assets.Scripts.WaveSystem
                 if (wave.IsMiniBossWave())
                 {
                     clonedInfo.Damage *= 3f;
-                    clonedInfo.MaxHealth *= 50f;
+                    clonedInfo.MaxHealth *= 10f;
                     clonedInfo.CoinDropAmount *= 10;
                     clonedInfo.MovementSpeed *= 0.8f;
+                    clonedInfo.AttackRange += .2f; // Because the gfx size changes
                 }
 
                 if (wave.IsBossWave())
                 {
                     clonedInfo.Damage *= 5f;
-                    clonedInfo.MaxHealth *= 100f;
+                    clonedInfo.MaxHealth *= 20f;
                     clonedInfo.CoinDropAmount *= 20;
                     clonedInfo.MovementSpeed *= 0.6f;
+                    clonedInfo.AttackRange += .6f;
+                    AudioManager.Instance.PlayMusic("Boss");
                 }
 
+                AudioManager.Instance.Play("Boss Appear");
                 bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
             else if (Camera.main != null)

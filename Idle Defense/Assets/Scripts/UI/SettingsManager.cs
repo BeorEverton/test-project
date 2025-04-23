@@ -7,8 +7,8 @@ public class SettingsManager : MonoBehaviour
     public static SettingsManager Instance { get; private set; }
 
     [Header("Audio Settings")]
-    [Range(0f, 1f)] public float MusicVolume = 1f;
-    [Range(0f, 1f)] public float SFXVolume = 1f;
+    [Range(-80f, 20f)] public float MusicVolume = 1f;
+    [Range(-80f, 20f)] public float SFXVolume = 1f;
     private float savedMusicVolume, savedSFXVolume;
     [Header("Mixer Reference")]
     [SerializeField] private AudioMixer _masterMixer;
@@ -63,16 +63,14 @@ public class SettingsManager : MonoBehaviour
 
     public void SetMusicVolume(float sliderValue)
     {
-        float db = Mathf.Log10(Mathf.Max(sliderValue, 0.0001f)) * 20f;
-        _masterMixer.SetFloat("MusicVolume", db);
-        savedMusicVolume = db;
+        _masterMixer.SetFloat("MusicVolume", sliderValue);
+        savedMusicVolume = sliderValue;
     }
 
     public void SetSFXVolume(float sliderValue)
     {
-        float db = Mathf.Log10(Mathf.Max(sliderValue, 0.0001f)) * 20f;
-        _masterMixer.SetFloat("SFXVolume", db);
-        savedSFXVolume = db;
+        _masterMixer.SetFloat("SFXVolume", sliderValue);
+        savedSFXVolume = sliderValue;
     }
 
     public void OpenExternalLink(string key)

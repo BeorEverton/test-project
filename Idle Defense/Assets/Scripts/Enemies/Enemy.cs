@@ -1,5 +1,6 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.WaveSystem;
 using DamageNumbersPro;
 using System;
@@ -23,10 +24,9 @@ namespace Assets.Scripts.Enemies
         private bool _wasBossInstance;
         private bool _applyBossVisualsAfterReset = false;
         private bool _isMiniBoss = false;
-
-
         private Vector3? _originalScale;
         private Color? _originalColor;
+        private bool activeBoss = false; // Used to change music track when boss is dead
 
 
         public EnemyInfoSO Info
@@ -76,6 +76,10 @@ namespace Assets.Scripts.Enemies
 
         private void OnDisable()
         {
+            if (activeBoss)
+            {
+                AudioManager.Instance.PlayMusic("Main");
+            }
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
         }
 

@@ -1,3 +1,4 @@
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
 using UnityEngine;
@@ -29,7 +30,7 @@ namespace Assets.Scripts.Systems
                 GameManager.Instance.SpendMoney((ulong)cost);
                 return true;
             }
-
+            AudioManager.Instance.Play("No Money");
             Debug.Log("Not enough money.");
             return false;
         }
@@ -64,8 +65,10 @@ namespace Assets.Scripts.Systems
             {
                 turret.DamageLevel += 1f;
                 turret.Damage = turret.BaseDamage * Mathf.Pow(turret.DamageUpgradeAmount, turret.DamageLevel) + turret.DamageLevel;
-                UpdateDamageDisplay();
+                UpdateDamageDisplay(); 
+                AudioManager.Instance.Play("Upgrade");
             }
+                
         }
 
         public void UpgradeFireRate()
@@ -77,6 +80,7 @@ namespace Assets.Scripts.Systems
                 turret.FireRateLevel += 1f;
                 turret.FireRate = turret.BaseFireRate + turret.FireRateUpgradeAmount * turret.FireRateLevel;
                 UpdateFireRateDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
         }
 
@@ -92,7 +96,9 @@ namespace Assets.Scripts.Systems
                 turret.CriticalChanceLevel += 1f;
                 turret.CriticalChance = Mathf.Min(50f, turret.BaseCritChance + turret.CriticalChanceUpgradeAmount * turret.CriticalChanceLevel);
                 UpdateCriticalChanceDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
+                
         }
 
         public void UpgradeCriticalDamageMultiplier()
@@ -104,7 +110,9 @@ namespace Assets.Scripts.Systems
                 turret.CriticalDamageMultiplierLevel += 1f;
                 turret.CriticalDamageMultiplier = turret.BaseCritDamage + turret.CriticalDamageMultiplierUpgradeAmount * turret.CriticalDamageMultiplierLevel;
                 UpdateCriticalDamageMultiplierDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
+                
         }
 
         public void UpgradeExplosionRadius()
@@ -121,7 +129,9 @@ namespace Assets.Scripts.Systems
                 turret.ExplosionRadius += turret.ExplosionRadiusUpgradeAmount;
                 turret.ExplosionRadiusLevel += 1f;
                 UpdateExplosionRadiusDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
+                
         }
 
 
@@ -133,6 +143,7 @@ namespace Assets.Scripts.Systems
                 turret.SplashDamage += turret.SplashDamageUpgradeAmount;
                 turret.SplashDamageLevel += 1f;
                 UpdateSplashDamageDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
         }
 
@@ -147,6 +158,7 @@ namespace Assets.Scripts.Systems
                 turret.PierceChance = Mathf.Min(100f, turret.PierceChance + turret.PierceChanceUpgradeAmount);
                 turret.PierceChanceLevel += 1;
                 UpdatePierceChanceDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
         }
 
@@ -159,6 +171,7 @@ namespace Assets.Scripts.Systems
                 turret.PierceDamageFalloff -= turret.PierceDamageFalloffUpgradeAmount;
                 turret.PierceDamageFalloffLevel += 1f;
                 UpdatePierceDamageFalloffDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
         }
 
@@ -170,6 +183,7 @@ namespace Assets.Scripts.Systems
                 turret.PelletCount += turret.PelletCountUpgradeAmount;
                 turret.PelletCountLevel += 1;
                 UpdatePelletCountDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
         }
 
@@ -188,6 +202,7 @@ namespace Assets.Scripts.Systems
                 turret.DamageFalloffOverDistance = Mathf.Max(0f, turret.DamageFalloffOverDistance); // Clamp to avoid negative values
                 turret.DamageFalloffOverDistanceLevel += 1f;
                 UpdateDamageFalloffOverDistanceDisplay();
+                AudioManager.Instance.Play("Upgrade");
             }
         }
 
@@ -199,7 +214,8 @@ namespace Assets.Scripts.Systems
                 turret.PercentBonusDamagePerSec += turret.PercentBonusDamagePerSecUpgradeAmount;
                 turret.PercentBonusDamagePerSecLevel += 1f;
                 UpdatePercentBonusDamagePerSecDisplay();
-            }
+                AudioManager.Instance.Play("Upgrade");
+            } 
         }
 
         public void UpgradeSlowEffect()
@@ -217,7 +233,8 @@ namespace Assets.Scripts.Systems
                 turret.SlowEffect = Mathf.Min(turret.SlowEffect, 100f); // Clamp to 100%
                 turret.SlowEffectLevel += 1f;
                 UpdateSlowEffectDisplay();
-            }
+                AudioManager.Instance.Play("Upgrade");
+            }                
         }
 
         // Update Display Methods

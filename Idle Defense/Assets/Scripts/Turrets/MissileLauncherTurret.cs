@@ -1,5 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Audio;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Assets.Scripts.Turrets
     public class MissileLauncherTurret : BaseTurret
     {
         [SerializeField] private MissileController _missile;
+        [SerializeField] private string _explosionSound;
 
         protected override void Shoot()
         {
@@ -89,6 +91,7 @@ namespace Assets.Scripts.Turrets
         {
             List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(_stats.ExplosionRadius));
             float impactArea = _stats.ExplosionRadius / 3;
+            AudioManager.Instance.PlayWithVariation(_explosionSound, 0.5f, 1f);
 
             foreach (Enemy enemy in enemiesInAdjecentGrids
                          .Where(enemy => Vector3.Distance(enemy.transform.position, target) <= impactArea))

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Assets.Scripts.Systems.Audio;
 
 namespace Assets.Scripts.Turrets
 {
@@ -21,6 +22,7 @@ namespace Assets.Scripts.Turrets
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] protected List<Sprite> _muzzleFlashSprites;
+        [SerializeField] protected string[] _shotSounds;
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -96,6 +98,7 @@ namespace Assets.Scripts.Turrets
         protected virtual void Shoot()
         {
             StartCoroutine(ShowMuzzleFlash());
+            AudioManager.Instance.PlayWithVariation(_shotSounds[Random.Range(0, _shotSounds.Length)], 0.8f, 10f);
         }
 
         protected virtual void TargetEnemy()

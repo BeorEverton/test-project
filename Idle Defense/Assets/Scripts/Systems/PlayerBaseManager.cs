@@ -1,4 +1,5 @@
 using Assets.Scripts.SO;
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using System;
 using UnityEngine;
@@ -72,10 +73,12 @@ namespace Assets.Scripts.Systems
             _regenTickTimer = 0f;
 
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+            AudioManager.Instance.Play("Take Damage");
 
             if (_currentHealth <= 0f)
             {
                 OnWaveFailed?.Invoke(this, EventArgs.Empty);
+                AudioManager.Instance.Play("Player Death");
                 InitializeGame();
             }
         }
@@ -94,6 +97,12 @@ namespace Assets.Scripts.Systems
                 {
                     _currentHealth = Mathf.Min(_currentHealth + _runtimeRegenAmount, _runtimeMaxHealth);
                     _regenTickTimer = 0f;
+
+                    if (_currentHealth >= _runtimeMaxHealth)
+                    {
+                        // Play full health sound
+                        AudioManager.Instance.Play("Full Health");
+                    }
 
                     OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
                 }
@@ -128,6 +137,8 @@ namespace Assets.Scripts.Systems
 
             OnMaxHealthChanged?.Invoke(_runtimeMaxHealth, _currentHealth);
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+
+            AudioManager.Instance.Play("Upgrade");
         }
 
         public void UpgradeRegenAmount()
@@ -139,6 +150,7 @@ namespace Assets.Scripts.Systems
 
             Info.RegenAmountLevel += 1f;
             _runtimeRegenAmount += Info.RegenAmountUpgradeAmount;
+            AudioManager.Instance.Play("Upgrade");
         }
 
         public void UpgradeRegenInterval()
@@ -154,6 +166,7 @@ namespace Assets.Scripts.Systems
 
             Info.RegenIntervalLevel += 1f;
             _runtimeRegenInterval = Mathf.Max(MinRegenInterval, _runtimeRegenInterval - Info.RegenIntervalUpgradeAmount);
+            AudioManager.Instance.Play("Upgrade");
         }
 
         public void UpdateMaxHealthDisplay(PlayerUpgradeButton button)

@@ -1,6 +1,7 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Systems.Save;
 using System;
 using System.Collections;
@@ -71,7 +72,7 @@ namespace Assets.Scripts.WaveSystem
             {
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
-                    WaveNumber = _currentWave
+                    WaveNumber = _currentWave                    
                 });
 
                 while (_maxWaves < _currentWave + 10) //Generate new waves when only 10 left
@@ -99,6 +100,7 @@ namespace Assets.Scripts.WaveSystem
                 yield return new WaitUntil(() => _waveCompleted);
 
                 _currentWave++;
+                AudioManager.Instance.Play("New Wave");
 
                 SaveGameManager.Instance.SaveGame(); //Save game at the start of each round
 
