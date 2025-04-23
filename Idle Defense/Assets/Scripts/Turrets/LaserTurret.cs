@@ -1,10 +1,7 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems.Audio;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Assets.Scripts.Turrets
 {
@@ -54,14 +51,6 @@ namespace Assets.Scripts.Turrets
                 enemy.ReduceMovementSpeed(_stats.SlowEffect);
 
             _timeSinceLastShot = 0f;
-        }
-
-        protected override void AimTowardsTarget(float bonusMultiplier)
-        {
-            base.AimTowardsTarget(bonusMultiplier);
-
-            //if (!_targetInRange)
-            //    _laserLine.enabled = false; // Disable the laser when not shooting
         }
 
         private void DrawLaser()
