@@ -1,6 +1,7 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections;
@@ -8,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using Assets.Scripts.Systems.Audio;
 
 namespace Assets.Scripts.Turrets
 {
@@ -27,13 +27,14 @@ namespace Assets.Scripts.Turrets
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
         protected bool _targetInRange;
+        protected bool _targetInAim;
         protected float _bonusSpdMultiplier;
         protected float _bonusDmgMultiplier;
 
         protected float _damage;
         protected float _atkSpeed;
+        protected string _currentShotSound = "";
 
-        private bool _targetInAim;
         private float aimSize = .3f;
 
         // Control the attack range based on the screen size
@@ -98,7 +99,8 @@ namespace Assets.Scripts.Turrets
         protected virtual void Shoot()
         {
             StartCoroutine(ShowMuzzleFlash());
-            AudioManager.Instance.PlayWithVariation(_shotSounds[Random.Range(0, _shotSounds.Length)], 0.8f, 1f);
+            _currentShotSound = _shotSounds[Random.Range(0, _shotSounds.Length)];
+            AudioManager.Instance.PlayWithVariation(_currentShotSound, 0.8f, 1f);
         }
 
         protected virtual void TargetEnemy()
@@ -137,7 +139,7 @@ namespace Assets.Scripts.Turrets
                    pos.y >= _screenBottom && pos.y <= (_screenTop - _topSpawnMargin);
         }
 
-        private void Enemy_OnDeath(object sender, EventArgs _)
+        protected virtual void Enemy_OnDeath(object sender, EventArgs _)
         {
             if (sender is not Enemy enemy)
                 return;

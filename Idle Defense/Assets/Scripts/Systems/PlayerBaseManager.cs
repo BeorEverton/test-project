@@ -79,6 +79,7 @@ namespace Assets.Scripts.Systems
             {
                 OnWaveFailed?.Invoke(this, EventArgs.Empty);
                 AudioManager.Instance.Play("Player Death");
+                AudioManager.Instance.Stop("Laser V2");
                 InitializeGame();
             }
         }
