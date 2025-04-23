@@ -51,8 +51,8 @@ public class SettingsManager : MonoBehaviour
     {
         if (option)
         {
-            MusicVolume = 0f;
-            SFXVolume = 0f;
+            _masterMixer.SetFloat("MusicVolume", -80f);
+            _masterMixer.SetFloat("SFXVolume", -80f);
         }
         else
         {
