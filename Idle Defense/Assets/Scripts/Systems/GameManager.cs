@@ -99,10 +99,7 @@ namespace Assets.Scripts.Systems
             }
 
             spdBonus = Mathf.Clamp(spdBonus, 0f, maxSpdBonus);
-            if (spdBonus >= maxSpdBonus)
-            {
-                AudioManager.Instance.Play("Max Speed");
-            }
+
             UIManager.Instance.UpdateSpdBonus(spdBonus);
 
         }
@@ -146,6 +143,12 @@ namespace Assets.Scripts.Systems
             spdBonus = 0;
             UIManager.Instance.UpdateMoney(money);
             UIManager.Instance.UpdateSpdBonus(spdBonus);
+        }
+
+        public void AddMoneyInt(int amount)
+        {
+            money += (ulong)amount;
+            OnMoneyChanged?.Invoke(money);
         }
     }
 }

@@ -1,61 +1,50 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Assets.Scripts.Systems
 {
     public class GameSpeedManager : MonoBehaviour
     {
-        [SerializeField] private List<GameSpeedButton> _gameSpeedButtons;
+        [SerializeField] private Button speedToggleButton;
+        [SerializeField] private TextMeshProUGUI speedLabel; // Or use TMP_Text if needed
 
-        private PlayerInput _playerInput;
-        private int _currentButtonIndex = 0;
+        private List<float> speedOptions;
+        private int currentSpeedIndex = 0;
 
         private void Start()
         {
-            _playerInput = new();
-            _playerInput.GameSpeed.Enable();
+            // Define speed steps based on platform
+#if UNITY_EDITOR
+            speedOptions = new List<float> { 1f, 1.5f, 2f, 3f, 5f, 10f };
+#else
+            speedOptions = new List<float> { 1f, 1.5f, 2f };
+#endif
 
-            InitGameSpeedButtons();
+            speedToggleButton.onClick.AddListener(AdvanceGameSpeed);
+            SetGameSpeed(speedOptions[currentSpeedIndex]);
         }
 
-        private void InitGameSpeedButtons()
+        private void AdvanceGameSpeed()
         {
-            _gameSpeedButtons.ForEach(button =>
-            {
-                button.Button.gameObject.SetActive(false);
-                button.Button.onClick.AddListener(ActivateNextButton);
-            });
-
-            //Activate 1x button
-            _gameSpeedButtons[_currentButtonIndex].Button.gameObject.SetActive(true);
-            SetGameSpeed(_gameSpeedButtons[_currentButtonIndex].GameSpeed);
+            currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.Count;
+            SetGameSpeed(speedOptions[currentSpeedIndex]);
         }
 
-        private void OnDestroy()
-        {
-            _playerInput.GameSpeed.Disable();
-        }
-
-        public void ActivateNextButton()
-        {
-            _gameSpeedButtons[_currentButtonIndex].Button.gameObject.SetActive(false);
-            _currentButtonIndex = (_currentButtonIndex + 1) % _gameSpeedButtons.Count;
-            _gameSpeedButtons[_currentButtonIndex].Button.gameObject.SetActive(true);
-
-            SetGameSpeed(_gameSpeedButtons[_currentButtonIndex].GameSpeed);
-        }
-
-        public void SetGameSpeed(int speed)
+        private void SetGameSpeed(float speed)
         {
             Time.timeScale = speed;
+            UpdateLabel(speed);
         }
-    }
 
-    [System.Serializable]
-    public class GameSpeedButton
-    {
-        public Button Button;
-        public int GameSpeed;
+        private void UpdateLabel(float speed)
+        {
+            speedLabel.SetText(speed +"x");
+        }
     }
 }

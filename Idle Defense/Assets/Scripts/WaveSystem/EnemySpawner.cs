@@ -110,6 +110,7 @@ namespace Assets.Scripts.WaveSystem
                     clonedInfo.CoinDropAmount *= 20;
                     clonedInfo.MovementSpeed *= 0.6f;
                     clonedInfo.AttackRange += .6f;
+                    AudioManager.Instance.StopAllMusics();
                     AudioManager.Instance.PlayMusic("Boss");
                 }
 

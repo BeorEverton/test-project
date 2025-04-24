@@ -77,6 +77,11 @@ namespace Assets.Scripts.Enemies
         private void OnDisable()
         {            
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
+            if (activeBoss)
+            {
+                AudioManager.Instance.PlayMusic("Main");
+                activeBoss = false;
+            }
         }
 
         public void TakeDamage(float amount, bool isCritical = false)
@@ -102,12 +107,7 @@ namespace Assets.Scripts.Enemies
                 return;
 
             IsAlive = false;
-
-            if (activeBoss)
-            {
-                AudioManager.Instance.PlayMusic("Main");
-                activeBoss = false;
-            }
+            
 
             OnDeath?.Invoke(this, new OnDeathEventArgs
             {
