@@ -166,7 +166,6 @@ namespace Assets.Scripts.Enemies
             {
                 _body.localScale = _originalScale.Value * 4f;
                 sr.color = Color.black;
-                Camera.main.backgroundColor = new Color(0.3f, 0, 0);
             }
             _applyBossVisualsAfterReset = false;
         }

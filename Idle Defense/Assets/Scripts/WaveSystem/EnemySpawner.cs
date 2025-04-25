@@ -115,8 +115,6 @@ namespace Assets.Scripts.WaveSystem
                 AudioManager.Instance.Play("Boss Appear");
                 bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
-            else if (Camera.main != null)
-                Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
         }
 
         private void CreateEnemiesFromEntry(EnemyWaveEntry entry)
@@ -153,6 +151,7 @@ namespace Assets.Scripts.WaveSystem
                 {
                     AudioManager.Instance.StopAllMusics();
                     AudioManager.Instance.PlayMusic("Boss");
+                    Camera.main.backgroundColor = new Color(0.3f, 0, 0);
                 }
 
                 enemy.OnDeath += Enemy_OnEnemyDeath;
@@ -210,6 +209,7 @@ namespace Assets.Scripts.WaveSystem
             {
                 enemy.IsBossInstance = false;
                 AudioManager.Instance.PlayMusic("Main");
+                Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
             }
             EnemiesAlive.Remove(enemy.gameObject);
 
