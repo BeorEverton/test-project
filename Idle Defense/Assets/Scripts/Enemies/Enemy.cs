@@ -20,13 +20,10 @@ namespace Assets.Scripts.Enemies
         }
 
         [SerializeField] private EnemyInfoSO _info;
-        private EnemyInfoSO _originalInfo; // Keeps the reference to the base SO
-        private bool _wasBossInstance;
         private bool _applyBossVisualsAfterReset = false;
         private bool _isMiniBoss = false;
         private Vector3? _originalScale;
         private Color? _originalColor;
-        private bool activeBoss = false; // Used to change music track when boss is dead
 
 
         public EnemyInfoSO Info
@@ -38,6 +35,7 @@ namespace Assets.Scripts.Enemies
         public float MaxHealth { get; private set; }
         public float CurrentHealth { get; private set; }
         public bool IsSlowed { get; private set; }
+        public bool IsBossInstance;
         public EnemyDeathEffect EnemyDeathEffect { get; private set; }
 
         public bool IsAlive;
@@ -47,6 +45,7 @@ namespace Assets.Scripts.Enemies
         public Vector2Int LastGridPos;
 
         [SerializeField] private DamageNumber damageNumber, damageNumberCritical;
+        [SerializeField] private Transform _body;
 
         // Laser targeting
         private float _baseMovementSpeed;
@@ -56,11 +55,9 @@ namespace Assets.Scripts.Enemies
         private float _damage;
 #endif
 
-
         private void Start()
         {
             EnemyDeathEffect = GetComponent<EnemyDeathEffect>();
-            _originalInfo = _info;
         }
 
         private void OnEnable()
@@ -75,13 +72,8 @@ namespace Assets.Scripts.Enemies
         }
 
         private void OnDisable()
-        {            
+        {
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
-            if (activeBoss)
-            {
-                AudioManager.Instance.PlayMusic("Main");
-                activeBoss = false;
-            }
         }
 
         public void TakeDamage(float amount, bool isCritical = false)
@@ -107,7 +99,6 @@ namespace Assets.Scripts.Enemies
                 return;
 
             IsAlive = false;
-            
 
             OnDeath?.Invoke(this, new OnDeathEventArgs
             {
@@ -120,8 +111,7 @@ namespace Assets.Scripts.Enemies
             // Reset visual state if modified
             if (_originalScale.HasValue)
             {
-                Transform bodyTransform = transform.Find("Body");
-                bodyTransform.localScale = _originalScale.Value;
+                _body.localScale = _originalScale.Value;
             }
 
             if (_originalColor.HasValue && TryGetBodySpriteRenderer(out var sr))
@@ -131,7 +121,7 @@ namespace Assets.Scripts.Enemies
             _originalColor = null;
 
             // Only reset info if not overridden (i.e., not a boss clone)
-            if (!_wasBossInstance)
+            if (!IsBossInstance)
             {
                 Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
             }
@@ -141,8 +131,6 @@ namespace Assets.Scripts.Enemies
             MaxHealth = Info.MaxHealth;
             CurrentHealth = MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
-            SetRandomMovementSpeed();
-
             SetRandomMovementSpeed();
 
             // Apply boss visuals only after reset
@@ -155,11 +143,7 @@ namespace Assets.Scripts.Enemies
 
         public void SetAsBoss(bool isMini)
         {
-            _originalInfo = _info;
-            activeBoss = true;
-
-            Transform bodyTransform = transform.Find("Body");
-            if (bodyTransform == null)
+            if (_body == null)
             {
                 Debug.LogWarning("Body not found on " + name);
                 return;
@@ -167,52 +151,36 @@ namespace Assets.Scripts.Enemies
 
             // Store original state
             if (_originalScale == null)
-                _originalScale = bodyTransform.localScale;
+                _originalScale = _body.localScale;
 
-            if (TryGetBodySpriteRenderer(out var sr) && _originalColor == null)
+            if (TryGetBodySpriteRenderer(out SpriteRenderer sr) && _originalColor == null)
                 _originalColor = sr.color;
 
             // Apply boss scaling + color
             if (isMini)
             {
-                bodyTransform.localScale = _originalScale.Value * 2f;
+                _body.localScale = _originalScale.Value * 2f;
                 sr.color = Color.red;
             }
             else
             {
-                bodyTransform.localScale = _originalScale.Value * 4f;
+                _body.localScale = _originalScale.Value * 4f;
                 sr.color = Color.black;
                 Camera.main.backgroundColor = new Color(0.3f, 0, 0);
             }
             _applyBossVisualsAfterReset = false;
-            _wasBossInstance = false;
         }
 
         public void ApplyBossInfo(EnemyInfoSO clone, bool isMini)
         {
-            _wasBossInstance = true;
+            IsBossInstance = true;
             Info = clone;
 
             _applyBossVisualsAfterReset = true;
             _isMiniBoss = isMini;
         }
 
-
-
-        private bool TryGetBodySpriteRenderer(out SpriteRenderer sr)
-        {
-            Transform bodyTransform = transform.Find("Body");
-            if (bodyTransform != null)
-            {
-                sr = bodyTransform.GetComponent<SpriteRenderer>();
-                return sr != null;
-            }
-
-            sr = null;
-            return false;
-        }
-
-
+        private bool TryGetBodySpriteRenderer(out SpriteRenderer sr) => _body != null ? sr = _body.GetComponent<SpriteRenderer>() : sr = null;
 
         private void SetRandomMovementSpeed()
         {

@@ -23,14 +23,14 @@ namespace Assets.Scripts.Systems.Audio
         private bool mute = true; // Used only to not play all sounds when the game is loaded. It is set to false on the game load.
 
         #region Simple Singleton
-        public static AudioManager Instance;
+        public static AudioManager Instance { get; private set; }
         void Awake()
         {
             if (!Instance)
                 Instance = this;
             else
                 Destroy(this);
-        #endregion
+            #endregion
 
             // On start add all sounds to the array with it's respective values
             foreach (Sound s in sounds)
@@ -68,7 +68,8 @@ namespace Assets.Scripts.Systems.Audio
         // Play can be called from any script
         public void Play(string name)
         {
-            if (mute) return;
+            if (mute)
+                return;
             //Debug.Log("calling sound " + name);
             Sound s = Array.Find(sounds, sound => sound.name == name); // Search the sound   
             if (s != null)
@@ -78,7 +79,8 @@ namespace Assets.Scripts.Systems.Audio
                 lastClipLenght = s.clip.length;
                 lastPlayed = Time.time;
             }
-            else Debug.LogWarning("Sound: " + s + " not found");
+            else
+                Debug.LogWarning("Sound: " + s + " not found");
         }
 
         /// <summary>
@@ -89,7 +91,8 @@ namespace Assets.Scripts.Systems.Audio
         /// <param name="volumeRange">Range of volume variation (e.g., 0.1f = ±10%).</param>
         public void PlayWithVariation(string name, float pitchRange = 0.05f, float volumeRange = 0.1f)
         {
-            if (mute) return;
+            if (mute)
+                return;
 
             Sound s = Array.Find(sounds, sound => sound.name == name);
             if (s != null)
@@ -124,7 +127,8 @@ namespace Assets.Scripts.Systems.Audio
                 s.source.Play(); // If found play it
                 musicPlaying = name;
             }
-            else Debug.LogWarning("Sound: " + s + " not found");
+            else
+                Debug.LogWarning("Sound: " + s + " not found");
         }
 
         public void StopMusic(string name)
@@ -150,10 +154,10 @@ namespace Assets.Scripts.Systems.Audio
         }
 
         public void StopAllMusics()
-        {        
+        {
             for (int i = 0; i < musics.Length; i++)
             {
-                musics[i].source.Stop();            
+                musics[i].source.Stop();
             }
         }
 
@@ -162,6 +166,5 @@ namespace Assets.Scripts.Systems.Audio
         {
             Play("Click");
         }
-
     }
 }

@@ -110,8 +110,6 @@ namespace Assets.Scripts.WaveSystem
                     clonedInfo.CoinDropAmount *= 20;
                     clonedInfo.MovementSpeed *= 0.6f;
                     clonedInfo.AttackRange += .6f;
-                    AudioManager.Instance.StopAllMusics();
-                    AudioManager.Instance.PlayMusic("Boss");
                 }
 
                 AudioManager.Instance.Play("Boss Appear");
@@ -119,13 +117,6 @@ namespace Assets.Scripts.WaveSystem
             }
             else if (Camera.main != null)
                 Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
-        }
-
-
-        private EnemyInfoSO GetRandomEnemyFromWave()
-        {
-            int randomIndex = Random.Range(0, _currentWaveConfig.EnemyWaveEntries.Count);
-            return _enemiesCurrentWave[randomIndex].GetComponent<Enemy>().Info;
         }
 
         private void CreateEnemiesFromEntry(EnemyWaveEntry entry)
@@ -151,14 +142,21 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator SpawnEnemies()
         {
-            foreach (GameObject enemy in _enemiesCurrentWave)
+            foreach (GameObject enemyObj in _enemiesCurrentWave)
             {
                 if (!_canSpawnEnemies)
                     break;
 
-                enemy.SetActive(true);
-                enemy.GetComponent<Enemy>().OnDeath += Enemy_OnEnemyDeath;
-                EnemiesAlive.Add(enemy);
+                enemyObj.SetActive(true);
+                Enemy enemy = enemyObj.GetComponent<Enemy>();
+                if (enemy.IsBossInstance) //Set boss music when boss is spawned
+                {
+                    AudioManager.Instance.StopAllMusics();
+                    AudioManager.Instance.PlayMusic("Boss");
+                }
+
+                enemy.OnDeath += Enemy_OnEnemyDeath;
+                EnemiesAlive.Add(enemyObj);
 
                 yield return new WaitForSeconds(_currentWaveConfig.TimeBetweenSpawns);
             }
@@ -208,6 +206,11 @@ namespace Assets.Scripts.WaveSystem
         private IEnumerator HandleEnemyDeath(Enemy enemy)
         {
             enemy.OnDeath -= Enemy_OnEnemyDeath;
+            if (enemy.IsBossInstance)
+            {
+                enemy.IsBossInstance = false;
+                AudioManager.Instance.PlayMusic("Main");
+            }
             EnemiesAlive.Remove(enemy.gameObject);
 
             yield return StartCoroutine(enemy.EnemyDeathEffect.PlayEffectRoutine());
