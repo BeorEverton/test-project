@@ -309,8 +309,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -114.71037, y: 0}
-  m_SizeDelta: {x: 188.448, y: -10.188}
+  m_AnchoredPosition: {x: -90.52828, y: 0}
+  m_SizeDelta: {x: 153.3046, y: -10.188}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2934298786686795245
 CanvasRenderer:
@@ -441,7 +441,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 126.9383, y: 0}
+  m_SizeDelta: {x: 86.2578, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &2008324194571516859
 CanvasRenderer:
@@ -471,7 +471,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +45 $500.1B
+  m_text: ' $500.1B'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9c246574c1db03a47a942f0431fd046b, type: 2}
   m_sharedMaterial: {fileID: 4987959468375074593, guid: 9c246574c1db03a47a942f0431fd046b, type: 2}
@@ -681,11 +681,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfc2603e446f1404097e430b38cd5482, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statName: {fileID: 0}
-  statValue: {fileID: 0}
-  statUpgradeAmount: {fileID: 0}
-  statUpgradeCost: {fileID: 0}
-  upgradeType: 0
+  _statName: {fileID: 0}
+  _statValue: {fileID: 0}
+  _statUpgradeAmount: {fileID: 0}
+  _statUpgradeCost: {fileID: 0}
+  _upgradeType: 0
 --- !u!1 &8225007823943489327
 GameObject:
   m_ObjectHideFlags: 0
@@ -720,8 +720,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 126.93829, y: 0}
-  m_SizeDelta: {x: 126.9383, y: 0}
+  m_AnchoredPosition: {x: 73.652466, y: 0}
+  m_SizeDelta: {x: 63.0526, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &969679733935705274
 CanvasRenderer:
@@ -751,7 +751,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +45 $500.1B
+  m_text: +150
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9c246574c1db03a47a942f0431fd046b, type: 2}
   m_sharedMaterial: {fileID: 4987959468375074593, guid: 9c246574c1db03a47a942f0431fd046b, type: 2}
@@ -785,7 +785,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0

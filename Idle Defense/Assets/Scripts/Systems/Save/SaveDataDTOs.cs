@@ -14,6 +14,7 @@ namespace Assets.Scripts.Systems.Save
             {
                 WaveNumber = waveNumber,
                 Money = money,
+                TutorialStep = GameTutorialManager.Instance != null ? GameTutorialManager.Instance._currentStep : 0
             };
         }
 
@@ -213,6 +214,7 @@ public class GameDataDTO
 {
     public int WaveNumber;
     public ulong Money;
+    public int TutorialStep;
 }
 
 [Serializable]

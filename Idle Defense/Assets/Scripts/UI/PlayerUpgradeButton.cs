@@ -77,9 +77,9 @@ namespace Assets.Scripts.UI
         {
             return type switch
             {
-                PlayerUpgradeType.MaxHealth => "Max Health",
-                PlayerUpgradeType.RegenAmount => "Regen / Tick",
-                PlayerUpgradeType.RegenInterval => "Regen Rate",
+                PlayerUpgradeType.MaxHealth => "Base Health",
+                PlayerUpgradeType.RegenAmount => "Repair / Tick",
+                PlayerUpgradeType.RegenInterval => "Repair Delay",
                 _ => type.ToString()
             };
         }

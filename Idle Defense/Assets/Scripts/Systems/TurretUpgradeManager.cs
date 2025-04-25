@@ -273,22 +273,29 @@ namespace Assets.Scripts.Systems
         {
             if (turret == null)
                 return;
+
             float current = turret.CriticalChance;
             float bonus = turret.CriticalChanceUpgradeAmount;
-            float cost = GetExponentialCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel, turret.CriticalChanceCostExponentialMultiplier);
+            float cost = GetExponentialCost(
+                turret.CriticalChanceUpgradeBaseCost,
+                turret.CriticalChanceLevel,
+                turret.CriticalChanceCostExponentialMultiplier
+            );
+
             if (current >= 50f)
             {
-                turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
+                turretUpgradeButton.UpdateStats($"{(int)current}%", "Max", "");
             }
             else
             {
                 turretUpgradeButton.UpdateStats(
-                    $"{current:F1}%",
-                    $"+{bonus:F1}%",
+                    $"{(int)current}%",
+                    $"+{(int)bonus}%",
                     $"${UIManager.AbbreviateNumber(cost)}"
                 );
             }
         }
+
 
         public void UpdateCriticalDamageMultiplierDisplay()
         {
@@ -298,8 +305,8 @@ namespace Assets.Scripts.Systems
             float bonus = turret.CriticalDamageMultiplierUpgradeAmount;
             float cost = GetExponentialCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel, turret.CriticalDamageCostExponentialMultiplier);
             turretUpgradeButton.UpdateStats(
-                $"{current:F2}%",
-                $"+{bonus:F2}%",
+                $"{(int)current}%",
+                    $"+{(int)bonus}%",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
         }

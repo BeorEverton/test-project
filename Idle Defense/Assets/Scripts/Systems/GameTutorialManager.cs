@@ -15,11 +15,21 @@ namespace Assets.Scripts.Systems
         [Header("Steps")]
         [SerializeField] private List<TutorialStep> tutorialSteps;
 
-        private int _currentStep = 0;
+        public int _currentStep = 0;
         private bool _tutorialRunning = false;
         private bool _waitingToStartStep = true;
         private GameObject _lastActiveObject;
         private ulong _lastKnownMoney = 0;
+
+        public static GameTutorialManager Instance { get; private set; }
+
+        private void Awake()
+        {
+            if (Instance == null)
+                Instance = this;
+            else
+                Destroy(gameObject);
+        }
 
 
         private void Start()
@@ -34,7 +44,6 @@ namespace Assets.Scripts.Systems
             }
 
             _tutorialRunning = true;
-            tutorialPanel.SetActive(true);
             _waitingToStartStep = true;
 
             SubscribeToEvents();
@@ -183,7 +192,6 @@ namespace Assets.Scripts.Systems
             typingText.StartTyping(step.instructionText);
         }
 
-
         private void CompleteTutorial()
         {
             _tutorialRunning = false;
@@ -206,6 +214,11 @@ namespace Assets.Scripts.Systems
             _tutorialRunning = true;
             _waitingToStartStep = true;
             SubscribeToEvents();
+        }
+
+        public void LoadGame(int step)
+        {
+            _currentStep = step;
         }
     }
 

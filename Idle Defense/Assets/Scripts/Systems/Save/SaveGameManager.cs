@@ -86,6 +86,7 @@ namespace Assets.Scripts.Systems.Save
 
             GameManager.Instance.LoadMoney(gameData.GameDataDTO.Money);
             WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
+            GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);
         }
 
         public void DeleteSave()
