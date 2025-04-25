@@ -2,29 +2,16 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using System;
-using System.IO;
 using System.Collections.Generic;
 
 public class CanvasUIOrientationManager : EditorWindow
 {
     private Canvas selectedCanvas;
-    private Camera mainCamera;
-    private const string folderPath = "Assets/LayoutData";
 
     [MenuItem("Tools/Canvas UI Orientation Manager")]
     public static void ShowWindow()
     {
         GetWindow<CanvasUIOrientationManager>("Canvas UI Orientation Manager");
-    }
-
-    private void OnEnable()
-    {
-        GameObject canvasGO = GameObject.Find("Main Canvas");
-        if (canvasGO != null)
-            selectedCanvas = canvasGO.GetComponent<Canvas>();
-
-        mainCamera = Camera.main;
-        Directory.CreateDirectory(folderPath);
     }
 
     private void OnGUI()
@@ -34,7 +21,7 @@ public class CanvasUIOrientationManager : EditorWindow
 
         if (selectedCanvas == null)
         {
-            EditorGUILayout.HelpBox("Main Canvas not found. Please assign one.", MessageType.Warning);
+            EditorGUILayout.HelpBox("Please assign a Canvas to manage all child UI elements.", MessageType.Info);
             return;
         }
 
@@ -42,150 +29,96 @@ public class CanvasUIOrientationManager : EditorWindow
 
         GUILayout.Label("Save Layouts", EditorStyles.boldLabel);
         if (GUILayout.Button("Save Portrait Layout"))
-            SaveAll("Portrait");
+            ProcessAllChildren("Portrait", SaveLayout);
 
         if (GUILayout.Button("Save Landscape Layout"))
-            SaveAll("Landscape");
+            ProcessAllChildren("Landscape", SaveLayout);
 
         EditorGUILayout.Space();
 
         GUILayout.Label("Apply Layouts", EditorStyles.boldLabel);
         if (GUILayout.Button("Apply Portrait Layout"))
-            ApplyAll("Portrait");
+            ProcessAllChildren("Portrait", ApplyLayout);
 
         if (GUILayout.Button("Apply Landscape Layout"))
-            ApplyAll("Landscape");
+            ProcessAllChildren("Landscape", ApplyLayout);
     }
 
-    private void SaveAll(string layoutKey)
+    private void ProcessAllChildren(string layoutKey, Action<RectTransform, string> processFunc)
     {
-        foreach (var rect in selectedCanvas.GetComponentsInChildren<RectTransform>(true))
+        RectTransform[] rects = selectedCanvas.GetComponentsInChildren<RectTransform>(true);
+        foreach (var rect in rects)
         {
-            if (rect == selectedCanvas.transform) continue;
-            SaveLayout(rect, layoutKey);
+            if (rect == selectedCanvas.transform) continue; // skip the root canvas
+            processFunc(rect, layoutKey);
         }
-
-        SaveCamera(layoutKey);
-        AssetDatabase.Refresh();
-        Debug.Log($"{layoutKey} layout saved (Canvas + Camera).");
     }
 
-    private void ApplyAll(string layoutKey)
-    {
-        foreach (var rect in selectedCanvas.GetComponentsInChildren<RectTransform>(true))
-        {
-            if (rect == selectedCanvas.transform) continue;
-            ApplyLayout(rect, layoutKey);
-        }
-
-        ApplyCamera(layoutKey);
-        Debug.Log($"{layoutKey} layout applied (Canvas + Camera).");
-    }
-
-    // Corrected GenerateKey method
-   
-
-    // SaveLayout (no change needed for file name — still use rect.name for the JSON file)
     private void SaveLayout(RectTransform rect, string layoutKey)
     {
-        string fileName = $"{folderPath}/{rect.gameObject.name}_{layoutKey}.json";
-        RectTransformData data = new RectTransformData(rect);
+        string id = GenerateKey(rect, layoutKey);
+        EditorPrefs.SetString(id + "_anchoredPosition", JsonUtility.ToJson(rect.anchoredPosition));
+        EditorPrefs.SetString(id + "_sizeDelta", JsonUtility.ToJson(rect.sizeDelta));
+        EditorPrefs.SetString(id + "_anchorMin", JsonUtility.ToJson(rect.anchorMin));
+        EditorPrefs.SetString(id + "_anchorMax", JsonUtility.ToJson(rect.anchorMax));
+        EditorPrefs.SetString(id + "_pivot", JsonUtility.ToJson(rect.pivot));
 
         LayoutGroup group = rect.GetComponent<LayoutGroup>();
         if (group != null)
-            data.layoutGroup = new LayoutGroupData(group);
-
-        File.WriteAllText(fileName, JsonUtility.ToJson(data, true));
-
-        // Save a backup to EditorPrefs
-        EditorPrefs.SetString(GenerateKey(rect, layoutKey), JsonUtility.ToJson(data));
+        {
+            LayoutGroupData data = new LayoutGroupData(group);
+            EditorPrefs.SetString(id + "_layoutGroup", JsonUtility.ToJson(data));
+        }
     }
-
-    // ApplyLayout (already good — it tries File first, then EditorPrefs with corrected key)
-
 
     private void ApplyLayout(RectTransform rect, string layoutKey)
     {
-        string fileName = $"{folderPath}/{rect.gameObject.name}_{layoutKey}.json";
-        string key = GenerateKey(rect, layoutKey);
+        string id = GenerateKey(rect, layoutKey);
+        try
+        {
+            rect.anchoredPosition = JsonUtility.FromJson<Vector2>(EditorPrefs.GetString(id + "_anchoredPosition"));
+            rect.sizeDelta = JsonUtility.FromJson<Vector2>(EditorPrefs.GetString(id + "_sizeDelta"));
+            rect.anchorMin = JsonUtility.FromJson<Vector2>(EditorPrefs.GetString(id + "_anchorMin"));
+            rect.anchorMax = JsonUtility.FromJson<Vector2>(EditorPrefs.GetString(id + "_anchorMax"));
+            rect.pivot = JsonUtility.FromJson<Vector2>(EditorPrefs.GetString(id + "_pivot"));
 
-        string json = File.Exists(fileName) ? File.ReadAllText(fileName) :
-                      EditorPrefs.HasKey(key) ? EditorPrefs.GetString(key) : null;
-
-        if (string.IsNullOrEmpty(json)) return;
-
-        RectTransformData data = JsonUtility.FromJson<RectTransformData>(json);
-        data.ApplyTo(rect);
-    }
-
-    private void SaveCamera(string layoutKey)
-    {
-        if (mainCamera == null) return;
-
-        CameraData data = new CameraData(mainCamera);
-        string filePath = $"{folderPath}/MainCamera_{layoutKey}.json";
-        File.WriteAllText(filePath, JsonUtility.ToJson(data, true));
-    }
-
-    private void ApplyCamera(string layoutKey)
-    {
-        if (mainCamera == null) return;
-
-        string filePath = $"{folderPath}/MainCamera_{layoutKey}.json";
-        if (!File.Exists(filePath)) return;
-
-        CameraData data = JsonUtility.FromJson<CameraData>(File.ReadAllText(filePath));
-        data.ApplyTo(mainCamera);
+            LayoutGroup group = rect.GetComponent<LayoutGroup>();
+            if (group != null && EditorPrefs.HasKey(id + "_layoutGroup"))
+            {
+                LayoutGroupData data = JsonUtility.FromJson<LayoutGroupData>(EditorPrefs.GetString(id + "_layoutGroup"));
+                data.ApplyTo(group);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Layout could not be applied to '{rect.name}': {e.Message}");
+        }
     }
 
     private string GenerateKey(RectTransform rect, string layoutKey)
     {
-        return $"{selectedCanvas.name}_{rect.GetInstanceID()}_{layoutKey}";
+        string path = GetHierarchyPath(rect.transform);
+        return $"{selectedCanvas.name}_{path}_{layoutKey}";
     }
 
-    // --- DATA CLASSES ---
-
-    [Serializable]
-    private class RectTransformData
+    private string GetHierarchyPath(Transform t)
     {
-        public Vector2 anchoredPosition;
-        public Vector2 sizeDelta;
-        public Vector2 anchorMin;
-        public Vector2 anchorMax;
-        public Vector2 pivot;
-        public LayoutGroupData layoutGroup;
-
-        public RectTransformData(RectTransform rect)
+        string path = t.name;
+        while (t.parent != null && t.parent != selectedCanvas.transform)
         {
-            anchoredPosition = rect.anchoredPosition;
-            sizeDelta = rect.sizeDelta;
-            anchorMin = rect.anchorMin;
-            anchorMax = rect.anchorMax;
-            pivot = rect.pivot;
+            t = t.parent;
+            path = t.name + "/" + path;
         }
-
-        public void ApplyTo(RectTransform rect)
-        {
-            rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = sizeDelta;
-            rect.anchorMin = anchorMin;
-            rect.anchorMax = anchorMax;
-            rect.pivot = pivot;
-
-            if (layoutGroup != null)
-            {
-                LayoutGroup group = rect.GetComponent<LayoutGroup>();
-                if (group != null)
-                    layoutGroup.ApplyTo(group);
-            }
-        }
+        return path;
     }
+
+
 
     [Serializable]
     private class LayoutGroupData
     {
-        public RectOffset padding = new RectOffset();
-        public float spacing = 0;
+        public RectOffset padding;
+        public float spacing;
         public TextAnchor childAlignment;
 
         public LayoutGroupData(LayoutGroup group)
@@ -193,8 +126,8 @@ public class CanvasUIOrientationManager : EditorWindow
             padding = new RectOffset(group.padding.left, group.padding.right, group.padding.top, group.padding.bottom);
             childAlignment = group.childAlignment;
 
-            if (group is HorizontalOrVerticalLayoutGroup hv)
-                spacing = hv.spacing;
+            if (group is HorizontalOrVerticalLayoutGroup hvGroup)
+                spacing = hvGroup.spacing;
         }
 
         public void ApplyTo(LayoutGroup group)
@@ -202,36 +135,8 @@ public class CanvasUIOrientationManager : EditorWindow
             group.padding = new RectOffset(padding.left, padding.right, padding.top, padding.bottom);
             group.childAlignment = childAlignment;
 
-            if (group is HorizontalOrVerticalLayoutGroup hv)
-                hv.spacing = spacing;
-        }
-    }
-
-    [Serializable]
-    private class CameraData
-    {
-        public Vector3 position;
-        public Quaternion rotation;
-        public bool orthographic;
-        public float orthographicSize;
-        public float fieldOfView;
-
-        public CameraData(Camera cam)
-        {
-            position = cam.transform.position;
-            rotation = cam.transform.rotation;
-            orthographic = cam.orthographic;
-            orthographicSize = cam.orthographicSize;
-            fieldOfView = cam.fieldOfView;
-        }
-
-        public void ApplyTo(Camera cam)
-        {
-            cam.transform.position = position;
-            cam.transform.rotation = rotation;
-            cam.orthographic = orthographic;
-            cam.orthographicSize = orthographicSize;
-            cam.fieldOfView = fieldOfView;
+            if (group is HorizontalOrVerticalLayoutGroup hvGroup)
+                hvGroup.spacing = spacing;
         }
     }
 }
