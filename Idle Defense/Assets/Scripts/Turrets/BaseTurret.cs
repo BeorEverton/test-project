@@ -24,6 +24,11 @@ namespace Assets.Scripts.Turrets
         [SerializeField] protected List<Sprite> _muzzleFlashSprites;
         [SerializeField] protected string[] _shotSounds;
 
+        [SerializeField] private SpriteRenderer _turretBodyRenderer;
+        [SerializeField] private Sprite[] _turretUpgradeSprites;
+        private int[] _upgradeThresholds = new int[] { 50, 250, 500 };
+
+
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
         protected bool _targetInRange;
@@ -56,6 +61,8 @@ namespace Assets.Scripts.Turrets
                 new TurretStatsInstance(_turretInfo); //If turret is not yet unlocked, use the default stats from the turret info
 
             gameObject.SetActive(_stats.IsUnlocked);
+
+            UpdateTurretAppearance();
         }
 
         protected virtual void OnEnable()
@@ -255,6 +262,44 @@ namespace Assets.Scripts.Turrets
 
             }
         }
+
+        public void UpdateTurretAppearance()
+        {
+            if (_turretBodyRenderer == null || _turretUpgradeSprites == null || _turretUpgradeSprites.Length == 0)
+                return;
+
+            int totalLevel = GetTotalUpgradeLevel();
+            int spriteIndex = 0;
+
+            if (totalLevel >= _upgradeThresholds[2])
+                spriteIndex = 3;
+            else if (totalLevel >= _upgradeThresholds[1])
+                spriteIndex = 2;
+            else if (totalLevel >= _upgradeThresholds[0])
+                spriteIndex = 1;
+            else
+                spriteIndex = 0;
+
+            if (spriteIndex < _turretUpgradeSprites.Length)
+                _turretBodyRenderer.sprite = _turretUpgradeSprites[spriteIndex];
+        }
+
+        private int GetTotalUpgradeLevel()
+        {
+            return Mathf.FloorToInt(_stats.DamageLevel +
+                                    _stats.FireRateLevel +
+                                    _stats.CriticalChanceLevel +
+                                    _stats.CriticalDamageMultiplierLevel +
+                                    _stats.ExplosionRadiusLevel +
+                                    _stats.SplashDamageLevel +
+                                    _stats.PierceChanceLevel +
+                                    _stats.PierceDamageFalloffLevel +
+                                    _stats.PelletCountLevel +
+                                    _stats.DamageFalloffOverDistanceLevel +
+                                    _stats.PercentBonusDamagePerSecLevel +
+                                    _stats.SlowEffectLevel);
+        }
+
     }
 
     public enum EnemyTarget

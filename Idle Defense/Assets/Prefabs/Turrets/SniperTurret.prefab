@@ -164,12 +164,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: -4157566299942181881, guid: 69a8e8518de9b1b4fb47fce2904e9c1d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 69a8e8518de9b1b4fb47fce2904e9c1d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.56, y: 2.56}
+  m_Size: {x: 0.36, y: 2.01}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -414,12 +414,78 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 684478f2609172942bc5bd9b7a992031, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnemyTargetChoice: 0
   _turretInfo: {fileID: 11400000, guid: e50665230e8078148b03c2ea2409f436, type: 2}
-  _turretInfoBase: {fileID: 0}
+  SavedStats:
+    IsUnlocked: 0
+    BaseDamage: 0
+    BaseFireRate: 0
+    BaseCritChance: 0
+    BaseCritDamage: 0
+    Damage: 0
+    DamageLevel: 0
+    DamageUpgradeAmount: 0
+    DamageUpgradeBaseCost: 0
+    DamageCostExponentialMultiplier: 0
+    FireRate: 0
+    FireRateLevel: 0
+    FireRateUpgradeAmount: 0
+    FireRateUpgradeBaseCost: 0
+    FireRateCostExponentialMultiplier: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalChanceUpgradeAmount: 0
+    CriticalChanceUpgradeBaseCost: 0
+    CriticalChanceCostExponentialMultiplier: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    CriticalDamageMultiplierUpgradeAmount: 0
+    CriticalDamageMultiplierUpgradeBaseCost: 0
+    CriticalDamageCostExponentialMultiplier: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    ExplosionRadiusUpgradeAmount: 0
+    ExplosionRadiusUpgradeBaseCost: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    SplashDamageUpgradeAmount: 0
+    SplashDamageUpgradeBaseCost: 0
+    PierceChance: 0
+    PierceChanceLevel: 0
+    PierceChanceUpgradeAmount: 0
+    PierceChanceUpgradeBaseCost: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PierceDamageFalloffUpgradeAmount: 0
+    PierceDamageFalloffUpgradeBaseCost: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    PelletCountUpgradeAmount: 0
+    PelletCountUpgradeBaseCost: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    DamageFalloffOverDistanceUpgradeAmount: 0
+    DamageFalloffOverDistanceUpgradeBaseCost: 0
+    PercentBonusDamagePerSec: 0
+    PercentBonusDamagePerSecLevel: 0
+    PercentBonusDamagePerSecUpgradeAmount: 0
+    PercentBonusDamagePerSecUpgradeBaseCost: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
+    SlowEffectUpgradeAmount: 0
+    SlowEffectUpgradeBaseCost: 0
+    RotationSpeed: 0
+    AngleThreshold: 0
   _rotationPoint: {fileID: 4562069437259260447}
   _muzzleFlashPosition: {fileID: 972970059104740852}
-  _mussleFlashSprites: []
-  pathCells: []
+  _muzzleFlashSprites: []
+  _shotSounds: []
+  _turretBodyRenderer: {fileID: 252829975001637145}
+  _turretUpgradeSprites:
+  - {fileID: 21300000, guid: 69a8e8518de9b1b4fb47fce2904e9c1d, type: 3}
+  - {fileID: 21300000, guid: 977bde483841bae4a90cf3501c674efd, type: 3}
+  - {fileID: 21300000, guid: 19b4518a5109cb146985683b5e0e06a9, type: 3}
+  - {fileID: 21300000, guid: c0aa813514540ae4ab8b700baa563d94, type: 3}
 --- !u!114 &5837989838757907034
 MonoBehaviour:
   m_ObjectHideFlags: 0
