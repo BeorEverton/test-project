@@ -7,8 +7,8 @@ public class SettingsManager : MonoBehaviour
     public static SettingsManager Instance { get; private set; }
 
     [Header("Audio Settings")]
-    [Range(-80f, 20f)] public float MusicVolume = 1f;
-    [Range(-20f, 20f)] public float SFXVolume = 1f;
+    [Range(-45f, 20f)] public float MusicVolume = 1f;
+    [Range(-45f, 20f)] public float SFXVolume = 1f;
     private float savedMusicVolume, savedSFXVolume;
     [Header("Mixer Reference")]
     [SerializeField] private AudioMixer _masterMixer;

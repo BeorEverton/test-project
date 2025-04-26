@@ -16,6 +16,11 @@ namespace Assets.Scripts.Systems.Save
         [SerializeField] private BaseTurret _missileLauncherTurret;
         [SerializeField] private BaseTurret _laserTurret;
 
+        [Header("First-Time Disclaimer")]
+        [SerializeField] private GameObject disclaimerPanel;
+        private bool _disclaimerShown = false;
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -74,7 +79,10 @@ namespace Assets.Scripts.Systems.Save
             GameData gameData = SaveGameToFile.LoadGameDataFromFile();
 
             if (gameData == null)
+            {
+                ShowDisclaimerPanel();
                 return;
+            }
 
             _machineGunTurret.SavedStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.MachineGunTurretInfoDTO, gameData.MachineGunTurretBaseInfoDTO);
             _shotgunTurret.SavedStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.ShotgunTurretInfoDTO, gameData.ShotgunTurretBaseInfoDTO);
@@ -97,5 +105,25 @@ namespace Assets.Scripts.Systems.Save
             WaveManager.Instance.ResetWave();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+
+        private void ShowDisclaimerPanel()
+        {
+            if (disclaimerPanel != null && !_disclaimerShown)
+            {
+                disclaimerPanel.SetActive(true);
+                Time.timeScale = 0f; // Pause game
+                _disclaimerShown = true;
+            }
+        }
+
+        public void CloseDisclaimerPanel()
+        {
+            if (disclaimerPanel != null)
+            {
+                disclaimerPanel.SetActive(false);
+                Time.timeScale = 1f; // Resume game
+            }
+        }
+
     }
 }

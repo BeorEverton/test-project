@@ -27,7 +27,6 @@ namespace Assets.Scripts.Systems
 #endif
 
             speedToggleButton.onClick.AddListener(AdvanceGameSpeed);
-            SetGameSpeed(speedOptions[currentSpeedIndex]);
         }
 
         private void AdvanceGameSpeed()

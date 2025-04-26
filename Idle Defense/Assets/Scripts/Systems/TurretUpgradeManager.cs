@@ -330,7 +330,7 @@ namespace Assets.Scripts.Systems
             float bonus = turret.ExplosionRadiusUpgradeAmount;
             float cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
 
-            if (turret.ExplosionRadiusLevel >= 5f)
+            if (turret.ExplosionRadius >= 5f)
             {
                 turretUpgradeButton.UpdateStats($"{current:F1}", "Max", "");
             }
