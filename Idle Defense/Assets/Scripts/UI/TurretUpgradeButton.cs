@@ -121,7 +121,7 @@ namespace Assets.Scripts.UI
                 TurretUpgradeType.ExplosionRadius => "Explosion Radius",
                 TurretUpgradeType.SplashDamage => "Splash Damage",
                 TurretUpgradeType.PierceChance => "Pierce Chance",
-                TurretUpgradeType.PierceDamageFalloff => "Pierce Falloff",
+                TurretUpgradeType.PierceDamageFalloff => "Pierce Damage",
                 TurretUpgradeType.PelletCount => "Pellet Count",
                 TurretUpgradeType.DamageFalloffOverDistance => "Range Falloff",
                 TurretUpgradeType.PercentBonusDamagePerSec => "Bonus Dmg/s",

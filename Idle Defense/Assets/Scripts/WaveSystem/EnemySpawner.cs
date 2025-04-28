@@ -226,6 +226,7 @@ namespace Assets.Scripts.WaveSystem
 
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
+            Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
             StartCoroutine(RestartWave());
         }
 

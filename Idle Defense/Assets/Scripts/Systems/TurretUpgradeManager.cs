@@ -254,15 +254,28 @@ namespace Assets.Scripts.Systems
         {
             if (turret == null)
                 return;
+
             float current = turret.Damage;
-            float bonus = turret.DamageUpgradeAmount;
-            float cost = GetExponentialCost_PlusLevel(turret.DamageUpgradeBaseCost, turret.DamageLevel, turret.DamageCostExponentialMultiplier);
+
+            // Predict next level damage without actually upgrading
+            float nextLevel = turret.DamageLevel + 1f;
+            float nextDamage = turret.BaseDamage * Mathf.Pow(turret.DamageUpgradeAmount, nextLevel) + nextLevel;
+
+            float bonus = nextDamage - current;
+
+            float cost = GetExponentialCost_PlusLevel(
+                turret.DamageUpgradeBaseCost,
+                turret.DamageLevel,
+                turret.DamageCostExponentialMultiplier
+            );
+
             turretUpgradeButton.UpdateStats(
                 UIManager.AbbreviateNumber(current),
                 $"+{UIManager.AbbreviateNumber(bonus)}",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
         }
+
 
         public void UpdateFireRateDisplay()
         {
@@ -384,17 +397,24 @@ namespace Assets.Scripts.Systems
         {
             if (turret == null)
                 return;
-            float falloff = turret.PierceDamageFalloff;
-            float retained = 100f - falloff;
-            float bonus = turret.PierceDamageFalloffUpgradeAmount;
+
+            float currentFalloff = turret.PierceDamageFalloff;
+            float currentRetained = 100f - currentFalloff;
+
+            // Predict next values
+            float nextFalloff = Mathf.Max(0f, currentFalloff - turret.PierceDamageFalloffUpgradeAmount);
+            float nextRetained = 100f - nextFalloff;
+
+            float bonus = nextRetained - currentRetained;
             float cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
 
             turretUpgradeButton.UpdateStats(
-                $"{retained:F1}%",
+                $"{currentRetained:F1}%",
                 $"+{bonus:F1}%",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
         }
+
 
         public void UpdatePelletCountDisplay()
         {
