@@ -33,6 +33,11 @@ namespace Assets.Scripts.Systems
 
         private bool _isDead => _currentHealth <= 0f;
 
+        [Tooltip("Visuals for the player base upgrades. Assign 3 objects.")]
+        [SerializeField] private GameObject[] upgradeVisuals;
+        private readonly int[] _unlockThresholds = { 50, 100, 250 };
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -141,6 +146,7 @@ namespace Assets.Scripts.Systems
             OnMaxHealthChanged?.Invoke(_runtimeMaxHealth, _currentHealth);
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
 
+            UpdatePlayerBaseAppearance();
             AudioManager.Instance.Play("Upgrade");
         }
 
@@ -153,6 +159,7 @@ namespace Assets.Scripts.Systems
 
             Info.RegenAmountLevel += 1f;
             _runtimeRegenAmount += Info.RegenAmountUpgradeAmount;
+            UpdatePlayerBaseAppearance();
             AudioManager.Instance.Play("Upgrade");
         }
 
@@ -169,6 +176,7 @@ namespace Assets.Scripts.Systems
 
             Info.RegenIntervalLevel += 1f;
             _runtimeRegenInterval = Mathf.Max(MinRegenInterval, _runtimeRegenInterval - Info.RegenIntervalUpgradeAmount);
+            UpdatePlayerBaseAppearance();
             AudioManager.Instance.Play("Upgrade");
         }
 
@@ -203,6 +211,7 @@ namespace Assets.Scripts.Systems
         public void LoadPlayerBase(PlayerBaseSO savedStats)
         {
             Info = savedStats;
+            UpdatePlayerBaseAppearance();
             InitializeGame();
         }
 
@@ -212,48 +221,19 @@ namespace Assets.Scripts.Systems
             InitializeGame();
         }
 
-        /* Upgrade Base visual and color
-        [SerializeField] private SpriteRenderer wallSprite;
-        [SerializeField] private float baseMaxHealth = 100f;
-        [SerializeField] private float maxWallHeight = 1.5f;
-        [SerializeField] private float maxWallWidth = 2f;
-
-        private void UpdateWallScale()
+        private void UpdatePlayerBaseAppearance()
         {
-            float healthRatio = _runtimeMaxHealth / baseMaxHealth;
-            float newHeight = Mathf.Min(maxWallHeight * healthRatio, maxWallHeight);
-            float newWidth = Mathf.Min(maxWallWidth * healthRatio, maxWallWidth);
+            if (upgradeVisuals == null || upgradeVisuals.Length == 0)
+                return;
 
-            // Grow only downward in Y
-            wallSprite.transform.localScale = new Vector3(newWidth, newHeight, 1f);
-            wallSprite.transform.localPosition = new Vector3(0f, -newHeight / 2f, 0f);
+            float totalLevel = Info.MaxHealthLevel + Info.RegenAmountLevel + Info.RegenIntervalLevel;
+
+            for (int i = 0; i < upgradeVisuals.Length; i++)
+            {
+                if (upgradeVisuals[i] != null)
+                    upgradeVisuals[i].SetActive(totalLevel >= _unlockThresholds[i]);
+            }
         }
-
-
-        [SerializeField] private float flashDuration = 0.1f;
-        private Coroutine flashCoroutine;
-
-        private void FlashOnDamage()
-        {
-            if (flashCoroutine != null) StopCoroutine(flashCoroutine);
-            flashCoroutine = StartCoroutine(FlashRoutine());
-        }
-
-        private IEnumerator FlashRoutine()
-        {
-            wallSprite.color = Color.red;
-            yield return new WaitForSeconds(flashDuration);
-            UpdateWallColorByHealth(); // Reset to correct health color
-        }
-
-        private void UpdateWallColorByHealth()
-        {
-            float healthRatio = _currentHealth / _runtimeMaxHealth;
-            Color baseColor = Color.Lerp(Color.black, Color.white, healthRatio);
-            baseColor.a = Mathf.Clamp01(healthRatio);
-            wallSprite.color = baseColor;
-        }
-        */
 
     }
 
