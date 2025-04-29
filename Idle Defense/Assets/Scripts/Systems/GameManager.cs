@@ -78,9 +78,6 @@ namespace Assets.Scripts.Systems
 
         private void Update()
         {
-            if (EventSystem.current.IsPointerOverGameObject())
-                return;
-
             if (isHolding)
             {
                 spdBonus += holdIncreaseRate * Time.deltaTime;

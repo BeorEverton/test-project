@@ -3,6 +3,7 @@ using Assets.Scripts.Turrets;
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
@@ -48,6 +49,22 @@ namespace Assets.Scripts.UI
             SetTurret();
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             UpdateDisplayFromType();
+        }
+        private void OnEnable()
+        {
+            GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+            UpdateInteractableState(); // Run once on enable
+        }
+
+        private void OnDisable()
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
+        }
+
+        private void HandleMoneyChanged(ulong _)
+        {
+            UpdateInteractableState();
         }
 
         public void SetTurret()
@@ -102,6 +119,18 @@ namespace Assets.Scripts.UI
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        public void EnableTooltip()
+        {
+            string description = GetUpgradeDescription(_upgradeType);
+            TooltipManager.Instance.ShowTooltip(description);
+        }
+
+        public void DisableTooltip()
+        {
+            TooltipManager.Instance.HideTooltip();
+        }
+
 
         public void UpdateStats(string value, string upgradeAmount, string upgradeCost)
         {
@@ -173,6 +202,53 @@ namespace Assets.Scripts.UI
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private string GetUpgradeDescription(TurretUpgradeType type)
+        {
+            return type switch
+            {
+                TurretUpgradeType.Damage => "Increases turret base damage.",
+                TurretUpgradeType.FireRate => "Increases shots per second. Faster firing speed.",
+                TurretUpgradeType.CriticalChance => "Raises chance for critical hits. Max 50%.",
+                TurretUpgradeType.CriticalDamageMultiplier => "Increases damage multiplier for critical hits.",
+                TurretUpgradeType.ExplosionRadius => "Enlarges explosion area of missiles.",
+                TurretUpgradeType.SplashDamage => "Damages nearby enemies hit by explosions.",
+                TurretUpgradeType.PierceChance => "Adds chance for shots to pierce through enemies.",
+                TurretUpgradeType.PierceDamageFalloff => "Reduces the damage lost on each pierced enemy.",
+                TurretUpgradeType.PelletCount => "Adds more pellets per shotgun shot.",
+                TurretUpgradeType.DamageFalloffOverDistance => "Reduces damage lost over distance for shotgun.",
+                TurretUpgradeType.PercentBonusDamagePerSec => "Damage increases the longer it hits the same target.",
+                TurretUpgradeType.SlowEffect => "Applies a slowing effect on enemies hit.",
+                _ => "Upgrade effect not documented."
+            };
+        }
+
+        public void UpdateInteractableState()
+        {
+            if (_baseTurret == null || _upgradeManager == null)
+                return;
+
+            float cost = _upgradeType switch
+            {
+                TurretUpgradeType.Damage => _upgradeManager.GetDamageUpgradeCost(_turret),
+                TurretUpgradeType.FireRate => _upgradeManager.GetFireRateUpgradeCost(_turret),
+                TurretUpgradeType.CriticalChance => _upgradeManager.GetCriticalChanceUpgradeCost(_turret),
+                TurretUpgradeType.CriticalDamageMultiplier => _upgradeManager.GetCriticalDamageMultiplierUpgradeCost(_turret),
+                TurretUpgradeType.ExplosionRadius => _upgradeManager.GetExplosionRadiusUpgradeCost(_turret),
+                TurretUpgradeType.SplashDamage => _upgradeManager.GetSplashDamageUpgradeCost(_turret),
+                TurretUpgradeType.PierceChance => _upgradeManager.GetPierceChanceUpgradeCost(_turret),
+                TurretUpgradeType.PierceDamageFalloff => _upgradeManager.GetPierceDamageFalloffUpgradeCost(_turret),
+                TurretUpgradeType.PelletCount => _upgradeManager.GetPelletCountUpgradeCost(_turret),
+                TurretUpgradeType.DamageFalloffOverDistance => _upgradeManager.GetDamageFalloffOverDistanceUpgradeCost(_turret),
+                TurretUpgradeType.PercentBonusDamagePerSec => _upgradeManager.GetBonusDamagePerSecUpgradeCost(_turret),
+                TurretUpgradeType.SlowEffect => _upgradeManager.GetSlowEffectUpgradeCost(_turret),
+                _ => float.MaxValue
+            };
+
+            Button button = GetComponentInChildren<Button>();
+            if (button != null)
+                button.interactable = GameManager.Instance.Money >= (ulong)cost;
         }
     }
 }

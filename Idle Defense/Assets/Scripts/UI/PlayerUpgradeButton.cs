@@ -1,6 +1,8 @@
 using Assets.Scripts.Systems;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 namespace Assets.Scripts.UI
 {
@@ -13,6 +15,8 @@ namespace Assets.Scripts.UI
         [SerializeField] private PlayerUpgradeType _upgradeType;
 
         private PlayerBaseManager _upgradeManager;
+        private Button _button;
+
 
         private void Awake()
         {
@@ -24,7 +28,21 @@ namespace Assets.Scripts.UI
                 _statUpgradeAmount = tmpros[2];
                 _statUpgradeCost = tmpros[3];
             }
+
+            _button = GetComponentInChildren<Button>();
         }
+        private void OnEnable()
+        {
+            GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+            UpdateInteractableState(); // Run immediately on enable
+        }
+
+        private void OnDisable()
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
+        }
+
 
         private void Start()
         {
@@ -83,5 +101,49 @@ namespace Assets.Scripts.UI
                 _ => type.ToString()
             };
         }
+
+        public void EnableTooltip()
+        {
+            string description = GetUpgradeDescription(_upgradeType);
+            TooltipManager.Instance.ShowTooltip(description);
+        }
+
+        public void DisableTooltip()
+        {
+            TooltipManager.Instance.HideTooltip();
+        }
+
+        private string GetUpgradeDescription(PlayerUpgradeType type)
+        {
+            return type switch
+            {
+                PlayerUpgradeType.MaxHealth => "Increases base maximum health.",
+                PlayerUpgradeType.RegenAmount => "Increases the amount of heath repaired every tick.",
+                PlayerUpgradeType.RegenInterval => "Reduces the time needed to start repairing after taking damage. Minimum 0.5s",
+                _ => "Upgrade effect not documented."
+            };
+        }
+
+        private void HandleMoneyChanged(ulong _)
+        {
+            UpdateInteractableState();
+        }
+
+        private void UpdateInteractableState()
+        {
+            if (_button == null || _upgradeManager == null)
+                return;
+
+            float cost = _upgradeType switch
+            {
+                PlayerUpgradeType.MaxHealth => _upgradeManager.Info.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, _upgradeManager.Info.MaxHealthLevel),
+                PlayerUpgradeType.RegenAmount => _upgradeManager.Info.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, _upgradeManager.Info.RegenAmountLevel),
+                PlayerUpgradeType.RegenInterval => _upgradeManager.Info.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, _upgradeManager.Info.RegenIntervalLevel),
+                _ => 0f
+            };
+
+            _button.interactable = GameManager.Instance.Money >= (ulong)cost;
+        }
+
     }
 }

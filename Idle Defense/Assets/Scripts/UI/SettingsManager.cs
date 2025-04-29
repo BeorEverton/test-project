@@ -15,6 +15,7 @@ public class SettingsManager : MonoBehaviour
 
     [Header("UI Settings")]
     public bool AllowPopups = true;
+    public bool AllowTooltips = true;
 
     [Header("External Links")]
     [SerializeField] private List<ExternalLink> externalLinks;
@@ -45,6 +46,11 @@ public class SettingsManager : MonoBehaviour
     public void ShouldShowPopups(bool option)
     {
         AllowPopups = option;
+    }
+
+    public void ShouldShowTooltips(bool option)
+    {
+        AllowTooltips = option;
     }
 
     public void MuteAll(bool option)

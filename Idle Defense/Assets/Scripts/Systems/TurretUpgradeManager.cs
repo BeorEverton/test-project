@@ -490,6 +490,44 @@ namespace Assets.Scripts.Systems
             }
         }
 
+        // Used for enabling/disabling the buttons on the UI based on their costs
+        public float GetDamageUpgradeCost(TurretStatsInstance t) =>
+    GetExponentialCost_PlusLevel(t.DamageUpgradeBaseCost, t.DamageLevel, t.DamageCostExponentialMultiplier);
+
+        public float GetFireRateUpgradeCost(TurretStatsInstance t) =>
+            GetExponentialCost_PlusLevel(t.FireRateUpgradeBaseCost, t.FireRateLevel, t.FireRateCostExponentialMultiplier);
+
+        public float GetCriticalChanceUpgradeCost(TurretStatsInstance t) =>
+            GetExponentialCost(t.CriticalChanceUpgradeBaseCost, t.CriticalChanceLevel, t.CriticalChanceCostExponentialMultiplier);
+
+        public float GetCriticalDamageMultiplierUpgradeCost(TurretStatsInstance t) =>
+            GetExponentialCost(t.CriticalDamageMultiplierUpgradeBaseCost, t.CriticalDamageMultiplierLevel, t.CriticalDamageCostExponentialMultiplier);
+
+        public float GetExplosionRadiusUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.ExplosionRadiusUpgradeBaseCost, t.ExplosionRadiusLevel);
+
+        public float GetSplashDamageUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.SplashDamageUpgradeBaseCost, t.SplashDamageLevel);
+
+        public float GetPierceChanceUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.PierceChanceUpgradeBaseCost, t.PierceChanceLevel);
+
+        public float GetPierceDamageFalloffUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.PierceDamageFalloffUpgradeBaseCost, t.PierceDamageFalloffLevel);
+
+        public float GetPelletCountUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.PelletCountUpgradeBaseCost, t.PelletCountLevel);
+
+        public float GetDamageFalloffOverDistanceUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.DamageFalloffOverDistanceUpgradeBaseCost, t.DamageFalloffOverDistanceLevel);
+
+        public float GetBonusDamagePerSecUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.PercentBonusDamagePerSecUpgradeBaseCost, t.PercentBonusDamagePerSecLevel);
+
+        public float GetSlowEffectUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.SlowEffectUpgradeBaseCost, t.SlowEffectLevel);
+
+
     }
 
 
