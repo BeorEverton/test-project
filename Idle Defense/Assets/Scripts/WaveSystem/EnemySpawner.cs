@@ -97,7 +97,7 @@ namespace Assets.Scripts.WaveSystem
                 if (wave.IsMiniBossWave())
                 {
                     clonedInfo.Damage *= 3f;
-                    clonedInfo.MaxHealth *= 10f;
+                    clonedInfo.MaxHealth *= 30f;
                     clonedInfo.CoinDropAmount *= 10;
                     clonedInfo.MovementSpeed *= 0.8f;
                     clonedInfo.AttackRange += .2f; // Because the gfx size changes
@@ -106,7 +106,7 @@ namespace Assets.Scripts.WaveSystem
                 if (wave.IsBossWave())
                 {
                     clonedInfo.Damage *= 5f;
-                    clonedInfo.MaxHealth *= 20f;
+                    clonedInfo.MaxHealth *= 100f;
                     clonedInfo.CoinDropAmount *= 20;
                     clonedInfo.MovementSpeed *= 0.6f;
                     clonedInfo.AttackRange += .6f;

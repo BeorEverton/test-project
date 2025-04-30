@@ -10,6 +10,7 @@ namespace Assets.Scripts.Turrets
     public class TurretStatsInstance
     {
         public bool IsUnlocked;
+        public TurretType TurretType;   // add at top – nothing else changes
 
         [Header("Base Stats")]
         //DO NOT TOUCH AT RUNTIME

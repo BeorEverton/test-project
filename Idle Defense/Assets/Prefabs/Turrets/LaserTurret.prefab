@@ -75,7 +75,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 3
   m_Sprite: {fileID: 21300000, guid: 59a43887e23fad14fb7be01b28aa7966, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -100,12 +100,24 @@ PrefabInstance:
       value: LaserTurret
       objectReference: {fileID: 0}
     - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.25
+      value: -0.68000007
       objectReference: {fileID: 0}
     - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -138,6 +150,10 @@ PrefabInstance:
     - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4550722404459009523, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -276,7 +292,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.60724795
+        value: 0.5
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -357,6 +373,7 @@ MonoBehaviour:
   _turretInfo: {fileID: 11400000, guid: 43a962a1d20eeb548a80327e5843ee19, type: 2}
   SavedStats:
     IsUnlocked: 0
+    TurretType: 0
     BaseDamage: 0
     BaseFireRate: 0
     BaseCritChance: 0
@@ -418,7 +435,8 @@ MonoBehaviour:
   _rotationPoint: {fileID: 3238056590023094999}
   _muzzleFlashPosition: {fileID: 2171005184245118268}
   _muzzleFlashSprites: []
-  _shotSounds: []
+  _shotSounds:
+  - Laser v2
   _turretBodyRenderer: {fileID: 322146266565877949}
   _turretUpgradeSprites:
   - {fileID: 21300000, guid: 59a43887e23fad14fb7be01b28aa7966, type: 3}

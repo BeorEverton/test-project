@@ -1,9 +1,11 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.WSA;
 
 namespace Assets.Scripts.UI
 {
@@ -13,6 +15,11 @@ namespace Assets.Scripts.UI
 
         [SerializeField] private TextMeshProUGUI _dmgBonus, _spdBonus, _wave, _enemies, _money;
         [SerializeField] private Slider _spdBonusSlider;
+
+        // Equip management
+        [SerializeField] private GameObject equipPanel;   // drag a panel root in Canvas
+        [SerializeField] private GameObject unequipPanel; // another panel if you like
+        [SerializeField] private TextMeshProUGUI toast;   // optional 1-line overlay
 
         private int _enemyCount;
 
@@ -111,5 +118,39 @@ namespace Assets.Scripts.UI
                 _ => number.ToString(showPercent ? "F2" : "F0")
             };
         }
+
+        public void OpenEquipPanel(int slot)
+        {
+            equipPanel.SetActive(true);
+            unequipPanel.SetActive(false);
+
+            // (Populate your inventory list here)
+            Debug.Log($"Equip panel opened for slot {slot}");
+        }
+
+        public void OpenUnequipPanel(int slot)
+        {
+            unequipPanel.SetActive(true);
+            equipPanel.SetActive(false);
+
+            // (Show upgrade / remove buttons here)
+            Debug.Log($"Unequip panel opened for slot {slot}");
+        }
+
+        public void ShowToast(string msg, float time = 1.5f)
+        {
+            if (toast == null) { Debug.Log(msg); return; }  // no text object assigned
+            StopAllCoroutines();                            // stop any previous toast
+            StartCoroutine(ToastRoutine(msg, time));
+        }
+
+        private IEnumerator ToastRoutine(string m, float t)
+        {
+            toast.text = m;                // set message
+            toast.gameObject.SetActive(true);
+            yield return new WaitForSeconds(t);
+            toast.gameObject.SetActive(false); // hide after delay
+        }
+
     }
 }

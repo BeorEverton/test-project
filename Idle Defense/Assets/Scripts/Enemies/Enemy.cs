@@ -73,6 +73,7 @@ namespace Assets.Scripts.Enemies
 
         private void OnDisable()
         {
+            IsBossInstance = false;
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
         }
 

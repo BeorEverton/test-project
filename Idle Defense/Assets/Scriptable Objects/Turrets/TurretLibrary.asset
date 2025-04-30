@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53224e9ea4afe0048aaa1023c63138d3, type: 3}
+  m_Name: TurretLibrary
+  m_EditorClassIdentifier: 
+  items:
+  - type: 0
+    info: {fileID: 11400000, guid: d382a866b82a96449b631cb2dc2ef75a, type: 2}
+    prefab: {fileID: 2906797065888577587, guid: 71d1c9e10008e9c42bb8fe1e4e34f9f9, type: 3}
+  - type: 1
+    info: {fileID: 11400000, guid: 201a812d2671bd142a6aeaa5f8510788, type: 2}
+    prefab: {fileID: 8476021348886816848, guid: 27a5f270ea5f968418e728c36742d692, type: 3}
+  - type: 2
+    info: {fileID: 11400000, guid: e50665230e8078148b03c2ea2409f436, type: 2}
+    prefab: {fileID: 3206999689089362432, guid: d90f1d543089d534693699decadbf149, type: 3}
+  - type: 3
+    info: {fileID: 11400000, guid: f040866604771a0498bb260f1b3eca32, type: 2}
+    prefab: {fileID: 6463036619058361839, guid: 82e7ce9cbaf0def4dbc949a97476cf14, type: 3}
+  - type: 4
+    info: {fileID: 11400000, guid: 43a962a1d20eeb548a80327e5843ee19, type: 2}
+    prefab: {fileID: 4549154123848940232, guid: 8df63c7e7d0f6c044ae2cb3b73f742c9, type: 3}
