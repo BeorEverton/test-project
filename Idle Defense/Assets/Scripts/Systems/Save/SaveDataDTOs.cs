@@ -2,6 +2,7 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Turrets;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Systems.Save
@@ -318,4 +319,13 @@ public class TurretInfoDTO
 
     public float RotationSpeed;
     public float AngleThreshold;
+}
+
+[Serializable]
+public class TurretInventoryDTO
+{
+    public List<TurretStatsInstance> Owned;
+    public List<int> EquippedIds;
+    public List<TurretType> UnlockedTypes;
+    public List<bool> SlotPurchased;
 }

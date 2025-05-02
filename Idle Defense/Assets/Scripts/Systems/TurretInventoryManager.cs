@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using UnityEngine;
 using Assets.Scripts.WaveSystem;
+using Assets.Scripts.Systems.Save;
 
 public class TurretInventoryManager : MonoBehaviour
 {
@@ -13,20 +14,53 @@ public class TurretInventoryManager : MonoBehaviour
 
     [SerializeField] private TurretUnlockTableSO unlockTable;
     private readonly List<TurretStatsInstance> owned = new();
-    private readonly HashSet<TurretType> unlockedTypes = new();
+    public readonly HashSet<TurretType> unlockedTypes = new();
     [SerializeField] private TurretLibrarySO turretLibrary;   // assign the new asset
 
     public List<TurretStatsInstance> Owned => owned;
 
+    private List<int> pendingEquipped;
+    private List<bool> pendingPurchased;
+
+    public int WaveRequirement(TurretType t) =>
+        unlockTable.Entries.First(e => e.Type == t).WaveToUnlock;
+
+    public event Action OnInventoryChanged;   // UI will subscribe
+
+    public bool IsTurretTypeUnlocked(TurretType t) => unlockedTypes.Contains(t);
+
+
     void Awake()
     {
-        if (I == null) I = this;          
-        Load();     
+        if (I == null) I = this;      
     }
 
     private void Start()
     {
         WaveManager.Instance.OnWaveStarted += HandleWaveStarted;
+        EnsureStarterTurret();
+
+        if (pendingEquipped != null)
+        {
+            TurretSlotManager.I.ImportEquipped(pendingEquipped);
+            pendingEquipped = null;
+        }
+        if (pendingPurchased != null)
+        {
+            TurretSlotManager.I.ImportPurchasedFlags(pendingPurchased);
+            pendingPurchased = null;
+        }
+
+    }
+
+    private void EnsureStarterTurret()
+    {
+        if (owned.Count > 0) return;                     // already got one (load)
+
+        TryUnlockByWave(0);
+
+        if (unlockedTypes.Contains(TurretType.MachineGun))
+            TryPurchase(TurretType.MachineGun);          // cost is 0 for first copy
     }
 
     void OnDestroy()
@@ -48,7 +82,8 @@ public class TurretInventoryManager : MonoBehaviour
             if (currentWave >= e.WaveToUnlock && unlockedTypes.Add(e.Type))
                 changed = true;
         }
-        if (changed) Save();
+        OnInventoryChanged?.Invoke();
+        SaveGameManager.Instance.SaveGame();
         return changed;
     }
 
@@ -63,10 +98,20 @@ public class TurretInventoryManager : MonoBehaviour
         GameManager.Instance.SpendMoney(cost);
 
         // create runtime copy from the original SO
-        TurretInfoSO baseSO = turretLibrary.GetInfo(type);       // helper that returns the right SO
-        owned.Add(new TurretStatsInstance(baseSO) { TurretType = type });
-        Save();
+        TurretInfoSO baseSO = turretLibrary.GetInfo(type);
+        var inst = new TurretStatsInstance(baseSO)
+        {
+            TurretType = type,
+            /* this flag MUST be true otherwise BaseTurret.Start()
+               will clone the stats and you’ll lose all later upgrades */
+            IsUnlocked = true
+        };
+        owned.Add(inst);
+
+        OnInventoryChanged?.Invoke();
+        SaveGameManager.Instance.SaveGame();
         return true;
+
     }
 
     public ulong GetCost(TurretType type, int currentOwned)
@@ -77,38 +122,38 @@ public class TurretInventoryManager : MonoBehaviour
 
     public GameObject GetPrefab(TurretType t) => turretLibrary.GetPrefab(t);
 
+
     // ---------- save / load ----------
-    const string SAVE_KEY = "turret_inv";
 
-    [Serializable]
-    class SaveData
+    public TurretInventoryDTO ExportToDTO()
     {
-        public List<TurretStatsInstance> owned;
-        public List<int> equippedIds;            // handled by SlotManager
-        public List<TurretType> unlocked;
-        public List<bool> slotPurchased;
-
-    }
-
-    public void Save()
-    {
-        var data = new SaveData
+        return new TurretInventoryDTO
         {
-            owned = owned,
-            unlocked = unlockedTypes.ToList(),
-            equippedIds = TurretSlotManager.I.ExportEquipped(),
-            slotPurchased = TurretSlotManager.I.GetPurchasedFlags()
+            Owned = owned,
+            EquippedIds = TurretSlotManager.I.ExportEquipped(),
+            UnlockedTypes = unlockedTypes.ToList(),
+            SlotPurchased = TurretSlotManager.I.GetPurchasedFlags()
         };
-        PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
     }
 
-    void Load()
+    public void ImportFromDTO(TurretInventoryDTO dto)
     {
-        if (!PlayerPrefs.HasKey(SAVE_KEY)) return;
-        var data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
-        owned.Clear(); owned.AddRange(data.owned ?? new());
-        unlockedTypes.Clear(); unlockedTypes.UnionWith(data.unlocked ?? new());
-        TurretSlotManager.I.ImportPurchasedFlags(data.slotPurchased);
-        // slots will finish loading after their own Awake()
+        owned.Clear();
+        owned.AddRange(dto.Owned ?? new());
+
+        unlockedTypes.Clear();
+        unlockedTypes.UnionWith(dto.UnlockedTypes ?? new());
+
+        if (TurretSlotManager.I != null)
+        {
+            TurretSlotManager.I.ImportEquipped(dto.EquippedIds);
+            TurretSlotManager.I.ImportPurchasedFlags(dto.SlotPurchased);
+        }
+        else
+        {
+            pendingEquipped = dto.EquippedIds;
+            pendingPurchased = dto.SlotPurchased;
+        }
     }
+
 }

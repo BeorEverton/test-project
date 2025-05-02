@@ -33,7 +33,8 @@ namespace Assets.Scripts.UI
         }
         private void OnEnable()
         {
-            GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+            if (GameManager.Instance)
+                GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
             UpdateInteractableState(); // Run immediately on enable
         }
 
@@ -48,6 +49,7 @@ namespace Assets.Scripts.UI
         {
             _upgradeManager = PlayerBaseManager.Instance;
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
+            GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
             UpdateDisplayFromType();
         }
 

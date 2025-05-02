@@ -20,6 +20,9 @@ namespace Assets.Scripts.UI
         [SerializeField] private GameObject equipPanel;   // drag a panel root in Canvas
         [SerializeField] private GameObject unequipPanel; // another panel if you like
         [SerializeField] private TextMeshProUGUI toast;   // optional 1-line overlay
+        [SerializeField] private GameObject[] rightPanels;   
+
+        private int activeSlot; // for the equipment
 
         private int _enemyCount;
 
@@ -121,20 +124,11 @@ namespace Assets.Scripts.UI
 
         public void OpenEquipPanel(int slot)
         {
+            DeactivateRightPanels();
+            activeSlot = slot;
             equipPanel.SetActive(true);
-            unequipPanel.SetActive(false);
+            equipPanel.GetComponent<EquipPanelUI>().Open(slot);
 
-            // (Populate your inventory list here)
-            Debug.Log($"Equip panel opened for slot {slot}");
-        }
-
-        public void OpenUnequipPanel(int slot)
-        {
-            unequipPanel.SetActive(true);
-            equipPanel.SetActive(false);
-
-            // (Show upgrade / remove buttons here)
-            Debug.Log($"Unequip panel opened for slot {slot}");
         }
 
         public void ShowToast(string msg, float time = 1.5f)
@@ -150,6 +144,14 @@ namespace Assets.Scripts.UI
             toast.gameObject.SetActive(true);
             yield return new WaitForSeconds(t);
             toast.gameObject.SetActive(false); // hide after delay
+        }
+
+        public void DeactivateRightPanels()
+        {
+            foreach (var panel in rightPanels)
+            {
+                panel.SetActive(false);
+            }
         }
 
     }

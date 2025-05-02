@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Turrets;
-using Assets.Scripts.WaveSystem;   // if needed for BaseTurret refs
+using Assets.Scripts.WaveSystem;
+using Assets.Scripts.Systems.Save;   // if needed for BaseTurret refs
 
 namespace Assets.Scripts.Systems
 {
@@ -58,22 +59,22 @@ namespace Assets.Scripts.Systems
                 GameManager.Instance.SpendMoney(info.cost);
                 slotInfo[slot].purchased = true;
             }
-            TurretInventoryManager.I.Save();
+            SaveGameManager.Instance.SaveGame();
             return true;
         }
 
         public bool Equip(int slot, TurretStatsInstance inst)
         {
-            if (!UnlockSlot(slot)) return false;
+            Debug.Log($"Equip: {inst.TurretType} into slot {slot}");
             equipped[slot] = inst;
-            TurretInventoryManager.I.Save();
+            SaveGameManager.Instance.SaveGame();
             OnEquippedChanged?.Invoke(slot, inst);
             return true;
         }
         public void Unequip(int slot)
         {
             equipped[slot] = null;
-            TurretInventoryManager.I.Save();
+            SaveGameManager.Instance.SaveGame();
             OnEquippedChanged?.Invoke(slot, null);
         }
 
@@ -91,6 +92,20 @@ namespace Assets.Scripts.Systems
     equipped.Select(inst =>
         inst == null ? -1 : TurretInventoryManager.I.Owned.IndexOf(inst)
     ).ToList();
+
+        // TurretSlotManager.cs   – put it under GetPurchasedFlags()
+
+        public void ImportEquipped(List<int> ids)
+        {
+            for (int i = 0; i < ids.Count && i < equipped.Length; i++)
+            {
+                equipped[i] = (ids[i] >= 0 && ids[i] < TurretInventoryManager.I.Owned.Count)
+                              ? TurretInventoryManager.I.Owned[ids[i]]
+                              : null;
+                OnEquippedChanged?.Invoke(i, equipped[i]);   // refresh visuals
+            }
+        }
+
 
     }
 }

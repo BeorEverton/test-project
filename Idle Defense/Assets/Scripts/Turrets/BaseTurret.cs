@@ -25,7 +25,7 @@ namespace Assets.Scripts.Turrets
         [SerializeField] protected string[] _shotSounds;
 
         [SerializeField] private SpriteRenderer _turretBodyRenderer;
-        [SerializeField] private Sprite[] _turretUpgradeSprites;
+        public Sprite[] _turretUpgradeSprites;
         private int[] _upgradeThresholds = new int[] { 50, 250, 500 };
 
 
@@ -57,10 +57,9 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Start()
         {
-            _stats = SavedStats is { IsUnlocked: true } ? SavedStats : //If the turret is unlocked, use the saved stats
-                new TurretStatsInstance(_turretInfo); //If turret is not yet unlocked, use the default stats from the turret info
+            _stats = SavedStats ?? new TurretStatsInstance(_turretInfo);
 
-            gameObject.SetActive(_stats.IsUnlocked);
+            //gameObject.SetActive(_stats.IsUnlocked); from the old system where all turrets were active
 
             UpdateTurretAppearance();
         }

@@ -58,6 +58,9 @@ namespace Assets.Scripts.Systems.Save
             TurretInfoDTO laserTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_laserTurret.GetStats());
             TurretBaseInfoDTO laserTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
 
+            TurretInventoryDTO turretInventory = TurretInventoryManager.I.ExportToDTO();
+
+
             GameData gameData = new(gameDataDTO,
                 playerInfoDTO,
                 machineGunTurretDTO,
@@ -69,7 +72,8 @@ namespace Assets.Scripts.Systems.Save
                 missileLauncherTurretDTO,
                 missileLauncherTurretBaseDTO,
                 laserTurretDTO,
-                laserTurretBaseDTO);
+                laserTurretBaseDTO,
+                turretInventory);
 
             SaveGameToFile.SaveGameDataToFile(gameData);
         }
@@ -95,6 +99,9 @@ namespace Assets.Scripts.Systems.Save
             GameManager.Instance.LoadMoney(gameData.GameDataDTO.Money);
             WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
             GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);
+
+            TurretInventoryManager.I.ImportFromDTO(gameData.TurretInventory);
+
         }
 
         public void DeleteSave()

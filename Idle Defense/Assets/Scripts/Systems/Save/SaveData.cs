@@ -17,6 +17,8 @@ namespace Assets.Scripts.Systems.Save
         public TurretBaseInfoDTO? MissileLauncherTurretBaseInfoDTO;
         public TurretInfoDTO? LaserTurretInfoDTO;
         public TurretBaseInfoDTO? LaserTurretBaseInfoDTO;
+        public TurretInventoryDTO TurretInventory;
+
 
         public GameData(GameDataDTO gameData,
             PlayerInfoDTO playerInfo,
@@ -29,7 +31,8 @@ namespace Assets.Scripts.Systems.Save
             TurretInfoDTO? missileLauncherTurretInfoDTO,
             TurretBaseInfoDTO? missileLauncherTurretBaseInfoDTO,
             TurretInfoDTO? laserTurretInfoDTO,
-            TurretBaseInfoDTO? laserTurretBaseInfoDTO)
+            TurretBaseInfoDTO? laserTurretBaseInfoDTO,
+            TurretInventoryDTO turretInventory)
         {
             GameDataDTO = gameData;
             PlayerInfoDTO = playerInfo;
@@ -43,6 +46,7 @@ namespace Assets.Scripts.Systems.Save
             MissileLauncherTurretBaseInfoDTO = missileLauncherTurretBaseInfoDTO;
             LaserTurretInfoDTO = laserTurretInfoDTO;
             LaserTurretBaseInfoDTO = laserTurretBaseInfoDTO;
+            TurretInventory = turretInventory;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Assets.Scripts.UI
             }
         }
 
-        private void Start()
+        public void Init()
         {
             _upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
             _turret = _baseTurret.GetStats();
@@ -50,6 +50,7 @@ namespace Assets.Scripts.UI
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             UpdateDisplayFromType();
         }
+
         private void OnEnable()
         {
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
