@@ -9,10 +9,16 @@ public class TypingText : MonoBehaviour
     [SerializeField] private float typingSpeed = 0.05f;
     [SerializeField] private HeartbeatLine waveAnimator;
 
+    private Coroutine currentTypingRoutine;
+
     public void StartTyping(string newText)
     {
         fullText = newText;
-        StartCoroutine(TypeTextRoutine());
+
+        if (currentTypingRoutine != null)
+            StopCoroutine(currentTypingRoutine);
+
+        currentTypingRoutine = StartCoroutine(TypeTextRoutine());
     }
 
     private IEnumerator TypeTextRoutine()
@@ -24,9 +30,11 @@ public class TypingText : MonoBehaviour
         {
             textUI.text += c;
             textUI.ForceMeshUpdate();
-            yield return new WaitForSeconds(typingSpeed);
+            yield return new WaitForSecondsRealtime(typingSpeed);
         }
 
         waveAnimator.SetTypingActive(false);
+        currentTypingRoutine = null;
     }
+
 }

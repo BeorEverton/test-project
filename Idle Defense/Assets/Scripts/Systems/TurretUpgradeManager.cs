@@ -1,6 +1,7 @@
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
+using System;
 using UnityEngine;
 
 namespace Assets.Scripts.Systems
@@ -11,6 +12,8 @@ namespace Assets.Scripts.Systems
         [SerializeField] private TurretStatsInstance turret;
 
         private TurretUpgradeButton turretUpgradeButton;
+        public static event Action OnAnyTurretUpgraded;
+
 
         [Header("Cost Scaling Settings")]
         [SerializeField] private int hybridThreshold = 50;
@@ -68,8 +71,10 @@ namespace Assets.Scripts.Systems
                 UpdateDamageDisplay(); 
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
+
             }
-                
+
         }
 
         public void UpgradeFireRate()
@@ -83,6 +88,8 @@ namespace Assets.Scripts.Systems
                 UpdateFireRateDisplay();
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
+
             }
         }
 
@@ -100,8 +107,10 @@ namespace Assets.Scripts.Systems
                 UpdateCriticalChanceDisplay();
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
+
             }
-                
+
         }
 
         public void UpgradeCriticalDamageMultiplier()
@@ -115,8 +124,10 @@ namespace Assets.Scripts.Systems
                 UpdateCriticalDamageMultiplierDisplay();
                 AudioManager.Instance.Play("Upgrade"); 
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
+
             }
-                
+
         }
 
         public void UpgradeExplosionRadius()

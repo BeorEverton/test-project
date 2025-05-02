@@ -4,7 +4,9 @@ using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
-using Assets.Scripts.Systems.Save;   // if needed for BaseTurret refs
+using Assets.Scripts.Systems.Save;
+using Assets.Scripts.Systems.Audio;
+using Assets.Scripts.UI;   // if needed for BaseTurret refs
 
 namespace Assets.Scripts.Systems
 {
@@ -59,16 +61,19 @@ namespace Assets.Scripts.Systems
                 GameManager.Instance.SpendMoney(info.cost);
                 slotInfo[slot].purchased = true;
             }
+            OnSlotUnlocked?.Invoke();
             SaveGameManager.Instance.SaveGame();
             return true;
         }
 
         public bool Equip(int slot, TurretStatsInstance inst)
         {
-            Debug.Log($"Equip: {inst.TurretType} into slot {slot}");
+            AudioManager.Instance.Play("Click");
+            UIManager.Instance.DeactivateRightPanels();
+            UIManager.Instance.wallUpgradePanel.gameObject.SetActive(true); // to help the tutorial progression
             equipped[slot] = inst;
-            SaveGameManager.Instance.SaveGame();
             OnEquippedChanged?.Invoke(slot, inst);
+            SaveGameManager.Instance.SaveGame();
             return true;
         }
         public void Unequip(int slot)
@@ -77,6 +82,27 @@ namespace Assets.Scripts.Systems
             SaveGameManager.Instance.SaveGame();
             OnEquippedChanged?.Invoke(slot, null);
         }
+
+        public bool IsAnyTurretEquipped()
+        {
+            for (int i = 0; i < equipped.Length; i++)
+            {
+                if (equipped[i] != null)
+                    return true;
+            }
+            return false;
+        }
+        public int UnlockedSlotCount()
+        {
+            int count = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                if (Purchased(i))
+                    count++;
+            }
+            return count;
+        }
+
 
         //  save helpers 
         public List<bool> GetPurchasedFlags() => slotInfo.Select(s => s.purchased).ToList();
@@ -87,6 +113,8 @@ namespace Assets.Scripts.Systems
         }
 
         public event Action<int, TurretStatsInstance> OnEquippedChanged;
+
+        public event Action OnSlotUnlocked;
 
         public List<int> ExportEquipped() =>
     equipped.Select(inst =>

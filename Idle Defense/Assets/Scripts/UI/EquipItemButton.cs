@@ -37,6 +37,26 @@ public class EquipItemButton : MonoBehaviour
 
         iconImage.sprite = icon;
 
+        // Adjust size to preserve sprite's native aspect ratio with max height
+        if (icon != null)
+        {
+            float maxHeight = 40f;
+
+            float width = icon.rect.width;
+            float height = icon.rect.height;
+            float pixelsPerUnit = icon.pixelsPerUnit;
+
+            float nativeW = width / pixelsPerUnit;
+            float nativeH = height / pixelsPerUnit;
+
+            float scale = maxHeight / nativeH;
+            float finalW = nativeW * scale;
+            float finalH = maxHeight;
+
+            iconImage.rectTransform.sizeDelta = new Vector2(finalW, finalH);
+        }
+
+
         // ----- Click ------------------------------------------------------
         if (!btn) btn = GetComponent<Button>();
 

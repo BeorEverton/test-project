@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using Assets.Scripts.WaveSystem;
+using Assets.Scripts.Turrets;
+using Assets.Scripts.Systems.Save;
 
 namespace Assets.Scripts.Systems
 {
@@ -18,8 +20,10 @@ namespace Assets.Scripts.Systems
         public int _currentStep = 0;
         private bool _tutorialRunning = false;
         private bool _waitingToStartStep = true;
-        private GameObject _lastActiveObject;
+        private List<GameObject> _lastActiveObjects = new();
         private ulong _lastKnownMoney = 0;
+        private bool _turretWasUpgraded = false;
+
 
         public static GameTutorialManager Instance { get; private set; }
 
@@ -37,16 +41,23 @@ namespace Assets.Scripts.Systems
             if (tutorialSteps == null || tutorialSteps.Count == 0)
                 return;
 
-            if (PlayerPrefs.GetInt("Tutorial_Completed", 0) == 1)
+            if (_currentStep >= tutorialSteps.Count)
             {
                 tutorialPanel.SetActive(false);
                 return;
             }
 
+            SubscribeToEvents();
+            TryAdvanceTutorial();
+
+            if (_currentStep == 0)
+            {
+                Time.timeScale = 0f; // Pause the game
+            }
+
             _tutorialRunning = true;
             _waitingToStartStep = true;
 
-            SubscribeToEvents();
             Debug.Log("Tutorial started!");
         }
 
@@ -57,7 +68,9 @@ namespace Assets.Scripts.Systems
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
             GameManager.Instance.OnMoneyChanged += OnMoneyChanged;
             PlayerBaseManager.Instance.OnMaxHealthChanged += OnMaxHealthChanged;
-
+            TurretSlotManager.I.OnEquippedChanged += OnAnyTurretEquipped;
+            TurretSlotManager.I.OnSlotUnlocked += TryAdvanceTutorial;
+            TurretUpgradeManager.OnAnyTurretUpgraded += OnAnyTurretUpgraded;
         }
 
         private void UnsubscribeFromEvents()
@@ -67,6 +80,10 @@ namespace Assets.Scripts.Systems
             WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
             GameManager.Instance.OnMoneyChanged -= OnMoneyChanged;
             PlayerBaseManager.Instance.OnMaxHealthChanged -= OnHealthChanged;
+            TurretSlotManager.I.OnEquippedChanged -= OnAnyTurretEquipped;
+            TurretSlotManager.I.OnSlotUnlocked -= TryAdvanceTutorial;
+            TurretUpgradeManager.OnAnyTurretUpgraded -= OnAnyTurretUpgraded;
+
         }
 
         private void OnGameEventTriggered(float _)
@@ -94,12 +111,34 @@ namespace Assets.Scripts.Systems
             _lastKnownMoney = currentMoney;
         }
 
+        private void OnAnyTurretEquipped(int slotIndex, TurretStatsInstance stats)
+        {
+            if (_currentStep < tutorialSteps.Count &&
+                tutorialSteps[_currentStep].completeCondition == TutorialConditionType.TurretEquipped)
+            {
+                TryAdvanceTutorial(); 
+            }
+        }
+        private void OnAnyTurretUpgraded()
+        {
+            _turretWasUpgraded = true;
+            TryAdvanceTutorial();
+        }
+
+
+
         private void TryAdvanceTutorial()
         {
             if (!_tutorialRunning || _currentStep >= tutorialSteps.Count)
                 return;
 
-            var step = tutorialSteps[_currentStep];            
+            if (_currentStep == 1)
+            {
+                // Just completed step 0 resume game
+                Time.timeScale = 1f;
+            }
+
+            var step = tutorialSteps[_currentStep];
 
             if (_waitingToStartStep)
             {
@@ -130,13 +169,19 @@ namespace Assets.Scripts.Systems
                     else
                     {
                         tutorialPanel.SetActive(false); // Hide while waiting
-                        if (_lastActiveObject)
-                            _lastActiveObject.SetActive(false); // Hide while waiting
+                        foreach (var obj in _lastActiveObjects)
+                        {
+                            if (obj != null)
+                                obj.SetActive(false);
+                        }
+                        _lastActiveObjects.Clear();
+
                         _waitingToStartStep = true;
                     }
 
                 }
             }
+            _turretWasUpgraded = false;
 
         }
 
@@ -164,10 +209,17 @@ namespace Assets.Scripts.Systems
                     return GameManager.Instance.Money > _lastKnownMoney;
                 case TutorialConditionType.MoneyDecreased:
                     return GameManager.Instance.Money < _lastKnownMoney;
+                case TutorialConditionType.TurretEquipped:
+                    return TurretSlotManager.I.IsAnyTurretEquipped();
+                case TutorialConditionType.SlotUnlocked:
+                    return TurretSlotManager.I.UnlockedSlotCount() >= (int)threshold;
+                case TutorialConditionType.TurretUpgraded:
+                    return _turretWasUpgraded;
 
                 default:
                     return false;
             }
+
         }
 
         private void ShowStep(int index)
@@ -175,18 +227,24 @@ namespace Assets.Scripts.Systems
             if (!tutorialPanel.activeInHierarchy)
                 tutorialPanel.SetActive(true);
 
-            if (_lastActiveObject != null)
-                _lastActiveObject.SetActive(false);
+            foreach (var obj in _lastActiveObjects)
+            {
+                if (obj != null)
+                    obj.SetActive(false);
+            }
+            _lastActiveObjects.Clear();
 
             var step = tutorialSteps[index];
-            if (step.associatedObject != null)
+            if (step.associatedObjects != null && step.associatedObjects.Length > 0)
             {
-                step.associatedObject.SetActive(true);
-                _lastActiveObject = step.associatedObject;
-            }
-            else
-            {
-                _lastActiveObject = null;
+                foreach (var obj in step.associatedObjects)
+                {
+                    if (obj != null)
+                    {
+                        obj.SetActive(true);
+                        _lastActiveObjects.Add(obj);
+                    }
+                }
             }
 
             typingText.StartTyping(step.instructionText);
@@ -197,11 +255,14 @@ namespace Assets.Scripts.Systems
             _tutorialRunning = false;
             tutorialPanel.SetActive(false);
             UnsubscribeFromEvents();
-            if (_lastActiveObject != null)
-                _lastActiveObject.SetActive(false);
+            foreach (var obj in _lastActiveObjects)
+            {
+                if (obj != null)
+                    obj.SetActive(false);
+            }
 
-            PlayerPrefs.SetInt("Tutorial_Completed", 1);
-            PlayerPrefs.Save();
+            _currentStep = tutorialSteps.Count;
+            SaveGameManager.Instance.SaveGame(); 
 
             Debug.Log("Tutorial completed!");
         }
@@ -209,7 +270,6 @@ namespace Assets.Scripts.Systems
         [ContextMenu("Reset and Start Tutorial")]
         public void RestartTutorialForDebug()
         {
-            PlayerPrefs.DeleteKey("Tutorial_Completed");
             _currentStep = 0;
             _tutorialRunning = true;
             _waitingToStartStep = true;
@@ -236,7 +296,7 @@ namespace Assets.Scripts.Systems
         public float completeThreshold;
 
         [Tooltip("Optional object to activate while this step is active")]
-        public GameObject associatedObject;
+        public GameObject[] associatedObjects;
     }
 
     public enum TutorialConditionType
@@ -250,6 +310,9 @@ namespace Assets.Scripts.Systems
         MoneyAbove,
         MoneyBelow,
         MoneyIncreased,
-        MoneyDecreased
+        MoneyDecreased,
+        TurretEquipped,
+        SlotUnlocked,
+        TurretUpgraded
     }
 }

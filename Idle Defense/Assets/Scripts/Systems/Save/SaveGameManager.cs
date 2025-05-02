@@ -128,9 +128,7 @@ namespace Assets.Scripts.Systems.Save
             if (disclaimerPanel != null)
             {
                 disclaimerPanel.SetActive(false);
-                Time.timeScale = 1f; // Resume game
             }
         }
-
     }
 }

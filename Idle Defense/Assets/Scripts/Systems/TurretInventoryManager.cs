@@ -60,7 +60,16 @@ public class TurretInventoryManager : MonoBehaviour
         TryUnlockByWave(0);
 
         if (unlockedTypes.Contains(TurretType.MachineGun))
-            TryPurchase(TurretType.MachineGun);          // cost is 0 for first copy
+        {
+            TurretInfoSO baseSO = turretLibrary.GetInfo(TurretType.MachineGun);
+            var inst = new TurretStatsInstance(baseSO)
+            {
+                TurretType = TurretType.MachineGun,
+                IsUnlocked = true
+            };
+            owned.Add(inst);
+        }
+
     }
 
     void OnDestroy()
@@ -92,6 +101,9 @@ public class TurretInventoryManager : MonoBehaviour
         if (!unlockedTypes.Contains(type)) return false;
 
         int countOwned = owned.Count(t => t.TurretType == type);
+        if (countOwned >= 5)
+            return false;
+
         ulong cost = GetCost(type, countOwned);
 
         if (GameManager.Instance.Money < cost) return false;

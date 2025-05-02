@@ -37,7 +37,7 @@ public class HeartbeatLine : MonoBehaviour
 
     void AnimateWaveform()
     {
-        noiseOffset += Time.deltaTime * pulseSpeed;
+        noiseOffset += Time.unscaledDeltaTime * pulseSpeed;
 
         for (int i = 0; i < bars; i++)
         {

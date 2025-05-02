@@ -20,7 +20,8 @@ namespace Assets.Scripts.UI
         [SerializeField] private GameObject equipPanel;   // drag a panel root in Canvas
         [SerializeField] private GameObject unequipPanel; // another panel if you like
         [SerializeField] private TextMeshProUGUI toast;   // optional 1-line overlay
-        [SerializeField] private GameObject[] rightPanels;   
+        [SerializeField] private GameObject[] rightPanels;
+        public GameObject wallUpgradePanel;   
 
         private int activeSlot; // for the equipment
 

@@ -30,7 +30,7 @@ public class SlotWorldButton : MonoBehaviour
     [SerializeField] private TurretUpgradePanelMapping[] panelMappings;
     private GameObject activePanel;
     private TurretType? currentPanelTurretType;
-
+    [SerializeField] private GameObject noTurretHint;
 
     [System.Serializable]
     public struct TurretUpgradePanelMapping
@@ -76,10 +76,18 @@ public class SlotWorldButton : MonoBehaviour
 
         if (!TurretSlotManager.I.Purchased(slotIndex))
         {
-            TurretSlotManager.I.UnlockSlot(slotIndex);   // tries to pay
-            UpdateOverlay();
+            if (TurretSlotManager.I.UnlockSlot(slotIndex))
+            {
+                UpdateOverlay();
+                RefreshSlot(slotIndex, TurretSlotManager.I.Get(slotIndex)); // force check
+
+                // Immediately open the equip panel after unlocking
+                UIManager.Instance.OpenEquipPanel(slotIndex);
+            }
             return;
         }
+
+
 
         TurretStatsInstance inst = TurretSlotManager.I.Get(slotIndex);
 
@@ -136,46 +144,41 @@ public class SlotWorldButton : MonoBehaviour
 
         if (changed != slotIndex) return;
 
-        if (spawned != null) Destroy(spawned);
+        if (spawned != null)
+            Destroy(spawned);
 
         if (inst != null)
         {
             GameObject prefab = TurretInventoryManager.I.GetPrefab(inst.TurretType);
             spawned = Instantiate(prefab, barrelAnchor.position,
-                                   Quaternion.identity, barrelAnchor);
+                                  Quaternion.identity, barrelAnchor);
             spawned.GetComponent<BaseTurret>().SavedStats = inst;
+
+            if (noTurretHint != null)
+                noTurretHint.SetActive(false);
         }
+        else
+        {
+            if (noTurretHint != null)
+                noTurretHint.SetActive(true);
+        }
+
         UpdateOverlay();
     }
+
+
+
+    //  Called whenever slot state / wave changes.
+    //  Controls the tint of the Slot sprite (black = unavailable).
 
     private void UpdateColor()
-    {
-        bool purchased = TurretSlotManager.I.Purchased(slotIndex);
-        SpriteRenderer slotSprite = GetComponentInChildren<SpriteRenderer>();
-        slotSprite.color = purchased ? Color.white : Color.black;
-
-        if (purchased)
-        {
-            lockedGroup.gameObject.SetActive(false);
-            lockedGroup.interactable = false;
-        }
-    }
-
-    private void OnWaveStart(object sender, WaveManager.OnWaveStartedEventArgs _)
-    {
-        UpdateOverlay();
-    }
-
-    /* ------------- overlay logic ----------------------------- */
-    private void UpdateOverlay()
     {
         bool purchased = TurretSlotManager.I.Purchased(slotIndex);
         int curWave = WaveManager.Instance.GetCurrentWaveIndex();
         int needWave = TurretSlotManager.I.WaveRequirement(slotIndex);
 
-        /* find the next locked slot (lowest index not purchased) */
         int nextLocked = -1;
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; ++i)
         {
             if (!TurretSlotManager.I.Purchased(i))
             {
@@ -183,37 +186,93 @@ public class SlotWorldButton : MonoBehaviour
                 break;
             }
         }
+
+        bool whiteNow = purchased || (slotIndex == nextLocked && curWave >= needWave);
+
+        SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
+        if (sr != null)
+            sr.color = whiteNow ? Color.white : Color.black;
+    }
+
+
+    private void OnWaveStart(object sender, WaveManager.OnWaveStartedEventArgs _)
+    {
+        UpdateOverlay();
+    }
+
+    
+    //  Shows the correct overlay text & button state.
+    
+    private void UpdateOverlay()
+    {
+        bool purchased = TurretSlotManager.I.Purchased(slotIndex);
+        int curWave = WaveManager.Instance.GetCurrentWaveIndex();
+        int needWave = TurretSlotManager.I.WaveRequirement(slotIndex);
+
+        int nextLocked = -1;
+        for (int i = 0; i < 5; ++i)
+        {
+            if (!TurretSlotManager.I.Purchased(i))
+            {
+                nextLocked = i;
+                break;
+            }
+        }
+
         bool isNext = slotIndex == nextLocked;
 
-        /* already bought: hide overlay */
         if (purchased)
         {
-            lockedGroup.gameObject.SetActive(false);            
+            lockedGroup.gameObject.SetActive(false);
             lockedGroup.interactable = false;
             return;
         }
 
-        /* show overlay */
-        lockedGroup.alpha = 1;
+        lockedGroup.gameObject.SetActive(true);
+        lockedGroup.alpha = 1f;
         lockedGroup.interactable = true;
-
-        waveText.text = "Wave " + needWave;
 
         if (isNext)
         {
             ulong cost = TurretSlotManager.I.BuyCost(slotIndex);
-            priceText.text = "$" + UIManager.AbbreviateNumber(cost);
-            priceText.gameObject.SetActive(true);
 
-            bool canBuy = curWave >= needWave;
-            waveText.gameObject.SetActive(false);
-            priceText.color = Color.black;
-            buyButton.interactable = canBuy;
+            if (curWave < needWave)
+            {
+                waveText.gameObject.SetActive(true);
+                priceText.gameObject.SetActive(true);
+
+                waveText.text = "Wave " + needWave;
+                priceText.text = "$" + UIManager.AbbreviateNumber(cost);
+
+                waveText.color = Color.white;
+                priceText.color = Color.white;
+
+                buyButton.interactable = false;
+            }
+            else
+            {
+                waveText.gameObject.SetActive(false);
+                priceText.gameObject.SetActive(true);
+
+                priceText.text = "$" + UIManager.AbbreviateNumber(cost);
+                priceText.color = Color.black;
+
+                buyButton.interactable = true;
+            }
         }
         else
         {
+            waveText.gameObject.SetActive(true);
             priceText.gameObject.SetActive(false);
+
+            waveText.text = "Wave " + needWave;
+            waveText.color = Color.white;
+
             buyButton.interactable = false;
         }
+
+        UpdateColor();
     }
+
+
 }

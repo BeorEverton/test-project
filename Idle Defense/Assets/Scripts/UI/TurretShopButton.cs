@@ -43,6 +43,19 @@ namespace Assets.Scripts.UI
         {
             var inv = TurretInventoryManager.I;
             int owned = inv.Owned.Count(t => t.TurretType == turretType);
+
+            if (owned >= 5)
+            {
+                icon.color = Color.white;
+                lockText.gameObject.SetActive(false);
+
+                countText.text = $"x{owned}";
+                costText.text = "Max";
+                costText.color = Color.gray;
+                buyButton.interactable = false;
+                return;
+            }
+
             bool unlocked = inv.IsTurretTypeUnlocked(turretType);
             int curWave = WaveManager.Instance.GetCurrentWaveIndex();
 
