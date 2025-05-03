@@ -285,18 +285,21 @@ namespace Assets.Scripts.Turrets
 
         private int GetTotalUpgradeLevel()
         {
-            return Mathf.FloorToInt(_stats.DamageLevel +
-                                    _stats.FireRateLevel +
-                                    _stats.CriticalChanceLevel +
-                                    _stats.CriticalDamageMultiplierLevel +
-                                    _stats.ExplosionRadiusLevel +
-                                    _stats.SplashDamageLevel +
-                                    _stats.PierceChanceLevel +
-                                    _stats.PierceDamageFalloffLevel +
-                                    _stats.PelletCountLevel +
-                                    _stats.DamageFalloffOverDistanceLevel +
-                                    _stats.PercentBonusDamagePerSecLevel +
-                                    _stats.SlowEffectLevel);
+            return Mathf.FloorToInt(
+                _stats.DamageLevel +
+                _stats.FireRateLevel +
+                _stats.CriticalChanceLevel +
+                _stats.CriticalDamageMultiplierLevel +
+                _stats.ExplosionRadiusLevel +
+                _stats.SplashDamageLevel +
+                _stats.PierceChanceLevel +
+                _stats.PierceDamageFalloffLevel +
+                _stats.PelletCountLevel +
+                _stats.DamageFalloffOverDistanceLevel +
+                _stats.PercentBonusDamagePerSecLevel +
+                _stats.SlowEffectLevel +
+                _stats.KnockbackStrengthLevel 
+            );
         }
 
     }

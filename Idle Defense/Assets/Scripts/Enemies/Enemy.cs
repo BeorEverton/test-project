@@ -25,6 +25,9 @@ namespace Assets.Scripts.Enemies
         private Vector3? _originalScale;
         private Color? _originalColor;
 
+        public Vector2 KnockbackVelocity;
+        public float KnockbackTime;
+
 
         public EnemyInfoSO Info
         {
@@ -140,6 +143,10 @@ namespace Assets.Scripts.Enemies
                 _applyBossVisualsAfterReset = false;
                 SetAsBoss(_isMiniBoss);
             }
+
+            KnockbackTime = 0f;
+            KnockbackVelocity = Vector2.zero;
+
         }
 
         public void SetAsBoss(bool isMini)

@@ -60,6 +60,10 @@ namespace Assets.Scripts.Systems
             return baseCost + Mathf.Pow(exponentialMultiplier, level);
         }
 
+        public float GetKnockbackStrengthUpgradeCost(TurretStatsInstance t) =>
+    GetHybridCost(t.KnockbackStrengthUpgradeBaseCost, t.KnockbackStrengthLevel);
+
+
         public void UpgradeDamage()
         {
             float cost = GetExponentialCost_PlusLevel(turret.DamageUpgradeBaseCost, turret.DamageLevel, turret.DamageCostExponentialMultiplier);
@@ -222,6 +226,20 @@ namespace Assets.Scripts.Systems
                 turret.DamageFalloffOverDistanceLevel += 1f;
                 UpdateDamageFalloffOverDistanceDisplay();
                 AudioManager.Instance.Play("Upgrade"); 
+                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+            }
+        }
+
+        public void UpgradeKnockbackStrength()
+        {
+            float cost = GetHybridCost(turret.KnockbackStrengthUpgradeBaseCost, turret.KnockbackStrengthLevel);
+
+            if (TrySpend(cost))
+            {
+                turret.KnockbackStrength += turret.KnockbackStrengthUpgradeAmount;
+                turret.KnockbackStrengthLevel += 1f;
+                UpdateKnockbackStrengthDisplay();
+                AudioManager.Instance.Play("Upgrade");
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
             }
         }
@@ -426,7 +444,6 @@ namespace Assets.Scripts.Systems
             );
         }
 
-
         public void UpdatePelletCountDisplay()
         {
             if (turret == null)
@@ -441,6 +458,24 @@ namespace Assets.Scripts.Systems
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
         }
+        
+
+        public void UpdateKnockbackStrengthDisplay()
+        {
+            if (turret == null)
+                return;
+
+            float current = turret.KnockbackStrength;
+            float bonus = turret.KnockbackStrengthUpgradeAmount;
+            float cost = GetHybridCost(turret.KnockbackStrengthUpgradeBaseCost, turret.KnockbackStrengthLevel);
+
+            turretUpgradeButton.UpdateStats(
+                UIManager.AbbreviateNumber(current),
+                $"+{UIManager.AbbreviateNumber(bonus)}",
+                $"${UIManager.AbbreviateNumber(cost)}"
+            );
+        }
+
 
         public void UpdateDamageFalloffOverDistanceDisplay()
         {
@@ -555,6 +590,7 @@ namespace Assets.Scripts.Systems
         PelletCount,
         DamageFalloffOverDistance,
         PercentBonusDamagePerSec,
-        SlowEffect
+        SlowEffect,
+        KnockbackStrength
     }
 }

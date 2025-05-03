@@ -49,6 +49,13 @@ namespace Assets.Scripts.WaveSystem
                 if (!enemyComponent.IsAlive)
                     continue;
 
+                if (enemyComponent.KnockbackTime > 0f)
+                {
+                    enemy.transform.position += (Vector3)(enemyComponent.KnockbackVelocity * Time.deltaTime);
+                    enemyComponent.KnockbackTime -= Time.deltaTime;
+                    continue; // Skip movement/attack while being pushed
+                }
+
                 if (!enemyComponent.CanAttack)
                 {
                     MoveEnemy(enemyComponent);

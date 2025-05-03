@@ -73,6 +73,11 @@ namespace Assets.Scripts.Turrets
         public float DamageFalloffOverDistanceUpgradeAmount;
         public float DamageFalloffOverDistanceUpgradeBaseCost;
 
+        public float KnockbackStrength;
+        public float KnockbackStrengthLevel;
+        public float KnockbackStrengthUpgradeAmount;
+        public float KnockbackStrengthUpgradeBaseCost;
+
         public float PercentBonusDamagePerSec;
         public float PercentBonusDamagePerSecLevel;
         public float PercentBonusDamagePerSecUpgradeAmount;
@@ -148,6 +153,11 @@ namespace Assets.Scripts.Turrets
             DamageFalloffOverDistanceUpgradeAmount = source.DamageFalloffOverDistanceUpgradeAmount;
             DamageFalloffOverDistanceUpgradeBaseCost = source.DamageFalloffOverDistanceUpgradeBaseCost;
 
+            KnockbackStrength = source.KnockbackStrength;
+            KnockbackStrengthLevel = source.KnockbackStrengthLevel;
+            KnockbackStrengthUpgradeAmount = source.KnockbackStrengthUpgradeAmount;
+            KnockbackStrengthUpgradeBaseCost = source.KnockbackStrengthUpgradeBaseCost;
+
             PercentBonusDamagePerSec = source.PercentBonusDamagePerSec;
             PercentBonusDamagePerSecLevel = source.PercentBonusDamagePerSecLevel;
             PercentBonusDamagePerSecUpgradeAmount = source.PercentBonusDamagePerSecUpgradeAmount;
@@ -180,6 +190,7 @@ namespace Assets.Scripts.Turrets
                 nameof(PierceDamageFalloffLevel) => (int)(PierceDamageFalloffLevel * PierceDamageFalloffUpgradeBaseCost),
                 nameof(PelletCountLevel) => (int)(PelletCountLevel * PelletCountUpgradeBaseCost),
                 nameof(DamageFalloffOverDistanceLevel) => (int)(DamageFalloffOverDistanceLevel * DamageFalloffOverDistanceUpgradeBaseCost),
+                nameof(KnockbackStrengthLevel) => (int)(KnockbackStrengthLevel * KnockbackStrengthUpgradeBaseCost),
                 nameof(PercentBonusDamagePerSecLevel) => (int)(PercentBonusDamagePerSecLevel * PercentBonusDamagePerSecUpgradeBaseCost),
                 nameof(SlowEffectLevel) => (int)(SlowEffectLevel * SlowEffectUpgradeBaseCost),
                 _ => 0

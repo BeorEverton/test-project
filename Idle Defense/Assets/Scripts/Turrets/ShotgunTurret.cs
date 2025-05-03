@@ -149,6 +149,11 @@ namespace Assets.Scripts.Turrets
                 enemy.TakeDamage(damage);
                 pelletsRemaining--;
 
+                Vector2 knockDir = (enemy.transform.position - transform.position).normalized;
+                enemy.KnockbackVelocity = knockDir * knockbackStrength; // strength depends on upgrade
+                enemy.KnockbackTime = knockbackDuration; // e.g. 0.2f
+
+
                 index = (index + 1) % sortedCount;
             }
 
