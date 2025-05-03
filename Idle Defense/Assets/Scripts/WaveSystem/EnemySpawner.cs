@@ -48,6 +48,10 @@ namespace Assets.Scripts.WaveSystem
         private bool _waveSpawned;
         private bool _canSpawnEnemies;
 
+        // Used when the player dies
+        private bool _suppressWaveComplete = false;
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -220,6 +224,9 @@ namespace Assets.Scripts.WaveSystem
 
         private void CheckIfWaveCompleted()
         {
+            if (_suppressWaveComplete)
+                return;
+
             if (_waveSpawned && EnemiesAlive.Count <= 0)
                 OnWaveCompleted?.Invoke(this, EventArgs.Empty);
         }
@@ -235,7 +242,9 @@ namespace Assets.Scripts.WaveSystem
             _canSpawnEnemies = false;
             StopCoroutine(SpawnEnemies());
 
-            yield return new WaitForSeconds(.5f); //Wait to secure all managers are done with EnemiesAlive list
+            _suppressWaveComplete = true;
+
+            yield return new WaitForSecondsRealtime(.5f); //Wait to secure all managers are done with EnemiesAlive list
 
             foreach (GameObject enemy in EnemiesAlive.ToList())
             {
@@ -247,7 +256,8 @@ namespace Assets.Scripts.WaveSystem
                 _objectPool.ReturnObject(enemy.GetComponent<Enemy>().Info.Name, enemy);
             }
 
-            OnWaveCompleted?.Invoke(this, EventArgs.Empty);
+            _suppressWaveComplete = false;
+
         }
 
     }

@@ -51,6 +51,12 @@ namespace Assets.Scripts.WaveSystem
 
                 if (enemyComponent.KnockbackTime > 0f)
                 {
+                    if (enemyComponent.IsBossInstance)
+                    {
+                        enemyComponent.KnockbackVelocity /= 2f;
+                        enemyComponent.KnockbackTime /= 2f;
+                    }
+
                     enemy.transform.position += (Vector3)(enemyComponent.KnockbackVelocity * Time.deltaTime);
                     enemyComponent.KnockbackTime -= Time.deltaTime;
                     continue; // Skip movement/attack while being pushed

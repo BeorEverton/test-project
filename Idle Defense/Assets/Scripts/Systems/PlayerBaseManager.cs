@@ -10,7 +10,7 @@ namespace Assets.Scripts.Systems
     {
         public static PlayerBaseManager Instance { get; private set; }
 
-        public event EventHandler OnWaveFailed; // TO-DO, Used to roll back 10 waves
+        public event EventHandler OnWaveFailed; 
         public event Action<float, float> OnHealthChanged; // (currentHealth, maxHealth)
         public event Action<float, float> OnMaxHealthChanged; // (newMaxHealth, currentHealth)
 
@@ -50,7 +50,7 @@ namespace Assets.Scripts.Systems
             InitializeGame();
         }
 
-        private void InitializeGame()
+        public void InitializeGame(bool startTime = false)
         {
             // Recalculate values based on upgrade levels
             _runtimeMaxHealth = Info.MaxHealth + Info.MaxHealthLevel * Info.MaxHealthUpgradeAmount;
@@ -66,6 +66,9 @@ namespace Assets.Scripts.Systems
             _regenTickTimer = 0f;
 
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+
+            if (startTime)
+                Time.timeScale = UIManager.Instance.timeSpeedOnDeath; // Resume the game only used in case of death
         }
 
         public void TakeDamage(float amount)
@@ -87,7 +90,7 @@ namespace Assets.Scripts.Systems
                 AudioManager.Instance.Stop("Laser V2");
                 AudioManager.Instance.StopAllMusics();
                 AudioManager.Instance.PlayMusic("Main");
-                InitializeGame();
+                UIManager.Instance.ShowDeathCountdown(); 
             }
         }
 

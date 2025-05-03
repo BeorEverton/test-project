@@ -47,24 +47,30 @@ namespace Assets.Scripts.WaveSystem
             StartCoroutine(StartWaveRoutine());
 
             EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
-            PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
+            //PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
         }
 
         public int GetCurrentWaveIndex() => _currentWave;
         public Wave GetCurrentWave() => _waves[_currentWave];
-        public void LoadWave(int waveNumber) => _currentWave = waveNumber; //Load previous wave, since StartWaveRoutine count +1 before initializing
+
+        public void LoadWave(int waveNumber)
+        {
+            _currentWave = Mathf.Clamp(waveNumber, 1, int.MaxValue);
+            _waveCompleted = true; // Force StartWaveRoutine to begin loading
+        }
+
 
         private void OnWaveCompleted(object sender, EventArgs e)
         {
             _waveCompleted = true;
         }
 
-        private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
+        /*private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
             _currentWave -= 10;
             if (_currentWave < 1)
                 _currentWave = 0;
-        }
+        }*/
 
         private IEnumerator StartWaveRoutine()
         {

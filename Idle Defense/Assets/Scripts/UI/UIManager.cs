@@ -20,7 +20,16 @@ namespace Assets.Scripts.UI
         [SerializeField] private GameObject unequipPanel; // another panel if you like
         [SerializeField] private TextMeshProUGUI toast;   // optional 1-line overlay
         [SerializeField] private GameObject[] rightPanels;
-        public GameObject wallUpgradePanel;   
+        public GameObject wallUpgradePanel;
+
+        [Tooltip("Death Screen")]
+        [SerializeField] private GameObject deathCountdownPanel;
+        [SerializeField] private TextMeshProUGUI countdownText;
+        [SerializeField] private Button immediateRestartButton;
+        private Coroutine deathRoutine;
+        private int rollbackWaveIndex;
+        public float timeSpeedOnDeath;
+
 
         private int activeSlot; // for the equipment
 
@@ -153,6 +162,73 @@ namespace Assets.Scripts.UI
                 panel.SetActive(false);
             }
         }
+
+        // Death functions:
+        public void ShowDeathCountdown(float seconds = 5f)
+        {
+            if (deathRoutine != null)
+                StopCoroutine(deathRoutine);
+
+            timeSpeedOnDeath = Time.timeScale; // Store current time scale
+            Time.timeScale = 0f; // Pause the game
+
+            deathCountdownPanel.SetActive(true);
+
+            // Calculate and store rollback wave
+            int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
+            rollbackWaveIndex = Mathf.Max(1, currentWave - 10); // clamp to wave 1
+
+            countdownText.text = $"Restarting from Wave {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
+            immediateRestartButton.onClick.RemoveAllListeners();
+            immediateRestartButton.onClick.AddListener(() => SkipDeathCountdown());
+
+            deathRoutine = StartCoroutine(DeathCountdownRoutine(seconds));
+        }
+
+
+        private IEnumerator DeathCountdownRoutine(float seconds)
+        {
+            float timeLeft = seconds;
+
+            while (timeLeft > 0f)
+            {
+                countdownText.text = $"Restarting from Wave {rollbackWaveIndex} in {Mathf.CeilToInt(timeLeft)}...";
+                yield return new WaitForSecondsRealtime(1f);
+                timeLeft -= 1f;
+            }
+
+            countdownText.text = $"Restarting now...";
+            yield return new WaitForSecondsRealtime(0.5f); // optional buffer
+            TriggerGameReset();
+        }
+
+
+        public void SkipDeathCountdown()
+        {
+            if (deathRoutine != null)
+                StopCoroutine(deathRoutine);
+            TriggerGameReset();            
+        }
+
+        private void TriggerGameReset()
+        {
+            deathCountdownPanel.SetActive(false);
+            WaveManager.Instance.LoadWave(rollbackWaveIndex -1); 
+            PlayerBaseManager.Instance.InitializeGame(true);            
+        }
+
+        public void RestartCurrentWave()
+        {
+            if (deathRoutine != null)
+                StopCoroutine(deathRoutine);
+
+            deathCountdownPanel.SetActive(false);
+
+            // Set to current wave minus one, since LoadWave will increment to it
+            WaveManager.Instance.LoadWave(rollbackWaveIndex - 1);
+            PlayerBaseManager.Instance.InitializeGame(true);
+        }
+
 
     }
 }
