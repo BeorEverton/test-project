@@ -89,15 +89,11 @@ namespace Assets.Scripts.SO
         public float PelletCountCostExponentialMultiplier;
 
         [Header("Knockback Settings")]
-        [Tooltip("Base strength of the knockback applied to enemies.")]
         public float KnockbackStrength;
         public int KnockbackStrengthLevel;
         public float KnockbackStrengthUpgradeAmount;
         public float KnockbackStrengthUpgradeBaseCost;
-
-        [Tooltip("Exponential cost multiplier for knockback upgrades.")]
         public float KnockbackStrengthCostExponentialMultiplier;
-
 
         [Tooltip("Amount of damage falloff over distance, measured in 1 unit")]
         public float DamageFalloffOverDistance;

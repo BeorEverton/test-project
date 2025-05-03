@@ -6,9 +6,8 @@ using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
 using Assets.Scripts.SO;
-using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.Systems.Audio;
+
 
 public class SlotWorldButton : MonoBehaviour
 {
@@ -65,6 +64,13 @@ public class SlotWorldButton : MonoBehaviour
     public void OnSlotClicked()
     {
         UIManager.Instance.DeactivateRightPanels();
+        TabSelectorButton[] allTabs = FindObjectsByType<TabSelectorButton>(FindObjectsSortMode.None);
+        foreach (var tab in allTabs)
+        {
+            tab.Deselect();
+        }
+
+
         AudioManager.Instance.Play("Click");
 
         // Skip first children because it's the title

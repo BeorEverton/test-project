@@ -55,10 +55,11 @@ namespace Assets.Scripts.Systems
             return baseCost + Mathf.Pow(exponentialMultiplier, level) + level;
         }
 
-        private float GetExponentialCost(float baseCost, float level, float exponentialMultiplier)
+        private float GetExponentialCost(float baseCost, float level, float multiplier)
         {
-            return baseCost + Mathf.Pow(exponentialMultiplier, level);
+            return baseCost * Mathf.Pow(multiplier, level);
         }
+
 
         public float GetKnockbackStrengthUpgradeCost(TurretStatsInstance t) =>
     GetHybridCost(t.KnockbackStrengthUpgradeBaseCost, t.KnockbackStrengthLevel);
@@ -232,12 +233,16 @@ namespace Assets.Scripts.Systems
 
         public void UpgradeKnockbackStrength()
         {
-            float cost = GetHybridCost(turret.KnockbackStrengthUpgradeBaseCost, turret.KnockbackStrengthLevel);
+            float cost = GetExponentialCost(
+                turret.KnockbackStrengthUpgradeBaseCost,
+                turret.KnockbackStrengthLevel,
+                turret.KnockbackStrengthCostExponentialMultiplier
+            );
 
             if (TrySpend(cost))
             {
-                turret.KnockbackStrength += turret.KnockbackStrengthUpgradeAmount;
                 turret.KnockbackStrengthLevel += 1f;
+                turret.KnockbackStrength += turret.KnockbackStrengthUpgradeAmount;
                 UpdateKnockbackStrengthDisplay();
                 AudioManager.Instance.Play("Upgrade");
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
@@ -457,8 +462,7 @@ namespace Assets.Scripts.Systems
                 $"+{UIManager.AbbreviateNumber(bonus)}",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
-        }
-        
+        }        
 
         public void UpdateKnockbackStrengthDisplay()
         {
@@ -467,15 +471,19 @@ namespace Assets.Scripts.Systems
 
             float current = turret.KnockbackStrength;
             float bonus = turret.KnockbackStrengthUpgradeAmount;
-            float cost = GetHybridCost(turret.KnockbackStrengthUpgradeBaseCost, turret.KnockbackStrengthLevel);
+            float cost = GetExponentialCost(
+                turret.KnockbackStrengthUpgradeBaseCost,
+                turret.KnockbackStrengthLevel,
+                turret.KnockbackStrengthCostExponentialMultiplier
+            );
+
 
             turretUpgradeButton.UpdateStats(
-                UIManager.AbbreviateNumber(current),
-                $"+{UIManager.AbbreviateNumber(bonus)}",
+                $"{current:F1}",
+                $"+{bonus:F1}",
                 $"${UIManager.AbbreviateNumber(cost)}"
             );
         }
-
 
         public void UpdateDamageFalloffOverDistanceDisplay()
         {

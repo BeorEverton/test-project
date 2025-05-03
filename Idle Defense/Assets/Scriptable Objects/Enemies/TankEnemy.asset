@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: TankEnemy
   EnemyClass: 2
-  MaxHealth: 20
-  MovementSpeed: 0.5
+  MaxHealth: 12
+  MovementSpeed: 0.3
   MovementSpeedDifference: 0.125
-  CoinDropAmount: 7
+  CoinDropAmount: 9
   CoinDropMultiplierByWaveCount: 1.7
-  HealthMultiplierByWaveCount: 1.08
+  HealthMultiplierByWaveCount: 1.2
   Damage: 2
   AttackRange: 0.3
   AttackSpeed: 0.8

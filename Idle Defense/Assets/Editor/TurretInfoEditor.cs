@@ -65,6 +65,12 @@ namespace Assets.Editor
         private SerializedProperty damageFalloffOverDistanceLevelProp;
         private SerializedProperty damageFalloffOverDistanceUpgradeAmountProp;
         private SerializedProperty damageFalloffOverDistanceUpgradeBaseCostProp;
+        private SerializedProperty knockbackStrengthProp;
+        private SerializedProperty knockbackStrengthLevelProp;
+        private SerializedProperty knockbackStrengthUpgradeAmountProp;
+        private SerializedProperty knockbackStrengthUpgradeBaseCostProp;
+        private SerializedProperty knockbackStrengthCostExponentialMultiplierProp;
+
 
         // Laser Turret
         private SerializedProperty percentBonusDamagePerSecProp;
@@ -142,6 +148,12 @@ namespace Assets.Editor
                                                   = serializedObject.FindProperty("DamageFalloffOverDistanceUpgradeAmount");
             damageFalloffOverDistanceUpgradeBaseCostProp
                                                   = serializedObject.FindProperty("DamageFalloffOverDistanceUpgradeBaseCost");
+            knockbackStrengthProp = serializedObject.FindProperty("KnockbackStrength");
+            knockbackStrengthLevelProp = serializedObject.FindProperty("KnockbackStrengthLevel");
+            knockbackStrengthUpgradeAmountProp = serializedObject.FindProperty("KnockbackStrengthUpgradeAmount");
+            knockbackStrengthUpgradeBaseCostProp = serializedObject.FindProperty("KnockbackStrengthUpgradeBaseCost");
+            knockbackStrengthCostExponentialMultiplierProp = serializedObject.FindProperty("KnockbackStrengthCostExponentialMultiplier");
+
 
             // Laser
             percentBonusDamagePerSecProp = serializedObject.FindProperty("PercentBonusDamagePerSec");
@@ -232,6 +244,12 @@ namespace Assets.Editor
             EditorGUILayout.PropertyField(damageFalloffOverDistanceLevelProp);
             EditorGUILayout.PropertyField(damageFalloffOverDistanceUpgradeAmountProp);
             EditorGUILayout.PropertyField(damageFalloffOverDistanceUpgradeBaseCostProp);
+            EditorGUILayout.PropertyField(knockbackStrengthProp);
+            EditorGUILayout.PropertyField(knockbackStrengthLevelProp);
+            EditorGUILayout.PropertyField(knockbackStrengthUpgradeAmountProp);
+            EditorGUILayout.PropertyField(knockbackStrengthUpgradeBaseCostProp);
+            EditorGUILayout.PropertyField(knockbackStrengthCostExponentialMultiplierProp);
+
         }
 
         private void ShowSniperInfo()

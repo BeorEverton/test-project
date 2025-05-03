@@ -56,14 +56,18 @@ namespace Assets.Scripts.WaveSystem
                     continue; // Skip movement/attack while being pushed
                 }
 
-                if (!enemyComponent.CanAttack)
+                if (!enemyComponent.CanAttack || enemyComponent.KnockbackTime > 0f)
                 {
                     MoveEnemy(enemyComponent);
                     HandleGridPosition(enemy, enemyComponent);
                 }
                 else
                 {
-                    TryAttack(enemyComponent);
+                    if (enemy.transform.position.y <= enemyComponent.Info.AttackRange)
+                        TryAttack(enemyComponent);
+                    else
+                        enemyComponent.CanAttack = false; // Cancel attack state if pushed out of range
+
                 }
             }
         }
@@ -91,6 +95,9 @@ namespace Assets.Scripts.WaveSystem
 
         private void TryAttack(Enemy enemy)
         {
+            if (enemy.KnockbackTime > 0f)
+                return;
+
             enemy.TimeSinceLastAttack += Time.deltaTime;
             if (enemy.TimeSinceLastAttack < 1 / enemy.Info.AttackSpeed)
                 return;

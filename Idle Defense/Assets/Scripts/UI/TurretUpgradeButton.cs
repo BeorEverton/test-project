@@ -116,6 +116,10 @@ namespace Assets.Scripts.UI
                 case TurretUpgradeType.SlowEffect:
                     _upgradeManager.UpgradeSlowEffect();
                     break;
+                case TurretUpgradeType.KnockbackStrength:
+                    _upgradeManager.UpgradeKnockbackStrength();
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -156,6 +160,7 @@ namespace Assets.Scripts.UI
                 TurretUpgradeType.DamageFalloffOverDistance => "Range Falloff",
                 TurretUpgradeType.PercentBonusDamagePerSec => "Bonus Dmg/s",
                 TurretUpgradeType.SlowEffect => "Slow Effect",
+                TurretUpgradeType.KnockbackStrength => "Knockback",
                 _ => type.ToString()
             };
         }
@@ -200,6 +205,10 @@ namespace Assets.Scripts.UI
                 case TurretUpgradeType.SlowEffect:
                     _upgradeManager.UpdateSlowEffectDisplay();
                     break;
+                case TurretUpgradeType.KnockbackStrength:
+                    _upgradeManager.UpdateKnockbackStrengthDisplay();
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -221,6 +230,7 @@ namespace Assets.Scripts.UI
                 TurretUpgradeType.DamageFalloffOverDistance => "Reduces damage lost over distance for shotgun.",
                 TurretUpgradeType.PercentBonusDamagePerSec => "Damage increases the longer it hits the same target.",
                 TurretUpgradeType.SlowEffect => "Applies a slowing effect on enemies hit.",
+                TurretUpgradeType.KnockbackStrength => "Pushes enemies back on hit. Stronger knockback per level.",
                 _ => "Upgrade effect not documented."
             };
         }
@@ -244,6 +254,8 @@ namespace Assets.Scripts.UI
                 TurretUpgradeType.DamageFalloffOverDistance => _upgradeManager.GetDamageFalloffOverDistanceUpgradeCost(_turret),
                 TurretUpgradeType.PercentBonusDamagePerSec => _upgradeManager.GetBonusDamagePerSecUpgradeCost(_turret),
                 TurretUpgradeType.SlowEffect => _upgradeManager.GetSlowEffectUpgradeCost(_turret),
+                TurretUpgradeType.KnockbackStrength => _upgradeManager.GetKnockbackStrengthUpgradeCost(_turret),
+
                 _ => float.MaxValue
             };
 

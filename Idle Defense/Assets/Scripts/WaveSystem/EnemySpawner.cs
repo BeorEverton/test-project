@@ -98,8 +98,8 @@ namespace Assets.Scripts.WaveSystem
                 {
                     clonedInfo.Damage *= 3f;
                     clonedInfo.MaxHealth *= 30f;
-                    clonedInfo.CoinDropAmount *= 10;
-                    clonedInfo.MovementSpeed *= 0.8f;
+                    clonedInfo.CoinDropAmount *= 20;
+                    clonedInfo.MovementSpeed *= 0.9f;
                     clonedInfo.AttackRange += .2f; // Because the gfx size changes
                 }
 
@@ -107,8 +107,8 @@ namespace Assets.Scripts.WaveSystem
                 {
                     clonedInfo.Damage *= 5f;
                     clonedInfo.MaxHealth *= 100f;
-                    clonedInfo.CoinDropAmount *= 20;
-                    clonedInfo.MovementSpeed *= 0.6f;
+                    clonedInfo.CoinDropAmount *= 40;
+                    clonedInfo.MovementSpeed *= 0.85f;
                     clonedInfo.AttackRange += .6f;
                 }
 

@@ -77,6 +77,7 @@ namespace Assets.Scripts.Turrets
         public float KnockbackStrengthLevel;
         public float KnockbackStrengthUpgradeAmount;
         public float KnockbackStrengthUpgradeBaseCost;
+        public float KnockbackStrengthCostExponentialMultiplier;
 
         public float PercentBonusDamagePerSec;
         public float PercentBonusDamagePerSecLevel;
@@ -157,6 +158,7 @@ namespace Assets.Scripts.Turrets
             KnockbackStrengthLevel = source.KnockbackStrengthLevel;
             KnockbackStrengthUpgradeAmount = source.KnockbackStrengthUpgradeAmount;
             KnockbackStrengthUpgradeBaseCost = source.KnockbackStrengthUpgradeBaseCost;
+            KnockbackStrengthCostExponentialMultiplier = source.KnockbackStrengthCostExponentialMultiplier;
 
             PercentBonusDamagePerSec = source.PercentBonusDamagePerSec;
             PercentBonusDamagePerSecLevel = source.PercentBonusDamagePerSecLevel;

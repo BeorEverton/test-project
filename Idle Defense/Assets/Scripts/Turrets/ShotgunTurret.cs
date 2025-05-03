@@ -150,8 +150,10 @@ namespace Assets.Scripts.Turrets
                 pelletsRemaining--;
 
                 Vector2 knockDir = (enemy.transform.position - transform.position).normalized;
-                enemy.KnockbackVelocity = knockDir * knockbackStrength; // strength depends on upgrade
-                enemy.KnockbackTime = knockbackDuration; // e.g. 0.2f
+                float knockback = _stats.KnockbackStrength;
+                enemy.KnockbackVelocity = new Vector2(0f, knockback * 1f);
+
+                enemy.KnockbackTime = 0.2f;
 
 
                 index = (index + 1) % sortedCount;

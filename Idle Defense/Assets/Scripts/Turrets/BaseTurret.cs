@@ -258,8 +258,10 @@ namespace Assets.Scripts.Turrets
                 default:
                     EnemyTargetChoice = EnemyTarget.First;
                     break;
-
             }
+
+            TargetEnemy();
+
         }
 
         public void UpdateTurretAppearance()

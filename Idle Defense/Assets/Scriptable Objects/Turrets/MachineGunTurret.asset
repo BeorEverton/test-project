@@ -22,7 +22,7 @@ MonoBehaviour:
   FireRate: 0.5
   FireRateLevel: 0
   FireRateUpgradeAmount: 0.04
-  FireRateUpgradeBaseCost: 7
+  FireRateUpgradeBaseCost: 25
   FireRateCostExponentialMultiplier: 1.078
   RotationSpeed: 5
   AngleThreshold: 5
@@ -61,6 +61,11 @@ MonoBehaviour:
   PelletCountUpgradeAmount: 0
   PelletCountUpgradeBaseCost: 0
   PelletCountCostExponentialMultiplier: 0
+  KnockbackStrength: 0
+  KnockbackStrengthLevel: 0
+  KnockbackStrengthUpgradeAmount: 0
+  KnockbackStrengthUpgradeBaseCost: 0
+  KnockbackStrengthCostExponentialMultiplier: 0
   DamageFalloffOverDistance: 0
   DamageFalloffOverDistanceLevel: 0
   DamageFalloffOverDistanceUpgradeAmount: 0
