@@ -26,7 +26,7 @@ namespace Assets.Scripts.Turrets
 
         [SerializeField] private SpriteRenderer _turretBodyRenderer;
         public Sprite[] _turretUpgradeSprites;
-        private int[] _upgradeThresholds = new int[] { 50, 250, 500 };
+        private int[] _upgradeThresholds = new int[] { 50, 100, 200 };
 
 
         protected GameObject _targetEnemy;
@@ -302,6 +302,21 @@ namespace Assets.Scripts.Turrets
                 _stats.SlowEffectLevel +
                 _stats.KnockbackStrengthLevel 
             );
+        }
+
+        public virtual float GetDPS()
+        {
+            float baseDamage = _stats.Damage;
+            float fireRate = _stats.FireRate;
+            float critChance = Mathf.Clamp01(_stats.CriticalChance / 100f);
+            float critMultiplier = _stats.CriticalDamageMultiplier / 100f;
+            float bonusDpsPercent = _stats.PercentBonusDamagePerSec / 100f;
+
+            // Effective damage per shot with crit chance
+            float effectiveDamage = baseDamage * (1f + critChance * (critMultiplier - 1f));
+            effectiveDamage *= (1f + bonusDpsPercent);
+
+            return effectiveDamage * fireRate;
         }
 
     }

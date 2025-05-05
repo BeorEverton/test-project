@@ -281,5 +281,21 @@ namespace Assets.Scripts.Turrets
             Gizmos.color = Color.white;
             Gizmos.DrawWireSphere(turretPosition, 11f);
         }
+
+        public override float GetDPS()
+        {
+            float baseDamage = _stats.Damage;
+            float fireRate = _stats.FireRate;
+            float critChance = Mathf.Clamp01(_stats.CriticalChance / 100f);
+            float critMultiplier = _stats.CriticalDamageMultiplier / 100f;
+            float bonusDpsPercent = _stats.PercentBonusDamagePerSec / 100f;
+            int pelletCount = _stats.PelletCount;
+
+            float pelletDamage = baseDamage * (1f + critChance * (critMultiplier - 1f));
+            pelletDamage *= (1f + bonusDpsPercent);
+
+            return pelletDamage * pelletCount * fireRate;
+        }
+
     }
 }

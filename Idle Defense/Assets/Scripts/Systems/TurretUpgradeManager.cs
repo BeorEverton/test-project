@@ -77,7 +77,6 @@ namespace Assets.Scripts.Systems
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
                 OnAnyTurretUpgraded?.Invoke();
-
             }
 
         }
@@ -94,7 +93,6 @@ namespace Assets.Scripts.Systems
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
                 OnAnyTurretUpgraded?.Invoke();
-
             }
         }
 
@@ -113,7 +111,6 @@ namespace Assets.Scripts.Systems
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
                 OnAnyTurretUpgraded?.Invoke();
-
             }
 
         }
@@ -130,7 +127,6 @@ namespace Assets.Scripts.Systems
                 AudioManager.Instance.Play("Upgrade"); 
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
                 OnAnyTurretUpgraded?.Invoke();
-
             }
 
         }
@@ -151,6 +147,7 @@ namespace Assets.Scripts.Systems
                 UpdateExplosionRadiusDisplay();
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }
                 
         }
@@ -166,6 +163,7 @@ namespace Assets.Scripts.Systems
                 UpdateSplashDamageDisplay();
                 AudioManager.Instance.Play("Upgrade"); 
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }
         }
 
@@ -182,6 +180,7 @@ namespace Assets.Scripts.Systems
                 UpdatePierceChanceDisplay();
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }
         }
 
@@ -196,6 +195,7 @@ namespace Assets.Scripts.Systems
                 UpdatePierceDamageFalloffDisplay();
                 AudioManager.Instance.Play("Upgrade"); 
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }
         }
 
@@ -208,6 +208,7 @@ namespace Assets.Scripts.Systems
                 turret.PelletCountLevel += 1;
                 UpdatePelletCountDisplay();
                 AudioManager.Instance.Play("Upgrade");  turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }
         }
 
@@ -228,6 +229,7 @@ namespace Assets.Scripts.Systems
                 UpdateDamageFalloffOverDistanceDisplay();
                 AudioManager.Instance.Play("Upgrade"); 
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }
         }
 
@@ -246,6 +248,7 @@ namespace Assets.Scripts.Systems
                 UpdateKnockbackStrengthDisplay();
                 AudioManager.Instance.Play("Upgrade");
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }
         }
 
@@ -259,6 +262,7 @@ namespace Assets.Scripts.Systems
                 UpdatePercentBonusDamagePerSecDisplay();
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             } 
         }
 
@@ -279,6 +283,7 @@ namespace Assets.Scripts.Systems
                 UpdateSlowEffectDisplay();
                 AudioManager.Instance.Play("Upgrade");  
                 turretUpgradeButton._baseTurret.UpdateTurretAppearance();
+                OnAnyTurretUpgraded?.Invoke();
             }                
         }
 

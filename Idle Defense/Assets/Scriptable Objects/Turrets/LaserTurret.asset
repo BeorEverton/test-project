@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurretType: 4
   IsUnlocked: 0
-  Damage: 1
+  Damage: 200
   DamageLevel: 0
   DamageUpgradeAmount: 1.04
   DamageUpgradeBaseCost: 15000
@@ -61,6 +61,11 @@ MonoBehaviour:
   PelletCountUpgradeAmount: 0
   PelletCountUpgradeBaseCost: 0
   PelletCountCostExponentialMultiplier: 0
+  KnockbackStrength: 0
+  KnockbackStrengthLevel: 0
+  KnockbackStrengthUpgradeAmount: 0
+  KnockbackStrengthUpgradeBaseCost: 0
+  KnockbackStrengthCostExponentialMultiplier: 0
   DamageFalloffOverDistance: 0
   DamageFalloffOverDistanceLevel: 0
   DamageFalloffOverDistanceUpgradeAmount: 0

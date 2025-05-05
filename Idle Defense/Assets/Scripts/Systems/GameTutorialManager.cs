@@ -11,7 +11,7 @@ namespace Assets.Scripts.Systems
     public class GameTutorialManager : MonoBehaviour
     {
         [Header("UI Reference")]
-        [SerializeField] private GameObject tutorialPanel;
+        [SerializeField] private GameObject tutorialPanel, skipButton;
         [SerializeField] private TypingText typingText;
 
         [Header("Steps")]
@@ -23,8 +23,6 @@ namespace Assets.Scripts.Systems
         private List<GameObject> _lastActiveObjects = new();
         private ulong _lastKnownMoney = 0;
         private bool _turretWasUpgraded = false;
-
-
         public static GameTutorialManager Instance { get; private set; }
 
         private void Awake()
@@ -34,7 +32,6 @@ namespace Assets.Scripts.Systems
             else
                 Destroy(gameObject);
         }
-
 
         private void Start()
         {
@@ -125,18 +122,10 @@ namespace Assets.Scripts.Systems
             TryAdvanceTutorial();
         }
 
-
-
         private void TryAdvanceTutorial()
         {
             if (!_tutorialRunning || _currentStep >= tutorialSteps.Count)
-                return;
-
-            if (_currentStep == 1)
-            {
-                // Just completed step 0 resume game
-                Time.timeScale = 1f;
-            }
+                return;            
 
             var step = tutorialSteps[_currentStep];
 
@@ -227,11 +216,23 @@ namespace Assets.Scripts.Systems
             if (!tutorialPanel.activeInHierarchy)
                 tutorialPanel.SetActive(true);
 
+            if (index == 0) skipButton.SetActive(false);
+            else skipButton.SetActive(true);
+
+            if (_currentStep == 1)
+            {
+                // Just completed step 0 resume game
+                Time.timeScale = 1f;
+            }
+
             foreach (var obj in _lastActiveObjects)
             {
-                if (obj != null)
-                    obj.SetActive(false);
+                if (obj == null) continue;
+                if (!obj) continue; // optional, for safety
+
+                obj.SetActive(false);
             }
+
             _lastActiveObjects.Clear();
 
             var step = tutorialSteps[index];
@@ -266,6 +267,43 @@ namespace Assets.Scripts.Systems
 
             Debug.Log("Tutorial completed!");
         }
+
+        public void SkipCurrentStep()
+        {
+            if (!_tutorialRunning || _currentStep >= tutorialSteps.Count)
+                return;
+
+            _currentStep++;
+
+            foreach (var obj in _lastActiveObjects)
+            {
+                if (obj == null) continue;
+                if (!obj) continue; // optional, for safety
+
+                obj.SetActive(false);
+            }
+
+            _lastActiveObjects.Clear();
+
+            if (_currentStep >= tutorialSteps.Count)
+            {
+                CompleteTutorial();
+                return;
+            }
+
+            var nextStep = tutorialSteps[_currentStep];
+            if (CheckCondition(nextStep.startCondition, nextStep.startThreshold))
+            {
+                ShowStep(_currentStep);
+                _waitingToStartStep = false;
+            }
+            else
+            {
+                tutorialPanel.SetActive(false);
+                _waitingToStartStep = true;
+            }
+        }
+
 
         [ContextMenu("Reset and Start Tutorial")]
         public void RestartTutorialForDebug()

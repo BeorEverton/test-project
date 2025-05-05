@@ -61,15 +61,15 @@ MonoBehaviour:
   PelletCountUpgradeAmount: 1
   PelletCountUpgradeBaseCost: 5000
   PelletCountCostExponentialMultiplier: 1.075
-  KnockbackStrength: 0.5
+  KnockbackStrength: 0.2
   KnockbackStrengthLevel: 0
   KnockbackStrengthUpgradeAmount: 0.1
   KnockbackStrengthUpgradeBaseCost: 2000
   KnockbackStrengthCostExponentialMultiplier: 1.3
-  DamageFalloffOverDistance: 16
+  DamageFalloffOverDistance: 35
   DamageFalloffOverDistanceLevel: 0
-  DamageFalloffOverDistanceUpgradeAmount: 0.2
-  DamageFalloffOverDistanceUpgradeBaseCost: 500
+  DamageFalloffOverDistanceUpgradeAmount: 0.5
+  DamageFalloffOverDistanceUpgradeBaseCost: 80
   DamageFalloffOverDistanceCostExponentialMultiplier: 1.079
   PercentBonusDamagePerSec: 0
   PercentBonusDamagePerSecLevel: 0

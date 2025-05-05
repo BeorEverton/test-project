@@ -98,7 +98,7 @@ public class TurretInventoryManager : MonoBehaviour
 
     public bool TryPurchase(TurretType type)
     {
-        if (!unlockedTypes.Contains(type)) return false;
+        //if (!unlockedTypes.Contains(type)) return false; SUed only with the wave requirement
 
         int countOwned = owned.Count(t => t.TurretType == type);
         if (countOwned >= 5)
@@ -133,6 +133,9 @@ public class TurretInventoryManager : MonoBehaviour
     }
 
     public GameObject GetPrefab(TurretType t) => turretLibrary.GetPrefab(t);
+
+    public TurretInfoSO GetInfoSO(TurretType type) => turretLibrary.GetInfo(type);
+
 
 
     // ---------- save / load ----------

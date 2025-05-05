@@ -107,5 +107,26 @@ namespace Assets.Scripts.Turrets
                 Gizmos.DrawWireCube(center, Vector3.one * _cellSize * 0.9f);
             }
         }
+
+        public override float GetDPS()
+        {
+            float baseDamage = _stats.Damage;
+            float fireRate = _stats.FireRate;
+            float critChance = Mathf.Clamp01(_stats.CriticalChance / 100f);
+            float critMultiplier = _stats.CriticalDamageMultiplier / 100f;
+            float pierceChance = Mathf.Clamp01(_stats.PierceChance / 100f);
+            float pierceFalloff = _stats.PierceDamageFalloff / 100f;
+            float bonusDpsPercent = _stats.PercentBonusDamagePerSec / 100f;
+
+            float damage = baseDamage * (1f + critChance * (critMultiplier - 1f));
+            damage *= (1f + bonusDpsPercent);
+
+            // Estimate 1.5 hits per shot on average for piercing
+            float averageHits = 1f + pierceChance * 0.5f;
+            float effectiveDamage = damage * averageHits;
+
+            return effectiveDamage * fireRate;
+        }
+
     }
 }

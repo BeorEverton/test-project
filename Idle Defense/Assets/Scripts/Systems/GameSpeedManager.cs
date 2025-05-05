@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Assets.Scripts.WaveSystem;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -27,6 +29,8 @@ namespace Assets.Scripts.Systems
 #endif
 
             speedToggleButton.onClick.AddListener(AdvanceGameSpeed);
+            WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+
         }
 
         private void AdvanceGameSpeed()
@@ -45,5 +49,26 @@ namespace Assets.Scripts.Systems
         {
             speedLabel.SetText(speed +"x");
         }
+
+        public void UnlockSpeed(float newSpeed)
+        {
+            if (!speedOptions.Contains(newSpeed))
+            {
+                speedOptions.Add(newSpeed);
+                speedOptions.Sort(); // Optional: keep order clean
+            }
+        }
+
+        private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs e)
+        {
+            int wave = e.WaveNumber;
+
+            if (wave >= 30) UnlockSpeed(2.5f);
+            if (wave >= 50) UnlockSpeed(3f);
+            if (wave >= 80) UnlockSpeed(4f);
+            if (wave >= 100) UnlockSpeed(5f);
+        }
+
+
     }
 }
