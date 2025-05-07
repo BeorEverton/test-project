@@ -22,6 +22,9 @@ namespace Assets.Scripts.WaveSystem
         public event EventHandler OnWaveStarted;
         public event EventHandler<OnWaveCreatedEventArgs> OnWaveCreated;
         public event EventHandler<OnEnemyDeathEventArgs> OnEnemyDeath;
+
+        public Material backgroundMaterial; // used to turn red when a boss is spawned
+
         public class OnEnemyDeathEventArgs : EventArgs
         {
             public ulong CoinDropAmount;
@@ -151,11 +154,13 @@ namespace Assets.Scripts.WaveSystem
 
                 enemyObj.SetActive(true);
                 Enemy enemy = enemyObj.GetComponent<Enemy>();
+                EnemyLibraryManager.Instance.MarkAsDiscovered(enemy.Info.Name);
+
                 if (enemy.IsBossInstance) //Set boss music when boss is spawned
                 {
                     AudioManager.Instance.StopAllMusics();
                     AudioManager.Instance.PlayMusic("Boss");
-                    Camera.main.backgroundColor = new Color(0.3f, 0, 0);
+                    backgroundMaterial.color = new Color(0.3f, 0, 0);
                 }
 
                 enemy.OnDeath += Enemy_OnEnemyDeath;
@@ -213,7 +218,7 @@ namespace Assets.Scripts.WaveSystem
             {
                 enemy.IsBossInstance = false;
                 AudioManager.Instance.PlayMusic("Main");
-                Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
+                backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
             }
             EnemiesAlive.Remove(enemy.gameObject);
 
@@ -233,7 +238,7 @@ namespace Assets.Scripts.WaveSystem
 
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
-            Camera.main.backgroundColor = new Color(.14f, .14f, .14f, 1f);
+            backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
             StartCoroutine(RestartWave());
         }
 
