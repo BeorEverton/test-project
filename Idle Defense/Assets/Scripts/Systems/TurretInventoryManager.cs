@@ -30,7 +30,6 @@ namespace Assets.Scripts.Systems
 
         public bool IsTurretTypeUnlocked(TurretType t) => unlockedTypes.Contains(t);
 
-
         void Awake()
         {
             if (I == null)
@@ -52,7 +51,6 @@ namespace Assets.Scripts.Systems
                 TurretSlotManager.Instance.ImportPurchasedFlags(pendingPurchased);
                 pendingPurchased = null;
             }
-
         }
 
         private void EnsureStarterTurret()
@@ -95,7 +93,6 @@ namespace Assets.Scripts.Systems
                     changed = true;
             }
             OnInventoryChanged?.Invoke();
-            SaveGameManager.Instance.SaveGame();
             return changed;
         }
 
