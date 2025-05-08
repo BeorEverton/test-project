@@ -73,7 +73,6 @@ namespace Assets.Scripts.Turrets
         {
             // Get spd & dmg bonus from GameManager and calculate effective fire rate
             _bonusSpdMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
-            _bonusDmgMultiplier = 1f + GameManager.Instance.dmgBonus / 100f;
 
             // Calculate attack speed and damage
             _damage = _stats.Damage * _bonusDmgMultiplier;
@@ -300,7 +299,7 @@ namespace Assets.Scripts.Turrets
                 _stats.DamageFalloffOverDistanceLevel +
                 _stats.PercentBonusDamagePerSecLevel +
                 _stats.SlowEffectLevel +
-                _stats.KnockbackStrengthLevel 
+                _stats.KnockbackStrengthLevel
             );
         }
 

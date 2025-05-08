@@ -123,22 +123,22 @@ namespace Assets.Scripts.Systems.Save
     {
         public static PlayerBaseSO CreatePlayerBaseSO(PlayerInfoDTO playerInfo)
         {
-            return new PlayerBaseSO
-            {
-                MaxHealth = playerInfo.MaxHealth,
-                RegenAmount = playerInfo.RegenAmount,
-                RegenDelay = playerInfo.RegenDelay,
-                RegenInterval = playerInfo.RegenInterval,
-                MaxHealthUpgradeAmount = playerInfo.MaxHealthUpgradeAmount,
-                MaxHealthUpgradeBaseCost = playerInfo.MaxHealthUpgradeBaseCost,
-                MaxHealthLevel = playerInfo.MaxHealthLevel,
-                RegenAmountUpgradeAmount = playerInfo.RegenAmountUpgradeAmount,
-                RegenAmountUpgradeBaseCost = playerInfo.RegenAmountUpgradeBaseCost,
-                RegenAmountLevel = playerInfo.RegenAmountLevel,
-                RegenIntervalUpgradeAmount = playerInfo.RegenIntervalUpgradeAmount,
-                RegenIntervalUpgradeBaseCost = playerInfo.RegenIntervalUpgradeBaseCost,
-                RegenIntervalLevel = playerInfo.RegenIntervalLevel
-            };
+            PlayerBaseSO playerBaseSO = ScriptableObject.CreateInstance<PlayerBaseSO>();
+            playerBaseSO.MaxHealth = playerInfo.MaxHealth;
+            playerBaseSO.RegenAmount = playerInfo.RegenAmount;
+            playerBaseSO.RegenDelay = playerInfo.RegenDelay;
+            playerBaseSO.RegenInterval = playerInfo.RegenInterval;
+            playerBaseSO.MaxHealthUpgradeAmount = playerInfo.MaxHealthUpgradeAmount;
+            playerBaseSO.MaxHealthUpgradeBaseCost = playerInfo.MaxHealthUpgradeBaseCost;
+            playerBaseSO.MaxHealthLevel = playerInfo.MaxHealthLevel;
+            playerBaseSO.RegenAmountUpgradeAmount = playerInfo.RegenAmountUpgradeAmount;
+            playerBaseSO.RegenAmountUpgradeBaseCost = playerInfo.RegenAmountUpgradeBaseCost;
+            playerBaseSO.RegenAmountLevel = playerInfo.RegenAmountLevel;
+            playerBaseSO.RegenIntervalUpgradeAmount = playerInfo.RegenIntervalUpgradeAmount;
+            playerBaseSO.RegenIntervalUpgradeBaseCost = playerInfo.RegenIntervalUpgradeBaseCost;
+            playerBaseSO.RegenIntervalLevel = playerInfo.RegenIntervalLevel;
+
+            return playerBaseSO;
         }
 
         public static TurretStatsInstance CreateTurretStatsInstance(TurretInfoDTO turret, TurretBaseInfoDTO baseInfo)

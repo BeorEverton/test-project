@@ -137,12 +137,12 @@ namespace Assets.Scripts.UI
             activeSlot = slot;
             equipPanel.SetActive(true);
             equipPanel.GetComponent<EquipPanelUI>().Open(slot);
-
         }
 
         public void ShowToast(string msg, float time = 1.5f)
         {
-            if (toast == null) { Debug.Log(msg); return; }  // no text object assigned
+            if (toast == null)
+            { Debug.Log(msg); return; }  // no text object assigned
             StopAllCoroutines();                            // stop any previous toast
             StartCoroutine(ToastRoutine(msg, time));
         }
@@ -157,13 +157,13 @@ namespace Assets.Scripts.UI
 
         public void DeactivateRightPanels()
         {
-            foreach (var panel in rightPanels)
+            foreach (GameObject panel in rightPanels)
             {
                 panel.SetActive(false);
             }
         }
 
-        // Death functions:
+        #region Death Methods
         public void ShowDeathCountdown(float seconds = 5f)
         {
             if (deathRoutine != null)
@@ -180,11 +180,10 @@ namespace Assets.Scripts.UI
 
             countdownText.text = $"Restarting from Wave {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
             immediateRestartButton.onClick.RemoveAllListeners();
-            immediateRestartButton.onClick.AddListener(() => SkipDeathCountdown());
+            immediateRestartButton.onClick.AddListener(SkipDeathCountdown);
 
             deathRoutine = StartCoroutine(DeathCountdownRoutine(seconds));
         }
-
 
         private IEnumerator DeathCountdownRoutine(float seconds)
         {
@@ -202,19 +201,18 @@ namespace Assets.Scripts.UI
             TriggerGameReset();
         }
 
-
         public void SkipDeathCountdown()
         {
             if (deathRoutine != null)
                 StopCoroutine(deathRoutine);
-            TriggerGameReset();            
+            TriggerGameReset();
         }
 
         private void TriggerGameReset()
         {
             deathCountdownPanel.SetActive(false);
-            WaveManager.Instance.LoadWave(rollbackWaveIndex -1); 
-            PlayerBaseManager.Instance.InitializeGame(true);            
+            WaveManager.Instance.LoadWave(rollbackWaveIndex);
+            PlayerBaseManager.Instance.InitializeGame(true);
         }
 
         public void RestartCurrentWave()
@@ -225,10 +223,9 @@ namespace Assets.Scripts.UI
             deathCountdownPanel.SetActive(false);
 
             // Set to current wave minus one, since LoadWave will increment to it
-            WaveManager.Instance.LoadWave(rollbackWaveIndex - 1);
+            WaveManager.Instance.LoadWave(rollbackWaveIndex);
             PlayerBaseManager.Instance.InitializeGame(true);
         }
-
-
+        #endregion
     }
 }

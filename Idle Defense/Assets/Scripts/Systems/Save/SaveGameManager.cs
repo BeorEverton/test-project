@@ -26,7 +26,6 @@ namespace Assets.Scripts.Systems.Save
             if (Instance == null)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
             }
             else
             {
@@ -101,7 +100,6 @@ namespace Assets.Scripts.Systems.Save
             GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);
 
             TurretInventoryManager.I.ImportFromDTO(gameData.TurretInventory);
-
         }
 
         public void DeleteSave()

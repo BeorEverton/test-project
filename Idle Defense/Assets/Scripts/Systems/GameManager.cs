@@ -2,9 +2,11 @@ using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Systems
 {
@@ -14,7 +16,6 @@ namespace Assets.Scripts.Systems
         public PlayerInput Input { get; private set; }
 
         // Haven't comented this one, because it might be helpful in the future.
-        public float dmgBonus { get; private set; }
         public float spdBonus { get; private set; }
 
         private const float maxSpdBonus = 100f;
@@ -31,6 +32,10 @@ namespace Assets.Scripts.Systems
         public ulong Money => money;
         public event Action<ulong> OnMoneyChanged;
 
+        [SerializeField] GraphicRaycaster uiRaycaster;
+        PointerEventData _ped;
+        List<RaycastResult> _results = new();
+
         private void Awake()
         {
             if (Instance == null)
@@ -38,6 +43,7 @@ namespace Assets.Scripts.Systems
             else
                 Destroy(gameObject);
 
+            _ped = new PointerEventData(EventSystem.current);
             Input = new PlayerInput();
             Input.Player.Click.performed += OnClickStarted;
             Input.Player.Click.canceled += OnClickReleased;
@@ -46,9 +52,6 @@ namespace Assets.Scripts.Systems
 
         private void Start()
         {
-            // Previous system that increases damage on wave completion
-            //EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
-            //PlayerBaseManager.Instance.OnWaveFailed += OnWaveFailed;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
         }
 
@@ -61,8 +64,15 @@ namespace Assets.Scripts.Systems
 
         private void OnClickStarted(InputAction.CallbackContext ctx)
         {
-            if (EventSystem.current.IsPointerOverGameObject())
+            Vector2 screenPos = Pointer.current.position.ReadValue();
+
+            _ped.position = screenPos;
+            _results.Clear();
+            uiRaycaster.Raycast(_ped, _results);
+
+            if (_results.Count > 0) //If any UI was hit, the count is greater than 0
                 return;
+
             spdBonus += initialBoost;
             isHolding = true;
             decreaseTimer = 0f;
@@ -74,7 +84,6 @@ namespace Assets.Scripts.Systems
             isHolding = false;
             decreaseTimer = 0f;
         }
-
 
         private void Update()
         {
@@ -104,17 +113,6 @@ namespace Assets.Scripts.Systems
         {
             AddMoney(e.CoinDropAmount);
         }
-
-        /*private void OnWaveCompleted(object sender, EventArgs e)
-        {
-            dmgBonus++;
-            UIManager.Instance.UpdateDmgBonus(dmgBonus);
-        }
-
-        private void OnWaveFailed(object sender, EventArgs e)
-        {
-            dmgBonus = 0;
-        }*/
 
         public void AddMoney(ulong amount)
         {

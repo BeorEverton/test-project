@@ -31,6 +31,7 @@ namespace Assets.Scripts.WaveSystem
         private int _maxWaves = 0; //Amount of waves in dictionary
         private int _currentWave = 1; //Overall wave index
         private bool _waveCompleted = false;
+        private bool _waveLost = false;
 
         private void Awake()
         {
@@ -46,8 +47,8 @@ namespace Assets.Scripts.WaveSystem
 
             StartCoroutine(StartWaveRoutine());
 
-            EnemySpawner.Instance.OnWaveCompleted += OnWaveCompleted;
-            //PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
+            EnemySpawner.Instance.OnWaveCompleted += EnemySpawner_OnWaveCompleted;
+            PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
         }
 
         public int GetCurrentWaveIndex() => _currentWave;
@@ -56,21 +57,17 @@ namespace Assets.Scripts.WaveSystem
         public void LoadWave(int waveNumber)
         {
             _currentWave = Mathf.Clamp(waveNumber, 1, int.MaxValue);
-            _waveCompleted = true; // Force StartWaveRoutine to begin loading
         }
 
-
-        private void OnWaveCompleted(object sender, EventArgs e)
+        private void EnemySpawner_OnWaveCompleted(object sender, EventArgs e)
         {
             _waveCompleted = true;
         }
 
-        /*private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
+        private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
-            _currentWave -= 10;
-            if (_currentWave < 1)
-                _currentWave = 0;
-        }*/
+            _waveLost = true;
+        }
 
         private IEnumerator StartWaveRoutine()
         {
@@ -78,7 +75,7 @@ namespace Assets.Scripts.WaveSystem
             {
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
-                    WaveNumber = _currentWave                    
+                    WaveNumber = _currentWave
                 });
 
                 while (_maxWaves < _currentWave + 10) //Generate new waves when only 10 left
@@ -103,14 +100,17 @@ namespace Assets.Scripts.WaveSystem
                     Debug.LogError(e.Message);
                 }
 
-                yield return new WaitUntil(() => _waveCompleted);
+                yield return new WaitUntil(() => _waveCompleted || _waveLost);
 
-                _currentWave++;
+                if (_waveCompleted)
+                    _currentWave++;
+
                 AudioManager.Instance.Play("New Wave");
 
                 SaveGameManager.Instance.SaveGame(); //Save game at the start of each round
 
                 _waveCompleted = false;
+                _waveLost = false;
             }
         }
 

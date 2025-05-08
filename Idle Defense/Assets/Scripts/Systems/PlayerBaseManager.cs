@@ -10,7 +10,7 @@ namespace Assets.Scripts.Systems
     {
         public static PlayerBaseManager Instance { get; private set; }
 
-        public event EventHandler OnWaveFailed; 
+        public event EventHandler OnWaveFailed;
         public event Action<float, float> OnHealthChanged; // (currentHealth, maxHealth)
         public event Action<float, float> OnMaxHealthChanged; // (newMaxHealth, currentHealth)
 
@@ -36,7 +36,6 @@ namespace Assets.Scripts.Systems
         [Tooltip("Visuals for the player base upgrades. Assign 3 objects.")]
         [SerializeField] private GameObject[] upgradeVisuals;
         private readonly int[] _unlockThresholds = { 50, 100, 250 };
-
 
         private void Awake()
         {
@@ -90,7 +89,7 @@ namespace Assets.Scripts.Systems
                 AudioManager.Instance.Stop("Laser V2");
                 AudioManager.Instance.StopAllMusics();
                 AudioManager.Instance.PlayMusic("Main");
-                UIManager.Instance.ShowDeathCountdown(); 
+                UIManager.Instance.ShowDeathCountdown();
             }
         }
 
@@ -237,7 +236,6 @@ namespace Assets.Scripts.Systems
                     upgradeVisuals[i].SetActive(totalLevel >= _unlockThresholds[i]);
             }
         }
-
     }
 
     public enum PlayerUpgradeType

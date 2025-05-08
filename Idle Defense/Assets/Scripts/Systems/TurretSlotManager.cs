@@ -1,18 +1,18 @@
+using Assets.Scripts.Systems.Audio;
+using Assets.Scripts.Systems.Save;
+using Assets.Scripts.Turrets;
+using Assets.Scripts.UI;   // if needed for BaseTurret refs
+using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Assets.Scripts.Turrets;
-using Assets.Scripts.WaveSystem;
-using Assets.Scripts.Systems.Save;
-using Assets.Scripts.Systems.Audio;
-using Assets.Scripts.UI;   // if needed for BaseTurret refs
 
 namespace Assets.Scripts.Systems
 {
     public class TurretSlotManager : MonoBehaviour
     {
-        public static TurretSlotManager I { get; private set; }
+        public static TurretSlotManager Instance { get; private set; }
 
         // 5 equip slots
         private readonly TurretStatsInstance[] equipped = new TurretStatsInstance[5];
@@ -41,7 +41,8 @@ namespace Assets.Scripts.Systems
         public ulong BuyCost(int slot) => slotInfo[slot].cost;
         public bool Purchased(int slot) => slotInfo[slot].purchased;
         public TurretStatsInstance Get(int slot) => equipped[slot];
-        void Awake() { if (I == null) I = this; }
+
+        private void Awake() { if (Instance == null) Instance = this; else Destroy(gameObject); }
 
         public bool IsUnlocked(int slot)
         {
@@ -53,11 +54,13 @@ namespace Assets.Scripts.Systems
         public bool UnlockSlot(int slot)
         {
             var info = slotInfo[slot];
-            if (WaveManager.Instance.GetCurrentWaveIndex() < info.wave) return false;
+            if (WaveManager.Instance.GetCurrentWaveIndex() < info.wave)
+                return false;
 
             if (!info.purchased)
             {
-                if (GameManager.Instance.Money < info.cost) return false;
+                if (GameManager.Instance.Money < info.cost)
+                    return false;
                 GameManager.Instance.SpendMoney(info.cost);
                 slotInfo[slot].purchased = true;
             }
@@ -103,7 +106,6 @@ namespace Assets.Scripts.Systems
             return count;
         }
 
-
         //  save helpers 
         public List<bool> GetPurchasedFlags() => slotInfo.Select(s => s.purchased).ToList();
         public void ImportPurchasedFlags(List<bool> flags)
@@ -133,7 +135,5 @@ namespace Assets.Scripts.Systems
                 OnEquippedChanged?.Invoke(i, equipped[i]);   // refresh visuals
             }
         }
-
-
     }
 }

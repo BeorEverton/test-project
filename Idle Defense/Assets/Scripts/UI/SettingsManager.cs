@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Audio;
 
 public class SettingsManager : MonoBehaviour
@@ -31,8 +31,6 @@ public class SettingsManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
-        DontDestroyOnLoad(gameObject);
 
         // Cache links for fast lookup
         _linkLookup = new Dictionary<string, string>();

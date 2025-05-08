@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -70,30 +71,30 @@ namespace Assets.Scripts.WaveSystem
             PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
         }
 
-        public void StartWave(Wave wave)
+        public async void StartWave(Wave wave)
         {
             _currentWaveConfig = wave.WaveConfig;
             _waveSpawned = false;
             OnWaveStarted?.Invoke(this, EventArgs.Empty);
 
-            CreateWave();
-            Shuffle.ShuffleList(_enemiesCurrentWave);
-            CheckIfBossWave(wave);
+            await CreateWave();
+            await Shuffle.ShuffleList(_enemiesCurrentWave);
+            await CheckIfBossWave(wave);
 
             _canSpawnEnemies = true;
             StartCoroutine(SpawnEnemies());
         }
 
-        private void CreateWave()
+        private async Task CreateWave()
         {
             _enemiesCurrentWave.Clear();
             foreach (EnemyWaveEntry entry in _currentWaveConfig.EnemyWaveEntries)
             {
-                CreateEnemiesFromEntry(entry);
+                await CreateEnemiesFromEntry(entry);
             }
         }
 
-        private void CheckIfBossWave(Wave wave)
+        private Task CheckIfBossWave(Wave wave)
         {
             if (wave.IsMiniBossWave() || wave.IsBossWave())
             {
@@ -122,9 +123,11 @@ namespace Assets.Scripts.WaveSystem
                 AudioManager.Instance.Play("Boss Appear");
                 bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
+
+            return Task.CompletedTask;
         }
 
-        private void CreateEnemiesFromEntry(EnemyWaveEntry entry)
+        private Task CreateEnemiesFromEntry(EnemyWaveEntry entry)
         {
             for (int i = 0; i < entry.NumberOfEnemies; i++)
             {
@@ -135,6 +138,8 @@ namespace Assets.Scripts.WaveSystem
                 _enemiesCurrentWave.Add(tempEnemy);
             }
             OnWaveCreated?.Invoke(this, new OnWaveCreatedEventArgs { EnemyCount = _enemiesCurrentWave.Count });
+
+            return Task.CompletedTask;
         }
 
         private GameObject GetEnemyFromPool(string enemyName, GameObject enemyPrefab)
@@ -147,11 +152,8 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator SpawnEnemies()
         {
-            foreach (GameObject enemyObj in _enemiesCurrentWave)
+            foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies))
             {
-                if (!_canSpawnEnemies)
-                    break;
-
                 enemyObj.SetActive(true);
                 Enemy enemy = enemyObj.GetComponent<Enemy>();
                 EnemyLibraryManager.Instance.MarkAsDiscovered(enemy.Info.Name);
