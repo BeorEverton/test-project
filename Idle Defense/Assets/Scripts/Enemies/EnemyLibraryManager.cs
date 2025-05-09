@@ -21,6 +21,8 @@ namespace Assets.Scripts.Enemies
         [SerializeField] private Sprite unknownSprite;
         public Sprite UnknownSprite => unknownSprite;
 
+        [SerializeField] private Transform contentParent; // Your ScrollView's Content
+        [SerializeField] private GameObject enemyEntryPrefab; // Your entry prefab
 
         private void Awake()
         {
@@ -83,5 +85,7 @@ namespace Assets.Scripts.Enemies
 
             return (hpTier, dmgTier, spdTier);
         }
+
+
     }
 }
