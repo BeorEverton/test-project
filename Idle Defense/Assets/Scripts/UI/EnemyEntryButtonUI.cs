@@ -19,6 +19,7 @@ public class EnemyEntryButtonUI : MonoBehaviour
         nameText.text = discovered ? info.Name : "???";
         iconImage.sprite = discovered ? info.Icon : EnemyLibraryManager.Instance.UnknownSprite;
 
+        GetComponent<Button>().onClick.AddListener(() => infoPanel.gameObject.SetActive(true));
         GetComponent<Button>().onClick.AddListener(() => infoPanel.DisplayEnemyInfo(info));
     }
 }

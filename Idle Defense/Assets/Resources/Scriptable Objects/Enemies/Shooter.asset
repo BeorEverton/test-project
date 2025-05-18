@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
-  m_Name: ChampionEnemy
+  m_Name: Shooter
   m_EditorClassIdentifier: 
-  Name: ChampionEnemy
-  Icon: {fileID: -8626978579551121323, guid: b0c776edb6d4da741ba91ef07675c250, type: 3}
-  EnemyClass: 7
-  MaxHealth: 11
-  MovementSpeed: 2
-  MovementSpeedDifference: 0.2
-  CoinDropAmount: 12
-  CoinDropMultiplierByWaveCount: 2.5
-  HealthMultiplierByWaveCount: 1.15
-  Damage: 6
-  AttackRange: 0.3
-  AttackSpeed: 1.5
+  Name: Shooter
+  Icon: {fileID: 4233310686934124197, guid: 039daf6df36b8c149b74f8d975f863f5, type: 3}
+  EnemyClass: 1
+  MaxHealth: 3
+  MovementSpeed: 0.6
+  MovementSpeedDifference: 0.22
+  CoinDropAmount: 4
+  CoinDropMultiplierByWaveCount: 1.15
+  HealthMultiplierByWaveCount: 1.06
+  Damage: 1
+  AttackRange: 2
+  AttackSpeed: 1

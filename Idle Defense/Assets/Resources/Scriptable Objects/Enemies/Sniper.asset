@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
-  m_Name: RangedEnemy
+  m_Name: Sniper
   m_EditorClassIdentifier: 
-  Name: RangedEnemy
-  Icon: {fileID: 4233310686934124197, guid: 039daf6df36b8c149b74f8d975f863f5, type: 3}
-  EnemyClass: 1
-  MaxHealth: 3
-  MovementSpeed: 0.6
-  MovementSpeedDifference: 0.22
-  CoinDropAmount: 4
-  CoinDropMultiplierByWaveCount: 1.15
-  HealthMultiplierByWaveCount: 1.06
-  Damage: 1
-  AttackRange: 2
-  AttackSpeed: 1
+  Name: Sniper
+  Icon: {fileID: 2521174482935598502, guid: bbc90998e76ccd14b9b02b83ec45d09b, type: 3}
+  EnemyClass: 5
+  MaxHealth: 4
+  MovementSpeed: 1
+  MovementSpeedDifference: 0.23
+  CoinDropAmount: 8
+  CoinDropMultiplierByWaveCount: 1.8
+  HealthMultiplierByWaveCount: 1.07
+  Damage: 4
+  AttackRange: 4.5
+  AttackSpeed: 0.8

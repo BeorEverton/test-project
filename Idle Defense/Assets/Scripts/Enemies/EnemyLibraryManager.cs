@@ -1,7 +1,9 @@
 using Assets.Scripts.SO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Enemies
 {
@@ -23,6 +25,9 @@ namespace Assets.Scripts.Enemies
 
         [SerializeField] private Transform contentParent; // Your ScrollView's Content
         [SerializeField] private GameObject enemyEntryPrefab; // Your entry prefab
+        [SerializeField] private GameObject enemyDiscoveredPopUp;
+        [SerializeField] private Image enemyDiscoveredIcon;
+        [SerializeField] private Slider popUpTimer;
 
         private void Awake()
         {
@@ -51,10 +56,14 @@ namespace Assets.Scripts.Enemies
             entryLookup = enemyEntries.ToDictionary(e => e.info.Name, e => e);
         }
 
-        public void MarkAsDiscovered(string enemyName)
+        public void MarkAsDiscovered(string enemyName, bool load = false)
         {
             if (entryLookup.TryGetValue(enemyName, out var entry))
+            {
+                if (!entry.discovered && !load)
+                    StartCoroutine(ShowEnemyDiscoveredPopUp(entry.info.Icon));
                 entry.discovered = true;
+            }
         }
 
         public List<EnemyLibraryEntry> GetAllEntries() => enemyEntries;
@@ -73,19 +82,41 @@ namespace Assets.Scripts.Enemies
             return "Max";
         }
 
-        public (string hp, string dmg, string speed) GetEnemyTiers(EnemyInfoSO target)
+        public (string hp, string dmg, string speed, string attackRange) GetEnemyTiers(EnemyInfoSO target)
         {
             List<float> allHPs = enemyEntries.Select(e => e.info.MaxHealth).ToList();
             List<float> allDMGs = enemyEntries.Select(e => e.info.Damage).ToList();
             List<float> allSpeeds = enemyEntries.Select(e => e.info.MovementSpeed).ToList();
+            List<float> allRanges = enemyEntries.Select(e => e.info.AttackRange).ToList();
 
             string hpTier = GetStatTier(target.MaxHealth, allHPs);
             string dmgTier = GetStatTier(target.Damage, allDMGs);
             string spdTier = GetStatTier(target.MovementSpeed, allSpeeds);
+            string rangeTier = GetStatTier(target.AttackRange, allRanges);
 
-            return (hpTier, dmgTier, spdTier);
+            return (hpTier, dmgTier, spdTier, rangeTier);
         }
 
+        IEnumerator ShowEnemyDiscoveredPopUp(Sprite icon)
+        {
+            yield return new WaitForSeconds(.5f); // To prevent disappearing when the time is paused
+            enemyDiscoveredPopUp.SetActive(true);
+            enemyDiscoveredIcon.sprite = icon;
+            float duration = 5f;
+            popUpTimer.maxValue = duration;
+            popUpTimer.value = duration;
+            for (float t = 5f; t >= 0; t -= Time.unscaledDeltaTime)
+            {                
+                popUpTimer.value = t;
+                yield return null;
+            }
+            enemyDiscoveredPopUp.SetActive(false);
+        }
 
+        public void StopTimer()
+        {
+            StopAllCoroutines();
+            enemyDiscoveredPopUp.SetActive(false);
+        }
     }
 }

@@ -88,7 +88,6 @@ namespace Assets.Scripts.WaveSystem
                     if (_waves.TryGetValue(_currentWave, out Wave wave))
                     {
                         _enemySpawner.StartWave(wave);
-
                     }
                     else
                     {
@@ -207,5 +206,14 @@ namespace Assets.Scripts.WaveSystem
             _waves.Clear();
             GameRunning = true;
         }
+
+        public void ForceRestartWave()
+        {
+            StopAllCoroutines();
+            _waveCompleted = false;
+            _waveLost = false;
+            StartCoroutine(StartWaveRoutine());
+        }
+
     }
 }

@@ -35,6 +35,7 @@ namespace Assets.Scripts.Systems
 
         private void AdvanceGameSpeed()
         {
+            if (Time.timeScale == 0) return; // Prevent changing speed when game is paused
             currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.Count;
             SetGameSpeed(speedOptions[currentSpeedIndex]);
         }
