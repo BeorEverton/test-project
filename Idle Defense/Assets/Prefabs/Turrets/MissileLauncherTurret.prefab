@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2533961459269339917}
   - component: {fileID: 2309025908519245819}
   m_Layer: 0
-  m_Name: Barrel
+  m_Name: Missile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -103,6 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _startPoint: {fileID: 3887860916152146634}
   _spriteRenderer: {fileID: 2533961459269339917}
+  _thrustSpriteRenderer: {fileID: 2144137597917527441}
 --- !u!1 &1898482384231616511
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,7 +290,7 @@ GameObject:
   - component: {fileID: 1363671113376412601}
   - component: {fileID: 2144137597917527441}
   m_Layer: 0
-  m_Name: Muzzle Flash
+  m_Name: Thrust
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -554,6 +555,11 @@ MonoBehaviour:
     DamageFalloffOverDistanceLevel: 0
     DamageFalloffOverDistanceUpgradeAmount: 0
     DamageFalloffOverDistanceUpgradeBaseCost: 0
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
     PercentBonusDamagePerSec: 0
     PercentBonusDamagePerSecLevel: 0
     PercentBonusDamagePerSecUpgradeAmount: 0

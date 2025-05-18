@@ -45,7 +45,7 @@ namespace Assets.Scripts.Turrets
             base.Shoot();
 
             Enemy enemy = _targetEnemy.GetComponent<Enemy>();
-            enemy.TakeDamage(_damage + _rampedDamageBonus);
+            enemy.TakeDamage(_stats.Damage + _rampedDamageBonus);
 
             if (!enemy.IsSlowed)
                 enemy.ReduceMovementSpeed(_stats.SlowEffect);

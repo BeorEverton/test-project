@@ -28,7 +28,6 @@ namespace Assets.Scripts.Enemies
         public Vector2 KnockbackVelocity;
         public float KnockbackTime;
 
-
         public EnemyInfoSO Info
         {
             get => _info;
@@ -146,7 +145,6 @@ namespace Assets.Scripts.Enemies
 
             KnockbackTime = 0f;
             KnockbackVelocity = Vector2.zero;
-
         }
 
         public void SetAsBoss(bool isMini)

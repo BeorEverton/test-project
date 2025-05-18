@@ -34,9 +34,7 @@ namespace Assets.Scripts.Turrets
         protected bool _targetInRange;
         protected bool _targetInAim;
         protected float _bonusSpdMultiplier;
-        protected float _bonusDmgMultiplier;
 
-        protected float _damage;
         protected float _atkSpeed;
         protected string _currentShotSound = "";
 
@@ -59,8 +57,6 @@ namespace Assets.Scripts.Turrets
         {
             _stats = SavedStats ?? new TurretStatsInstance(_turretInfo);
 
-            //gameObject.SetActive(_stats.IsUnlocked); from the old system where all turrets were active
-
             UpdateTurretAppearance();
         }
 
@@ -75,7 +71,6 @@ namespace Assets.Scripts.Turrets
             _bonusSpdMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
 
             // Calculate attack speed and damage
-            _damage = _stats.Damage * _bonusDmgMultiplier;
             _atkSpeed = (1 / _stats.FireRate) / _bonusSpdMultiplier;
 
             _timeSinceLastShot += Time.deltaTime;

@@ -34,7 +34,7 @@ namespace Assets.Scripts.Turrets
             _recoil.AddRecoil();
 
             float pierceDamageMultiplier = _stats.PierceDamageFalloff / 100f;
-            float currentDamage = _damage;
+            float currentDamage = _stats.Damage;
             bool firstHit = true;
 
             Vector2 startPos = _muzzleFlashPosition.position;
