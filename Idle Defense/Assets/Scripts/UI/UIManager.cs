@@ -212,6 +212,7 @@ namespace Assets.Scripts.UI
         {
             deathCountdownPanel.SetActive(false);
             WaveManager.Instance.LoadWave(rollbackWaveIndex);
+            WaveManager.Instance.ForceRestartWave();
             PlayerBaseManager.Instance.InitializeGame(true);
         }
 
@@ -224,6 +225,7 @@ namespace Assets.Scripts.UI
 
             // Set to current wave minus one, since LoadWave will increment to it
             WaveManager.Instance.LoadWave(rollbackWaveIndex);
+            WaveManager.Instance.ForceRestartWave();
             PlayerBaseManager.Instance.InitializeGame(true);
         }
         #endregion

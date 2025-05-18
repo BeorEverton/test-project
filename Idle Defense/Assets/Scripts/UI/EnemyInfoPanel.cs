@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class EnemyInfoPanel : MonoBehaviour
 {
     [SerializeField] private Image icon;
-    [SerializeField] private TextMeshProUGUI nameText, hpText, dmgText, spdText;
+    [SerializeField] private TextMeshProUGUI nameText, hpText, dmgText, spdText, rangeTxt;
     [SerializeField] private Sprite unknownSprite;
 
     public void DisplayEnemyInfo(EnemyInfoSO enemyInfo)
@@ -31,9 +31,10 @@ public class EnemyInfoPanel : MonoBehaviour
         icon.sprite = enemyInfo.Icon;
         nameText.text = enemyInfo.Name;
 
-        var (hp, dmg, spd) = EnemyLibraryManager.Instance.GetEnemyTiers(enemyInfo);
-        hpText.text = $"HP: {hp}";
-        dmgText.text = $"DMG: {dmg}";
-        spdText.text = $"SPD: {spd}";
+        var (hp, dmg, spd, range) = EnemyLibraryManager.Instance.GetEnemyTiers(enemyInfo);
+        hpText.text = $"{hp}";
+        dmgText.text = $"{dmg}";
+        spdText.text = $"{spd}";
+        rangeTxt.text = $"{range}";
     }
 }

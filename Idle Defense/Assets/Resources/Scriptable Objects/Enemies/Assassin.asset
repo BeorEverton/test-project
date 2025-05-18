@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
-  m_Name: SniperEnemy
+  m_Name: Assassin
   m_EditorClassIdentifier: 
-  Name: SniperEnemy
-  Icon: {fileID: 2521174482935598502, guid: bbc90998e76ccd14b9b02b83ec45d09b, type: 3}
-  EnemyClass: 5
-  MaxHealth: 4
-  MovementSpeed: 1
-  MovementSpeedDifference: 0.23
-  CoinDropAmount: 8
-  CoinDropMultiplierByWaveCount: 1.8
-  HealthMultiplierByWaveCount: 1.07
-  Damage: 4
-  AttackRange: 4.5
-  AttackSpeed: 0.8
+  Name: Assassin
+  Icon: {fileID: -461371056090583876, guid: f197740cee7abc140af899c615dd2dcf, type: 3}
+  EnemyClass: 6
+  MaxHealth: 3
+  MovementSpeed: 2.5
+  MovementSpeedDifference: 0.2
+  CoinDropAmount: 10
+  CoinDropMultiplierByWaveCount: 2
+  HealthMultiplierByWaveCount: 1.06
+  Damage: 9
+  AttackRange: 0.4
+  AttackSpeed: 1.5

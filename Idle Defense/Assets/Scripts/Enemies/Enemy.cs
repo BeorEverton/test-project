@@ -27,8 +27,6 @@ namespace Assets.Scripts.Enemies
 
         public Vector2 KnockbackVelocity;
         public float KnockbackTime;
-
-
         public EnemyInfoSO Info
         {
             get => _info;
@@ -125,7 +123,7 @@ namespace Assets.Scripts.Enemies
             _originalColor = null;
 
             // Only reset info if not overridden (i.e., not a boss clone)
-            if (!IsBossInstance)
+            if (!IsBossInstance && WaveManager.Instance.GetCurrentWave().WaveEnemies.ContainsKey(Info.EnemyClass))
             {
                 Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
             }

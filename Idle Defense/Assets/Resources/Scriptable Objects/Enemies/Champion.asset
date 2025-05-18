@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
-  m_Name: ScoutEnemy
+  m_Name: Champion
   m_EditorClassIdentifier: 
-  Name: ScoutEnemy
-  Icon: {fileID: -461371056090583876, guid: f197740cee7abc140af899c615dd2dcf, type: 3}
-  EnemyClass: 3
-  MaxHealth: 2
+  Name: Champion
+  Icon: {fileID: -8626978579551121323, guid: b0c776edb6d4da741ba91ef07675c250, type: 3}
+  EnemyClass: 7
+  MaxHealth: 11
   MovementSpeed: 2
   MovementSpeedDifference: 0.2
-  CoinDropAmount: 4
-  CoinDropMultiplierByWaveCount: 1.11
-  HealthMultiplierByWaveCount: 1.08
-  Damage: 1
+  CoinDropAmount: 12
+  CoinDropMultiplierByWaveCount: 2.5
+  HealthMultiplierByWaveCount: 1.15
+  Damage: 6
   AttackRange: 0.3
-  AttackSpeed: 0.8
+  AttackSpeed: 1.5

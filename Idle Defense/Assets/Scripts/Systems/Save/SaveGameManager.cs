@@ -1,6 +1,8 @@
+using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -59,8 +61,13 @@ namespace Assets.Scripts.Systems.Save
 
             TurretInventoryDTO turretInventory = TurretInventoryManager.I.ExportToDTO();
 
+            var discoveredEnemies = EnemyLibraryManager.Instance.GetAllEntries()
+                .Where(e => e.discovered)
+                .Select(e => e.info.Name)
+                .ToList();
 
-            GameData gameData = new(gameDataDTO,
+            GameData gameData = new(
+                gameDataDTO,
                 playerInfoDTO,
                 machineGunTurretDTO,
                 machineGunTurretBaseDTO,
@@ -73,6 +80,7 @@ namespace Assets.Scripts.Systems.Save
                 laserTurretDTO,
                 laserTurretBaseDTO,
                 turretInventory);
+            gameData.DiscoveredEnemyNames = discoveredEnemies;
 
             SaveGameToFile.SaveGameDataToFile(gameData);
         }
@@ -100,6 +108,15 @@ namespace Assets.Scripts.Systems.Save
             GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);
 
             TurretInventoryManager.I.ImportFromDTO(gameData.TurretInventory);
+
+            if (gameData.DiscoveredEnemyNames != null)
+            {
+                foreach (string enemyName in gameData.DiscoveredEnemyNames)
+                {
+                    EnemyLibraryManager.Instance.MarkAsDiscovered(enemyName, true);
+                }
+            }
+
         }
 
         public void DeleteSave()

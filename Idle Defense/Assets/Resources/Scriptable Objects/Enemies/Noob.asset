@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
-  m_Name: TankEnemy
+  m_Name: Noob
   m_EditorClassIdentifier: 
-  Name: TankEnemy
-  Icon: {fileID: -3596667999559895167, guid: fad62913238961a44acbaa1ede80c2e5, type: 3}
-  EnemyClass: 2
-  MaxHealth: 12
-  MovementSpeed: 0.3
-  MovementSpeedDifference: 0.125
-  CoinDropAmount: 9
-  CoinDropMultiplierByWaveCount: 1.7
-  HealthMultiplierByWaveCount: 1.2
-  Damage: 2
+  Name: Noob
+  Icon: {fileID: -7068553724952606805, guid: ff9c7f35851f09f4c91e112653092e30, type: 3}
+  EnemyClass: 0
+  MaxHealth: 1
+  MovementSpeed: 0.5
+  MovementSpeedDifference: 0.2
+  CoinDropAmount: 2
+  CoinDropMultiplierByWaveCount: 1.1
+  HealthMultiplierByWaveCount: 1.09
+  Damage: 1
   AttackRange: 0.3
-  AttackSpeed: 0.8
+  AttackSpeed: 1.3

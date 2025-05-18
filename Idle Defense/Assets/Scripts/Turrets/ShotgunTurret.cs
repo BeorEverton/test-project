@@ -144,7 +144,9 @@ namespace Assets.Scripts.Turrets
             {
                 Enemy enemy = enemyBuffer[sortedIndices[index]];
                 float distToEnemy = enemyDistances[sortedIndices[index]];
-                float damage = _damage - GetDamageFalloff(distToEnemy);
+                _damage = _stats.Damage;                
+                float damage = Mathf.Max(0f, _damage - GetDamageFalloff(distToEnemy));
+                
 
                 enemy.TakeDamage(damage);
                 pelletsRemaining--;
@@ -226,15 +228,14 @@ namespace Assets.Scripts.Turrets
         private float GetDamageFalloff(float distance)
         {
             float minFalloffDistance = 3f;
-            float maxDamageFalloff = _damage * 0.9f; // cap at 90% reduction
 
             if (distance <= minFalloffDistance)
                 return 0f;
 
             float effectiveDistance = distance - minFalloffDistance;
-            float damageFalloff = _damage * effectiveDistance * _stats.DamageFalloffOverDistance / 100f;
+            float falloff = _damage * effectiveDistance * _stats.DamageFalloffOverDistance / 100f;
 
-            return Mathf.Min(damageFalloff, maxDamageFalloff);
+            return Mathf.Min(falloff, _damage * 0.9f); // max 90% of base damage
         }
 
         private Vector2 RotateVector2(Vector2 v, float degrees)

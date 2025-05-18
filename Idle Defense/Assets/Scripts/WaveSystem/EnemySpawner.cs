@@ -123,6 +123,7 @@ namespace Assets.Scripts.WaveSystem
                 AudioManager.Instance.Play("Boss Appear");
                 bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
+            else backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f); // Roll back to the regular color if not boss wave
 
             return Task.CompletedTask;
         }

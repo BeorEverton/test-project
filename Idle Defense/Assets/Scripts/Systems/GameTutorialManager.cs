@@ -197,7 +197,7 @@ namespace Assets.Scripts.Systems
 
         private void ShowStep(int index)
         {
-            if (!tutorialPanel.activeInHierarchy)
+            if (tutorialPanel && !tutorialPanel.activeInHierarchy)
                 tutorialPanel.SetActive(true);
 
             skipButton.SetActive(index != 0);
