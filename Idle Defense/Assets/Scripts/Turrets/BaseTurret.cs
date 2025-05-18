@@ -85,6 +85,9 @@ namespace Assets.Scripts.Turrets
             {
                 _targetInRange = false;
                 TargetEnemy();
+
+                if (_targetEnemy == null) //If no enemies are alive and in range, stop attacking
+                    return;
             }
 
             AimTowardsTarget(_bonusSpdMultiplier);
@@ -94,6 +97,8 @@ namespace Assets.Scripts.Turrets
 
             if (_targetInAim && _targetInRange && IsTargetVisibleOnScreen())
                 Shoot();
+            else
+                TargetEnemy();
         }
 
         protected virtual void Shoot()
@@ -105,6 +110,9 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void TargetEnemy()
         {
+            if (_targetEnemy != null)
+                _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
+
             List<GameObject> enemiesAlive = EnemySpawner.Instance.EnemiesAlive;
             _targetEnemy = EnemyTargetChoice switch
             {
