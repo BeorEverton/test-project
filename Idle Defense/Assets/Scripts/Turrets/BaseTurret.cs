@@ -38,7 +38,7 @@ namespace Assets.Scripts.Turrets
         protected float _atkSpeed;
         protected string _currentShotSound = "";
 
-        private float aimSize = .3f;
+        private float _aimSize = .3f;
 
         // Control the attack range based on the screen size
         private float _screenLeft;
@@ -213,8 +213,8 @@ namespace Assets.Scripts.Turrets
             Vector3 position = _targetEnemy.transform.position;
 
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(position + new Vector3(-aimSize, -aimSize, 0), position + new Vector3(aimSize, aimSize, 0));
-            Gizmos.DrawLine(position + new Vector3(-aimSize, aimSize, 0), position + new Vector3(aimSize, -aimSize, 0));
+            Gizmos.DrawLine(position + new Vector3(-_aimSize, -_aimSize, 0), position + new Vector3(_aimSize, _aimSize, 0));
+            Gizmos.DrawLine(position + new Vector3(-_aimSize, _aimSize, 0), position + new Vector3(_aimSize, -_aimSize, 0));
         }
 
         public TurretStatsInstance GetStats() => _stats;

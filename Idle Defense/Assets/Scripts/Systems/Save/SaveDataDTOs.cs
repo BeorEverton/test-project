@@ -132,6 +132,7 @@ namespace Assets.Scripts.Systems.Save
                 TotalDamageTaken = StatsManager.Instance.TotalDamageTaken,
                 TotalHealthRepaired = StatsManager.Instance.TotalHealthRepaired,
                 MissionsFailed = StatsManager.Instance.MissionsFailed,
+                SpeedBoostClicks = StatsManager.Instance.SpeedBoostClicks,
                 MachineGunDamage = StatsManager.Instance.MachineGunDamage,
                 ShotgunDamage = StatsManager.Instance.ShotgunDamage,
                 SniperDamage = StatsManager.Instance.SniperDamage,
@@ -365,6 +366,7 @@ public class StatsDTO
     public double TotalDamageTaken;
     public double TotalHealthRepaired;
     public int MissionsFailed;
+    public int SpeedBoostClicks;
 
     public double MachineGunDamage;
     public double ShotgunDamage;

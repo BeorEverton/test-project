@@ -31,6 +31,7 @@ namespace Assets.Scripts.UI
             UpdateDamageTaken(sm.TotalDamageTaken);
             UpdateWallRepaired(sm.TotalHealthRepaired);
             UpdateMissionsFailed(sm.MissionsFailed);
+            UpdateSpeedBoosts(sm.SpeedBoostClicks);
             UpdateMachineGunDamage(sm.MachineGunDamage);
             UpdateShotgunDamage(sm.ShotgunDamage);
             UpdateSniperDamage(sm.SniperDamage);
@@ -71,6 +72,9 @@ namespace Assets.Scripts.UI
                     break;
                 case nameof(StatsManager.MissionsFailed):
                     UpdateMissionsFailed((int)newValue);
+                    break;
+                case nameof(StatsManager.SpeedBoostClicks):
+                    UpdateSpeedBoosts((int)newValue);
                     break;
                 case nameof(StatsManager.MachineGunDamage):
                     UpdateMachineGunDamage((double)newValue);

@@ -21,6 +21,7 @@ namespace Assets.Scripts.Systems
         private double _totalDamageTaken;
         private double _totalHealthRepaired;
         private int _missionsFailed;
+        private int _speedBoostClicks;
 
         private double _machinegunDamage;
         private double _shotgunDamage;
@@ -59,6 +60,7 @@ namespace Assets.Scripts.Systems
             TotalDamageTaken = statsDTO.TotalDamageTaken;
             TotalHealthRepaired = statsDTO.TotalHealthRepaired;
             MissionsFailed = statsDTO.MissionsFailed;
+            SpeedBoostClicks = statsDTO.SpeedBoostClicks;
             MachineGunDamage = statsDTO.MachineGunDamage;
             ShotgunDamage = statsDTO.ShotgunDamage;
             SniperDamage = statsDTO.SniperDamage;
@@ -78,6 +80,7 @@ namespace Assets.Scripts.Systems
             _totalDamageTaken = 0;
             _totalHealthRepaired = 0;
             _missionsFailed = 0;
+            _speedBoostClicks = 0;
             _machinegunDamage = 0;
             _shotgunDamage = 0;
             _sniperDamage = 0;
@@ -148,6 +151,11 @@ namespace Assets.Scripts.Systems
         {
             get => _missionsFailed;
             set => SetField(ref _missionsFailed, value, nameof(MissionsFailed));
+        }
+        public int SpeedBoostClicks
+        {
+            get => _speedBoostClicks;
+            set => SetField(ref _speedBoostClicks, value, nameof(SpeedBoostClicks));
         }
         public double MachineGunDamage
         {

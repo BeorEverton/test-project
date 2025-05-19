@@ -76,6 +76,7 @@ namespace Assets.Scripts.Systems
             spdBonus += initialBoost;
             isHolding = true;
             decreaseTimer = 0f;
+            StatsManager.Instance.SpeedBoostClicks++;
             OnSpdBonusChanged?.Invoke(spdBonus);
         }
 
