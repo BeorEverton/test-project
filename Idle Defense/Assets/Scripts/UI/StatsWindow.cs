@@ -23,15 +23,14 @@ namespace Assets.Scripts.UI
 
             UpdateTotalDamage(sm.TotalDamage);
             UpdateMaxWave(sm.MaxZone);
-            UpdateWavesSecured(sm.MaxZone);
+            UpdateWavesSecured(sm.TotalZonesSecured);
             UpdateHostilesKilled(sm.EnemiesKilled);
             UpdateBossesKilled(sm.BossesKilled);
             UpdateMoneyInvested(sm.MoneySpent);
             UpdateUpgradesMade(sm.UpgradeAmount);
-            UpdateDamageTaken(sm.DamageTaken);
-            UpdateWallRepaired(sm.HealthRepaired);
+            UpdateDamageTaken(sm.TotalDamageTaken);
+            UpdateWallRepaired(sm.TotalHealthRepaired);
             UpdateMissionsFailed(sm.MissionsFailed);
-            //UpdateSpeedBoosts(0);
             UpdateMachineGunDamage(sm.MachineGunDamage);
             UpdateShotgunDamage(sm.ShotgunDamage);
             UpdateSniperDamage(sm.SniperDamage);
@@ -49,6 +48,9 @@ namespace Assets.Scripts.UI
                 case nameof(StatsManager.MaxZone):
                     UpdateMaxWave((int)newValue);
                     break;
+                case nameof(StatsManager.TotalZonesSecured):
+                    UpdateWavesSecured((int)newValue);
+                    break;
                 case nameof(StatsManager.EnemiesKilled):
                     UpdateHostilesKilled((int)newValue);
                     break;
@@ -61,10 +63,10 @@ namespace Assets.Scripts.UI
                 case nameof(StatsManager.UpgradeAmount):
                     UpdateUpgradesMade((int)newValue);
                     break;
-                case nameof(StatsManager.DamageTaken):
+                case nameof(StatsManager.TotalDamageTaken):
                     UpdateDamageTaken((double)newValue);
                     break;
-                case nameof(StatsManager.HealthRepaired):
+                case nameof(StatsManager.TotalHealthRepaired):
                     UpdateWallRepaired((double)newValue);
                     break;
                 case nameof(StatsManager.MissionsFailed):

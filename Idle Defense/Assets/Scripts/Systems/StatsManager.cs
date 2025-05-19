@@ -12,12 +12,13 @@ namespace Assets.Scripts.Systems
 
         private double _totalDamage;
         private int _maxZone;
+        private int _totalZonesSecured;
         private int _enemiesKilled;
         private int _bossesKilled;
         private double _moneySpent;
         private int _upgradeAmount;
-        private double _damageTaken;
-        private double _healthRepaired;
+        private double _totalDamageTaken;
+        private double _totalHealthRepaired;
         private int _missionsFailed;
 
         private double _machinegunDamage;
@@ -34,13 +35,13 @@ namespace Assets.Scripts.Systems
                 Destroy(gameObject);
         }
 
-        private bool SetField<T>(ref T field, T newValue, string statName)
+        private void SetField<T>(ref T field, T newValue, string statName)
         {
             if (EqualityComparer<T>.Default.Equals(field, newValue))
-                return false;
+                return;
+
             field = newValue;
             OnStatChanged?.Invoke(statName, newValue);
-            return true;
         }
 
         public double TotalDamage
@@ -51,7 +52,17 @@ namespace Assets.Scripts.Systems
         public int MaxZone
         {
             get => _maxZone;
-            set => SetField(ref _maxZone, value, nameof(MaxZone));
+            set
+            {
+                if (value > _maxZone)
+                    SetField(ref _maxZone, value, nameof(MaxZone));
+            }
+        }
+
+        public int TotalZonesSecured
+        {
+            get => _totalZonesSecured;
+            set => SetField(ref _totalZonesSecured, value, nameof(TotalZonesSecured));
         }
         public int EnemiesKilled
         {
@@ -73,15 +84,15 @@ namespace Assets.Scripts.Systems
             get => _upgradeAmount;
             set => SetField(ref _upgradeAmount, value, nameof(UpgradeAmount));
         }
-        public double DamageTaken
+        public double TotalDamageTaken
         {
-            get => _damageTaken;
-            set => SetField(ref _damageTaken, value, nameof(DamageTaken));
+            get => _totalDamageTaken;
+            set => SetField(ref _totalDamageTaken, value, nameof(TotalDamageTaken));
         }
-        public double HealthRepaired
+        public double TotalHealthRepaired
         {
-            get => _healthRepaired;
-            set => SetField(ref _healthRepaired, value, nameof(HealthRepaired));
+            get => _totalHealthRepaired;
+            set => SetField(ref _totalHealthRepaired, value, nameof(TotalHealthRepaired));
         }
         public int MissionsFailed
         {

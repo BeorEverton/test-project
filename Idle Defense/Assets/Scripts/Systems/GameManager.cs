@@ -123,6 +123,7 @@ namespace Assets.Scripts.Systems
         public void SpendMoney(ulong amount)
         {
             money -= amount;
+            StatsManager.Instance.MoneySpent += amount;
             OnMoneyChanged?.Invoke(money);
         }
 
