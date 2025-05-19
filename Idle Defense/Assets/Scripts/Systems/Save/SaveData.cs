@@ -19,6 +19,7 @@ namespace Assets.Scripts.Systems.Save
         public TurretInfoDTO? LaserTurretInfoDTO;
         public TurretBaseInfoDTO? LaserTurretBaseInfoDTO;
         public TurretInventoryDTO TurretInventory;
+        public StatsDTO StatsDTO;
 
         public List<string> DiscoveredEnemyNames;
 
@@ -34,6 +35,7 @@ namespace Assets.Scripts.Systems.Save
             TurretBaseInfoDTO? missileLauncherTurretBaseInfoDTO,
             TurretInfoDTO? laserTurretInfoDTO,
             TurretBaseInfoDTO? laserTurretBaseInfoDTO,
+            StatsDTO statsDTO,
             TurretInventoryDTO turretInventory)
         {
             GameDataDTO = gameData;
@@ -48,6 +50,8 @@ namespace Assets.Scripts.Systems.Save
             MissileLauncherTurretBaseInfoDTO = missileLauncherTurretBaseInfoDTO;
             LaserTurretInfoDTO = laserTurretInfoDTO;
             LaserTurretBaseInfoDTO = laserTurretBaseInfoDTO;
-            TurretInventory = turretInventory;        }
+            StatsDTO = statsDTO;
+            TurretInventory = turretInventory;
+        }
     }
 }

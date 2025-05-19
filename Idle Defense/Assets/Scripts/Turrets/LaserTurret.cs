@@ -1,4 +1,5 @@
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using System;
 using UnityEngine;
@@ -45,7 +46,10 @@ namespace Assets.Scripts.Turrets
             base.Shoot();
 
             Enemy enemy = _targetEnemy.GetComponent<Enemy>();
-            enemy.TakeDamage(_stats.Damage + _rampedDamageBonus);
+            float damage = _stats.Damage + _rampedDamageBonus;
+
+            enemy.TakeDamage(damage);
+            StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, damage);
 
             if (!enemy.IsSlowed)
                 enemy.ReduceMovementSpeed(_stats.SlowEffect);

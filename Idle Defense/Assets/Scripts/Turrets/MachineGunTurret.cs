@@ -1,4 +1,5 @@
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Systems;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
@@ -34,6 +35,8 @@ namespace Assets.Scripts.Turrets
             }
 
             _targetEnemy.GetComponent<Enemy>().TakeDamage(finalDamage, isCritical);
+
+            StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, finalDamage);
             _timeSinceLastShot = 0f;
         }
 

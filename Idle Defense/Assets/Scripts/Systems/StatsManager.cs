@@ -1,3 +1,4 @@
+using Assets.Scripts.SO;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,12 +28,61 @@ namespace Assets.Scripts.Systems
         private double _missileLauncherDamage;
         private double _laserDamage;
 
+        private Dictionary<TurretType, Action<double>> _damageDictionary;
+
         private void Awake()
         {
             if (Instance == null)
                 Instance = this;
             else
                 Destroy(gameObject);
+
+            _damageDictionary = new Dictionary<TurretType, Action<double>>()
+            {
+                { TurretType.MachineGun, amount => MachineGunDamage += amount },
+                { TurretType.Shotgun, amount => ShotgunDamage += amount },
+                { TurretType.Sniper, amount => SniperDamage += amount },
+                { TurretType.MissileLauncher, amount => MissileLauncherDamage += amount },
+                { TurretType.Laser, amount => LaserDamage += amount }
+            };
+        }
+
+        public void LoadStats(StatsDTO statsDTO)
+        {
+            TotalDamage = statsDTO.TotalDamage;
+            MaxZone = statsDTO.MaxZone;
+            TotalZonesSecured = statsDTO.TotalZonesSecured;
+            EnemiesKilled = statsDTO.EnemiesKilled;
+            BossesKilled = statsDTO.BossesKilled;
+            MoneySpent = statsDTO.MoneySpent;
+            UpgradeAmount = statsDTO.UpgradeAmount;
+            TotalDamageTaken = statsDTO.TotalDamageTaken;
+            TotalHealthRepaired = statsDTO.TotalHealthRepaired;
+            MissionsFailed = statsDTO.MissionsFailed;
+            MachineGunDamage = statsDTO.MachineGunDamage;
+            ShotgunDamage = statsDTO.ShotgunDamage;
+            SniperDamage = statsDTO.SniperDamage;
+            MissileLauncherDamage = statsDTO.MissileLauncherDamage;
+            LaserDamage = statsDTO.LaserDamage;
+        }
+
+        public void ResetStats()
+        {
+            _totalDamage = 0;
+            _maxZone = 0;
+            _totalZonesSecured = 0;
+            _enemiesKilled = 0;
+            _bossesKilled = 0;
+            _moneySpent = 0;
+            _upgradeAmount = 0;
+            _totalDamageTaken = 0;
+            _totalHealthRepaired = 0;
+            _missionsFailed = 0;
+            _machinegunDamage = 0;
+            _shotgunDamage = 0;
+            _sniperDamage = 0;
+            _missileLauncherDamage = 0;
+            _laserDamage = 0;
         }
 
         private void SetField<T>(ref T field, T newValue, string statName)
@@ -123,6 +173,16 @@ namespace Assets.Scripts.Systems
         {
             get => _laserDamage;
             set => SetField(ref _laserDamage, value, nameof(LaserDamage));
+        }
+
+        public void AddTurretDamage(TurretType type, double damage)
+        {
+            if (_damageDictionary.TryGetValue(type, out Action<double> handler))
+                handler(damage);
+            else
+            {
+                Debug.LogError($"[STATMANAGER] No damage handler for turret type {type}");
+            }
         }
     }
 }

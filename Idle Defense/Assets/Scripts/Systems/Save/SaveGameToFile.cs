@@ -4,7 +4,6 @@ namespace Assets.Scripts.Systems.Save
 {
     public static class SaveGameToFile
     {
-        private const string FileName = "savegame.json";
         private const string SaveKey = "SaveGameData";
 
         public static void SaveGameDataToFile(GameData gameData)
