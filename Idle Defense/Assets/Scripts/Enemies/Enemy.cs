@@ -1,6 +1,5 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
-using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.WaveSystem;
 using DamageNumbersPro;
 using System;
@@ -91,6 +90,7 @@ namespace Assets.Scripts.Enemies
             }
 
             OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
+            StatsManager.Instance.TotalDamage += amount;
 
             CheckIfDead();
         }
@@ -101,6 +101,11 @@ namespace Assets.Scripts.Enemies
                 return;
 
             IsAlive = false;
+
+            StatsManager.Instance.EnemiesKilled++;
+
+            if (IsBossInstance)
+                StatsManager.Instance.BossesKilled++;
 
             OnDeath?.Invoke(this, new OnDeathEventArgs
             {
@@ -156,8 +161,7 @@ namespace Assets.Scripts.Enemies
             }
 
             // Store original state
-            if (_originalScale == null)
-                _originalScale = _body.localScale;
+            _originalScale ??= _body.localScale;
 
             if (TryGetBodySpriteRenderer(out SpriteRenderer sr) && _originalColor == null)
                 _originalColor = sr.color;

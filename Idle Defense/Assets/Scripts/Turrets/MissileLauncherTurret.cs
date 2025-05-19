@@ -67,6 +67,7 @@ namespace Assets.Scripts.Turrets
                          .Where(enemy => Vector3.Distance(enemy.transform.position, target) <= impactArea))
             {
                 enemy.TakeDamage(_stats.Damage);
+                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, _stats.Damage);
             }
 
             foreach (Enemy enemy in enemiesInAdjecentGrids
@@ -74,6 +75,7 @@ namespace Assets.Scripts.Turrets
                              Vector3.Distance(enemy.transform.position, target) <= _stats.ExplosionRadius))
             {
                 enemy.TakeDamage(_stats.SplashDamage);
+                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, _stats.SplashDamage);
             }
         }
 

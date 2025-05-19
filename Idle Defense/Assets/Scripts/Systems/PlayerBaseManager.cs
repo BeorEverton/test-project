@@ -80,11 +80,13 @@ namespace Assets.Scripts.Systems
             _regenTickTimer = 0f;
 
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+            StatsManager.Instance.TotalDamageTaken += amount;
             AudioManager.Instance.Play("Take Damage");
 
             if (_currentHealth <= 0f)
             {
                 OnWaveFailed?.Invoke(this, EventArgs.Empty);
+                StatsManager.Instance.MissionsFailed++;
                 AudioManager.Instance.Play("Player Death");
                 AudioManager.Instance.Stop("Laser V2");
                 AudioManager.Instance.StopAllMusics();
@@ -100,22 +102,30 @@ namespace Assets.Scripts.Systems
 
             _regenDelayTimer += Time.deltaTime;
 
-            if (_regenDelayTimer >= _runtimeRegenDelay)
+            if (!(_regenDelayTimer >= _runtimeRegenDelay))
+                return;
+
+            _regenTickTimer += Time.deltaTime;
+
+            if (!(_regenTickTimer >= _runtimeRegenInterval))
+                return;
+
+            RepairPlayerBase();
+
+            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+        }
+
+        private void RepairPlayerBase()
+        {
+            _currentHealth = Mathf.Min(_currentHealth + _runtimeRegenAmount, _runtimeMaxHealth);
+            _regenTickTimer = 0f;
+
+            StatsManager.Instance.TotalHealthRepaired += _runtimeRegenAmount;
+
+            if (_currentHealth >= _runtimeMaxHealth)
             {
-                _regenTickTimer += Time.deltaTime;
-                if (_regenTickTimer >= _runtimeRegenInterval)
-                {
-                    _currentHealth = Mathf.Min(_currentHealth + _runtimeRegenAmount, _runtimeMaxHealth);
-                    _regenTickTimer = 0f;
-
-                    if (_currentHealth >= _runtimeMaxHealth)
-                    {
-                        // Play full health sound
-                        AudioManager.Instance.Play("Full Health");
-                    }
-
-                    OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
-                }
+                // Play full health sound
+                AudioManager.Instance.Play("Full Health");
             }
         }
 

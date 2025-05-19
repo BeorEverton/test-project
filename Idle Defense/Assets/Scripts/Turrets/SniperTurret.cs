@@ -79,6 +79,7 @@ namespace Assets.Scripts.Turrets
                 }
 
                 enemy.TakeDamage(currentDamage);
+                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, currentDamage);
                 currentDamage *= pierceDamageMultiplier;
             }
         }

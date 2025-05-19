@@ -54,25 +54,6 @@ namespace Assets.Scripts.Turrets
                 FireWithEvenPelletCount(baseDir);
             }
 
-            /*foreach (Vector2 targetPos in _pelletTargetPositions)
-            {
-                List<Enemy> enemiesInPath = GetEnemiesInPathToTarget(targetPos);
-                SortListByDistance(enemiesInPath);
-
-                foreach (Enemy enemy in enemiesInPath)
-                {
-                    float distance = DistanceFromLine(enemy.transform.position, transform.position, targetPos);
-                    if (distance <= _pelletWidth)
-                    {
-                        float distanceToEnemy = Vector2.Distance(transform.position, enemy.transform.position);
-                        float damage = _damage - GetDamageFalloff(distanceToEnemy);
-
-                        enemy.TakeDamage(damage);
-                        break; // Only hit the first enemy in the path
-                    }
-                }
-            }*/
-
             Enemy[] enemyBuffer = new Enemy[64]; // Reuse a fixed array buffer
             int enemyCount = 0;
 
@@ -147,6 +128,7 @@ namespace Assets.Scripts.Turrets
                 float damage = _stats.Damage - GetDamageFalloff(distToEnemy);
 
                 enemy.TakeDamage(damage);
+                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, damage);
                 pelletsRemaining--;
 
                 Vector2 knockDir = (enemy.transform.position - transform.position).normalized;

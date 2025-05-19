@@ -26,13 +26,9 @@ namespace Assets.Scripts.Systems.Save
         private void Awake()
         {
             if (Instance == null)
-            {
                 Instance = this;
-            }
             else
-            {
                 Destroy(gameObject);
-            }
         }
 
         private void Start()
@@ -58,6 +54,7 @@ namespace Assets.Scripts.Systems.Save
             TurretBaseInfoDTO missileLauncherTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
             TurretInfoDTO laserTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_laserTurret.GetStats());
             TurretBaseInfoDTO laserTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
+            StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();
 
             TurretInventoryDTO turretInventory = TurretInventoryManager.I.ExportToDTO();
 
@@ -79,6 +76,7 @@ namespace Assets.Scripts.Systems.Save
                 missileLauncherTurretBaseDTO,
                 laserTurretDTO,
                 laserTurretBaseDTO,
+                statsDTO,
                 turretInventory);
             gameData.DiscoveredEnemyNames = discoveredEnemies;
 
@@ -107,6 +105,8 @@ namespace Assets.Scripts.Systems.Save
             WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
             GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);
 
+            StatsManager.Instance.LoadStats(gameData.StatsDTO);
+
             TurretInventoryManager.I.ImportFromDTO(gameData.TurretInventory);
 
             if (gameData.DiscoveredEnemyNames != null)
@@ -116,7 +116,6 @@ namespace Assets.Scripts.Systems.Save
                     EnemyLibraryManager.Instance.MarkAsDiscovered(enemyName, true);
                 }
             }
-
         }
 
         public void DeleteSave()
@@ -125,6 +124,7 @@ namespace Assets.Scripts.Systems.Save
             PlayerBaseManager.Instance.ResetPlayerBase();
             GameManager.Instance.ResetGame();
             WaveManager.Instance.ResetWave();
+            StatsManager.Instance.ResetStats();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 

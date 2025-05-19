@@ -102,7 +102,11 @@ namespace Assets.Scripts.WaveSystem
                 yield return new WaitUntil(() => _waveCompleted || _waveLost);
 
                 if (_waveCompleted)
+                {
                     _currentWave++;
+                    StatsManager.Instance.TotalZonesSecured++;
+                    StatsManager.Instance.MaxZone = _currentWave;
+                }
 
                 AudioManager.Instance.Play("New Wave");
 

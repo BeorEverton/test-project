@@ -117,6 +117,28 @@ namespace Assets.Scripts.Systems.Save
                 AngleThreshold = turret.AngleThreshold
             };
         }
+
+        public static StatsDTO CreateStatsDTO()
+        {
+            return new StatsDTO
+            {
+                TotalDamage = StatsManager.Instance.TotalDamage,
+                MaxZone = StatsManager.Instance.MaxZone,
+                TotalZonesSecured = StatsManager.Instance.TotalZonesSecured,
+                EnemiesKilled = StatsManager.Instance.EnemiesKilled,
+                BossesKilled = StatsManager.Instance.BossesKilled,
+                MoneySpent = StatsManager.Instance.MoneySpent,
+                UpgradeAmount = StatsManager.Instance.UpgradeAmount,
+                TotalDamageTaken = StatsManager.Instance.TotalDamageTaken,
+                TotalHealthRepaired = StatsManager.Instance.TotalHealthRepaired,
+                MissionsFailed = StatsManager.Instance.MissionsFailed,
+                MachineGunDamage = StatsManager.Instance.MachineGunDamage,
+                ShotgunDamage = StatsManager.Instance.ShotgunDamage,
+                SniperDamage = StatsManager.Instance.SniperDamage,
+                MissileLauncherDamage = StatsManager.Instance.MissileLauncherDamage,
+                LaserDamage = StatsManager.Instance.LaserDamage
+            };
+        }
     }
 
     public static class LoadDataDTOs
@@ -328,4 +350,25 @@ public class TurretInventoryDTO
     public List<int> EquippedIds;
     public List<TurretType> UnlockedTypes;
     public List<bool> SlotPurchased;
+}
+
+[Serializable]
+public class StatsDTO
+{
+    public double TotalDamage;
+    public int MaxZone;
+    public int TotalZonesSecured;
+    public int EnemiesKilled;
+    public int BossesKilled;
+    public double MoneySpent;
+    public int UpgradeAmount;
+    public double TotalDamageTaken;
+    public double TotalHealthRepaired;
+    public int MissionsFailed;
+
+    public double MachineGunDamage;
+    public double ShotgunDamage;
+    public double SniperDamage;
+    public double MissileLauncherDamage;
+    public double LaserDamage;
 }
