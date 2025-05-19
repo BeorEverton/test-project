@@ -59,7 +59,7 @@ namespace Assets.Scripts.UI
 
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
         {
-            _wave.text = $"Wave\n{args.WaveNumber}";
+            _wave.text = $"Zone\n{args.WaveNumber}";
         }
 
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
@@ -178,7 +178,7 @@ namespace Assets.Scripts.UI
             int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
             rollbackWaveIndex = Mathf.Max(1, currentWave - 10); // clamp to wave 1
 
-            countdownText.text = $"Restarting from Wave {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
+            countdownText.text = $"Restarting from Zone {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
             immediateRestartButton.onClick.RemoveAllListeners();
             immediateRestartButton.onClick.AddListener(SkipDeathCountdown);
 
@@ -191,7 +191,7 @@ namespace Assets.Scripts.UI
 
             while (timeLeft > 0f)
             {
-                countdownText.text = $"Restarting from Wave {rollbackWaveIndex} in {Mathf.CeilToInt(timeLeft)}...";
+                countdownText.text = $"Restarting from Zone {rollbackWaveIndex} in {Mathf.CeilToInt(timeLeft)}...";
                 yield return new WaitForSecondsRealtime(1f);
                 timeLeft -= 1f;
             }
