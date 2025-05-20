@@ -65,10 +65,19 @@ namespace Assets.Scripts.Systems
             {
                 for (int y = 0; y <= gridRange - Mathf.Abs(x); y++)
                 {
-                    Vector2Int checkPos = new(centerGridPos.x + x, centerGridPos.y + y);
-                    if (enemyGrid.TryGetValue(checkPos, out List<Enemy> enemies))
+                    Vector2Int checkPosUp = new(centerGridPos.x + x, centerGridPos.y + y);
+                    Vector2Int checkPosDown = new(centerGridPos.x + x, centerGridPos.y - y);
+                    if (checkPosUp == checkPosDown)
+                        if (enemyGrid.TryGetValue(checkPosUp, out List<Enemy> enemiesCenter))
+                            enemiesInRange.AddRange(enemiesCenter);
+                        else
+                            continue;
+                    else
                     {
-                        enemiesInRange.AddRange(enemies);
+                        if (enemyGrid.TryGetValue(checkPosUp, out List<Enemy> enemiesUp))
+                            enemiesInRange.AddRange(enemiesUp);
+                        if (enemyGrid.TryGetValue(checkPosDown, out List<Enemy> enemiesDown))
+                            enemiesInRange.AddRange(enemiesDown);
                     }
                 }
             }
