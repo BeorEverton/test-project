@@ -25,12 +25,12 @@ namespace Assets.Editor
                     continue;
                 Enum.TryParse(lines[2], out EnemyClass enemyClass);
 
-                EnemyInfoSO enemyInfo = AssetDatabase.LoadAssetAtPath<EnemyInfoSO>($"Assets/Scriptable Objects/Enemies/{lines[1]}.asset");
+                EnemyInfoSO enemyInfo = AssetDatabase.LoadAssetAtPath<EnemyInfoSO>($"Assets/Resources/Scriptable Objects/Enemies/{lines[1]}.asset");
 
                 if (enemyInfo == null)
                 {
                     enemyInfo = ScriptableObject.CreateInstance<EnemyInfoSO>();
-                    AssetDatabase.CreateAsset(enemyInfo, $"Assets/Scriptable Objects/Enemies/{lines[1]}.asset");
+                    AssetDatabase.CreateAsset(enemyInfo, $"Assets/Resources/Scriptable Objects/Enemies/{lines[1]}.asset");
 
                 }
 

@@ -133,6 +133,8 @@ namespace Assets.Scripts.Enemies
                 Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
             }
 
+            ApplyBodySpriteFromInfo();
+
             CanAttack = false;
             IsAlive = true;
             MaxHealth = Info.MaxHealth;
@@ -188,6 +190,31 @@ namespace Assets.Scripts.Enemies
             _applyBossVisualsAfterReset = true;
             _isMiniBoss = isMini;
         }
+
+        public void ApplyBodySpriteFromInfo()
+        {
+            if (_body == null)
+            {
+                Debug.LogWarning("Body transform is not assigned on: " + gameObject.name);
+                return;
+            }
+
+            if (_info == null || _info.Icon == null)
+            {
+                Debug.LogWarning("EnemyInfo or Icon is null for: " + gameObject.name);
+                return;
+            }
+
+            SpriteRenderer sr = _body.GetComponent<SpriteRenderer>();
+            if (sr == null)
+            {
+                Debug.LogWarning("No SpriteRenderer found on _body for: " + gameObject.name);
+                return;
+            }
+
+            sr.sprite = _info.Icon;
+        }
+
 
         private bool TryGetBodySpriteRenderer(out SpriteRenderer sr) => _body != null ? sr = _body.GetComponent<SpriteRenderer>() : sr = null;
 

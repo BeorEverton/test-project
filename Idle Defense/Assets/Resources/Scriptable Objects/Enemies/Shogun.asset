@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
+  m_Name: Shogun
+  m_EditorClassIdentifier: 
+  Name: Shogun
+  Icon: {fileID: 2234080705593526335, guid: bcaaa5b21dd8c7046b8f90d09f51e5cc, type: 3}
+  EnemyClass: 30
+  MaxHealth: 14
+  MovementSpeed: 2.1
+  MovementSpeedDifference: 0.2
+  CoinDropAmount: 16
+  CoinDropMultiplierByWaveCount: 2.5
+  HealthMultiplierByWaveCount: 1.35
+  Damage: 9
+  AttackRange: 0.3
+  AttackSpeed: 1.5
