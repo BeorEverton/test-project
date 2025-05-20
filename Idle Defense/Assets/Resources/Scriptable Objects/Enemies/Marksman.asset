@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
+  m_Name: Marksman
+  m_EditorClassIdentifier: 
+  Name: Marksman
+  Icon: {fileID: 4233310686934124197, guid: fd337db45c61505438a09681bdaf8611, type: 3}
+  EnemyClass: 11
+  MaxHealth: 4
+  MovementSpeed: 0.6
+  MovementSpeedDifference: 0.22
+  CoinDropAmount: 5
+  CoinDropMultiplierByWaveCount: 1.15
+  HealthMultiplierByWaveCount: 1.16
+  Damage: 2
+  AttackRange: 2
+  AttackSpeed: 1

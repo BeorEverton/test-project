@@ -45,6 +45,30 @@ namespace Assets.Scripts.SO
         Charger,
         Sniper,
         Assassin,
-        Champion
+        Champion,
+        Grunt, // melee
+        Fusai,
+        Breaker,
+        Marksman, // ranged
+        Arashi,
+        Howler,
+        Bulwark, // tank
+        Kaba,
+        Bunker,
+        Spotter, // scout
+        Hayai,
+        Trace,
+        Blitz, // charger
+        Totsugeki,
+        Crash,
+        Scope, // sniper
+        Kanshi,
+        Deadeye,
+        Shade, // assassin
+        Shinobi,
+        Vanish,
+        Dreadnought, // champion
+        Shogun,
+        Overlord
     }
 }

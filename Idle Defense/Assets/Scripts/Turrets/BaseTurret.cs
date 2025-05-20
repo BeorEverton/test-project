@@ -86,6 +86,18 @@ namespace Assets.Scripts.Turrets
         {
             UpdateScreenBoundsIfNeeded();
 
+            // if goes out of range
+            if (_targetEnemy != null)
+            {
+                float ty = _targetEnemy.transform.position.y;
+                if (ty > _attackRange || ty < _screenBottom)
+                {
+                    _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
+                    _targetEnemy = null;
+                    _targetInRange = false;
+                }
+            }
+
             if (_targetEnemy == null || !_targetEnemy.activeInHierarchy)
             {
                 _targetInRange = false;
