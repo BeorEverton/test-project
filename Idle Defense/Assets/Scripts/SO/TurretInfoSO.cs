@@ -13,7 +13,7 @@ namespace Assets.Scripts.SO
 
         [Tooltip("Amount of damage dealt per hit")]
         public float Damage;
-        public float DamageLevel;
+        public int DamageLevel;
         [Tooltip("Exponential damage upgrade amount")]
         public float DamageUpgradeAmount;
         public float DamageUpgradeBaseCost;
@@ -21,7 +21,7 @@ namespace Assets.Scripts.SO
 
         [Tooltip("Amount of shots per second")]
         public float FireRate;
-        public float FireRateLevel;
+        public int FireRateLevel;
         [Tooltip("Exponential fire rate upgrade amount")]
         public float FireRateUpgradeAmount;
         public float FireRateUpgradeBaseCost;
@@ -36,7 +36,7 @@ namespace Assets.Scripts.SO
         [Header("Machine Gun Turret")]
         [Tooltip("Chance for a critical attack in Percent")]
         public float CriticalChance;
-        public float CriticalChanceLevel;
+        public int CriticalChanceLevel;
         [Tooltip("Linear critical chance upgrade amount")]
         public float CriticalChanceUpgradeAmount;
         public float CriticalChanceUpgradeBaseCost;
@@ -44,7 +44,7 @@ namespace Assets.Scripts.SO
 
         [Tooltip("Multiplier for critical damage in Percent")]
         public float CriticalDamageMultiplier;
-        public float CriticalDamageMultiplierLevel;
+        public int CriticalDamageMultiplierLevel;
         [Tooltip("Linear critical damage upgrade amount")]
         public float CriticalDamageMultiplierUpgradeAmount;
         public float CriticalDamageMultiplierUpgradeBaseCost;
@@ -53,14 +53,14 @@ namespace Assets.Scripts.SO
         [Header("Missile Launcher Turret")]
         [Tooltip("Radius of the explosion")]
         public float ExplosionRadius;
-        public float ExplosionRadiusLevel;
+        public int ExplosionRadiusLevel;
         public float ExplosionRadiusUpgradeAmount;
         public float ExplosionRadiusUpgradeBaseCost;
         public float ExplosionRadiusCostExponentialMultiplier;
 
         [Tooltip("Amount of damage dealt to adjacent enemies in the explosion radius")]
         public float SplashDamage;
-        public float SplashDamageLevel;
+        public int SplashDamageLevel;
         public float SplashDamageUpgradeAmount;
         public float SplashDamageUpgradeBaseCost;
         public float SplashDamageCostExponentialMultiplier;
@@ -75,7 +75,7 @@ namespace Assets.Scripts.SO
 
         [Tooltip("Amount of damage falloff for each enemy the bullet pierces through")]
         public float PierceDamageFalloff;
-        public float PierceDamageFalloffLevel;
+        public int PierceDamageFalloffLevel;
         public float PierceDamageFalloffUpgradeAmount;
         public float PierceDamageFalloffUpgradeBaseCost;
         public float PierceDamageFalloffCostExponentialMultiplier;
@@ -97,7 +97,7 @@ namespace Assets.Scripts.SO
 
         [Tooltip("Amount of damage falloff over distance, measured in 1 unit")]
         public float DamageFalloffOverDistance;
-        public float DamageFalloffOverDistanceLevel;
+        public int DamageFalloffOverDistanceLevel;
         public float DamageFalloffOverDistanceUpgradeAmount;
         public float DamageFalloffOverDistanceUpgradeBaseCost;
         public float DamageFalloffOverDistanceCostExponentialMultiplier;
@@ -105,14 +105,14 @@ namespace Assets.Scripts.SO
         [Header("Laser Turret")]
         [Tooltip("Amount of damage added to initial Damage per second active on the same target")]
         public float PercentBonusDamagePerSec;
-        public float PercentBonusDamagePerSecLevel;
+        public int PercentBonusDamagePerSecLevel;
         public float PercentBonusDamagePerSecUpgradeAmount;
         public float PercentBonusDamagePerSecUpgradeBaseCost;
         public float PercentBonusDamagePerSecCostExponentialMultiplier;
 
         [Tooltip("Amount of slow effect applied to the target")]
         public float SlowEffect;
-        public float SlowEffectLevel;
+        public int SlowEffectLevel;
         public float SlowEffectUpgradeAmount;
         public float SlowEffectUpgradeBaseCost;
         public float SlowEffectCostExponentialMultiplier;

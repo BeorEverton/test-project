@@ -46,9 +46,8 @@ namespace Assets.Scripts.UI
             _turret = _baseTurret.GetStats();
 
             // Update the initial data
-            SetTurret();
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
-            UpdateDisplayFromType();
+            //UpdateDisplayFromType();
         }
 
         private void OnEnable()
@@ -68,61 +67,12 @@ namespace Assets.Scripts.UI
             UpdateInteractableState();
         }
 
-        public void SetTurret()
-        {
-            _upgradeManager.SetTurret(_turret, this);
-        }
-
         public void OnClick()
         {
             if (_upgradeManager == null)
                 _upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
 
-            switch (_upgradeType)
-            {
-                case TurretUpgradeType.Damage:
-                    _upgradeManager.UpgradeDamage();
-                    break;
-                case TurretUpgradeType.FireRate:
-                    _upgradeManager.UpgradeFireRate();
-                    break;
-                case TurretUpgradeType.CriticalChance:
-                    _upgradeManager.UpgradeCriticalChance();
-                    break;
-                case TurretUpgradeType.CriticalDamageMultiplier:
-                    _upgradeManager.UpgradeCriticalDamageMultiplier();
-                    break;
-                case TurretUpgradeType.ExplosionRadius:
-                    _upgradeManager.UpgradeExplosionRadius();
-                    break;
-                case TurretUpgradeType.SplashDamage:
-                    _upgradeManager.UpgradeSplashDamage();
-                    break;
-                case TurretUpgradeType.PierceChance:
-                    _upgradeManager.UpgradePierceChance();
-                    break;
-                case TurretUpgradeType.PierceDamageFalloff:
-                    _upgradeManager.UpgradePierceDamageFalloff();
-                    break;
-                case TurretUpgradeType.PelletCount:
-                    _upgradeManager.UpgradePelletCount();
-                    break;
-                case TurretUpgradeType.DamageFalloffOverDistance:
-                    _upgradeManager.UpgradeDamageFalloffOverDistance();
-                    break;
-                case TurretUpgradeType.PercentBonusDamagePerSec:
-                    _upgradeManager.UpgradePercentBonusDamagePerSec();
-                    break;
-                case TurretUpgradeType.SlowEffect:
-                    _upgradeManager.UpgradeSlowEffect();
-                    break;
-                case TurretUpgradeType.KnockbackStrength:
-                    _upgradeManager.UpgradeKnockbackStrength();
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            _upgradeManager.UpgradeStat(_turret, _upgradeType);
         }
 
         public void EnableTooltip()
@@ -135,7 +85,6 @@ namespace Assets.Scripts.UI
         {
             TooltipManager.Instance.HideTooltip();
         }
-
 
         public void UpdateStats(string value, string upgradeAmount, string upgradeCost)
         {
@@ -165,54 +114,54 @@ namespace Assets.Scripts.UI
             };
         }
 
-        public void UpdateDisplayFromType()
-        {
-            switch (_upgradeType)
-            {
-                case TurretUpgradeType.Damage:
-                    _upgradeManager.UpdateDamageDisplay();
-                    break;
-                case TurretUpgradeType.FireRate:
-                    _upgradeManager.UpdateFireRateDisplay();
-                    break;
-                case TurretUpgradeType.CriticalChance:
-                    _upgradeManager.UpdateCriticalChanceDisplay();
-                    break;
-                case TurretUpgradeType.CriticalDamageMultiplier:
-                    _upgradeManager.UpdateCriticalDamageMultiplierDisplay();
-                    break;
-                case TurretUpgradeType.ExplosionRadius:
-                    _upgradeManager.UpdateExplosionRadiusDisplay();
-                    break;
-                case TurretUpgradeType.SplashDamage:
-                    _upgradeManager.UpdateSplashDamageDisplay();
-                    break;
-                case TurretUpgradeType.PierceChance:
-                    _upgradeManager.UpdatePierceChanceDisplay();
-                    break;
-                case TurretUpgradeType.PierceDamageFalloff:
-                    _upgradeManager.UpdatePierceDamageFalloffDisplay();
-                    break;
-                case TurretUpgradeType.PelletCount:
-                    _upgradeManager.UpdatePelletCountDisplay();
-                    break;
-                case TurretUpgradeType.DamageFalloffOverDistance:
-                    _upgradeManager.UpdateDamageFalloffOverDistanceDisplay();
-                    break;
-                case TurretUpgradeType.PercentBonusDamagePerSec:
-                    _upgradeManager.UpdatePercentBonusDamagePerSecDisplay();
-                    break;
-                case TurretUpgradeType.SlowEffect:
-                    _upgradeManager.UpdateSlowEffectDisplay();
-                    break;
-                case TurretUpgradeType.KnockbackStrength:
-                    _upgradeManager.UpdateKnockbackStrengthDisplay();
-                    break;
+        //public void UpdateDisplayFromType()
+        //{
+        //    switch (_upgradeType)
+        //    {
+        //        case TurretUpgradeType.Damage:
+        //            _upgradeManager.UpdateDamageDisplay();
+        //            break;
+        //        case TurretUpgradeType.FireRate:
+        //            _upgradeManager.UpdateFireRateDisplay();
+        //            break;
+        //        case TurretUpgradeType.CriticalChance:
+        //            _upgradeManager.UpdateCriticalChanceDisplay();
+        //            break;
+        //        case TurretUpgradeType.CriticalDamageMultiplier:
+        //            _upgradeManager.UpdateCriticalDamageMultiplierDisplay();
+        //            break;
+        //        case TurretUpgradeType.ExplosionRadius:
+        //            _upgradeManager.UpdateExplosionRadiusDisplay();
+        //            break;
+        //        case TurretUpgradeType.SplashDamage:
+        //            _upgradeManager.UpdateSplashDamageDisplay();
+        //            break;
+        //        case TurretUpgradeType.PierceChance:
+        //            _upgradeManager.UpdatePierceChanceDisplay();
+        //            break;
+        //        case TurretUpgradeType.PierceDamageFalloff:
+        //            _upgradeManager.UpdatePierceDamageFalloffDisplay();
+        //            break;
+        //        case TurretUpgradeType.PelletCount:
+        //            _upgradeManager.UpdatePelletCountDisplay();
+        //            break;
+        //        case TurretUpgradeType.DamageFalloffOverDistance:
+        //            _upgradeManager.UpdateDamageFalloffOverDistanceDisplay();
+        //            break;
+        //        case TurretUpgradeType.PercentBonusDamagePerSec:
+        //            _upgradeManager.UpdatePercentBonusDamagePerSecDisplay();
+        //            break;
+        //        case TurretUpgradeType.SlowEffect:
+        //            _upgradeManager.UpdateSlowEffectDisplay();
+        //            break;
+        //        case TurretUpgradeType.KnockbackStrength:
+        //            _upgradeManager.UpdateKnockbackStrengthDisplay();
+        //            break;
 
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        //        default:
+        //            throw new ArgumentOutOfRangeException();
+        //    }
+        //}
 
         private string GetUpgradeDescription(TurretUpgradeType type)
         {

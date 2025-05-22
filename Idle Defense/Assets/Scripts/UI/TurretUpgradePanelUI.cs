@@ -22,13 +22,13 @@ namespace Assets.Scripts.UI
             _baseTurret = baseTurret;
 
             // Assign turret to all upgrade buttons inside this panel
-            foreach (var btn in contentRoot.GetComponentsInChildren<TurretUpgradeButton>())
+            foreach (TurretUpgradeButton btn in contentRoot.GetComponentsInChildren<TurretUpgradeButton>())
             {
                 btn._baseTurret = _baseTurret;
                 btn.enabled = true;
                 btn.Init();
-                btn.SetTurret();             // ensures UpgradeManager is assigned
-                btn.UpdateDisplayFromType();
+                //btn.SetTurret();             // ensures UpgradeManager is assigned
+                //btn.UpdateDisplayFromType();
             }
 
             gameObject.SetActive(true);

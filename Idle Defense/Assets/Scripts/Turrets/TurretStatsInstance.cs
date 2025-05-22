@@ -20,36 +20,36 @@ namespace Assets.Scripts.Turrets
         public float BaseCritDamage;
 
         public float Damage;
-        public float DamageLevel;
+        public int DamageLevel;
         public float DamageUpgradeAmount;
         public float DamageUpgradeBaseCost;
         public float DamageCostExponentialMultiplier;
 
         public float FireRate;
-        public float FireRateLevel;
+        public int FireRateLevel;
         public float FireRateUpgradeAmount;
         public float FireRateUpgradeBaseCost;
         public float FireRateCostExponentialMultiplier;
 
         public float CriticalChance;
-        public float CriticalChanceLevel;
+        public int CriticalChanceLevel;
         public float CriticalChanceUpgradeAmount;
         public float CriticalChanceUpgradeBaseCost;
         public float CriticalChanceCostExponentialMultiplier;
 
         public float CriticalDamageMultiplier;
-        public float CriticalDamageMultiplierLevel;
+        public int CriticalDamageMultiplierLevel;
         public float CriticalDamageMultiplierUpgradeAmount;
         public float CriticalDamageMultiplierUpgradeBaseCost;
         public float CriticalDamageCostExponentialMultiplier;
 
         public float ExplosionRadius;
-        public float ExplosionRadiusLevel;
+        public int ExplosionRadiusLevel;
         public float ExplosionRadiusUpgradeAmount;
         public float ExplosionRadiusUpgradeBaseCost;
 
         public float SplashDamage;
-        public float SplashDamageLevel;
+        public int SplashDamageLevel;
         public float SplashDamageUpgradeAmount;
         public float SplashDamageUpgradeBaseCost;
 
@@ -59,7 +59,7 @@ namespace Assets.Scripts.Turrets
         public float PierceChanceUpgradeBaseCost;
 
         public float PierceDamageFalloff;
-        public float PierceDamageFalloffLevel;
+        public int PierceDamageFalloffLevel;
         public float PierceDamageFalloffUpgradeAmount;
         public float PierceDamageFalloffUpgradeBaseCost;
 
@@ -69,23 +69,23 @@ namespace Assets.Scripts.Turrets
         public float PelletCountUpgradeBaseCost;
 
         public float DamageFalloffOverDistance;
-        public float DamageFalloffOverDistanceLevel;
+        public int DamageFalloffOverDistanceLevel;
         public float DamageFalloffOverDistanceUpgradeAmount;
         public float DamageFalloffOverDistanceUpgradeBaseCost;
 
         public float KnockbackStrength;
-        public float KnockbackStrengthLevel;
+        public int KnockbackStrengthLevel;
         public float KnockbackStrengthUpgradeAmount;
         public float KnockbackStrengthUpgradeBaseCost;
         public float KnockbackStrengthCostExponentialMultiplier;
 
         public float PercentBonusDamagePerSec;
-        public float PercentBonusDamagePerSecLevel;
+        public int PercentBonusDamagePerSecLevel;
         public float PercentBonusDamagePerSecUpgradeAmount;
         public float PercentBonusDamagePerSecUpgradeBaseCost;
 
         public float SlowEffect;
-        public float SlowEffectLevel;
+        public int SlowEffectLevel;
         public float SlowEffectUpgradeAmount;
         public float SlowEffectUpgradeBaseCost;
 
