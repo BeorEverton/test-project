@@ -21,16 +21,16 @@ namespace Assets.Scripts.SO
         [Tooltip("Upgrade amount per level for MaxHealth")]
         public float MaxHealthUpgradeAmount;
         public float MaxHealthUpgradeBaseCost;
-        public float MaxHealthLevel;
+        public int MaxHealthLevel;
 
         [Tooltip("Upgrade amount per level for RegenAmount")]
         public float RegenAmountUpgradeAmount;
         public float RegenAmountUpgradeBaseCost;
-        public float RegenAmountLevel;
+        public int RegenAmountLevel;
 
         [Tooltip("Upgrade amount per level for RegenInterval (lower is faster)")]
         public float RegenIntervalUpgradeAmount;
         public float RegenIntervalUpgradeBaseCost;
-        public float RegenIntervalLevel;
+        public int RegenIntervalLevel;
     }
 }

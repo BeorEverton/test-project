@@ -42,7 +42,7 @@ namespace Assets.Scripts.Systems.Save
             ulong money = GameManager.Instance.Money;
             GameDataDTO gameDataDTO = SaveDataDTOs.CreateGameDataDTO(waveNumber, money);
 
-            PlayerInfoDTO playerInfoDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.Info);
+            PlayerInfoDTO playerInfoDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.Stats);
 
             TurretInfoDTO machineGunTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_machineGunTurret.GetStats());
             TurretBaseInfoDTO machineGunTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());

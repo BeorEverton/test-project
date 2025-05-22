@@ -121,6 +121,19 @@ namespace Assets.Scripts.Systems
             OnMoneyChanged?.Invoke(money);
         }
 
+        public bool TrySpend(float cost)
+        {
+            if (money >= cost)
+            {
+                SpendMoney((ulong)cost);
+                StatsManager.Instance.UpgradeAmount++;
+                return true;
+            }
+
+            AudioManager.Instance.Play("No Money");
+            return false;
+        }
+
         public void SpendMoney(ulong amount)
         {
             money -= amount;
@@ -140,12 +153,6 @@ namespace Assets.Scripts.Systems
             spdBonus = 0;
             UIManager.Instance.UpdateMoney(money);
             UIManager.Instance.UpdateSpdBonus(spdBonus);
-        }
-
-        public void AddMoneyInt(int amount)
-        {
-            money += (ulong)amount;
-            OnMoneyChanged?.Invoke(money);
         }
     }
 }

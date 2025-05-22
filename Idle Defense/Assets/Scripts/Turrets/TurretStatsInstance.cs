@@ -174,29 +174,6 @@ namespace Assets.Scripts.Turrets
             AngleThreshold = source.AngleThreshold;
         }
 
-        public TurretStatsInstance() //Used to load from DTO
-        {
-        }
-
-        public int GetUpgradeCost(string statName)
-        {
-            return statName switch
-            {
-                nameof(DamageLevel) => (int)(DamageLevel * DamageUpgradeBaseCost),
-                nameof(FireRateLevel) => (int)(FireRateLevel * FireRateUpgradeBaseCost),
-                nameof(CriticalChanceLevel) => (int)(CriticalChanceLevel * CriticalChanceUpgradeBaseCost),
-                nameof(CriticalDamageMultiplierLevel) => (int)(CriticalDamageMultiplierLevel * CriticalDamageMultiplierUpgradeBaseCost),
-                nameof(ExplosionRadiusLevel) => (int)(ExplosionRadiusLevel * ExplosionRadiusUpgradeBaseCost),
-                nameof(SplashDamageLevel) => (int)(SplashDamageLevel * SplashDamageUpgradeBaseCost),
-                nameof(PierceChanceLevel) => (int)(PierceChanceLevel * PierceChanceUpgradeBaseCost),
-                nameof(PierceDamageFalloffLevel) => (int)(PierceDamageFalloffLevel * PierceDamageFalloffUpgradeBaseCost),
-                nameof(PelletCountLevel) => (int)(PelletCountLevel * PelletCountUpgradeBaseCost),
-                nameof(DamageFalloffOverDistanceLevel) => (int)(DamageFalloffOverDistanceLevel * DamageFalloffOverDistanceUpgradeBaseCost),
-                nameof(KnockbackStrengthLevel) => (int)(KnockbackStrengthLevel * KnockbackStrengthUpgradeBaseCost),
-                nameof(PercentBonusDamagePerSecLevel) => (int)(PercentBonusDamagePerSecLevel * PercentBonusDamagePerSecUpgradeBaseCost),
-                nameof(SlowEffectLevel) => (int)(SlowEffectLevel * SlowEffectUpgradeBaseCost),
-                _ => 0
-            };
-        }
+        public TurretStatsInstance() { }//Used to load from DTO
     }
 }

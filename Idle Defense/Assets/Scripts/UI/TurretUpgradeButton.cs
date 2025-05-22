@@ -72,7 +72,7 @@ namespace Assets.Scripts.UI
             if (_upgradeManager == null)
                 _upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
 
-            _upgradeManager.UpgradeStat(_turret, _upgradeType, this);
+            _upgradeManager.UpgradeTurretStat(_turret, _upgradeType, this);
         }
 
         public void EnableTooltip()
@@ -115,7 +115,7 @@ namespace Assets.Scripts.UI
             if (_baseTurret == null || _upgradeManager == null)
                 return;
 
-            float cost = _upgradeManager.GetUpgradeCost(_turret, _upgradeType);
+            float cost = _upgradeManager.GetTurretUpgradeCost(_turret, _upgradeType);
             Button button = GetComponentInChildren<Button>();
 
             if (button != null)

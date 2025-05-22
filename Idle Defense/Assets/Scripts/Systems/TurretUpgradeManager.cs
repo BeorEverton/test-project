@@ -17,7 +17,7 @@ namespace Assets.Scripts.Systems
         [SerializeField] private float quadraticFactor = 0.1f;
         [SerializeField] private float exponentialPower = 1.15f;
 
-        private Dictionary<TurretUpgradeType, TurretUpgrade> _upgrades;
+        private Dictionary<TurretUpgradeType, TurretUpgrade> _turretUpgrades;
 
         private void Start()
         {
@@ -27,7 +27,7 @@ namespace Assets.Scripts.Systems
         #region UpgradeInitialization
         private void InitializeUpgrades()
         {
-            _upgrades = new Dictionary<TurretUpgradeType, TurretUpgrade>
+            _turretUpgrades = new Dictionary<TurretUpgradeType, TurretUpgrade>
             {
                 [TurretUpgradeType.Damage] = new()
                 {
@@ -378,17 +378,19 @@ namespace Assets.Scripts.Systems
         }
         #endregion
 
-        public void UpgradeStat(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
+        public void UpgradeTurretStat(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
         {
-            if (!_upgrades.TryGetValue(type, out TurretUpgrade upgrade))
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
                 return;
 
             float cost = upgrade.GetCost(turret);
+
             if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(turret) >= upgrade.GetMaxValue(turret))
             {
                 UpdateUpgradeDisplay(turret, type, button);
                 return;
             }
+
             if (upgrade.GetMinValue != null && upgrade.GetCurrentValue(turret) <= upgrade.GetMinValue(turret))
             {
                 UpdateUpgradeDisplay(turret, type, button);
@@ -408,21 +410,10 @@ namespace Assets.Scripts.Systems
             }
         }
 
-        public float GetUpgradeCost(TurretStatsInstance turret, TurretUpgradeType type) => !_upgrades.TryGetValue(type, out TurretUpgrade upgrade) ? 0f : upgrade.GetCost(turret);
+        private bool TrySpend(float cost) => GameManager.Instance.TrySpend(cost);
 
-        private bool TrySpend(float cost)
-        {
-            if (GameManager.Instance.Money >= cost)
-            {
-                GameManager.Instance.SpendMoney((ulong)cost);
-                StatsManager.Instance.UpgradeAmount++;
-                return true;
-            }
-
-            AudioManager.Instance.Play("No Money");
-            Debug.Log("Not enough money.");
-            return false;
-        }
+        public float GetTurretUpgradeCost(TurretStatsInstance turret, TurretUpgradeType type) =>
+            !_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) ? 0f : upgrade.GetCost(turret);
 
         private float GetHybridCost(float baseCost, float level)
         {
@@ -437,7 +428,7 @@ namespace Assets.Scripts.Systems
 
         public void UpdateUpgradeDisplay(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
         {
-            if (!_upgrades.TryGetValue(type, out TurretUpgrade upgrade) || turret == null)
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) || turret == null)
                 return;
 
             (string value, string bonus, string cost) = upgrade.GetDisplayStrings(turret);
