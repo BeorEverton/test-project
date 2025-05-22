@@ -1,0 +1,17 @@
+[
+    {
+        "Type": "MaxHealth",
+        "DisplayName": "Base Health",
+        "Description": "Increases base maximum health."
+    },
+    {
+        "Type": "RegenAmount",
+        "DisplayName": "Repair / Tick",
+        "Description": "Increases the amount of heath repaired every tick."
+    },
+    {
+        "Type": "RegenInterval",
+        "DisplayName": "Repair Delay",
+        "Description": "Reduces the time needed to start repairing after taking damage. Minimum 0.5s"
+    }
+]

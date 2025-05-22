@@ -1,4 +1,5 @@
 using Assets.Scripts.Systems;
+using Assets.Scripts.UpgradeSystem;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +18,6 @@ namespace Assets.Scripts.UI
         private PlayerBaseManager _upgradeManager;
         private Button _button;
 
-
         private void Awake()
         {
             var tmpros = GetComponentsInChildren<TextMeshProUGUI>();
@@ -31,6 +31,7 @@ namespace Assets.Scripts.UI
 
             _button = GetComponentInChildren<Button>();
         }
+
         private void OnEnable()
         {
             if (GameManager.Instance)
@@ -43,7 +44,6 @@ namespace Assets.Scripts.UI
             if (GameManager.Instance != null)
                 GameManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
         }
-
 
         private void Start()
         {
@@ -95,13 +95,8 @@ namespace Assets.Scripts.UI
 
         private string GetDisplayNameForUpgrade(PlayerUpgradeType type)
         {
-            return type switch
-            {
-                PlayerUpgradeType.MaxHealth => "Base Health",
-                PlayerUpgradeType.RegenAmount => "Repair / Tick",
-                PlayerUpgradeType.RegenInterval => "Repair Delay",
-                _ => type.ToString()
-            };
+            PlayerBaseUpgradeMeta meta = PlayerBaseUpgradeMetaManager.GetMeta(type);
+            return meta != null ? meta.DisplayName : type.ToString();
         }
 
         public void EnableTooltip()
@@ -117,13 +112,8 @@ namespace Assets.Scripts.UI
 
         private string GetUpgradeDescription(PlayerUpgradeType type)
         {
-            return type switch
-            {
-                PlayerUpgradeType.MaxHealth => "Increases base maximum health.",
-                PlayerUpgradeType.RegenAmount => "Increases the amount of heath repaired every tick.",
-                PlayerUpgradeType.RegenInterval => "Reduces the time needed to start repairing after taking damage. Minimum 0.5s",
-                _ => "Upgrade effect not documented."
-            };
+            PlayerBaseUpgradeMeta meta = PlayerBaseUpgradeMetaManager.GetMeta(type);
+            return meta != null ? meta.Description : "Upgrade effect not documented.";
         }
 
         private void HandleMoneyChanged(ulong _)
