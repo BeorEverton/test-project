@@ -1,5 +1,6 @@
 using Assets.Scripts.Turrets;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Assets.Scripts.UpgradeSystem
 {
@@ -15,7 +16,7 @@ namespace Assets.Scripts.UpgradeSystem
         public Func<TurretStatsInstance, float> GetMaxValue;
         public Func<TurretStatsInstance, float> GetMinValue;
         public Func<TurretStatsInstance, float> GetCost;
-        public Action<TurretStatsInstance> UpdateDisplay;
-        public Action<TurretStatsInstance> OnUpgrade;
+        public Action<TurretStatsInstance> Upgrade;
+        public Func<TurretStatsInstance, (string value, string bonus, string cost)> GetDisplayStrings;
     }
 }

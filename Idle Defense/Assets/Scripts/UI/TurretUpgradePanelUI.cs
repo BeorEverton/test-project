@@ -28,7 +28,7 @@ namespace Assets.Scripts.UI
                 btn.enabled = true;
                 btn.Init();
                 //btn.SetTurret();             // ensures UpgradeManager is assigned
-                //btn.UpdateDisplayFromType();
+                //btn.UpdateDisplay();
             }
 
             gameObject.SetActive(true);

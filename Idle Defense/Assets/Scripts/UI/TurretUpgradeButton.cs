@@ -1,6 +1,5 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,7 +24,7 @@ namespace Assets.Scripts.UI
         private void Awake()
         {
             // Auto-assign the first two TextMeshProUGUI components in children
-            var tmpros = GetComponentsInChildren<TextMeshProUGUI>();
+            TextMeshProUGUI[] tmpros = GetComponentsInChildren<TextMeshProUGUI>();
 
             if (tmpros.Length >= 4)
             {
@@ -47,7 +46,7 @@ namespace Assets.Scripts.UI
 
             // Update the initial data
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
-            //UpdateDisplayFromType();
+            UpdateDisplay();
         }
 
         private void OnEnable()
@@ -72,7 +71,7 @@ namespace Assets.Scripts.UI
             if (_upgradeManager == null)
                 _upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
 
-            _upgradeManager.UpgradeStat(_turret, _upgradeType);
+            _upgradeManager.UpgradeStat(_turret, _upgradeType, this);
         }
 
         public void EnableTooltip()
@@ -114,54 +113,10 @@ namespace Assets.Scripts.UI
             };
         }
 
-        //public void UpdateDisplayFromType()
-        //{
-        //    switch (_upgradeType)
-        //    {
-        //        case TurretUpgradeType.Damage:
-        //            _upgradeManager.UpdateDamageDisplay();
-        //            break;
-        //        case TurretUpgradeType.FireRate:
-        //            _upgradeManager.UpdateFireRateDisplay();
-        //            break;
-        //        case TurretUpgradeType.CriticalChance:
-        //            _upgradeManager.UpdateCriticalChanceDisplay();
-        //            break;
-        //        case TurretUpgradeType.CriticalDamageMultiplier:
-        //            _upgradeManager.UpdateCriticalDamageMultiplierDisplay();
-        //            break;
-        //        case TurretUpgradeType.ExplosionRadius:
-        //            _upgradeManager.UpdateExplosionRadiusDisplay();
-        //            break;
-        //        case TurretUpgradeType.SplashDamage:
-        //            _upgradeManager.UpdateSplashDamageDisplay();
-        //            break;
-        //        case TurretUpgradeType.PierceChance:
-        //            _upgradeManager.UpdatePierceChanceDisplay();
-        //            break;
-        //        case TurretUpgradeType.PierceDamageFalloff:
-        //            _upgradeManager.UpdatePierceDamageFalloffDisplay();
-        //            break;
-        //        case TurretUpgradeType.PelletCount:
-        //            _upgradeManager.UpdatePelletCountDisplay();
-        //            break;
-        //        case TurretUpgradeType.DamageFalloffOverDistance:
-        //            _upgradeManager.UpdateDamageFalloffOverDistanceDisplay();
-        //            break;
-        //        case TurretUpgradeType.PercentBonusDamagePerSec:
-        //            _upgradeManager.UpdatePercentBonusDamagePerSecDisplay();
-        //            break;
-        //        case TurretUpgradeType.SlowEffect:
-        //            _upgradeManager.UpdateSlowEffectDisplay();
-        //            break;
-        //        case TurretUpgradeType.KnockbackStrength:
-        //            _upgradeManager.UpdateKnockbackStrengthDisplay();
-        //            break;
-
-        //        default:
-        //            throw new ArgumentOutOfRangeException();
-        //    }
-        //}
+        public void UpdateDisplay()
+        {
+            _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
+        }
 
         private string GetUpgradeDescription(TurretUpgradeType type)
         {
@@ -189,26 +144,9 @@ namespace Assets.Scripts.UI
             if (_baseTurret == null || _upgradeManager == null)
                 return;
 
-            float cost = _upgradeType switch
-            {
-                TurretUpgradeType.Damage => _upgradeManager.GetDamageUpgradeCost(_turret),
-                TurretUpgradeType.FireRate => _upgradeManager.GetFireRateUpgradeCost(_turret),
-                TurretUpgradeType.CriticalChance => _upgradeManager.GetCriticalChanceUpgradeCost(_turret),
-                TurretUpgradeType.CriticalDamageMultiplier => _upgradeManager.GetCriticalDamageMultiplierUpgradeCost(_turret),
-                TurretUpgradeType.ExplosionRadius => _upgradeManager.GetExplosionRadiusUpgradeCost(_turret),
-                TurretUpgradeType.SplashDamage => _upgradeManager.GetSplashDamageUpgradeCost(_turret),
-                TurretUpgradeType.PierceChance => _upgradeManager.GetPierceChanceUpgradeCost(_turret),
-                TurretUpgradeType.PierceDamageFalloff => _upgradeManager.GetPierceDamageFalloffUpgradeCost(_turret),
-                TurretUpgradeType.PelletCount => _upgradeManager.GetPelletCountUpgradeCost(_turret),
-                TurretUpgradeType.DamageFalloffOverDistance => _upgradeManager.GetDamageFalloffOverDistanceUpgradeCost(_turret),
-                TurretUpgradeType.PercentBonusDamagePerSec => _upgradeManager.GetBonusDamagePerSecUpgradeCost(_turret),
-                TurretUpgradeType.SlowEffect => _upgradeManager.GetSlowEffectUpgradeCost(_turret),
-                TurretUpgradeType.KnockbackStrength => _upgradeManager.GetKnockbackStrengthUpgradeCost(_turret),
-
-                _ => float.MaxValue
-            };
-
+            float cost = _upgradeManager.GetUpgradeCost(_turret, _upgradeType);
             Button button = GetComponentInChildren<Button>();
+
             if (button != null)
                 button.interactable = GameManager.Instance.Money >= (ulong)cost;
         }

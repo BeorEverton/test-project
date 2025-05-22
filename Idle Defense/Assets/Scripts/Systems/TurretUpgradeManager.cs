@@ -10,8 +10,6 @@ namespace Assets.Scripts.Systems
 {
     public class TurretUpgradeManager : MonoBehaviour
     {
-        private TurretUpgradeButton turretUpgradeButton;
-
         public static event Action OnAnyTurretUpgraded;
 
         [Header("Cost Scaling Settings")]
@@ -26,6 +24,7 @@ namespace Assets.Scripts.Systems
             InitializeUpgrades();
         }
 
+        #region UpgradeInitialization
         private void InitializeUpgrades()
         {
             _upgrades = new Dictionary<TurretUpgradeType, TurretUpgrade>
@@ -42,8 +41,18 @@ namespace Assets.Scripts.Systems
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetDamageUpgradeCost,
-                    UpdateDisplay = UpdateDamageDisplay,
-                    OnUpgrade = UpgradeDamage
+                    GetDisplayStrings = t =>
+                        {
+                            float current = t.Damage;
+                            float nextLevel = t.DamageLevel + 1f;
+                            float nextDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, nextLevel) + nextLevel;
+                            float bonus = nextDamage - current;
+                            float cost = GetDamageUpgradeCost(t);
+
+                            return (UIManager.AbbreviateNumber(current),
+                                $"+{UIManager.AbbreviateNumber(bonus)}",
+                                $"${UIManager.AbbreviateNumber(cost)}");
+                        }
                 },
                 [TurretUpgradeType.FireRate] = new()
                 {
@@ -57,8 +66,18 @@ namespace Assets.Scripts.Systems
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetFireRateUpgradeCost,
-                    UpdateDisplay = UpdateFireRateDisplay,
-                    OnUpgrade = UpgradeFireRate
+                    GetDisplayStrings = t =>
+                    {
+                        float currentFireRate = t.FireRate;
+                        float bonusFireRate = t.FireRateUpgradeAmount;
+                        float cost = GetFireRateUpgradeCost(t);
+
+                        return (
+                        $"{currentFireRate:F2}/s",
+                        $"+{bonusFireRate:F2}/s",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.CriticalChance] = new()
                 {
@@ -72,8 +91,21 @@ namespace Assets.Scripts.Systems
                     GetMaxValue = t => 50f,
                     GetMinValue = t => 0f,
                     GetCost = GetCriticalChanceUpgradeCost,
-                    UpdateDisplay = UpdateCriticalChanceDisplay,
-                    OnUpgrade = UpgradeCriticalChance
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.CriticalChance;
+                        float bonus = t.CriticalChanceUpgradeAmount;
+                        float cost = GetCriticalChanceUpgradeCost(t);
+
+                        if (current >= 50f)
+                            return ($"{(int)current}%", "Max", "");
+
+                        return (
+                            $"{(int)current}%",
+                            $"+{(int)bonus}%",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.CriticalDamageMultiplier] = new()
                 {
@@ -87,8 +119,18 @@ namespace Assets.Scripts.Systems
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetCriticalDamageMultiplierUpgradeCost,
-                    UpdateDisplay = UpdateCriticalDamageMultiplierDisplay,
-                    OnUpgrade = UpgradeCriticalDamageMultiplier
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.CriticalDamageMultiplier;
+                        float bonus = t.CriticalDamageMultiplierUpgradeAmount;
+                        float cost = GetCriticalDamageMultiplierUpgradeCost(t);
+
+                        return (
+                            $"{(int)current}%",
+                            $"+{(int)bonus}%",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.ExplosionRadius] = new()
                 {
@@ -96,14 +138,27 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.ExplosionRadius = v,
                     GetLevel = t => t.ExplosionRadiusLevel,
                     SetLevel = (t, v) => t.ExplosionRadiusLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.ExplosionRadius,
                     GetUpgradeAmount = t => t.ExplosionRadiusUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetExplosionRadiusUpgradeCost,
-                    UpdateDisplay = UpdateExplosionRadiusDisplay,
-                    OnUpgrade = UpgradeExplosionRadius
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.ExplosionRadius;
+                        float bonus = t.ExplosionRadiusUpgradeAmount;
+                        float cost = GetExplosionRadiusUpgradeCost(t);
+
+                        if (t.ExplosionRadius >= 5f)
+                            return ($"{current:F1}", "Max", "");
+
+                        return (
+                            $"{current:F1}",
+                            $"+{bonus:F1}",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.SplashDamage] = new()
                 {
@@ -111,14 +166,24 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.SplashDamage = v,
                     GetLevel = t => t.SplashDamageLevel,
                     SetLevel = (t, v) => t.SplashDamageLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.SplashDamage,
                     GetUpgradeAmount = t => t.SplashDamageUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetSplashDamageUpgradeCost,
-                    UpdateDisplay = UpdateSplashDamageDisplay,
-                    OnUpgrade = UpgradeSplashDamage
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.SplashDamage;
+                        float bonus = t.SplashDamageUpgradeAmount;
+                        float cost = GetSplashDamageUpgradeCost(t);
+
+                        return (
+                            UIManager.AbbreviateNumber(current),
+                            $"+{UIManager.AbbreviateNumber(bonus)}",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.PierceChance] = new()
                 {
@@ -126,14 +191,27 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PierceChance = v,
                     GetLevel = t => t.PierceChanceLevel,
                     SetLevel = (t, v) => t.PierceChanceLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.PierceChance,
                     GetUpgradeAmount = t => t.PierceChanceUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => 100f,
                     GetMinValue = t => 0f,
                     GetCost = GetPierceChanceUpgradeCost,
-                    UpdateDisplay = UpdatePierceChanceDisplay,
-                    OnUpgrade = UpgradePierceChance
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.PierceChance;
+                        float bonus = t.PierceChanceUpgradeAmount;
+                        float cost = GetPierceChanceUpgradeCost(t);
+
+                        if (current >= 100f)
+                            return ($"{current:F1}%", "Max", "");
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.PierceDamageFalloff] = new()
                 {
@@ -141,14 +219,29 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PierceDamageFalloff = v,
                     GetLevel = t => t.PierceDamageFalloffLevel,
                     SetLevel = (t, v) => t.PierceDamageFalloffLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.PierceDamageFalloff,
                     GetUpgradeAmount = t => t.PierceDamageFalloffUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetPierceDamageFalloffUpgradeCost,
-                    UpdateDisplay = UpdatePierceDamageFalloffDisplay,
-                    OnUpgrade = UpgradePierceDamageFalloff
+                    GetDisplayStrings = t =>
+                    {
+                        float currentFalloff = t.PierceDamageFalloff;
+                        float currentRetained = 100f - currentFalloff;
+
+                        float nextFalloff = Mathf.Max(0f, currentFalloff - t.PierceDamageFalloffUpgradeAmount);
+                        float nextRetained = 100f - nextFalloff;
+
+                        float bonus = nextRetained - currentRetained;
+                        float cost = GetPierceDamageFalloffUpgradeCost(t);
+
+                        return (
+                            $"{currentRetained:F1}%",
+                            $"+{bonus:F1}%",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.PelletCount] = new()
                 {
@@ -156,14 +249,24 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PelletCount = (int)v,
                     GetLevel = t => t.PelletCountLevel,
                     SetLevel = (t, v) => t.PelletCountLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.PelletCount,
                     GetUpgradeAmount = t => t.PelletCountUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetPelletCountUpgradeCost,
-                    UpdateDisplay = UpdatePelletCountDisplay,
-                    OnUpgrade = UpgradePelletCount
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.PelletCount;
+                        float bonus = t.PelletCountUpgradeAmount;
+                        float cost = GetPelletCountUpgradeCost(t);
+
+                        return (
+                            UIManager.AbbreviateNumber(current),
+                            $"+{UIManager.AbbreviateNumber(bonus)}",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.DamageFalloffOverDistance] = new()
                 {
@@ -171,14 +274,27 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.DamageFalloffOverDistance = v,
                     GetLevel = t => t.DamageFalloffOverDistanceLevel,
                     SetLevel = (t, v) => t.DamageFalloffOverDistanceLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.DamageFalloffOverDistance,
                     GetUpgradeAmount = t => t.DamageFalloffOverDistanceUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetDamageFalloffOverDistanceUpgradeCost,
-                    UpdateDisplay = UpdateDamageFalloffOverDistanceDisplay,
-                    OnUpgrade = UpgradeDamageFalloffOverDistance
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.DamageFalloffOverDistance;
+                        float bonus = t.DamageFalloffOverDistanceUpgradeAmount;
+                        float cost = GetDamageFalloffOverDistanceUpgradeCost(t);
+
+                        if (current <= 0f)
+                            return ($"{current:F1}%", "Max", "");
+
+                        return (
+                                $"{current:F1}%",
+                                $"-{bonus:F1}%",
+                                $"${UIManager.AbbreviateNumber(cost)}"
+                            );
+                    }
                 },
                 [TurretUpgradeType.KnockbackStrength] = new()
                 {
@@ -186,14 +302,24 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.KnockbackStrength = v,
                     GetLevel = t => t.KnockbackStrengthLevel,
                     SetLevel = (t, v) => t.KnockbackStrengthLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.KnockbackStrength,
                     GetUpgradeAmount = t => t.KnockbackStrengthUpgradeAmount,
                     GetCostMultiplier = t => t.KnockbackStrengthCostExponentialMultiplier,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetKnockbackStrengthUpgradeCost,
-                    UpdateDisplay = UpdateKnockbackStrengthDisplay,
-                    OnUpgrade = UpgradeKnockbackStrength
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.KnockbackStrength;
+                        float bonus = t.KnockbackStrengthUpgradeAmount;
+                        float cost = GetKnockbackStrengthUpgradeCost(t);
+
+                        return (
+                            $"{current:F1}",
+                            $"+{bonus:F1}",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.PercentBonusDamagePerSec] = new()
                 {
@@ -201,14 +327,24 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PercentBonusDamagePerSec = v,
                     GetLevel = t => t.PercentBonusDamagePerSecLevel,
                     SetLevel = (t, v) => t.PercentBonusDamagePerSecLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.PercentBonusDamagePerSec,
                     GetUpgradeAmount = t => t.PercentBonusDamagePerSecUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
                     GetCost = GetBonusDamagePerSecUpgradeCost,
-                    UpdateDisplay = UpdatePercentBonusDamagePerSecDisplay,
-                    OnUpgrade = UpgradePercentBonusDamagePerSec
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.PercentBonusDamagePerSec;
+                        float bonus = t.PercentBonusDamagePerSecUpgradeAmount;
+                        float cost = GetBonusDamagePerSecUpgradeCost(t);
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 },
                 [TurretUpgradeType.SlowEffect] = new()
                 {
@@ -216,19 +352,33 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.SlowEffect = v,
                     GetLevel = t => t.SlowEffectLevel,
                     SetLevel = (t, v) => t.SlowEffectLevel = v,
-                    GetBaseCode = t => 0f,
+                    GetBaseCode = t => t.SlowEffect,
                     GetUpgradeAmount = t => t.SlowEffectUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => 100f,
                     GetMinValue = t => 0f,
                     GetCost = GetSlowEffectUpgradeCost,
-                    UpdateDisplay = UpdateSlowEffectDisplay,
-                    OnUpgrade = UpgradeSlowEffect
+                    GetDisplayStrings = t =>
+                    {
+                        float current = t.SlowEffect;
+                        float bonus = t.SlowEffectUpgradeAmount;
+                        float cost = GetSlowEffectUpgradeCost(t);
+
+                        if (current >= 100f)
+                            return ($"{current:F1}%", "Max", "");
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"${UIManager.AbbreviateNumber(cost)}"
+                        );
+                    }
                 }
             };
         }
+        #endregion
 
-        public void UpgradeStat(TurretStatsInstance turret, TurretUpgradeType type)
+        public void UpgradeStat(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
         {
             if (!_upgrades.TryGetValue(type, out TurretUpgrade upgrade))
                 return;
@@ -236,12 +386,12 @@ namespace Assets.Scripts.Systems
             float cost = upgrade.GetCost(turret);
             if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(turret) >= upgrade.GetMaxValue(turret))
             {
-                upgrade.UpdateDisplay?.Invoke(turret);
+                UpdateUpgradeDisplay(turret, type, button);
                 return;
             }
             if (upgrade.GetMinValue != null && upgrade.GetCurrentValue(turret) <= upgrade.GetMinValue(turret))
             {
-                upgrade.UpdateDisplay?.Invoke(turret);
+                UpdateUpgradeDisplay(turret, type, button);
                 return;
             }
 
@@ -250,13 +400,15 @@ namespace Assets.Scripts.Systems
                 float newValue = upgrade.GetCurrentValue(turret) + upgrade.GetUpgradeAmount(turret);
                 upgrade.SetCurrentValue(turret, newValue);
                 upgrade.SetLevel(turret, upgrade.GetLevel(turret) + 1);
-                upgrade.UpdateDisplay?.Invoke(turret);
                 AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                upgrade.OnUpgrade?.Invoke(turret);
+                button._baseTurret.UpdateTurretAppearance();
+                upgrade.Upgrade?.Invoke(turret);
+                UpdateUpgradeDisplay(turret, type, button);
                 OnAnyTurretUpgraded?.Invoke();
             }
         }
+
+        public float GetUpgradeCost(TurretStatsInstance turret, TurretUpgradeType type) => !_upgrades.TryGetValue(type, out TurretUpgrade upgrade) ? 0f : upgrade.GetCost(turret);
 
         private bool TrySpend(float cost)
         {
@@ -275,513 +427,21 @@ namespace Assets.Scripts.Systems
         private float GetHybridCost(float baseCost, float level)
         {
             if (level < hybridThreshold)
-            {
                 return baseCost * (1f + level * level * quadraticFactor);
-            }
-            else
-            {
-                return baseCost * Mathf.Pow(exponentialPower, level);
-            }
+
+            return baseCost * Mathf.Pow(exponentialPower, level);
         }
 
-        private float GetExponentialCost_PlusLevel(float baseCost, float level, float exponentialMultiplier)
+        private float GetExponentialCost_PlusLevel(float baseCost, float level, float exponentialMultiplier) => baseCost + Mathf.Pow(exponentialMultiplier, level) + level;
+        private float GetExponentialCost(float baseCost, float level, float multiplier) => baseCost * Mathf.Pow(multiplier, level);
+
+        public void UpdateUpgradeDisplay(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
         {
-            return baseCost + Mathf.Pow(exponentialMultiplier, level) + level;
-        }
-
-        private float GetExponentialCost(float baseCost, float level, float multiplier)
-        {
-            return baseCost * Mathf.Pow(multiplier, level);
-        }
-
-
-        public float GetKnockbackStrengthUpgradeCost(TurretStatsInstance t) =>
-    GetHybridCost(t.KnockbackStrengthUpgradeBaseCost, t.KnockbackStrengthLevel);
-
-
-        public void UpgradeDamage(TurretStatsInstance turret)
-        {
-            float cost = GetExponentialCost_PlusLevel(turret.DamageUpgradeBaseCost, turret.DamageLevel, turret.DamageCostExponentialMultiplier);
-
-            if (TrySpend(cost))
-            {
-                turret.DamageLevel++;
-                turret.Damage = turret.BaseDamage * Mathf.Pow(turret.DamageUpgradeAmount, turret.DamageLevel) + turret.DamageLevel;
-                UpdateDamageDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-
-        }
-
-        public void UpgradeFireRate(TurretStatsInstance turret)
-        {
-            float cost = GetExponentialCost_PlusLevel(turret.FireRateUpgradeBaseCost, turret.FireRateLevel, turret.FireRateCostExponentialMultiplier);
-
-            if (TrySpend(cost))
-            {
-                turret.FireRateLevel++;
-                turret.FireRate = turret.BaseFireRate + turret.FireRateUpgradeAmount * turret.FireRateLevel;
-                UpdateFireRateDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        public void UpgradeCriticalChance(TurretStatsInstance turret)
-        {
-            if (turret.CriticalChance >= 50f)
+            if (!_upgrades.TryGetValue(type, out TurretUpgrade upgrade) || turret == null)
                 return;
 
-            float cost = GetExponentialCost(turret.CriticalChanceUpgradeBaseCost, turret.CriticalChanceLevel, turret.CriticalChanceCostExponentialMultiplier);
-
-            if (TrySpend(cost))
-            {
-                turret.CriticalChanceLevel++;
-                turret.CriticalChance = Mathf.Min(50f, turret.BaseCritChance + turret.CriticalChanceUpgradeAmount * turret.CriticalChanceLevel);
-                UpdateCriticalChanceDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-
-        }
-
-        public void UpgradeCriticalDamageMultiplier(TurretStatsInstance turret)
-        {
-            float cost = GetExponentialCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel, turret.CriticalDamageCostExponentialMultiplier);
-
-            if (TrySpend(cost))
-            {
-                turret.CriticalDamageMultiplierLevel++;
-                turret.CriticalDamageMultiplier = turret.BaseCritDamage + turret.CriticalDamageMultiplierUpgradeAmount * turret.CriticalDamageMultiplierLevel;
-                UpdateCriticalDamageMultiplierDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-
-        }
-
-        public void UpgradeExplosionRadius(TurretStatsInstance turret)
-        {
-            if (turret.ExplosionRadius >= 5f)
-            {
-                UpdateExplosionRadiusDisplay(turret); // Update UI to show Max if needed
-                return;
-            }
-
-            float cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
-            if (TrySpend(cost))
-            {
-                turret.ExplosionRadius += turret.ExplosionRadiusUpgradeAmount;
-                turret.ExplosionRadiusLevel++;
-                UpdateExplosionRadiusDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-
-        }
-
-
-        public void UpgradeSplashDamage(TurretStatsInstance turret)
-        {
-            float cost = GetHybridCost(turret.SplashDamageUpgradeBaseCost, turret.SplashDamageLevel);
-            if (TrySpend(cost))
-            {
-                turret.SplashDamage += turret.SplashDamageUpgradeAmount;
-                turret.SplashDamageLevel++;
-                UpdateSplashDamageDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        public void UpgradePierceChance(TurretStatsInstance turret)
-        {
-            if (turret.PierceChance >= 100f)
-                return;
-
-            float cost = GetHybridCost(turret.PierceChanceUpgradeBaseCost, turret.PierceChanceLevel);
-            if (TrySpend(cost))
-            {
-                turret.PierceChance = Mathf.Min(100f, turret.PierceChance + turret.PierceChanceUpgradeAmount);
-                turret.PierceChanceLevel += 1;
-                UpdatePierceChanceDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-
-        public void UpgradePierceDamageFalloff(TurretStatsInstance turret)
-        {
-            float cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
-            if (TrySpend(cost))
-            {
-                turret.PierceDamageFalloff -= turret.PierceDamageFalloffUpgradeAmount;
-                turret.PierceDamageFalloffLevel++;
-                UpdatePierceDamageFalloffDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        public void UpgradePelletCount(TurretStatsInstance turret)
-        {
-            float cost = GetHybridCost(turret.PelletCountUpgradeBaseCost, turret.PelletCountLevel);
-            if (TrySpend(cost))
-            {
-                turret.PelletCount += turret.PelletCountUpgradeAmount;
-                turret.PelletCountLevel += 1;
-                UpdatePelletCountDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        public void UpgradeDamageFalloffOverDistance(TurretStatsInstance turret)
-        {
-            if (turret.DamageFalloffOverDistance <= 0f)
-            {
-                UpdateDamageFalloffOverDistanceDisplay(turret); // Still update UI if player clicks it
-                return;
-            }
-
-            float cost = GetHybridCost(turret.DamageFalloffOverDistanceUpgradeBaseCost, turret.DamageFalloffOverDistanceLevel);
-            if (TrySpend(cost))
-            {
-                turret.DamageFalloffOverDistance -= turret.DamageFalloffOverDistanceUpgradeAmount;
-                turret.DamageFalloffOverDistance = Mathf.Max(0f, turret.DamageFalloffOverDistance); // Clamp to avoid negative values
-                turret.DamageFalloffOverDistanceLevel++;
-                UpdateDamageFalloffOverDistanceDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        public void UpgradeKnockbackStrength(TurretStatsInstance turret)
-        {
-            float cost = GetExponentialCost(
-                turret.KnockbackStrengthUpgradeBaseCost,
-                turret.KnockbackStrengthLevel,
-                turret.KnockbackStrengthCostExponentialMultiplier
-            );
-
-            if (TrySpend(cost))
-            {
-                turret.KnockbackStrengthLevel++;
-                turret.KnockbackStrength += turret.KnockbackStrengthUpgradeAmount;
-                UpdateKnockbackStrengthDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        public void UpgradePercentBonusDamagePerSec(TurretStatsInstance turret)
-        {
-            float cost = GetHybridCost(turret.PercentBonusDamagePerSecUpgradeBaseCost, turret.PercentBonusDamagePerSecLevel);
-            if (TrySpend(cost))
-            {
-                turret.PercentBonusDamagePerSec += turret.PercentBonusDamagePerSecUpgradeAmount;
-                turret.PercentBonusDamagePerSecLevel++;
-                UpdatePercentBonusDamagePerSecDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        public void UpgradeSlowEffect(TurretStatsInstance turret)
-        {
-            if (turret.SlowEffect >= 100f)
-            {
-                UpdateSlowEffectDisplay(turret); // Update UI to show Max
-                return;
-            }
-
-            float cost = GetHybridCost(turret.SlowEffectUpgradeBaseCost, turret.SlowEffectLevel);
-            if (TrySpend(cost))
-            {
-                turret.SlowEffect += turret.SlowEffectUpgradeAmount;
-                turret.SlowEffect = Mathf.Min(turret.SlowEffect, 100f); // Clamp to 100%
-                turret.SlowEffectLevel++;
-                UpdateSlowEffectDisplay(turret);
-                AudioManager.Instance.Play("Upgrade");
-                turretUpgradeButton._baseTurret.UpdateTurretAppearance();
-                OnAnyTurretUpgraded?.Invoke();
-            }
-        }
-
-        // Update Display Methods
-
-        public void UpdateDamageDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-
-            float current = turret.Damage;
-
-            // Predict next level damage without actually upgrading
-            float nextLevel = turret.DamageLevel + 1f;
-            float nextDamage = turret.BaseDamage * Mathf.Pow(turret.DamageUpgradeAmount, nextLevel) + nextLevel;
-
-            float bonus = nextDamage - current;
-
-            float cost = GetExponentialCost_PlusLevel(
-                turret.DamageUpgradeBaseCost,
-                turret.DamageLevel,
-                turret.DamageCostExponentialMultiplier
-            );
-
-            turretUpgradeButton.UpdateStats(
-                UIManager.AbbreviateNumber(current),
-                $"+{UIManager.AbbreviateNumber(bonus)}",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-
-        public void UpdateFireRateDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-
-            float currentAttackSpeed = turret.FireRate;
-            float bonusSPS = turret.FireRateUpgradeAmount;
-            float cost = GetExponentialCost_PlusLevel(turret.FireRateUpgradeBaseCost, turret.FireRateLevel, turret.FireRateCostExponentialMultiplier);
-
-            turretUpgradeButton.UpdateStats(
-                $"{currentAttackSpeed:F2}/s",
-                $"+{bonusSPS:F2}/s",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-        public void UpdateCriticalChanceDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-
-            float current = turret.CriticalChance;
-            float bonus = turret.CriticalChanceUpgradeAmount;
-            float cost = GetExponentialCost(
-                turret.CriticalChanceUpgradeBaseCost,
-                turret.CriticalChanceLevel,
-                turret.CriticalChanceCostExponentialMultiplier
-            );
-
-            if (current >= 50f)
-            {
-                turretUpgradeButton.UpdateStats($"{(int)current}%", "Max", "");
-            }
-            else
-            {
-                turretUpgradeButton.UpdateStats(
-                    $"{(int)current}%",
-                    $"+{(int)bonus}%",
-                    $"${UIManager.AbbreviateNumber(cost)}"
-                );
-            }
-        }
-
-
-        public void UpdateCriticalDamageMultiplierDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.CriticalDamageMultiplier;
-            float bonus = turret.CriticalDamageMultiplierUpgradeAmount;
-            float cost = GetExponentialCost(turret.CriticalDamageMultiplierUpgradeBaseCost, turret.CriticalDamageMultiplierLevel, turret.CriticalDamageCostExponentialMultiplier);
-            turretUpgradeButton.UpdateStats(
-                $"{(int)current}%",
-                    $"+{(int)bonus}%",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-        public void UpdateExplosionRadiusDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.ExplosionRadius;
-            float bonus = turret.ExplosionRadiusUpgradeAmount;
-            float cost = GetHybridCost(turret.ExplosionRadiusUpgradeBaseCost, turret.ExplosionRadiusLevel);
-
-            if (turret.ExplosionRadius >= 5f)
-            {
-                turretUpgradeButton.UpdateStats($"{current:F1}", "Max", "");
-            }
-            else
-            {
-                turretUpgradeButton.UpdateStats(
-                    $"{current:F1}",
-                    $"+{bonus:F1}",
-                    $"${UIManager.AbbreviateNumber(cost)}"
-                );
-            }
-        }
-
-        public void UpdateSplashDamageDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.SplashDamage;
-            float bonus = turret.SplashDamageUpgradeAmount;
-            float cost = GetHybridCost(turret.SplashDamageUpgradeBaseCost, turret.SplashDamageLevel);
-            turretUpgradeButton.UpdateStats(
-                UIManager.AbbreviateNumber(current),
-                $"+{UIManager.AbbreviateNumber(bonus)}",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-        public void UpdatePierceChanceDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.PierceChance;
-            float bonus = turret.PierceChanceUpgradeAmount;
-            float cost = GetHybridCost(turret.PierceChanceUpgradeBaseCost, turret.PierceChanceLevel);
-
-            if (current >= 100f)
-            {
-                turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
-            }
-            else
-            {
-                turretUpgradeButton.UpdateStats(
-                    $"{current:F1}%",
-                    $"+{bonus:F1}%",
-                    $"${UIManager.AbbreviateNumber(cost)}"
-                );
-            }
-        }
-
-        public void UpdatePierceDamageFalloffDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-
-            float currentFalloff = turret.PierceDamageFalloff;
-            float currentRetained = 100f - currentFalloff;
-
-            // Predict next values
-            float nextFalloff = Mathf.Max(0f, currentFalloff - turret.PierceDamageFalloffUpgradeAmount);
-            float nextRetained = 100f - nextFalloff;
-
-            float bonus = nextRetained - currentRetained;
-            float cost = GetHybridCost(turret.PierceDamageFalloffUpgradeBaseCost, turret.PierceDamageFalloffLevel);
-
-            turretUpgradeButton.UpdateStats(
-                $"{currentRetained:F1}%",
-                $"+{bonus:F1}%",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-        public void UpdatePelletCountDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.PelletCount;
-            float bonus = turret.PelletCountUpgradeAmount;
-            float cost = GetHybridCost(turret.PelletCountUpgradeBaseCost, turret.PelletCountLevel);
-
-            turretUpgradeButton.UpdateStats(
-                UIManager.AbbreviateNumber(current),
-                $"+{UIManager.AbbreviateNumber(bonus)}",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-        public void UpdateKnockbackStrengthDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-
-            float current = turret.KnockbackStrength;
-            float bonus = turret.KnockbackStrengthUpgradeAmount;
-            float cost = GetExponentialCost(
-                turret.KnockbackStrengthUpgradeBaseCost,
-                turret.KnockbackStrengthLevel,
-                turret.KnockbackStrengthCostExponentialMultiplier
-            );
-
-
-            turretUpgradeButton.UpdateStats(
-                $"{current:F1}",
-                $"+{bonus:F1}",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-        public void UpdateDamageFalloffOverDistanceDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.DamageFalloffOverDistance;
-            float bonus = turret.DamageFalloffOverDistanceUpgradeAmount;
-            float cost = GetHybridCost(turret.DamageFalloffOverDistanceUpgradeBaseCost, turret.DamageFalloffOverDistanceLevel);
-
-            if (current <= 0f)
-            {
-                turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
-            }
-            else
-            {
-                turretUpgradeButton.UpdateStats(
-                    $"{current:F1}%",
-                    $"-{bonus:F1}%",
-                    $"${UIManager.AbbreviateNumber(cost)}"
-                );
-            }
-        }
-
-        public void UpdatePercentBonusDamagePerSecDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.PercentBonusDamagePerSec;
-            float bonus = turret.PercentBonusDamagePerSecUpgradeAmount;
-            float cost = GetHybridCost(turret.PercentBonusDamagePerSecUpgradeBaseCost, turret.PercentBonusDamagePerSecLevel);
-
-            turretUpgradeButton.UpdateStats(
-                $"{current:F1}%",
-                $"+{bonus:F1}%",
-                $"${UIManager.AbbreviateNumber(cost)}"
-            );
-        }
-
-        public void UpdateSlowEffectDisplay(TurretStatsInstance turret)
-        {
-            if (turret == null)
-                return;
-            float current = turret.SlowEffect;
-            float bonus = turret.SlowEffectUpgradeAmount;
-            float cost = GetHybridCost(turret.SlowEffectUpgradeBaseCost, turret.SlowEffectLevel);
-
-            if (current >= 100f)
-            {
-                turretUpgradeButton.UpdateStats($"{current:F1}%", "Max", "");
-            }
-            else
-            {
-                turretUpgradeButton.UpdateStats(
-                    $"{current:F1}%",
-                    $"+{bonus:F1}%",
-                    $"${UIManager.AbbreviateNumber(cost)}"
-                );
-            }
+            (string value, string bonus, string cost) = upgrade.GetDisplayStrings(turret);
+            button.UpdateStats(value, bonus, cost);
         }
 
         // Used for enabling/disabling the buttons on the UI based on their costs
@@ -820,8 +480,10 @@ namespace Assets.Scripts.Systems
 
         public float GetSlowEffectUpgradeCost(TurretStatsInstance t) =>
             GetHybridCost(t.SlowEffectUpgradeBaseCost, t.SlowEffectLevel);
-    }
 
+        public float GetKnockbackStrengthUpgradeCost(TurretStatsInstance t) =>
+            GetHybridCost(t.KnockbackStrengthUpgradeBaseCost, t.KnockbackStrengthLevel);
+    }
 
     public enum TurretUpgradeType
     {
