@@ -109,7 +109,7 @@ namespace Assets.Scripts.UI
                 // reuse current panel
                 activePanel.SetActive(true);
                 activePanel.GetComponent<TurretUpgradePanelUI>()
-                    .Open(slotIndex, inst, GetComponentInChildren<BaseTurret>());
+                    .Open(slotIndex, GetComponentInChildren<BaseTurret>());
             }
             else
             {
@@ -133,7 +133,7 @@ namespace Assets.Scripts.UI
                     currentPanelTurretType = inst.TurretType;
 
                     var ui = activePanel.GetComponent<TurretUpgradePanelUI>();
-                    ui.Open(slotIndex, inst, GetComponentInChildren<BaseTurret>());
+                    ui.Open(slotIndex, GetComponentInChildren<BaseTurret>());
                 }
                 else
                 {

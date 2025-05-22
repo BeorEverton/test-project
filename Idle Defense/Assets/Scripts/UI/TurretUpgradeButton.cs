@@ -1,5 +1,6 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
+using Assets.Scripts.UpgradeSystem;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -94,49 +95,19 @@ namespace Assets.Scripts.UI
 
         private string GetDisplayNameForUpgrade(TurretUpgradeType type)
         {
-            return type switch
-            {
-                TurretUpgradeType.Damage => "Damage",
-                TurretUpgradeType.FireRate => "Fire Rate",
-                TurretUpgradeType.CriticalChance => "Critical Chance",
-                TurretUpgradeType.CriticalDamageMultiplier => "Critical Damage",
-                TurretUpgradeType.ExplosionRadius => "Explosion Radius",
-                TurretUpgradeType.SplashDamage => "Splash Damage",
-                TurretUpgradeType.PierceChance => "Pierce Chance",
-                TurretUpgradeType.PierceDamageFalloff => "Pierce Damage",
-                TurretUpgradeType.PelletCount => "Pellet Count",
-                TurretUpgradeType.DamageFalloffOverDistance => "Range Falloff",
-                TurretUpgradeType.PercentBonusDamagePerSec => "Bonus Dmg/s",
-                TurretUpgradeType.SlowEffect => "Slow Effect",
-                TurretUpgradeType.KnockbackStrength => "Knockback",
-                _ => type.ToString()
-            };
+            TurretUpgradeMeta meta = TurretUpgradeMetaManager.GetMeta(type);
+            return meta != null ? meta.DisplayName : type.ToString();
+        }
+
+        private string GetUpgradeDescription(TurretUpgradeType type)
+        {
+            TurretUpgradeMeta meta = TurretUpgradeMetaManager.GetMeta(type);
+            return meta != null ? meta.Description : "Upgrade effect not documented.";
         }
 
         public void UpdateDisplay()
         {
             _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
-        }
-
-        private string GetUpgradeDescription(TurretUpgradeType type)
-        {
-            return type switch
-            {
-                TurretUpgradeType.Damage => "Increases turret base damage.",
-                TurretUpgradeType.FireRate => "Increases shots per second. Faster firing speed.",
-                TurretUpgradeType.CriticalChance => "Raises chance for critical hits. Max 50%.",
-                TurretUpgradeType.CriticalDamageMultiplier => "Increases damage multiplier for critical hits.",
-                TurretUpgradeType.ExplosionRadius => "Enlarges explosion area of missiles.",
-                TurretUpgradeType.SplashDamage => "Damages nearby enemies hit by explosions.",
-                TurretUpgradeType.PierceChance => "Adds chance for shots to pierce through enemies.",
-                TurretUpgradeType.PierceDamageFalloff => "Reduces the damage lost on each pierced enemy.",
-                TurretUpgradeType.PelletCount => "Adds more pellets per shotgun shot.",
-                TurretUpgradeType.DamageFalloffOverDistance => "Reduces damage lost over distance for shotgun.",
-                TurretUpgradeType.PercentBonusDamagePerSec => "Damage increases the longer it hits the same target.",
-                TurretUpgradeType.SlowEffect => "Applies a slowing effect on enemies hit.",
-                TurretUpgradeType.KnockbackStrength => "Pushes enemies back on hit. Stronger knockback per level.",
-                _ => "Upgrade effect not documented."
-            };
         }
 
         public void UpdateInteractableState()

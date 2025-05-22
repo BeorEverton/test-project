@@ -1,0 +1,72 @@
+[
+    {
+        "Type": "Damage",
+        "DisplayName": "Damage",
+        "Description": "Increases turret base damage."
+    },
+    {
+        "Type": "FireRate",
+        "DisplayName": "Fire Rate",
+        "Description": "Increases shots per second. Faster firing speed."
+    },
+    {
+        "Type": "CriticalChance",
+        "DisplayName": "Critical Chance",
+        "Description": "Raises chance for critical hits. Max 50%."
+    },
+    {
+        "Type": "CriticalDamageMultiplier",
+        "DisplayName": "Critical Damage",
+        "Description": "Increases damage multiplier for critical hits."
+    },
+    {
+        "Type": "ExplosionRadius",
+        "DisplayName": "Explosion Radius",
+        "Description": "Enlarges explosion area of missiles."
+    },
+    {
+        "Type": "SplashDamage",
+        "DisplayName": "Splash Damage",
+        "Description": "Damages nearby enemies hit by explosions."
+    },
+    {
+        "Type": "PierceChance",
+        "DisplayName": "Pierce Chance",
+        "Description": "Increases chance for shots to pierce through enemies."
+    },
+    {
+        "Type": "PierceDamageFalloff",
+        "DisplayName": "Pierce Damage",
+        "Description": "Reduces the damage lost on each pierced enemy."
+    },
+    {
+        "Type": "PelletCount",
+        "DisplayName": "Pellet Count",
+        "Description": "Adds more pellets per shotgun shot."
+    },
+    {
+        "Type": "DamageFalloffOverDistance",
+        "DisplayName": "Range Falloff",
+        "Description": "Reduces damage lost over distance for shotgun."
+    },
+    {
+        "Type": "PercentBonusDamagePerSec",
+        "DisplayName": "Bonus Dmg/s",
+        "Description": "Damage increases the longer it hits the same target."
+    },
+    {
+        "Type": "SlowEffect",
+        "DisplayName": "Slow Effect",
+        "Description": "Applies a slowing effect on enemies hit."
+    },
+    {
+        "Type": "KnockbackStrength",
+        "DisplayName": "Knockback",
+        "Description": "Pushes enemies back on hit. Stronger knockback per level."
+    },
+    {
+        "Type": "Unkown",
+        "DisplayName": "Unknown",
+        "Description": "Upgrade effect not documented."
+    }
+]

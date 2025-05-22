@@ -10,15 +10,13 @@ namespace Assets.Scripts.UI
         [Header("UI")]
         [SerializeField] private Button unequipButton;
         [SerializeField] private Transform contentRoot;   // Parent of all TurretUpgradeButtons
-        private TurretStatsInstance _stats;          // stats of the turret in this slot
 
         private int _slotIndex;
         private BaseTurret _baseTurret;
 
-        public void Open(int slotIndex, TurretStatsInstance stats, BaseTurret baseTurret)
+        public void Open(int slotIndex, BaseTurret baseTurret)
         {
             _slotIndex = slotIndex;
-            _stats = stats;
             _baseTurret = baseTurret;
 
             // Assign turret to all upgrade buttons inside this panel
@@ -27,8 +25,6 @@ namespace Assets.Scripts.UI
                 btn._baseTurret = _baseTurret;
                 btn.enabled = true;
                 btn.Init();
-                //btn.SetTurret();             // ensures UpgradeManager is assigned
-                //btn.UpdateDisplay();
             }
 
             gameObject.SetActive(true);
