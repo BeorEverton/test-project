@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4012000093620566100, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Name
-      value: ScoutEnemy
+      value: Scout
       objectReference: {fileID: 0}
     - target: {fileID: 5550549370963425500, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_LocalPosition.x
@@ -68,6 +68,14 @@ PrefabInstance:
       propertyPath: _info
       value: 
       objectReference: {fileID: 11400000, guid: e14df854d79048343ab120d8b697d125, type: 2}
+    - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_Size.x
+      value: 1.74
+      objectReference: {fileID: 0}
+    - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_Size.y
+      value: 1.6040626
+      objectReference: {fileID: 0}
     - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Sprite
       value: 

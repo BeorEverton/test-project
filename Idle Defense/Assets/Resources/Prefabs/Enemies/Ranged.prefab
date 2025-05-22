@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4012000093620566100, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Name
-      value: RangedEnemy_01
+      value: Ranged
       objectReference: {fileID: 0}
     - target: {fileID: 4054926558504893090, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -84,6 +84,14 @@ PrefabInstance:
       propertyPath: _starterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 1e6569d70efb577439529de6c16daab7, type: 2}
+    - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_Size.x
+      value: 1.8300002
+      objectReference: {fileID: 0}
+    - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_Size.y
+      value: 1.60125
+      objectReference: {fileID: 0}
     - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Sprite
       value: 

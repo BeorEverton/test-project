@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4012000093620566100, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Name
-      value: SniperEnemy Variant
+      value: Sniper
       objectReference: {fileID: 0}
     - target: {fileID: 5550549370963425500, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_LocalPosition.x
@@ -68,6 +68,14 @@ PrefabInstance:
       propertyPath: _info
       value: 
       objectReference: {fileID: 11400000, guid: 3a7a6fa86d47e4a4c94e8866219bf94a, type: 2}
+    - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_Size.x
+      value: 1.9318519
+      objectReference: {fileID: 0}
+    - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: m_Size.y
+      value: 1.63
+      objectReference: {fileID: 0}
     - target: {fileID: 8915718066707412222, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: m_Sprite
       value: 
