@@ -26,7 +26,7 @@ namespace IdleDefense.Editor.Simulation
                 for (int i = 0; i < iterations; i++)
                 {
                     var stats = SimulationEngine.Run(minutes, clicksPerSec, mode);
-                    CsvExporter.Append(stats);
+                    CsvExporter.Append(stats, mode);
                 }
                 Debug.Log($" Simulation done ({iterations} runs) - Assets/SimResults/results.csv");
             }

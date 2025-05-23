@@ -1,8 +1,8 @@
 // Assets/Editor/Simulation/SpendingStrategies.cs
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.Turrets;  // for TurretType
 using UnityEngine;
+using Assets.Scripts.Turrets;  // for TurretType
 
 namespace IdleDefense.Editor.Simulation
 {
@@ -10,11 +10,6 @@ namespace IdleDefense.Editor.Simulation
 
     public interface ISpendingStrategy
     {
-        /// <summary>
-        /// Called every tick. You get a ref to coins (so you can spend),
-        /// a ref to the list of turret slots (so you can replace entries),
-        /// and the current wave index if you need it.
-        /// </summary>
         void Tick(ref ulong coins,
                   ref List<TurretBlueprint> slots,
                   int currentWave);
@@ -35,54 +30,76 @@ namespace IdleDefense.Editor.Simulation
     }
 
     // ---------------------------------------------------------
-    // Cheapest: finds the single cheapest upgrade across all slots
+    // Cheapest: finds the single cheapest next upgrade across all slots and stats
     // ---------------------------------------------------------
     class CheapestStrategy : ISpendingStrategy
     {
         public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
-            // copy coin balance to a local so loops can use it
-            ulong available = coins;
-            int bestSlot = -1;
-            bool bestIsDamage = false;
             ulong bestCost = ulong.MaxValue;
+            int bestSlot = -1;
+            int bestUpgrade = -1; // index into our list of upgrade types
 
+            // for each slot, check every upgrade cost
             for (int i = 0; i < slots.Count; i++)
             {
-                TurretBlueprint t = slots[i];
-
-                // damage upgrade cost
-                ulong costD = t.CostPerDamageUp;
-                if (costD <= available && costD < bestCost)
+                var t = slots[i];
+                var costs = new ulong[]
                 {
-                    bestCost = costD;
-                    bestSlot = i;
-                    bestIsDamage = true;
-                }
+                    (ulong)t.DamageUpgradeBaseCost,
+                    (ulong)t.FireRateUpgradeBaseCost,
+                    (ulong)t.CritChanceUpgradeBaseCost,
+                    (ulong)t.CritDamageUpgradeBaseCost,
+                    (ulong)t.ExplosionRadiusUpgradeBaseCost,
+                    (ulong)t.SplashDamageUpgradeBaseCost,
+                    (ulong)t.PierceChanceUpgradeBaseCost,
+                    (ulong)t.PierceDamageFalloffUpgradeBaseCost,
+                    (ulong)t.PelletCountUpgradeBaseCost,
+                    (ulong)t.KnockbackStrengthUpgradeBaseCost,
+                    (ulong)t.DamageFalloffOverDistanceUpgradeBaseCost,
+                    (ulong)t.PercentBonusDamagePerSecUpgradeBaseCost,
+                    (ulong)t.SlowEffectUpgradeBaseCost
+                };
 
-                // fire rate upgrade cost
-                ulong costF = t.CostPerFireRateUp;
-                if (costF <= available && costF < bestCost)
+                for (int u = 0; u < costs.Length; u++)
                 {
-                    bestCost = costF;
-                    bestSlot = i;
-                    bestIsDamage = false;
+                    var c = costs[u];
+                    if (c <= coins && c < bestCost)
+                    {
+                        bestCost = c;
+                        bestSlot = i;
+                        bestUpgrade = u;
+                    }
                 }
             }
 
             if (bestSlot >= 0)
             {
                 coins -= bestCost;
-                TurretBlueprint bp = slots[bestSlot];
-                slots[bestSlot] = bestIsDamage
-                    ? bp.WithDamageUpgraded()
-                    : bp.WithFireRateUpgraded();
+                var bp = slots[bestSlot];
+                // apply the chosen upgrade
+                switch (bestUpgrade)
+                {
+                    case 0: slots[bestSlot] = bp.WithDamageUpgraded(); break;
+                    case 1: slots[bestSlot] = bp.WithFireRateUpgraded(); break;
+                    case 2: slots[bestSlot] = bp.WithCritChanceUpgraded(); break;
+                    case 3: slots[bestSlot] = bp.WithCritDamageUpgraded(); break;
+                    case 4: slots[bestSlot] = bp.WithExplosionRadiusUpgraded(); break;
+                    case 5: slots[bestSlot] = bp.WithSplashDamageUpgraded(); break;
+                    case 6: slots[bestSlot] = bp.WithPierceChanceUpgraded(); break;
+                    case 7: slots[bestSlot] = bp.WithPierceDamageFalloffUpgraded(); break;
+                    case 8: slots[bestSlot] = bp.WithPelletCountUpgraded(); break;
+                    case 9: slots[bestSlot] = bp.WithKnockbackStrengthUpgraded(); break;
+                    case 10: slots[bestSlot] = bp.WithDamageFalloffOverDistanceUpgraded(); break;
+                    case 11: slots[bestSlot] = bp.WithPercentBonusDamagePerSecUpgraded(); break;
+                    case 12: slots[bestSlot] = bp.WithSlowEffectUpgraded(); break;
+                }
             }
         }
     }
 
     // ---------------------------------------------------------
-    // Random: picks one affordable upgrade at random each tick
+    // Random: picks a random upgrade among all affordable options
     // ---------------------------------------------------------
     class RandomStrategy : ISpendingStrategy
     {
@@ -90,31 +107,54 @@ namespace IdleDefense.Editor.Simulation
 
         public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
-            ulong available = coins;
-            var candidates = new List<(int idx, bool isDamage, ulong cost)>(slots.Count * 2);
+            var candidates = new List<(int slot, int upgrade, ulong cost)>();
 
             for (int i = 0; i < slots.Count; i++)
             {
-                TurretBlueprint t = slots[i];
-                ulong costD = t.CostPerDamageUp;
-                if (costD <= available)
-                    candidates.Add((i, true, costD));
+                var t = slots[i];
+                var costs = new ulong[]
+                {
+                    (ulong)t.DamageUpgradeBaseCost,
+                    (ulong)t.FireRateUpgradeBaseCost,
+                    (ulong)t.CritChanceUpgradeBaseCost,
+                    (ulong)t.CritDamageUpgradeBaseCost,
+                    (ulong)t.ExplosionRadiusUpgradeBaseCost,
+                    (ulong)t.SplashDamageUpgradeBaseCost,
+                    (ulong)t.PierceChanceUpgradeBaseCost,
+                    (ulong)t.PierceDamageFalloffUpgradeBaseCost,
+                    (ulong)t.PelletCountUpgradeBaseCost,
+                    (ulong)t.KnockbackStrengthUpgradeBaseCost,
+                    (ulong)t.DamageFalloffOverDistanceUpgradeBaseCost,
+                    (ulong)t.PercentBonusDamagePerSecUpgradeBaseCost,
+                    (ulong)t.SlowEffectUpgradeBaseCost
+                };
 
-                ulong costF = t.CostPerFireRateUp;
-                if (costF <= available)
-                    candidates.Add((i, false, costF));
+                for (int u = 0; u < costs.Length; u++)
+                    if (costs[u] <= coins)
+                        candidates.Add((i, u, costs[u]));
             }
 
-            if (candidates.Count == 0)
-                return;
+            if (candidates.Count == 0) return;
 
             var pick = candidates[rng.Next(candidates.Count)];
             coins -= pick.cost;
-
-            TurretBlueprint bp = slots[pick.idx];
-            slots[pick.idx] = pick.isDamage
-                ? bp.WithDamageUpgraded()
-                : bp.WithFireRateUpgraded();
+            var bp = slots[pick.slot];
+            switch (pick.upgrade)
+            {
+                case 0: slots[pick.slot] = bp.WithDamageUpgraded(); break;
+                case 1: slots[pick.slot] = bp.WithFireRateUpgraded(); break;
+                case 2: slots[pick.slot] = bp.WithCritChanceUpgraded(); break;
+                case 3: slots[pick.slot] = bp.WithCritDamageUpgraded(); break;
+                case 4: slots[pick.slot] = bp.WithExplosionRadiusUpgraded(); break;
+                case 5: slots[pick.slot] = bp.WithSplashDamageUpgraded(); break;
+                case 6: slots[pick.slot] = bp.WithPierceChanceUpgraded(); break;
+                case 7: slots[pick.slot] = bp.WithPierceDamageFalloffUpgraded(); break;
+                case 8: slots[pick.slot] = bp.WithPelletCountUpgraded(); break;
+                case 9: slots[pick.slot] = bp.WithKnockbackStrengthUpgraded(); break;
+                case 10: slots[pick.slot] = bp.WithDamageFalloffOverDistanceUpgraded(); break;
+                case 11: slots[pick.slot] = bp.WithPercentBonusDamagePerSecUpgraded(); break;
+                case 12: slots[pick.slot] = bp.WithSlowEffectUpgraded(); break;
+            }
         }
     }
 
@@ -127,48 +167,63 @@ namespace IdleDefense.Editor.Simulation
         {
             float bestScore = 0f;
             int bestSlot = -1;
-            bool bestIsDamage = false;
+            int bestUpgrade = -1;
             ulong bestCost = 0;
 
-            // evaluate every possible upgrade
             for (int i = 0; i < slots.Count; i++)
             {
-                TurretBlueprint t = slots[i];
+                var t = slots[i];
                 float baseDps = t.DamagePerSecond();
 
-                // damage upgrade
+                var costs = new ulong[]
                 {
-                    ulong cost = t.CostPerDamageUp;
-                    if (cost <= coins)
-                    {
-                        var up = t.WithDamageUpgraded();
-                        float delta = up.DamagePerSecond() - baseDps;
-                        float score = delta / cost;
-                        if (score > bestScore)
-                        {
-                            bestScore = score;
-                            bestSlot = i;
-                            bestIsDamage = true;
-                            bestCost = cost;
-                        }
-                    }
-                }
+                    (ulong)t.DamageUpgradeBaseCost,
+                    (ulong)t.FireRateUpgradeBaseCost,
+                    (ulong)t.CritChanceUpgradeBaseCost,
+                    (ulong)t.CritDamageUpgradeBaseCost,
+                    (ulong)t.ExplosionRadiusUpgradeBaseCost,
+                    (ulong)t.SplashDamageUpgradeBaseCost,
+                    (ulong)t.PierceChanceUpgradeBaseCost,
+                    (ulong)t.PierceDamageFalloffUpgradeBaseCost,
+                    (ulong)t.PelletCountUpgradeBaseCost,
+                    (ulong)t.KnockbackStrengthUpgradeBaseCost,
+                    (ulong)t.DamageFalloffOverDistanceUpgradeBaseCost,
+                    (ulong)t.PercentBonusDamagePerSecUpgradeBaseCost,
+                    (ulong)t.SlowEffectUpgradeBaseCost
+                };
 
-                // fire rate upgrade
+                for (int u = 0; u < costs.Length; u++)
                 {
-                    ulong cost = t.CostPerFireRateUp;
-                    if (cost <= coins)
+                    var cost = costs[u];
+                    if (cost > coins) continue;
+
+                    // simulate applying the u-th upgrade
+                    TurretBlueprint up = t;
+                    switch (u)
                     {
-                        var up = t.WithFireRateUpgraded();
-                        float delta = up.DamagePerSecond() - baseDps;
-                        float score = delta / cost;
-                        if (score > bestScore)
-                        {
-                            bestScore = score;
-                            bestSlot = i;
-                            bestIsDamage = false;
-                            bestCost = cost;
-                        }
+                        case 0: up = t.WithDamageUpgraded(); break;
+                        case 1: up = t.WithFireRateUpgraded(); break;
+                        case 2: up = t.WithCritChanceUpgraded(); break;
+                        case 3: up = t.WithCritDamageUpgraded(); break;
+                        case 4: up = t.WithExplosionRadiusUpgraded(); break;
+                        case 5: up = t.WithSplashDamageUpgraded(); break;
+                        case 6: up = t.WithPierceChanceUpgraded(); break;
+                        case 7: up = t.WithPierceDamageFalloffUpgraded(); break;
+                        case 8: up = t.WithPelletCountUpgraded(); break;
+                        case 9: up = t.WithKnockbackStrengthUpgraded(); break;
+                        case 10: up = t.WithDamageFalloffOverDistanceUpgraded(); break;
+                        case 11: up = t.WithPercentBonusDamagePerSecUpgraded(); break;
+                        case 12: up = t.WithSlowEffectUpgraded(); break;
+                    }
+
+                    float delta = up.DamagePerSecond() - baseDps;
+                    float score = delta / cost;
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        bestSlot = i;
+                        bestUpgrade = u;
+                        bestCost = cost;
                     }
                 }
             }
@@ -176,10 +231,23 @@ namespace IdleDefense.Editor.Simulation
             if (bestSlot >= 0)
             {
                 coins -= bestCost;
-                TurretBlueprint bp = slots[bestSlot];
-                slots[bestSlot] = bestIsDamage
-                    ? bp.WithDamageUpgraded()
-                    : bp.WithFireRateUpgraded();
+                var bp = slots[bestSlot];
+                switch (bestUpgrade)
+                {
+                    case 0: slots[bestSlot] = bp.WithDamageUpgraded(); break;
+                    case 1: slots[bestSlot] = bp.WithFireRateUpgraded(); break;
+                    case 2: slots[bestSlot] = bp.WithCritChanceUpgraded(); break;
+                    case 3: slots[bestSlot] = bp.WithCritDamageUpgraded(); break;
+                    case 4: slots[bestSlot] = bp.WithExplosionRadiusUpgraded(); break;
+                    case 5: slots[bestSlot] = bp.WithSplashDamageUpgraded(); break;
+                    case 6: slots[bestSlot] = bp.WithPierceChanceUpgraded(); break;
+                    case 7: slots[bestSlot] = bp.WithPierceDamageFalloffUpgraded(); break;
+                    case 8: slots[bestSlot] = bp.WithPelletCountUpgraded(); break;
+                    case 9: slots[bestSlot] = bp.WithKnockbackStrengthUpgraded(); break;
+                    case 10: slots[bestSlot] = bp.WithDamageFalloffOverDistanceUpgraded(); break;
+                    case 11: slots[bestSlot] = bp.WithPercentBonusDamagePerSecUpgraded(); break;
+                    case 12: slots[bestSlot] = bp.WithSlowEffectUpgraded(); break;
+                }
             }
         }
     }

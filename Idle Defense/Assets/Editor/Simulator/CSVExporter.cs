@@ -8,47 +8,73 @@ namespace IdleDefense.Editor.Simulation
     {
         const string Folder = "Assets/SimResults";
         const string FileName = "results.csv";
-
-        // Flag to ensure we only schedule one refresh per batch
         static bool _refreshScheduled = false;
 
-        public static void Append(SimStats stats)
+        public static void Append(SimStats s, SpendingMode mode)
         {
-            // 1) Ensure folder exists
             if (!Directory.Exists(Folder))
                 Directory.CreateDirectory(Folder);
 
-            // 2) Determine path
             string path = Path.Combine(Folder, FileName);
-
-            // 3) Append header if new file
             bool writeHeader = !File.Exists(path);
-            using (var sw = new StreamWriter(path, append: true))
-            {
-                if (writeHeader)
-                    sw.WriteLine("WavesBeaten,EnemiesKilled,TimesDefeated,SimMinutes");
 
+            using var sw = new StreamWriter(path, append: true);
+            if (writeHeader)
+            {
                 sw.WriteLine(
-                    $"{stats.WavesBeaten}," +
-                    $"{stats.EnemiesKilled}," +
-                    $"{stats.TimesDefeated}," +
-                    $"{stats.SimMinutes}"
+                    "SpendingMode," +
+                    "WavesBeaten,EnemiesKilled,BossesKilled,TotalDamageDealt," +
+                    "MaxZone,MoneySpent,UpgradeAmount," +
+                    // new cols:
+                    "UpgradeHistory,TurretStats,BaseStats," +
+                    "TotalDamageTaken,TotalHealthRepaired,MissionsFailed," +
+                    "SpeedBoostClicks,MachineGunDamage,ShotgunDamage," +
+                    "SniperDamage,MissileLauncherDamage,LaserDamage,SimMinutes"
                 );
+
             }
 
-            // 4) Schedule a single, deferred AssetDatabase.Refresh()
+            string history = string.Join("|", s.UpgradeHistory);
+            string turretSS = string.Join("|", s.TurretSnapshots);
+            string baseSS = string.Join("|", s.BaseSnapshots);
+
+
+            sw.WriteLine(
+                $"{mode}," +
+                $"{s.WavesBeaten}," +
+                $"{s.EnemiesKilled}," +
+                $"{s.BossesKilled}," +
+                $"{s.TotalDamageDealt:F2}," +
+                $"{s.MaxZone}," +
+                $"{s.MoneySpent:F0}," +
+                $"{s.UpgradeAmount}," +
+                // new fields:
+                $"\"{history}\"," +
+                $"\"{turretSS}\"," +
+                $"\"{baseSS}\"," +
+                $"{s.TotalDamageTaken:F2}," +
+                $"{s.TotalHealthRepaired:F2}," +
+                $"{s.MissionsFailed}," +
+                $"{s.SpeedBoostClicks}," +
+                $"{s.MachineGunDamage:F2}," +
+                $"{s.ShotgunDamage:F2}," +
+                $"{s.SniperDamage:F2}," +
+                $"{s.MissileLauncherDamage:F2}," +
+                $"{s.LaserDamage:F2}," +
+                $"{s.SimMinutes:F2}"
+    );
+            sw.Flush();
+
             if (!_refreshScheduled)
             {
                 _refreshScheduled = true;
-                EditorApplication.delayCall += DoRefresh;
+                EditorApplication.delayCall += () =>
+                {
+                    AssetDatabase.Refresh();
+                    _refreshScheduled = false;
+                };
             }
         }
 
-        private static void DoRefresh()
-        {
-            AssetDatabase.Refresh();
-            _refreshScheduled = false;
-            EditorApplication.delayCall -= DoRefresh;
-        }
     }
 }
