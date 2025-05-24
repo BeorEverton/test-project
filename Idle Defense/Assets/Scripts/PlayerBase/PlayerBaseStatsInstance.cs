@@ -1,6 +1,5 @@
 using Assets.Scripts.SO;
 using System;
-using UnityEngine;
 
 namespace Assets.Scripts.PlayerBase
 {

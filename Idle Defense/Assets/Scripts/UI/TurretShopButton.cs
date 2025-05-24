@@ -1,11 +1,10 @@
+using Assets.Scripts.SO;
+using Assets.Scripts.Systems;
+using Assets.Scripts.WaveSystem;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Assets.Scripts.Systems;
-using Assets.Scripts.Turrets;
-using Assets.Scripts.WaveSystem;
-using Assets.Scripts.SO;
 
 namespace Assets.Scripts.UI
 {
@@ -17,15 +16,15 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI countText;     // “x3”
         [SerializeField] private TextMeshProUGUI costText;      // “$10k”
         //[SerializeField] private TextMeshProUGUI lockText;      // “Wave 30”
-        [SerializeField] private TextMeshProUGUI dpsText;      
-        [SerializeField] private Image  lockIcon;      
+        [SerializeField] private TextMeshProUGUI dpsText;
+        [SerializeField] private Image lockIcon;
         [SerializeField] private Button buyButton;
 
         private void Start()
         {
             buyButton.onClick.AddListener(TryBuy);
             GameManager.Instance.OnMoneyChanged += _ => Refresh();
-            TurretInventoryManager.I.OnInventoryChanged += Refresh;
+            TurretInventoryManager.Instance.OnInventoryChanged += Refresh;
             WaveManager.Instance.OnWaveStarted += (_, __) => Refresh();
             Refresh();
         }
@@ -35,15 +34,17 @@ namespace Assets.Scripts.UI
             buyButton.onClick.RemoveListener(TryBuy);
             if (GameManager.Instance != null)
                 GameManager.Instance.OnMoneyChanged -= _ => Refresh();
-            if (TurretInventoryManager.I != null)
-                TurretInventoryManager.I.OnInventoryChanged -= Refresh;
+
+            if (TurretInventoryManager.Instance != null)
+                TurretInventoryManager.Instance.OnInventoryChanged -= Refresh;
+
             if (WaveManager.Instance != null)
                 WaveManager.Instance.OnWaveStarted -= (_, __) => Refresh();
         }
 
         private void Refresh()
         {
-            var inv = TurretInventoryManager.I;
+            TurretInventoryManager inv = TurretInventoryManager.Instance;
             int owned = inv.Owned.Count(t => t.TurretType == turretType);
 
             if (owned >= 5)
@@ -74,7 +75,7 @@ namespace Assets.Scripts.UI
                 icon.color = Color.black;
                 //lockText.gameObject.SetActive(true);
                 lockIcon.gameObject.SetActive(true);
-               // lockText.text = $"Not owned";
+                // lockText.text = $"Not owned";
             }
 
             // Continue with normal pricing
@@ -126,21 +127,19 @@ namespace Assets.Scripts.UI
 
         private void UpdateDPSDisplay()
         {
-            TurretInfoSO info = TurretInventoryManager.I.GetInfoSO(turretType);
+            TurretInfoSO info = TurretInventoryManager.Instance.GetInfoSO(turretType);
             float dps = TurretStatsCalculator.CalculateDPS(info);
-            if (info.TurretType == TurretType.Laser)
-                dpsText.text = $">{dps:F1} DPS";
-            else
-                dpsText.text = $"{dps:F1} DPS";
+            dpsText.text = info.TurretType == TurretType.Laser
+                ? $">{dps:F1} DPS"
+                : $"{dps:F1} DPS";
         }
 
 
         private void TryBuy()
         {
-            if (TurretInventoryManager.I.TryPurchase(turretType))
-                UIManager.Instance.ShowToast("Turret bought!");
-            else
-                UIManager.Instance.ShowToast("Need more coins");
+            UIManager.Instance.ShowToast(TurretInventoryManager.Instance.TryPurchase(turretType)
+                ? "Turret bought!"
+                : "Need more coins");
             Refresh();
         }
     }

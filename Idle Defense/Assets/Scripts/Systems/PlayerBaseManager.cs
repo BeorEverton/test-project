@@ -1,7 +1,6 @@
 using Assets.Scripts.PlayerBase;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems.Audio;
-using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
 using System;
 using UnityEngine;
@@ -52,6 +51,7 @@ namespace Assets.Scripts.Systems
         {
             Stats = SavedStats ?? new PlayerBaseStatsInstance(_baseInfo);
 
+            UpdatePlayerBaseAppearance();
             InitializeGame();
         }
 
@@ -130,7 +130,6 @@ namespace Assets.Scripts.Systems
 
             if (_currentHealth >= _runtimeMaxHealth)
             {
-                // Play full health sound
                 AudioManager.Instance.Play("Full Health");
             }
         }
@@ -196,13 +195,6 @@ namespace Assets.Scripts.Systems
             _runtimeRegenInterval = Mathf.Max(MinRegenInterval, _runtimeRegenInterval - Stats.RegenIntervalUpgradeAmount);
             UpdatePlayerBaseAppearance();
             AudioManager.Instance.Play("Upgrade");
-        }
-
-        public void LoadPlayerBase(PlayerBaseStatsInstance savedStats)
-        {
-            Stats = savedStats;
-            UpdatePlayerBaseAppearance();
-            InitializeGame();
         }
 
         public void ResetPlayerBase()

@@ -1,5 +1,6 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -22,17 +23,18 @@ namespace Assets.Scripts.UI
         public void Close() => gameObject.SetActive(false);
 
         // -------------------------------------------------------------------------
+
         private void RefreshList()
         {
             // Clear old cards
             foreach (Transform c in listParent)
                 Destroy(c.gameObject);
 
-            var equippedIds = TurretSlotManager.Instance.ExportEquipped()
+            HashSet<int> equippedIds = TurretSlotManager.Instance.ExportEquipped()
                 .Where(id => id >= 0)
                 .ToHashSet();
 
-            var owned = TurretInventoryManager.I.Owned;
+            List<TurretStatsInstance> owned = TurretInventoryManager.Instance.Owned;
 
             for (int i = 0; i < owned.Count; i++)
             {
@@ -42,8 +44,8 @@ namespace Assets.Scripts.UI
                 TurretStatsInstance inst = owned[i];
 
                 // Spawn card prefab
-                var card = Instantiate(itemPrefab, listParent);
-                var btn = card.GetComponent<EquipItemButton>();
+                EquipItemButton card = Instantiate(itemPrefab, listParent);
+                EquipItemButton btn = card.GetComponent<EquipItemButton>();
 
                 // Pick icon that matches this turret's current level
                 Sprite icon = TurretIconUtility.GetIcon(inst);
@@ -60,6 +62,5 @@ namespace Assets.Scripts.UI
                 );
             }
         }
-
     }
 }

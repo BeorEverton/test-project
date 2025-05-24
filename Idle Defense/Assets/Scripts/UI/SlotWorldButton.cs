@@ -3,6 +3,7 @@ using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,6 +42,7 @@ namespace Assets.Scripts.UI
         private GameObject spawned;
 
         /* --------------------------------------------------------- */
+
         private void Start()
         {
             TurretSlotManager.Instance.OnEquippedChanged += RefreshSlot;
@@ -61,6 +63,7 @@ namespace Assets.Scripts.UI
         }
 
         /* ---------------- main click ----------------------------- */
+
         public void OnSlotClicked()
         {
             UIManager.Instance.DeactivateRightPanels();
@@ -69,7 +72,6 @@ namespace Assets.Scripts.UI
             {
                 tab.Deselect();
             }
-
 
             AudioManager.Instance.Play("Click");
 
@@ -93,8 +95,6 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-
-
             TurretStatsInstance inst = TurretSlotManager.Instance.Get(slotIndex);
 
             if (inst == null)
@@ -117,22 +117,14 @@ namespace Assets.Scripts.UI
                 if (activePanel != null)
                     Destroy(activePanel);
 
-                GameObject panelPrefab = null;
-                foreach (var mapping in panelMappings)
-                {
-                    if (mapping.type == inst.TurretType)
-                    {
-                        panelPrefab = mapping.panelPrefab;
-                        break;
-                    }
-                }
+                GameObject panelPrefab = (from mapping in panelMappings where mapping.type == inst.TurretType select mapping.panelPrefab).FirstOrDefault();
 
                 if (panelPrefab != null)
                 {
                     activePanel = Instantiate(panelPrefab, canvasTransform);
                     currentPanelTurretType = inst.TurretType;
 
-                    var ui = activePanel.GetComponent<TurretUpgradePanelUI>();
+                    TurretUpgradePanelUI ui = activePanel.GetComponent<TurretUpgradePanelUI>();
                     ui.Open(slotIndex, GetComponentInChildren<BaseTurret>());
                 }
                 else
@@ -144,6 +136,7 @@ namespace Assets.Scripts.UI
         }
 
         /* ------------- refresh when slot state changes ----------- */
+
         private void RefreshSlot(int changed, TurretStatsInstance inst)
         {
             UpdateColor();
@@ -156,7 +149,7 @@ namespace Assets.Scripts.UI
 
             if (inst != null)
             {
-                GameObject prefab = TurretInventoryManager.I.GetPrefab(inst.TurretType);
+                GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
                 spawned = Instantiate(prefab, barrelAnchor.position,
                     Quaternion.identity, barrelAnchor);
                 spawned.GetComponent<BaseTurret>().SavedStats = inst;
@@ -172,8 +165,6 @@ namespace Assets.Scripts.UI
 
             UpdateOverlay();
         }
-
-
 
         //  Called whenever slot state / wave changes.
         //  Controls the tint of the Slot sprite (black = unavailable).
@@ -207,7 +198,6 @@ namespace Assets.Scripts.UI
             UpdateOverlay();
         }
 
-
         //  Shows the correct overlay text & button state.
 
         private void UpdateOverlay()
@@ -217,7 +207,7 @@ namespace Assets.Scripts.UI
             int needWave = TurretSlotManager.Instance.WaveRequirement(slotIndex);
 
             int nextLocked = -1;
-            for (int i = 0; i < 5; ++i)
+            for (int i = 0; i < 5; i++)
             {
                 if (!TurretSlotManager.Instance.Purchased(i))
                 {
@@ -280,7 +270,5 @@ namespace Assets.Scripts.UI
 
             UpdateColor();
         }
-
-
     }
 }

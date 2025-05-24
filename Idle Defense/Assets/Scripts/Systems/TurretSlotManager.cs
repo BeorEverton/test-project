@@ -19,7 +19,7 @@ namespace Assets.Scripts.Systems
 
         private readonly SlotUnlock[] slotInfo =
         {
-            new SlotUnlock(  1,      0),      // wave, cost
+            new SlotUnlock(  1,     0),      // wave, cost
             new SlotUnlock( 20,  5000),
             new SlotUnlock( 50, 20000),
             new SlotUnlock(120, 50000),
@@ -44,11 +44,7 @@ namespace Assets.Scripts.Systems
 
         private void Awake() { if (Instance == null) Instance = this; else Destroy(gameObject); }
 
-        public bool IsUnlocked(int slot)
-        {
-            return Purchased(slot) &&
-                   WaveManager.Instance.GetCurrentWaveIndex() >= slotInfo[slot].wave;
-        }
+        public bool IsUnlocked(int slot) => Purchased(slot) && WaveManager.Instance.GetCurrentWaveIndex() >= slotInfo[slot].wave;
 
         // try to pay and mark purchased
         public bool UnlockSlot(int slot)
@@ -79,6 +75,7 @@ namespace Assets.Scripts.Systems
             SaveGameManager.Instance.SaveGame();
             return true;
         }
+
         public void Unequip(int slot)
         {
             equipped[slot] = null;
@@ -86,15 +83,8 @@ namespace Assets.Scripts.Systems
             OnEquippedChanged?.Invoke(slot, null);
         }
 
-        public bool IsAnyTurretEquipped()
-        {
-            for (int i = 0; i < equipped.Length; i++)
-            {
-                if (equipped[i] != null)
-                    return true;
-            }
-            return false;
-        }
+        public bool IsAnyTurretEquipped() => equipped.Any(t => t != null);
+
         public int UnlockedSlotCount()
         {
             int count = 0;
@@ -118,10 +108,7 @@ namespace Assets.Scripts.Systems
 
         public event Action OnSlotUnlocked;
 
-        public List<int> ExportEquipped() =>
-    equipped.Select(inst =>
-        inst == null ? -1 : TurretInventoryManager.I.Owned.IndexOf(inst)
-    ).ToList();
+        public List<int> ExportEquipped() => equipped.Select(inst => inst == null ? -1 : TurretInventoryManager.Instance.Owned.IndexOf(inst)).ToList();
 
         // TurretSlotManager.cs   – put it under GetPurchasedFlags()
 
@@ -129,8 +116,8 @@ namespace Assets.Scripts.Systems
         {
             for (int i = 0; i < ids.Count && i < equipped.Length; i++)
             {
-                equipped[i] = (ids[i] >= 0 && ids[i] < TurretInventoryManager.I.Owned.Count)
-                              ? TurretInventoryManager.I.Owned[ids[i]]
+                equipped[i] = (ids[i] >= 0 && ids[i] < TurretInventoryManager.Instance.Owned.Count)
+                              ? TurretInventoryManager.Instance.Owned[ids[i]]
                               : null;
                 OnEquippedChanged?.Invoke(i, equipped[i]);   // refresh visuals
             }

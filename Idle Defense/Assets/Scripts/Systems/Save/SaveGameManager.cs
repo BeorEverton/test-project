@@ -56,7 +56,7 @@ namespace Assets.Scripts.Systems.Save
             TurretBaseInfoDTO laserTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
             StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();
 
-            TurretInventoryDTO turretInventory = TurretInventoryManager.I.ExportToDTO();
+            TurretInventoryDTO turretInventory = TurretInventoryManager.Instance.ExportToDTO();
 
             var discoveredEnemies = EnemyLibraryManager.Instance.GetAllEntries()
                 .Where(e => e.discovered)
@@ -99,7 +99,7 @@ namespace Assets.Scripts.Systems.Save
             _missileLauncherTurret.SavedStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.MissileLauncherTurretInfoDTO, gameData.MissileLauncherTurretBaseInfoDTO);
             _laserTurret.SavedStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.LaserTurretInfoDTO, gameData.LaserTurretBaseInfoDTO);
 
-            PlayerBaseManager.Instance.LoadPlayerBase(LoadDataDTOs.CreatePlayerBaseSO(gameData.PlayerInfoDTO));
+            PlayerBaseManager.Instance.SavedStats = LoadDataDTOs.CreatePlayerBaseSO(gameData.PlayerInfoDTO);
 
             GameManager.Instance.LoadMoney(gameData.GameDataDTO.Money);
             WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
@@ -107,7 +107,7 @@ namespace Assets.Scripts.Systems.Save
 
             StatsManager.Instance.LoadStats(gameData.StatsDTO);
 
-            TurretInventoryManager.I.ImportFromDTO(gameData.TurretInventory);
+            TurretInventoryManager.Instance.ImportFromDTO(gameData.TurretInventory);
 
             if (gameData.DiscoveredEnemyNames != null)
             {

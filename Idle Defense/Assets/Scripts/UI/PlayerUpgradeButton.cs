@@ -50,6 +50,7 @@ namespace Assets.Scripts.UI
         private void Start()
         {
             _playerBaseManager = PlayerBaseManager.Instance;
+            _upgradeManager = FindFirstObjectByType<PlayerBaseUpgradeManager>();
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
             UpdateDisplayFromType();

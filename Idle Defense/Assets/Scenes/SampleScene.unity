@@ -2075,8 +2075,9 @@ GameObject:
   m_Component:
   - component: {fileID: 263351005}
   - component: {fileID: 263351006}
+  - component: {fileID: 263351007}
   m_Layer: 0
-  m_Name: TurretUpgradeManager
+  m_Name: UpgradeManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2112,6 +2113,18 @@ MonoBehaviour:
   hybridThreshold: 10
   quadraticFactor: 0.1
   exponentialPower: 1.15
+--- !u!114 &263351007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263351004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bef278cd31ec6b4888afa6f47e9a69a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &268500735
 GameObject:
   m_ObjectHideFlags: 0
@@ -10360,6 +10373,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseInfo: {fileID: 11400000, guid: 5d29cd04ac9db5040a3b7f7a5f683a14, type: 2}
+  SavedStats:
+    MaxHealth: 0
+    RegenAmount: 0
+    RegenDelay: 0
+    RegenInterval: 0
+    MaxHealthUpgradeAmount: 0
+    MaxHealthUpgradeBaseCost: 0
+    MaxHealthLevel: 0
+    RegenAmountUpgradeAmount: 0
+    RegenAmountUpgradeBaseCost: 0
+    RegenAmountLevel: 0
+    RegenIntervalUpgradeAmount: 0
+    RegenIntervalUpgradeBaseCost: 0
+    RegenIntervalLevel: 0
   upgradeVisuals:
   - {fileID: 1622077747}
   - {fileID: 776857581}

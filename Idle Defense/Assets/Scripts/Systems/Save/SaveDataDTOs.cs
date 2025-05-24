@@ -254,15 +254,15 @@ public class PlayerInfoDTO
 
     public float MaxHealthUpgradeAmount;
     public float MaxHealthUpgradeBaseCost;
-    public float MaxHealthLevel;
+    public int MaxHealthLevel;
 
     public float RegenAmountUpgradeAmount;
     public float RegenAmountUpgradeBaseCost;
-    public float RegenAmountLevel;
+    public int RegenAmountLevel;
 
     public float RegenIntervalUpgradeAmount;
     public float RegenIntervalUpgradeBaseCost;
-    public float RegenIntervalLevel;
+    public int RegenIntervalLevel;
 }
 
 [Serializable]

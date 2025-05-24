@@ -11,7 +11,7 @@ namespace Assets.Scripts.Systems
 {
     public class TurretInventoryManager : MonoBehaviour
     {
-        public static TurretInventoryManager I { get; private set; }
+        public static TurretInventoryManager Instance { get; private set; }
 
         [SerializeField] private TurretUnlockTableSO unlockTable;
         private readonly List<TurretStatsInstance> owned = new();
@@ -30,10 +30,10 @@ namespace Assets.Scripts.Systems
 
         public bool IsTurretTypeUnlocked(TurretType t) => unlockedTypes.Contains(t);
 
-        void Awake()
+        private void Awake()
         {
-            if (I == null)
-                I = this;
+            if (Instance == null)
+                Instance = this;
         }
 
         private void Start()
@@ -60,20 +60,19 @@ namespace Assets.Scripts.Systems
 
             TryUnlockByWave(0);
 
-            if (unlockedTypes.Contains(TurretType.MachineGun))
-            {
-                TurretInfoSO baseSO = turretLibrary.GetInfo(TurretType.MachineGun);
-                var inst = new TurretStatsInstance(baseSO)
-                {
-                    TurretType = TurretType.MachineGun,
-                    IsUnlocked = true
-                };
-                owned.Add(inst);
-            }
+            if (!unlockedTypes.Contains(TurretType.MachineGun))
+                return;
 
+            TurretInfoSO baseSO = turretLibrary.GetInfo(TurretType.MachineGun);
+            TurretStatsInstance inst = new(baseSO)
+            {
+                TurretType = TurretType.MachineGun,
+                IsUnlocked = true
+            };
+            owned.Add(inst);
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (WaveManager.Instance != null)
                 WaveManager.Instance.OnWaveStarted -= HandleWaveStarted;
@@ -87,18 +86,18 @@ namespace Assets.Scripts.Systems
         public bool TryUnlockByWave(int currentWave)
         {
             bool changed = false;
-            foreach (var e in unlockTable.Entries)
-            {
-                if (currentWave >= e.WaveToUnlock && unlockedTypes.Add(e.Type))
-                    changed = true;
-            }
+            foreach (TurretUnlockTableSO.Entry e in unlockTable.Entries
+                         .Where(e => currentWave >= e.WaveToUnlock && unlockedTypes
+                             .Add(e.Type)))
+                changed = true;
+
             OnInventoryChanged?.Invoke();
             return changed;
         }
 
         public bool TryPurchase(TurretType type)
         {
-            //if (!unlockedTypes.Contains(type)) return false; SUed only with the wave requirement
+            //if (!unlockedTypes.Contains(type)) return false; Used only with the wave requirement
 
             int countOwned = owned.Count(t => t.TurretType == type);
             if (countOwned >= 5)
@@ -112,7 +111,7 @@ namespace Assets.Scripts.Systems
 
             // create runtime copy from the original SO
             TurretInfoSO baseSO = turretLibrary.GetInfo(type);
-            var inst = new TurretStatsInstance(baseSO)
+            TurretStatsInstance inst = new(baseSO)
             {
                 TurretType = type,
                 /* this flag MUST be true otherwise BaseTurret.Start()
@@ -123,21 +122,19 @@ namespace Assets.Scripts.Systems
 
             OnInventoryChanged?.Invoke();
             SaveGameManager.Instance.SaveGame();
-            return true;
 
+            return true;
         }
 
         public ulong GetCost(TurretType type, int currentOwned)
         {
-            var entry = unlockTable.Entries.First(e => e.Type == type);
+            TurretUnlockTableSO.Entry entry = unlockTable.Entries.First(e => e.Type == type);
             return entry.FirstCopyCost * (ulong)Mathf.Pow(2, Mathf.Max(0, currentOwned - 1));
         }
 
         public GameObject GetPrefab(TurretType t) => turretLibrary.GetPrefab(t);
 
         public TurretInfoSO GetInfoSO(TurretType type) => turretLibrary.GetInfo(type);
-
-
 
         // ---------- save / load ----------
 
@@ -155,10 +152,10 @@ namespace Assets.Scripts.Systems
         public void ImportFromDTO(TurretInventoryDTO dto)
         {
             owned.Clear();
-            owned.AddRange(dto.Owned ?? new());
+            owned.AddRange(dto.Owned ?? new List<TurretStatsInstance>());
 
             unlockedTypes.Clear();
-            unlockedTypes.UnionWith(dto.UnlockedTypes ?? new());
+            unlockedTypes.UnionWith(dto.UnlockedTypes ?? new List<TurretType>());
 
             if (TurretSlotManager.Instance != null)
             {
