@@ -1,6 +1,7 @@
 using Assets.Scripts.PlayerBase;
 using Assets.Scripts.Systems;
 using Assets.Scripts.UpgradeSystem;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -53,6 +54,11 @@ namespace Assets.Scripts.UI
             _upgradeManager = FindFirstObjectByType<PlayerBaseUpgradeManager>();
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+            PlayerBaseManager.Instance.OnStatsLoaded += OnStatsLoaded;
+        }
+
+        private void OnStatsLoaded(object sender, EventArgs e)
+        {
             UpdateDisplayFromType();
         }
 

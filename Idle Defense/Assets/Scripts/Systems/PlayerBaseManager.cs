@@ -12,6 +12,7 @@ namespace Assets.Scripts.Systems
         public static PlayerBaseManager Instance { get; private set; }
 
         public event EventHandler OnWaveFailed;
+        public event EventHandler OnStatsLoaded;
         public event Action<float, float> OnHealthChanged; // (currentHealth, maxHealth)
         public event Action<float, float> OnMaxHealthChanged; // (newMaxHealth, currentHealth)
 
@@ -23,14 +24,8 @@ namespace Assets.Scripts.Systems
         private float _regenDelayTimer;
         private float _regenTickTimer;
 
-        private float _runtimeMaxHealth;
-        private float _runtimeRegenAmount;
-        private float _runtimeRegenDelay;
-        private float _runtimeRegenInterval;
-        private const float MinRegenInterval = 0.5f;
-
         public float CurrentHealth => _currentHealth;
-        public float MaxHealth => _runtimeMaxHealth;
+        public float MaxHealth => Stats.MaxHealth;
 
         private bool _isDead => _currentHealth <= 0f;
 
@@ -49,28 +44,22 @@ namespace Assets.Scripts.Systems
 
         private void Start()
         {
-            Stats = SavedStats ?? new PlayerBaseStatsInstance(_baseInfo);
+            Stats = IsValidSavedStats(SavedStats) ? SavedStats : new PlayerBaseStatsInstance(_baseInfo);
+            OnStatsLoaded?.Invoke(this, EventArgs.Empty);
 
-            UpdatePlayerBaseAppearance();
             InitializeGame();
         }
 
+        private bool IsValidSavedStats(PlayerBaseStatsInstance stats) => stats is { MaxHealth: > 0 };
+
         public void InitializeGame(bool startTime = false)
         {
-            // Recalculate values based on upgrade levels
-            _runtimeMaxHealth = Stats.MaxHealth + Stats.MaxHealthLevel * Stats.MaxHealthUpgradeAmount;
-            _runtimeRegenAmount = Stats.RegenAmount + Stats.RegenAmountLevel * Stats.RegenAmountUpgradeAmount;
-            _runtimeRegenDelay = Stats.RegenDelay; // This one is fixed
-            _runtimeRegenInterval = Mathf.Max(
-                MinRegenInterval,
-                Stats.RegenInterval - Stats.RegenIntervalLevel * Stats.RegenIntervalUpgradeAmount
-            );
-
-            _currentHealth = _runtimeMaxHealth;
+            _currentHealth = Stats.MaxHealth;
             _regenDelayTimer = 0f;
             _regenTickTimer = 0f;
 
-            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+            UpdatePlayerBaseAppearance();
+            OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
 
             if (startTime)
                 Time.timeScale = UIManager.Instance.timeSpeedOnDeath; // Resume the game only used in case of death
@@ -85,116 +74,61 @@ namespace Assets.Scripts.Systems
             _regenDelayTimer = 0f;
             _regenTickTimer = 0f;
 
-            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+            OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
             StatsManager.Instance.TotalDamageTaken += amount;
             AudioManager.Instance.Play("Take Damage");
 
-            if (_currentHealth <= 0f)
-            {
-                OnWaveFailed?.Invoke(this, EventArgs.Empty);
-                StatsManager.Instance.MissionsFailed++;
-                AudioManager.Instance.Play("Player Death");
-                AudioManager.Instance.Stop("Laser V2");
-                AudioManager.Instance.StopAllMusics();
-                AudioManager.Instance.PlayMusic("Main");
-                UIManager.Instance.ShowDeathCountdown();
-            }
+            if (_currentHealth > 0f)
+                return;
+
+            OnWaveFailed?.Invoke(this, EventArgs.Empty);
+            StatsManager.Instance.MissionsFailed++;
+            AudioManager.Instance.Play("Player Death");
+            AudioManager.Instance.Stop("Laser V2");
+            AudioManager.Instance.StopAllMusics();
+            AudioManager.Instance.PlayMusic("Main");
+            UIManager.Instance.ShowDeathCountdown();
         }
 
         private void Update()
         {
-            if (_isDead || _currentHealth >= _runtimeMaxHealth)
+            if (_isDead || _currentHealth >= Stats.MaxHealth)
                 return;
 
-            _regenDelayTimer += Time.deltaTime;
-
-            if (!(_regenDelayTimer >= _runtimeRegenDelay))
+            if (_regenDelayTimer < Stats.RegenDelay)
+            {
+                _regenDelayTimer += Time.deltaTime;
                 return;
+            }
 
-            _regenTickTimer += Time.deltaTime;
-
-            if (!(_regenTickTimer >= _runtimeRegenInterval))
+            if (_regenTickTimer < Stats.RegenInterval)
+            {
+                _regenTickTimer += Time.deltaTime;
                 return;
+            }
 
             RepairPlayerBase();
 
-            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+            OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
         }
 
         private void RepairPlayerBase()
         {
-            _currentHealth = Mathf.Min(_currentHealth + _runtimeRegenAmount, _runtimeMaxHealth);
+            _currentHealth = Mathf.Min(_currentHealth + Stats.RegenAmount, Stats.MaxHealth);
             _regenTickTimer = 0f;
 
-            StatsManager.Instance.TotalHealthRepaired += _runtimeRegenAmount;
+            StatsManager.Instance.TotalHealthRepaired += Stats.RegenAmount;
 
-            if (_currentHealth >= _runtimeMaxHealth)
+            if (_currentHealth >= Stats.MaxHealth)
             {
                 AudioManager.Instance.Play("Full Health");
             }
         }
 
-        private bool TrySpend(float cost)
+        public void InvokeHealthChangedEvents()
         {
-            if (GameManager.Instance.Money >= cost)
-            {
-                GameManager.Instance.SpendMoney((ulong)cost);
-                return true;
-            }
-
-            Debug.Log("Not enough money.");
-            return false;
-        }
-
-        public void UpgradeMaxHealth()
-        {
-            float level = Stats.MaxHealthLevel;
-            float cost = Stats.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, level);
-            if (!TrySpend(cost))
-                return;
-
-            Stats.MaxHealthLevel++;
-            _runtimeMaxHealth += Stats.MaxHealthUpgradeAmount;
-
-            // Heal by the upgraded amount
-            _currentHealth += Stats.MaxHealthUpgradeAmount;
-            _currentHealth = Mathf.Min(_currentHealth, _runtimeMaxHealth);
-
-            OnMaxHealthChanged?.Invoke(_runtimeMaxHealth, _currentHealth);
-            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
-
-            UpdatePlayerBaseAppearance();
-            AudioManager.Instance.Play("Upgrade");
-        }
-
-        public void UpgradeRegenAmount()
-        {
-            float level = Stats.RegenAmountLevel;
-            float cost = Stats.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, level);
-            if (!TrySpend(cost))
-                return;
-
-            Stats.RegenAmountLevel++;
-            _runtimeRegenAmount += Stats.RegenAmountUpgradeAmount;
-            UpdatePlayerBaseAppearance();
-            AudioManager.Instance.Play("Upgrade");
-        }
-
-        public void UpgradeRegenInterval()
-        {
-            if (_runtimeRegenInterval <= MinRegenInterval)
-                return;
-
-            float level = Stats.RegenIntervalLevel;
-            float cost = Stats.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, level);
-
-            if (!TrySpend(cost))
-                return;
-
-            Stats.RegenIntervalLevel++;
-            _runtimeRegenInterval = Mathf.Max(MinRegenInterval, _runtimeRegenInterval - Stats.RegenIntervalUpgradeAmount);
-            UpdatePlayerBaseAppearance();
-            AudioManager.Instance.Play("Upgrade");
+            OnMaxHealthChanged?.Invoke(Stats.MaxHealth, _currentHealth);
+            OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
         }
 
         public void ResetPlayerBase()
@@ -203,7 +137,7 @@ namespace Assets.Scripts.Systems
             InitializeGame();
         }
 
-        private void UpdatePlayerBaseAppearance()
+        public void UpdatePlayerBaseAppearance()
         {
             if (upgradeVisuals == null || upgradeVisuals.Length == 0)
                 return;

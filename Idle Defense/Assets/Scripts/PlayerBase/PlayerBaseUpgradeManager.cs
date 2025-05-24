@@ -121,6 +121,10 @@ namespace Assets.Scripts.PlayerBase
                 upgrade.SetLevel(stats, upgrade.GetLevel(stats) + 1);
                 AudioManager.Instance.Play("Upgrade");
                 UpdateUpgradeDisplay(stats, type, button);
+                PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
+
+                if (type == PlayerUpgradeType.MaxHealth)
+                    PlayerBaseManager.Instance.InvokeHealthChangedEvents();
             }
         }
 
