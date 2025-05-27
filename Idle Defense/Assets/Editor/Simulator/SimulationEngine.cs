@@ -157,6 +157,8 @@ namespace IdleDefense.Editor.Simulation
 
             // click speed bonus
             float clickBonus = 0f;
+            float clicksThisWave = 0f;
+
             const float bonusPerClick = 1f, decayPerSec = 1f;
 
             // slot / turret state
@@ -275,11 +277,20 @@ namespace IdleDefense.Editor.Simulation
                 spawnTimer = spawnIntervalCurrent;
 
                 // reset wave accumulators
+                clicksThisWave = 0f;
+
                 wStat = new WaveStat
                 {
                     Wave = waveIndex,
-                    HealthStart = baseHealth
+                    HealthStart = baseHealth,
+                    MaxHealthLevel = maxHpLvl,
+                    RegenAmountLevel = regenAmtLvl,
+                    RegenIntervalLevel = regenIntLvl,
+                    CurrentMaxHealth = baseMaxHealth,
+                    CurrentRegenAmount = regenAmount,
+                    CurrentRegenInterval = regenInterval
                 };
+
                 Array.Clear(perWaveDmg, 0, perWaveDmg.Length);
             }
 
@@ -318,6 +329,7 @@ namespace IdleDefense.Editor.Simulation
                 {
                     // each simulated click adds initialBoost
                     clickBonus += initialBoost * clicksPerSec * dt;
+                    clicksThisWave += clicksPerSec * dt;
                     bonusDelayTimer = 0f;
                 }
                 else
@@ -332,8 +344,114 @@ namespace IdleDefense.Editor.Simulation
                 clickBonus = Mathf.Clamp(clickBonus, 0f, 100f);
 
                 // record the raw spdBonus value for export
-                wStat.SpeedBoostClicks = (int)(clicksPerSec * dt);
+                wStat.SpeedBoostClicks = Mathf.RoundToInt(clicksThisWave);
 
+                // 3ENEMY MOVEMENT
+                for (int i = 0; i < live.Count; i++) // Iterate carefully if removals happen elsewhere
+                {
+                    var e = live[i];
+                    e.Y -= e.Speed * dt;
+                    live[i] = e; // Update position in the list
+                }
+
+                // TURRET FIRING
+                for (int t = 0; t < slots.Count; t++)
+                {
+                    var bp = slots[t];
+                    shotTimers[t] += dt;
+                    // Corrected click bonus application for fire rate:
+                    float effectiveFireRate = bp.FireRate * (1f + clickBonus / 100f); // Assuming clickBonus is 0-100
+                    float interval = 1f / effectiveFireRate;
+
+                    if (shotTimers[t] >= interval)
+                    {
+                        shotTimers[t] -= interval; // Reset or subtract cooldown
+
+                        // Targeting logic (e.g., find first enemy in range)
+                        int targetEnemyIndex = -1;
+                        for (int enemyIdx = 0; enemyIdx < live.Count; enemyIdx++)
+                        {
+                            if (live[enemyIdx].Y <= bp.Range) // Assuming bp.Range is a Y-coordinate threshold
+                            {
+                                targetEnemyIndex = enemyIdx;
+                                break; // Found first target
+                            }
+                        }
+
+                        if (targetEnemyIndex != -1)
+                        {
+                            var e = live[targetEnemyIndex];
+                            bool crit = Random.value < bp.CritChance * 0.01f;
+                            float critMultiplier = 1f + bp.CritDamageMultiplier * 0.01f;
+                            float dmg = bp.Damage * (crit ? critMultiplier : 1f);
+
+                            if (dmg >= e.Hp)
+                            { // Enemy is killed
+                                dmg = e.Hp; // Clamp damage to actual HP for accurate stats
+                                wStat.DamageDealt += dmg;
+                                stats.TotalDamageDealt += dmg;
+                                perWaveDmg[(int)bp.Type] += dmg;
+                                coins += e.Coin;
+                                wStat.MoneyEarned += e.Coin;
+                                if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
+                                else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                live.RemoveAt(targetEnemyIndex);
+                                // Important: If iterating with 'i < live.Count' and removing,
+                                // iterate backwards or adjust index after removal.
+                                // For this example, assuming the turret loop completes, then enemy attack loop starts fresh.
+                            }
+                            else // Enemy survives
+                            {
+                                e.Hp -= dmg;
+                                live[targetEnemyIndex] = e; // Update HP
+                                wStat.DamageDealt += dmg;
+                                stats.TotalDamageDealt += dmg;
+                                perWaveDmg[(int)bp.Type] += dmg;
+                            }
+                        }
+                    }
+                }
+
+                // 5 ENEMY BASE DAMAGE 
+                bool baseDamaged = false;
+                for (int i = live.Count - 1; i >= 0; i--) // Iterate backwards for safe removal if base dies
+                {
+                    var e = live[i];
+                    if (e.Y <= e.AttackRange) // Check if enemy is in range to attack base
+                    {
+                        e.TimeSinceLastAttack += dt;
+                        var info = enemyInfos[e.Class]; // To get AttackSpeed
+                        float atkInterval = 1f / info.AttackSpeed;
+                        if (e.TimeSinceLastAttack >= atkInterval)
+                        {
+                            baseHealth = Mathf.Max(0f, baseHealth - e.Damage);
+                            wStat.DamageTaken += e.Damage;
+                            e.TimeSinceLastAttack = 0f; // Reset attack cooldown
+                            baseDamaged = true;
+
+                            if (baseHealth <= 0f)
+                            {
+                                wStat.HealthEnd = 0f;
+                                wStat.WaveBeaten = false;
+                                stats.Waves.Add(wStat);
+                                stats.MissionsFailed++;
+                                waveIndex = Mathf.Max(1, waveIndex - 10); // Or other penalty
+                                baseHealth = baseMaxHealth; // Reset base health
+                                                            // Reset regen timers (original logic)
+                                regenDelayTimer = 0f;
+                                regenTickTimer = 0f;
+
+                                live.Clear(); // Clear all live enemies
+                                pendingSpawns.Clear(); // Clear pending spawns
+                                InitWave(); // Prepare for the new (potentially earlier) wave
+                                goto END_OF_FRAME; // Skip other logic for this dt step
+                            }
+                        }
+                        live[i] = e; // Update enemy state (like TimeSinceLastAttack)
+                    }
+                }
+
+                /* previous method with turret firing first and enemy movement later. it gives turrets an advantage
                 //------------------ turret firing (first!) ---------------------
                 for (int t = 0; t < slots.Count; t++)
                 {
@@ -419,6 +537,7 @@ namespace IdleDefense.Editor.Simulation
 
                     live[i] = e;
                 }
+                */
 
                 //------------------ base regen ------------------------
                 if (baseDamaged && baseHealth < baseMaxHealth && live.Count == 0)
