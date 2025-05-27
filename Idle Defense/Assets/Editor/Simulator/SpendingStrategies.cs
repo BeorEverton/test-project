@@ -2,7 +2,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.Scripts.Turrets;  // for TurretType
+using Assets.Scripts.Turrets;
+using Assets.Scripts.Systems;  // for TurretType
 
 namespace IdleDefense.Editor.Simulation
 {
@@ -10,29 +11,89 @@ namespace IdleDefense.Editor.Simulation
 
     public interface ISpendingStrategy
     {
-        void Tick(ref ulong coins,
-                  ref List<TurretBlueprint> slots,
-                  int currentWave);
+        // Called by SimulationEngine after coins have been deducted.
+        void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave);
+
+        // Set by the engine to tell the strategy *which* turret slot to upgrade.
+        void SetNextTurretIndex(int index);
+
+        // Set by the engine to tell the strategy *which* stat to upgrade.
+        void SetNextUpgradeType(TurretUpgradeType upgrade);
     }
 
     public static class SpendingStrategyFactory
     {
         public static ISpendingStrategy Create(SpendingMode mode)
         {
-            switch (mode)
+            return mode switch
             {
-                case SpendingMode.Cheapest: return new CheapestStrategy();
-                case SpendingMode.Random: return new RandomStrategy();
-                case SpendingMode.MostEffective: return new MostEffectiveStrategy();
-                default: throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+                SpendingMode.Cheapest => new CheapestStrategy(),
+                SpendingMode.Random => new RandomStrategy(),
+                SpendingMode.MostEffective => new MostEffectiveStrategy(),
+                _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
+            };
+        }
+    }
+
+    // ---------------------------------------------------------
+    // Base class to share the apply upgrade code
+    // ---------------------------------------------------------
+    abstract class BaseStrategy : ISpendingStrategy
+    {
+        protected int nextTurretIndex = -1;
+        protected TurretUpgradeType nextUpgradeType;
+
+        public void SetNextTurretIndex(int index)
+            => nextTurretIndex = index;
+
+        public void SetNextUpgradeType(TurretUpgradeType upgrade)
+            => nextUpgradeType = upgrade;
+
+        public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
+        {
+            if (nextTurretIndex < 0 || nextTurretIndex >= slots.Count)
+                return;
+
+            var bp = slots[nextTurretIndex];
+            switch (nextUpgradeType)
+            {
+                case TurretUpgradeType.Damage:
+                    slots[nextTurretIndex] = bp.WithDamageUpgraded(); break;
+                case TurretUpgradeType.FireRate:
+                    slots[nextTurretIndex] = bp.WithFireRateUpgraded(); break;
+                case TurretUpgradeType.CriticalChance:
+                    slots[nextTurretIndex] = bp.WithCritChanceUpgraded(); break;
+                case TurretUpgradeType.CriticalDamageMultiplier:
+                    slots[nextTurretIndex] = bp.WithCritDamageUpgraded(); break;
+                case TurretUpgradeType.ExplosionRadius:
+                    slots[nextTurretIndex] = bp.WithExplosionRadiusUpgraded(); break;
+                case TurretUpgradeType.SplashDamage:
+                    slots[nextTurretIndex] = bp.WithSplashDamageUpgraded(); break;
+                case TurretUpgradeType.PierceChance:
+                    slots[nextTurretIndex] = bp.WithPierceChanceUpgraded(); break;
+                case TurretUpgradeType.PierceDamageFalloff:
+                    slots[nextTurretIndex] = bp.WithPierceDamageFalloffUpgraded(); break;
+                case TurretUpgradeType.PelletCount:
+                    slots[nextTurretIndex] = bp.WithPelletCountUpgraded(); break;
+                case TurretUpgradeType.DamageFalloffOverDistance:
+                    slots[nextTurretIndex] = bp.WithDamageFalloffOverDistanceUpgraded(); break;
+                case TurretUpgradeType.PercentBonusDamagePerSec:
+                    slots[nextTurretIndex] = bp.WithPercentBonusDamagePerSecUpgraded(); break;
+                case TurretUpgradeType.SlowEffect:
+                    slots[nextTurretIndex] = bp.WithSlowEffectUpgraded(); break;
+                case TurretUpgradeType.KnockbackStrength:
+                    slots[nextTurretIndex] = bp.WithKnockbackStrengthUpgraded(); break;
             }
+
+            // reset for next decision
+            nextTurretIndex = -1;
         }
     }
 
     // ---------------------------------------------------------
     // Cheapest: finds the single cheapest next upgrade across all slots and stats
     // ---------------------------------------------------------
-    class CheapestStrategy : ISpendingStrategy
+    class CheapestStrategy : BaseStrategy
     {
         public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
@@ -101,7 +162,7 @@ namespace IdleDefense.Editor.Simulation
     // ---------------------------------------------------------
     // Random: picks a random upgrade among all affordable options
     // ---------------------------------------------------------
-    class RandomStrategy : ISpendingStrategy
+    class RandomStrategy : BaseStrategy
     {
         private readonly System.Random rng = new System.Random();
 
@@ -161,7 +222,7 @@ namespace IdleDefense.Editor.Simulation
     // ---------------------------------------------------------
     // MostEffective: picks the upgrade with highest DPS gain per coin
     // ---------------------------------------------------------
-    class MostEffectiveStrategy : ISpendingStrategy
+    class MostEffectiveStrategy : BaseStrategy
     {
         public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
@@ -197,7 +258,7 @@ namespace IdleDefense.Editor.Simulation
                     var cost = costs[u];
                     if (cost > coins) continue;
 
-                    // simulate applying the u-th upgrade
+                    // simulate applying the u th upgrade
                     TurretBlueprint up = t;
                     switch (u)
                     {

@@ -89,10 +89,30 @@ namespace IdleDefense.Editor.Simulation
         public readonly float SlowEffectUpgradeBaseCost;
         public readonly float SlowEffectCostExponentialMultiplier;
 
+        public readonly int DamageLevel;
+        public readonly int FireRateLevel;
+        public readonly int CriticalChanceLevel;
+        public readonly int CriticalDamageMultiplierLevel;
+        public readonly int ExplosionRadiusLevel;
+        public readonly int SplashDamageLevel;
+        public readonly int PierceChanceLevel;
+        public readonly int PierceDamageFalloffLevel;
+        public readonly int PelletCountLevel;
+        public readonly int KnockbackStrengthLevel;
+        public readonly int DamageFalloffOverDistanceLevel;
+        public readonly int PercentBonusDamagePerSecLevel;
+        public readonly int SlowEffectLevel;
+        public float CriticalChanceUpgradeBaseCost => CritChanceUpgradeBaseCost;
+        public float CriticalChanceCostExponentialMultiplier => CritChanceCostExponentialMultiplier;
+
+        public float CriticalDamageMultiplierUpgradeBaseCost => CritDamageUpgradeBaseCost;
+        public float CriticalDamageCostExponentialMultiplier => CritDamageCostExponentialMultiplier;
+
+
         // ---------------------
         // Constructor from SO
         // ---------------------
-        public TurretBlueprint(TurretInfoSO so)
+        public TurretBlueprint(TurretInfoSO so) : this()
         {
             Type = so.TurretType;
             Damage = so.Damage;
@@ -231,7 +251,20 @@ namespace IdleDefense.Editor.Simulation
             float percentBonusDamagePerSecCostExponentialMultiplier,
             float slowEffectUpgradeAmount,
             float slowEffectUpgradeBaseCost,
-            float slowEffectCostExponentialMultiplier
+            float slowEffectCostExponentialMultiplier,
+            int damageLevel,
+            int fireRateLevel,
+            int criticalChanceLevel,
+            int criticalDamageMultiplierLevel,
+            int explosionRadiusLevel,
+            int splashDamageLevel,
+            int pierceChanceLevel,
+            int pierceDamageFalloffLevel,
+            int pelletCountLevel,
+            int knockbackStrengthLevel,
+            int damageFalloffOverDistanceLevel,
+            int percentBonusDamagePerSecLevel,
+            int slowEffectLevel
         ) : this()
         {
             Type = type;
@@ -290,6 +323,19 @@ namespace IdleDefense.Editor.Simulation
             SlowEffectUpgradeAmount = slowEffectUpgradeAmount;
             SlowEffectUpgradeBaseCost = slowEffectUpgradeBaseCost;
             SlowEffectCostExponentialMultiplier = slowEffectCostExponentialMultiplier;
+            DamageLevel = damageLevel;
+            FireRateLevel = fireRateLevel;
+            CriticalChanceLevel = criticalChanceLevel;
+            CriticalDamageMultiplierLevel = criticalDamageMultiplierLevel;
+            ExplosionRadiusLevel = explosionRadiusLevel;
+            SplashDamageLevel = splashDamageLevel;
+            PierceChanceLevel = pierceChanceLevel;
+            PierceDamageFalloffLevel = pierceDamageFalloffLevel;
+            PelletCountLevel = pelletCountLevel;
+            KnockbackStrengthLevel = knockbackStrengthLevel;
+            DamageFalloffOverDistanceLevel = damageFalloffOverDistanceLevel;
+            PercentBonusDamagePerSecLevel = percentBonusDamagePerSecLevel;
+            SlowEffectLevel = slowEffectLevel;
         }
 
         // ---------------------
@@ -323,7 +369,10 @@ namespace IdleDefense.Editor.Simulation
                 KnockbackStrengthUpgradeAmount, KnockbackStrengthUpgradeBaseCost, KnockbackStrengthCostExponentialMultiplier,
                 DamageFalloffOverDistanceUpgradeAmount, DamageFalloffOverDistanceUpgradeBaseCost, DamageFalloffOverDistanceCostExponentialMultiplier,
                 PercentBonusDamagePerSecUpgradeAmount, PercentBonusDamagePerSecUpgradeBaseCost, PercentBonusDamagePerSecCostExponentialMultiplier,
-                SlowEffectUpgradeAmount, SlowEffectUpgradeBaseCost, SlowEffectCostExponentialMultiplier
+                SlowEffectUpgradeAmount, SlowEffectUpgradeBaseCost, SlowEffectCostExponentialMultiplier,
+                DamageLevel + 1, FireRateLevel,CriticalChanceLevel,CriticalDamageMultiplierLevel,ExplosionRadiusLevel,
+                SplashDamageLevel,PierceChanceLevel,PierceDamageFalloffLevel,PelletCountLevel,KnockbackStrengthLevel,                DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel,SlowEffectLevel
             );
         }
 
@@ -347,7 +396,10 @@ namespace IdleDefense.Editor.Simulation
                 KnockbackStrengthUpgradeAmount, KnockbackStrengthUpgradeBaseCost, KnockbackStrengthCostExponentialMultiplier,
                 DamageFalloffOverDistanceUpgradeAmount, DamageFalloffOverDistanceUpgradeBaseCost, DamageFalloffOverDistanceCostExponentialMultiplier,
                 PercentBonusDamagePerSecUpgradeAmount, PercentBonusDamagePerSecUpgradeBaseCost, PercentBonusDamagePerSecCostExponentialMultiplier,
-                SlowEffectUpgradeAmount, SlowEffectUpgradeBaseCost, SlowEffectCostExponentialMultiplier
+                SlowEffectUpgradeAmount, SlowEffectUpgradeBaseCost, SlowEffectCostExponentialMultiplier,
+                DamageLevel, FireRateLevel +1, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -372,7 +424,10 @@ namespace IdleDefense.Editor.Simulation
                 KnockbackStrengthUpgradeAmount, KnockbackStrengthUpgradeBaseCost, KnockbackStrengthCostExponentialMultiplier,
                 DamageFalloffOverDistanceUpgradeAmount, DamageFalloffOverDistanceUpgradeBaseCost, DamageFalloffOverDistanceCostExponentialMultiplier,
                 PercentBonusDamagePerSecUpgradeAmount, PercentBonusDamagePerSecUpgradeBaseCost, PercentBonusDamagePerSecCostExponentialMultiplier,
-                SlowEffectUpgradeAmount, SlowEffectUpgradeBaseCost, SlowEffectCostExponentialMultiplier
+                SlowEffectUpgradeAmount, SlowEffectUpgradeBaseCost, SlowEffectCostExponentialMultiplier,
+                DamageLevel, FireRateLevel, CriticalChanceLevel+1, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -434,7 +489,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel+1, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -496,7 +554,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel+1,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -558,7 +619,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel+1, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -620,7 +684,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel+1, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -682,7 +749,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel+1, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -744,7 +814,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel+1, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -806,7 +879,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel, FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel+1, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -868,7 +944,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel+1,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel
             );
         }
 
@@ -930,7 +1009,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel+1, SlowEffectLevel
             );
         }
 
@@ -992,7 +1074,10 @@ namespace IdleDefense.Editor.Simulation
                 PercentBonusDamagePerSecCostExponentialMultiplier,
                 SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost,
-                SlowEffectCostExponentialMultiplier
+                SlowEffectCostExponentialMultiplier,
+                DamageLevel , FireRateLevel, CriticalChanceLevel, CriticalDamageMultiplierLevel, ExplosionRadiusLevel,
+                SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
+                PercentBonusDamagePerSecLevel, SlowEffectLevel+1
             );
         }
 

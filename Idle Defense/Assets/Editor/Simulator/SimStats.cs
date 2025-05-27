@@ -3,6 +3,56 @@ using System.Collections.Generic;
 
 namespace IdleDefense.Editor.Simulation
 {
+    public struct WaveStat
+    {
+        public int Wave;
+        public int EnemiesKilled;
+        public int BossesKilled;
+        public float DamageDealt;
+        public ulong MoneyEarned;
+        public ulong MoneySpent;
+        public int TurretUpgrades;
+        public int BaseUpgrades;
+        public float DamageTaken;
+        public float HealthStart;
+        public float HealthEnd;
+        public float HealthRegen;
+        public bool WaveBeaten;        // true = cleared
+        public int SpeedBoostClicks;
+        public double MachineGunDamage;
+        public double ShotgunDamage;
+        public double SniperDamage;
+        public double MissileLauncherDamage;
+        public double LaserDamage;
+
+        public int MaxHealthLevel;
+        public int RegenAmountLevel;
+        public int RegenIntervalLevel;
+
+        // Add current base stats
+        public float CurrentMaxHealth;
+        public float CurrentRegenAmount;
+        public float CurrentRegenInterval;
+
+        // breakdown of turret upgrades by stat
+        public int DamageUpgrades;
+        public int FireRateUpgrades;
+        public int CriticalChanceUpgrades;
+        public int CriticalDamageMultiplierUpgrades;
+        public int ExplosionRadiusUpgrades;
+        public int SplashDamageUpgrades;
+        public int PierceChanceUpgrades;
+        public int PierceDamageFalloffUpgrades;
+        public int PelletCountUpgrades;
+        public int KnockbackStrengthUpgrades;
+        public int DamageFalloffOverDistanceUpgrades;
+        public int PercentBonusDamagePerSecUpgrades;
+        public int SlowEffectUpgrades;
+
+        // total turret-upgrade spend this wave
+        public ulong TurretMoneySpent;
+    }
+
     public struct SimStats
     {
         public int WavesBeaten;
@@ -10,26 +60,18 @@ namespace IdleDefense.Editor.Simulation
         public int BossesKilled;
         public double TotalDamageDealt;
         public int MaxZone;
-        public int TotalZonesSecured;
         public double MoneySpent;
         public int UpgradeAmount;
 
-        public List<string> UpgradeHistory;
-
-        public List<string> TurretSnapshots;
-
-        public List<string> BaseSnapshots;
+        public List<WaveStat> Waves;    // <<< per-wave detail >>>
 
         public double TotalDamageTaken;
         public double TotalHealthRepaired;
         public int MissionsFailed;
         public int SpeedBoostClicks;
-        public double MachineGunDamage;
-        public double ShotgunDamage;
-        public double SniperDamage;
-        public double MissileLauncherDamage;
-        public double LaserDamage;
+
         public float SimMinutes;
     }
+
 
 }
