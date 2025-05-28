@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace Assets.Scripts.UI
     public class MultipleBuyOption : MonoBehaviour
     {
         public static MultipleBuyOption Instance { get; private set; }
+        public event EventHandler OnBuyAmountChanged;
 
         [SerializeField] private Button _buyAmountToggleButton;
         [SerializeField] private TextMeshProUGUI _amountLabel;
@@ -27,7 +29,7 @@ namespace Assets.Scripts.UI
 
         private void Start()
         {
-            _amountOptions = new List<int> { 1, 5, 10, 25, 50, 9999 };
+            _amountOptions = new List<int> { 1, 5, 25, 100, 9999 };
 
             _buyAmountToggleButton.onClick.AddListener(AdvanceBuyAmount);
         }
@@ -36,6 +38,7 @@ namespace Assets.Scripts.UI
         {
             _currentIndex = (_currentIndex + 1) % _amountOptions.Count;
             SetBuyAmount(_amountOptions[_currentIndex]);
+            OnBuyAmountChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void SetBuyAmount(int amount)
@@ -50,6 +53,7 @@ namespace Assets.Scripts.UI
                 _amountLabel.SetText("MAX");
                 return;
             }
+
             _amountLabel.SetText(amount.ToString());
         }
     }

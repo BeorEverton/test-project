@@ -55,10 +55,18 @@ namespace Assets.Scripts.UI
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
             PlayerBaseManager.Instance.OnStatsLoaded += OnStatsLoaded;
+            MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
+        }
+
+        private void OnBuyAmountChanged(object sender, EventArgs e)
+        {
+            UpdateInteractableState();
+            UpdateDisplayFromType();
         }
 
         private void OnStatsLoaded(object sender, EventArgs e)
         {
+            UpdateInteractableState();
             UpdateDisplayFromType();
         }
 
@@ -105,6 +113,7 @@ namespace Assets.Scripts.UI
         private void HandleMoneyChanged(ulong _)
         {
             UpdateInteractableState();
+            UpdateDisplayFromType();
         }
 
         private void UpdateInteractableState()
@@ -112,7 +121,9 @@ namespace Assets.Scripts.UI
             if (_button == null || _upgradeManager == null)
                 return;
 
-            float cost = _upgradeManager.GetPlayerBaseUpgradeCost(_playerBaseManager.Stats, _upgradeType);
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+
+            float cost = _upgradeManager.GetPlayerBaseUpgradeCost(_playerBaseManager.Stats, _upgradeType, amount);
 
             _button.interactable = GameManager.Instance.Money >= (ulong)cost;
         }

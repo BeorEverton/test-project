@@ -30,12 +30,12 @@ namespace Assets.Scripts.PlayerBase
                     GetCostMultiplier = p => p.MaxHealthUpgradeBaseCost,
                     GetMaxValue = p => float.MaxValue,
                     GetMinValue = p => 0f,
-                    GetCost = GetPlayerHealthUpgradeCost,
-                    GetDisplayStrings = p =>
+                    GetCost = (p, a) => GetCost(p, PlayerUpgradeType.MaxHealth, a),
+                    GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
                         float bonus = p.MaxHealthUpgradeAmount;
-                        float cost = GetPlayerHealthUpgradeCost(p);
+                        float cost = GetCost(p, PlayerUpgradeType.MaxHealth, a);
 
                         return ($"{current:F0}",
                                 $"+{bonus:F0}",
@@ -52,12 +52,12 @@ namespace Assets.Scripts.PlayerBase
                     GetCostMultiplier = p => p.RegenAmountUpgradeBaseCost,
                     GetMaxValue = p => float.MaxValue,
                     GetMinValue = p => 0f,
-                    GetCost = GetRegenAmountUpgradeCost,
-                    GetDisplayStrings = p =>
+                    GetCost = (p, a) => GetCost(p, PlayerUpgradeType.RegenAmount, a),
+                    GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenAmount;
                         float bonus = p.RegenAmountUpgradeAmount;
-                        float cost = GetRegenAmountUpgradeCost(p);
+                        float cost = GetCost(p, PlayerUpgradeType.RegenAmount, a);
 
                         return ($"{current:F0}",
                                 $"+{bonus:F0}",
@@ -74,12 +74,12 @@ namespace Assets.Scripts.PlayerBase
                     GetCostMultiplier = p => p.RegenIntervalUpgradeBaseCost,
                     GetMaxValue = p => 0.5f,
                     GetMinValue = p => 0f,
-                    GetCost = GetRegenIntervalUpgradeCost,
-                    GetDisplayStrings = p =>
+                    GetCost = (p, a) => GetCost(p, PlayerUpgradeType.RegenInterval, a),
+                    GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenInterval;
                         float bonus = p.RegenIntervalUpgradeAmount;
-                        float cost = GetRegenIntervalUpgradeCost(p);
+                        float cost = GetCost(p, PlayerUpgradeType.RegenInterval, a);
                         if (current <= 0.5f)
                             return ($"{current:F2}s", "Max", "");
 
@@ -91,22 +91,17 @@ namespace Assets.Scripts.PlayerBase
             };
         }
 
-        private float GetPlayerHealthUpgradeCost(PlayerBaseStatsInstance stats) =>
-            stats.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, stats.MaxHealthLevel);
-        private float GetRegenAmountUpgradeCost(PlayerBaseStatsInstance stats) =>
-            stats.RegenAmountUpgradeBaseCost * Mathf.Pow(1.1f, stats.RegenAmountLevel);
-        private float GetRegenIntervalUpgradeCost(PlayerBaseStatsInstance stats) =>
-            stats.RegenIntervalUpgradeBaseCost * Mathf.Pow(1.1f, stats.RegenIntervalLevel);
-
-        public float GetPlayerBaseUpgradeCost(PlayerBaseStatsInstance turret, PlayerUpgradeType type) =>
-            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetCost(turret);
+        public float GetPlayerBaseUpgradeCost(PlayerBaseStatsInstance turret, PlayerUpgradeType type, int amount) =>
+            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetCost(turret, amount);
 
         public void UpgradePlayerBaseStat(PlayerBaseStatsInstance stats, PlayerUpgradeType type, PlayerUpgradeButton button)
         {
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
                 return;
 
-            float cost = upgrade.GetCost(stats);
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+            GetCost(stats, type, amount, out float cost, out int maxAmount);
+
 
             if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(stats) >= upgrade.GetMaxValue(stats))
             {
@@ -116,7 +111,7 @@ namespace Assets.Scripts.PlayerBase
 
             if (TrySpend(cost))
             {
-                float newValue = upgrade.GetCurrentValue(stats) + upgrade.GetUpgradeAmount(stats);
+                float newValue = upgrade.GetCurrentValue(stats) + (upgrade.GetUpgradeAmount(stats) * maxAmount);
                 upgrade.SetCurrentValue(stats, newValue);
                 upgrade.SetLevel(stats, upgrade.GetLevel(stats) + 1);
                 AudioManager.Instance.Play("Upgrade");
@@ -128,12 +123,74 @@ namespace Assets.Scripts.PlayerBase
             }
         }
 
+        private void GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int amount, out float cost, out int maxAmount)
+        {
+            if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
+            {
+                cost = 0;
+                maxAmount = 0;
+                return;
+            }
+
+            int currentLevel = upgrade.GetLevel(stats);
+            float baseCost = stats.MaxHealthUpgradeBaseCost;
+            const float multiplier = 1.1f;
+
+            maxAmount = amount == 9999 ? GetMaxAmount(baseCost, multiplier, currentLevel) : amount;
+            cost = RecursiveCost(baseCost, multiplier, currentLevel, maxAmount);
+        }
+
+        private float GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int amount)
+        {
+            if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
+            {
+                return 0f;
+            }
+
+            int currentLevel = upgrade.GetLevel(stats);
+            float baseCost = stats.MaxHealthUpgradeBaseCost;
+            const float multiplier = 1.1f;
+
+            if (amount == 9999)
+                amount = GetMaxAmount(baseCost, multiplier, currentLevel);
+
+            return RecursiveCost(baseCost, multiplier, currentLevel, amount);
+        }
+
+        private int GetMaxAmount(float baseCost, float multiplier, int currentLevel)
+        {
+            int amount = 0;
+            float totalCost = 0f;
+            float money = GameManager.Instance.Money;
+
+            while (true)
+            {
+                float cost = baseCost * Mathf.Pow(multiplier, currentLevel + amount);
+                if (totalCost + cost > money)
+                    break;
+                totalCost += cost;
+                amount++;
+            }
+
+            return amount;
+        }
+
+        private float RecursiveCost(float baseCost, float multiplier, int level, int amount)
+        {
+            if (amount == 0)
+                return 0f;
+            float cost = baseCost * Mathf.Pow(multiplier, level);
+            return cost + RecursiveCost(baseCost, multiplier, level + 1, amount - 1);
+        }
+
         public void UpdateUpgradeDisplay(PlayerBaseStatsInstance stats, PlayerUpgradeType type, PlayerUpgradeButton button)
         {
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) || stats == null)
                 return;
 
-            (string value, string bonus, string cost) = upgrade.GetDisplayStrings(stats);
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+
+            (string value, string bonus, string cost) = upgrade.GetDisplayStrings(stats, amount);
             button.UpdateStats(value, bonus, cost);
         }
 
