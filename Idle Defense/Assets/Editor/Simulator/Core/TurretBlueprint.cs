@@ -1,6 +1,7 @@
 // Assets/Editor/Simulation/Core/Blueprints.cs
 using Assets.Scripts.SO;      // TurretInfoSO
-using Assets.Scripts.Turrets; // TurretType
+using Assets.Scripts.Turrets;
+using UnityEngine; // TurretType
 
 namespace IdleDefense.Editor.Simulation
 {
@@ -341,10 +342,39 @@ namespace IdleDefense.Editor.Simulation
         // ---------------------
         // Compute DPS
         // ---------------------
+        // add this improved DPS calculation in its stead:
         public float DamagePerSecond(float clickBonus = 0f)
         {
-            return (Damage * (1f + clickBonus)) * FireRate;
+            // match BaseTurret.GetDPS logic for default turrets:
+            // effective damage per shot with crit  bonus dps
+            float critChanceClamped = Mathf.Clamp01(CritChance / 100f);
+            float critMultiplierNorm = CritDamageMultiplier / 100f;
+            float bonusDpsPercent = PercentBonusDamagePerSec / 100f;
+            float effectiveDamage = Damage * (1f + critChanceClamped * (critMultiplierNorm - 1f));
+            effectiveDamage *= (1f + bonusDpsPercent);
+
+            // apply click speed bonus to fire rate
+            float rate = FireRate * (1f + clickBonus);
+
+            switch (Type)
+            {
+                case TurretType.Shotgun:
+                    // ShotgunTurret.GetDPS: pelletCount × damage × rate 
+                    return effectiveDamage * PelletCount * rate;
+
+                case TurretType.Sniper:
+                    // SniperTurret.GetDPS: account for average pierce hits 
+                    float pierceChanceNorm = Mathf.Clamp01(PierceChance / 100f);
+                    float averageHits = 1f + pierceChanceNorm * 0.5f;
+                    float sniperDamage = effectiveDamage * averageHits;
+                    return sniperDamage * rate;
+
+                default:
+                    // BaseTurret.GetDPS for Laser, MachineGun, Missile, etc
+                    return effectiveDamage * rate;
+            }
         }
+
 
         // ---------------------
         // All WithXUpgraded methods

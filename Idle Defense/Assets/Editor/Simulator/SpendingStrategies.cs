@@ -49,7 +49,7 @@ namespace IdleDefense.Editor.Simulation
         public void SetNextUpgradeType(TurretUpgradeType upgrade)
             => nextUpgradeType = upgrade;
 
-        public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
+        public virtual void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
             if (nextTurretIndex < 0 || nextTurretIndex >= slots.Count)
                 return;
@@ -95,7 +95,7 @@ namespace IdleDefense.Editor.Simulation
     // ---------------------------------------------------------
     class CheapestStrategy : BaseStrategy
     {
-        public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
+        public override void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
             ulong bestCost = ulong.MaxValue;
             int bestSlot = -1;
@@ -166,7 +166,7 @@ namespace IdleDefense.Editor.Simulation
     {
         private readonly System.Random rng = new System.Random();
 
-        public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
+        public override void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
             var candidates = new List<(int slot, int upgrade, ulong cost)>();
 
@@ -224,7 +224,13 @@ namespace IdleDefense.Editor.Simulation
     // ---------------------------------------------------------
     class MostEffectiveStrategy : BaseStrategy
     {
-        public void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
+        // helper to mirror SimulationEngine’s exponential+level cost
+        static float CostPlusLevel(float baseCost, int level, float multiplier)
+        {
+            return baseCost + Mathf.Pow(multiplier, level) + level;
+        }
+
+        public override void Tick(ref ulong coins, ref List<TurretBlueprint> slots, int currentWave)
         {
             float bestScore = 0f;
             int bestSlot = -1;
@@ -236,46 +242,111 @@ namespace IdleDefense.Editor.Simulation
                 var t = slots[i];
                 float baseDps = t.DamagePerSecond();
 
-                var costs = new ulong[]
+                // simulate each upgrade type’s real cost & DPS gain
+                for (int u = 0; u < 13; u++)
                 {
-                    (ulong)t.DamageUpgradeBaseCost,
-                    (ulong)t.FireRateUpgradeBaseCost,
-                    (ulong)t.CritChanceUpgradeBaseCost,
-                    (ulong)t.CritDamageUpgradeBaseCost,
-                    (ulong)t.ExplosionRadiusUpgradeBaseCost,
-                    (ulong)t.SplashDamageUpgradeBaseCost,
-                    (ulong)t.PierceChanceUpgradeBaseCost,
-                    (ulong)t.PierceDamageFalloffUpgradeBaseCost,
-                    (ulong)t.PelletCountUpgradeBaseCost,
-                    (ulong)t.KnockbackStrengthUpgradeBaseCost,
-                    (ulong)t.DamageFalloffOverDistanceUpgradeBaseCost,
-                    (ulong)t.PercentBonusDamagePerSecUpgradeBaseCost,
-                    (ulong)t.SlowEffectUpgradeBaseCost
-                };
-
-                for (int u = 0; u < costs.Length; u++)
-                {
-                    var cost = costs[u];
-                    if (cost > coins) continue;
-
-                    // simulate applying the u th upgrade
+                    float rawCost;
                     TurretBlueprint up = t;
+
                     switch (u)
                     {
-                        case 0: up = t.WithDamageUpgraded(); break;
-                        case 1: up = t.WithFireRateUpgraded(); break;
-                        case 2: up = t.WithCritChanceUpgraded(); break;
-                        case 3: up = t.WithCritDamageUpgraded(); break;
-                        case 4: up = t.WithExplosionRadiusUpgraded(); break;
-                        case 5: up = t.WithSplashDamageUpgraded(); break;
-                        case 6: up = t.WithPierceChanceUpgraded(); break;
-                        case 7: up = t.WithPierceDamageFalloffUpgraded(); break;
-                        case 8: up = t.WithPelletCountUpgraded(); break;
-                        case 9: up = t.WithKnockbackStrengthUpgraded(); break;
-                        case 10: up = t.WithDamageFalloffOverDistanceUpgraded(); break;
-                        case 11: up = t.WithPercentBonusDamagePerSecUpgraded(); break;
-                        case 12: up = t.WithSlowEffectUpgraded(); break;
+                        case 0: // Damage
+                            rawCost = CostPlusLevel(
+                                t.DamageUpgradeBaseCost,
+                                t.DamageLevel,
+                                t.DamageCostExponentialMultiplier);
+                            up = t.WithDamageUpgraded();
+                            break;
+                        case 1: // FireRate
+                            rawCost = CostPlusLevel(
+                                t.FireRateUpgradeBaseCost,
+                                t.FireRateLevel,
+                                t.FireRateCostExponentialMultiplier);
+                            up = t.WithFireRateUpgraded();
+                            break;
+                        case 2: // CritChance
+                            rawCost = CostPlusLevel(
+                                t.CritChanceUpgradeBaseCost,
+                                t.CriticalChanceLevel,
+                                t.CriticalChanceCostExponentialMultiplier);
+                            up = t.WithCritChanceUpgraded();
+                            break;
+                        case 3: // CritDamage
+                            rawCost = CostPlusLevel(
+                                t.CritDamageUpgradeBaseCost,
+                                t.CriticalDamageMultiplierLevel,
+                                t.CriticalDamageCostExponentialMultiplier);
+                            up = t.WithCritDamageUpgraded();
+                            break;
+                        case 4: // ExplosionRadius
+                            rawCost = CostPlusLevel(
+                                t.ExplosionRadiusUpgradeBaseCost,
+                                t.ExplosionRadiusLevel,
+                                t.ExplosionRadiusCostExponentialMultiplier);
+                            up = t.WithExplosionRadiusUpgraded();
+                            break;
+                        case 5: // SplashDamage
+                            rawCost = CostPlusLevel(
+                                t.SplashDamageUpgradeBaseCost,
+                                t.SplashDamageLevel,
+                                t.SplashDamageCostExponentialMultiplier);
+                            up = t.WithSplashDamageUpgraded();
+                            break;
+                        case 6: // PierceChance
+                            rawCost = CostPlusLevel(
+                                t.PierceChanceUpgradeBaseCost,
+                                t.PierceChanceLevel,
+                                t.PierceChanceCostExponentialMultiplier);
+                            up = t.WithPierceChanceUpgraded();
+                            break;
+                        case 7: // PierceFalloff
+                            rawCost = CostPlusLevel(
+                                t.PierceDamageFalloffUpgradeBaseCost,
+                                t.PierceDamageFalloffLevel,
+                                t.PierceDamageFalloffCostExponentialMultiplier);
+                            up = t.WithPierceDamageFalloffUpgraded();
+                            break;
+                        case 8: // PelletCount
+                            rawCost = CostPlusLevel(
+                                t.PelletCountUpgradeBaseCost,
+                                t.PelletCountLevel,
+                                t.PelletCountCostExponentialMultiplier);
+                            up = t.WithPelletCountUpgraded();
+                            break;
+                        case 9: // Knockback
+                            rawCost = CostPlusLevel(
+                                t.KnockbackStrengthUpgradeBaseCost,
+                                t.KnockbackStrengthLevel,
+                                t.KnockbackStrengthCostExponentialMultiplier);
+                            up = t.WithKnockbackStrengthUpgraded();
+                            break;
+                        case 10: // DamageFalloff
+                            rawCost = CostPlusLevel(
+                                t.DamageFalloffOverDistanceUpgradeBaseCost,
+                                t.DamageFalloffOverDistanceLevel,
+                                t.DamageFalloffOverDistanceCostExponentialMultiplier);
+                            up = t.WithDamageFalloffOverDistanceUpgraded();
+                            break;
+                        case 11: // % Bonus DPS
+                            rawCost = CostPlusLevel(
+                                t.PercentBonusDamagePerSecUpgradeBaseCost,
+                                t.PercentBonusDamagePerSecLevel,
+                                t.PercentBonusDamagePerSecCostExponentialMultiplier);
+                            up = t.WithPercentBonusDamagePerSecUpgraded();
+                            break;
+                        case 12: // SlowEffect
+                            rawCost = CostPlusLevel(
+                                t.SlowEffectUpgradeBaseCost,
+                                t.SlowEffectLevel,
+                                t.SlowEffectCostExponentialMultiplier);
+                            up = t.WithSlowEffectUpgraded();
+                            break;
+                        default:
+                            continue;
                     }
+
+                    ulong cost = (ulong)Mathf.Ceil(rawCost);
+                    if (cost > coins) continue;
 
                     float delta = up.DamagePerSecond() - baseDps;
                     float score = delta / cost;
@@ -311,5 +382,6 @@ namespace IdleDefense.Editor.Simulation
                 }
             }
         }
+
     }
 }

@@ -15,6 +15,9 @@ using Assets.Scripts.Turrets;     // TurretType
 using Assets.Scripts.WaveSystem;
 using Assets.Scripts.Systems;  // WaveConfigSO, TurretUnlockTableSO
 
+// for reference: [^\x00-\x7F]+
+
+
 namespace IdleDefense.Editor.Simulation
 {
     // ---------------------------------------------
@@ -128,7 +131,7 @@ namespace IdleDefense.Editor.Simulation
 
             float GetExponentialCostPlusLevel(float baseCost, int level, float multiplier)
             {
-                // matches TurretUpgradeManager.UpgradeDamage, FireRate…
+                // matches TurretUpgradeManager.UpgradeDamage, FireRate
                 return baseCost + Mathf.Pow(multiplier, level) + level;
             }
 
@@ -164,13 +167,26 @@ namespace IdleDefense.Editor.Simulation
             // slot / turret state
             var slots = new List<TurretBlueprint>();
             var shotTimers = new List<float>();
+            var turretCounts = new Dictionary<TurretType, int>();
 
-            foreach (var row in unlockTable.Entries)
-                if (row.WaveToUnlock <= 1 && turretInfos.ContainsKey(row.Type))
+            // init counts to zero
+            foreach (var e in unlockTable.Entries)
+                turretCounts[e.Type] = 0;
+
+            // seed your starter turret(s) in slot #1 (wave 1)
+            foreach (var e in unlockTable.Entries)
+                if (e.WaveToUnlock <= 1 && turretInfos.ContainsKey(e.Type))
                 {
-                    slots.Add(turretInfos[row.Type]);
+                    slots.Add(turretInfos[e.Type]);
                     shotTimers.Add(0f);
+                    turretCounts[e.Type]++;
                 }
+
+            // slot-purchase thresholds (wave, cost)
+            var slotWaves = new[] { 1, 20, 50, 120, 300 };
+            var slotCosts = new ulong[] { 0, 5000, 20000, 50000, 250000 };
+            int nextSlot = 1;
+
 
             // damage by turret type (per-wave)
             double[] perWaveDmg = new double[
@@ -198,6 +214,49 @@ namespace IdleDefense.Editor.Simulation
             void InitWave()
             {
                 var tpl = waves.Last(w => w.WaveStartIndex <= waveIndex);
+
+                if (nextSlot < slotWaves.Length && waveIndex >= slotWaves[nextSlot])
+                {
+                    if (coins >= slotCosts[nextSlot])
+                    {
+                        coins -= slotCosts[nextSlot];
+                        nextSlot++;
+                        Debug.Log($"[Simulation] Wave {waveIndex}: Bought slot #{nextSlot} for {slotCosts[nextSlot - 1]} coins.");
+                    }
+                }
+
+                // -- buy turrets into any empty slots --
+                int emptySlots = nextSlot - slots.Count;
+                if (emptySlots > 0)
+                {
+                    Debug.Log($"[Simulation] Wave {waveIndex}: Buying {emptySlots} turrets with {coins} coins.");
+                    // choose cheapest unlocked type you can afford this wave
+                    foreach (var entry in unlockTable.Entries
+                              .Where(u => u.WaveToUnlock <= waveIndex)
+                              .OrderBy(u => u.FirstCopyCost))
+                    {
+                        var type = entry.Type;
+                        int owned = turretCounts[type];
+                        // cost doubles each copy: FirstCopyCost * 2^(owned-1)
+                        ulong cost = owned == 0
+                                      ? entry.FirstCopyCost
+                                      : entry.FirstCopyCost * (ulong)(1 << (owned - 1));
+
+                        if (cost > 0
+                            && cost <= wStat.MoneyEarned
+                            && coins >= cost)
+                        {
+                            coins -= cost;
+                            slots.Add(turretInfos[type]);
+                            shotTimers.Add(0f);
+                            turretCounts[type]++;
+                            emptySlots--;
+                            Debug.Log($"[Simulation] Wave {waveIndex}: Bought turret {type} for {cost} coins.");
+                            if (emptySlots <= 0)
+                                break;
+                        }
+                    }
+                }
 
                 //----------------------------------------------------------------
                 // spawn queue for every EnemyWaveEntry
@@ -346,7 +405,7 @@ namespace IdleDefense.Editor.Simulation
                 // record the raw spdBonus value for export
                 wStat.SpeedBoostClicks = Mathf.RoundToInt(clicksThisWave);
 
-                // 3ENEMY MOVEMENT
+                // ENEMY MOVEMENT
                 for (int i = 0; i < live.Count; i++) // Iterate carefully if removals happen elsewhere
                 {
                     var e = live[i];
@@ -412,7 +471,7 @@ namespace IdleDefense.Editor.Simulation
                     }
                 }
 
-                // 5 ENEMY BASE DAMAGE 
+                // ENEMY BASE DAMAGE 
                 bool baseDamaged = false;
                 for (int i = live.Count - 1; i >= 0; i--) // Iterate backwards for safe removal if base dies
                 {
@@ -568,353 +627,378 @@ namespace IdleDefense.Editor.Simulation
                 {
                     regenDelayTimer = 0f;
                     regenTickTimer = 0f;
-                }                
+                }
 
                 // ------------------ spending ---------------------------------
-                ulong minCost = ulong.MaxValue;
-                bool chooseBase = false;
-                PlayerUpgradeType baseChoice = PlayerUpgradeType.MaxHealth;
-                TurretUpgradeType chosenTurretStat = TurretUpgradeType.Damage;  // default
-
-                // scan turret upgrades
-                // scan turret upgrades with proper scaling
-                for (int t = 0; t < slots.Count; t++)
+                if (mode == SpendingMode.MostEffective)
                 {
-                    #region turret upgrade stats
-                    var tp = slots[t];
-
-                    // DAMAGE (exponential + level)
+                    // 1) Prioritise base health if it took damage last wave
+                    float rawHealthCost = CostForBase(PlayerUpgradeType.MaxHealth, maxHpLvl);
+                    ulong healthCost = (ulong)Mathf.Ceil(rawHealthCost);
+                    if (baseHealth < baseMaxHealth
+                        && healthCost > 0
+                        && coins >= healthCost)
                     {
-                        float raw = GetExponentialCostPlusLevel(
-                            tp.DamageUpgradeBaseCost,
-                            tp.DamageLevel,
-                            tp.DamageCostExponentialMultiplier);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            // remember which turret & stat your strategy should pick
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.Damage);
-                            chosenTurretStat = TurretUpgradeType.Damage;
-
-                        }
-                    }
-
-                    // FIRE RATE (exponential + level)
-                    {
-                        float raw = GetExponentialCostPlusLevel(
-                            tp.FireRateUpgradeBaseCost,
-                            tp.FireRateLevel,
-                            tp.FireRateCostExponentialMultiplier);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.FireRate);
-                            chosenTurretStat = TurretUpgradeType.FireRate;
-                        }
-                    }
-
-                    // CRITICAL CHANCE (pure exponential)
-                    {
-                        float raw = GetExponentialCost(
-                            tp.CriticalChanceUpgradeBaseCost,
-                            tp.CriticalChanceLevel,
-                            tp.CriticalChanceCostExponentialMultiplier);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.CriticalChance);
-                            chosenTurretStat = TurretUpgradeType.CriticalChance;
-                        }
-                    }
-
-                    // CRIT DAMAGE MULTIPLIER (pure exponential)
-                    {
-                        float raw = GetExponentialCost(
-                            tp.CriticalDamageMultiplierUpgradeBaseCost,
-                            tp.CriticalDamageMultiplierLevel,
-                            tp.CriticalDamageCostExponentialMultiplier);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.CriticalDamageMultiplier);
-                            chosenTurretStat = TurretUpgradeType.CriticalDamageMultiplier;
-                        }
-                    }
-
-                    // EXPLOSION RADIUS (hybrid quadratic/exponential)
-                    {
-                        float raw = GetHybridCost(
-                            tp.ExplosionRadiusUpgradeBaseCost,
-                            tp.ExplosionRadiusLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.ExplosionRadius);
-                            chosenTurretStat = TurretUpgradeType.ExplosionRadius;
-                        }
-                    }
-
-                    // SPLASH DAMAGE (hybrid)
-                    {
-                        float raw = GetHybridCost(
-                            tp.SplashDamageUpgradeBaseCost,
-                            tp.SplashDamageLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.SplashDamage);
-                            chosenTurretStat = TurretUpgradeType.SplashDamage;
-                        }
-                    }
-
-                    // PIERCE CHANCE (hybrid)
-                    {
-                        float raw = GetHybridCost(
-                            tp.PierceChanceUpgradeBaseCost,
-                            tp.PierceChanceLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.PierceChance);
-                            chosenTurretStat = TurretUpgradeType.PierceChance;
-                        }
-                    }
-
-                    // PIERCE DAMAGE FALLOFF (hybrid)
-                    {
-                        float raw = GetHybridCost(
-                            tp.PierceDamageFalloffUpgradeBaseCost,
-                            tp.PierceDamageFalloffLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.PierceDamageFalloff);
-                            chosenTurretStat = TurretUpgradeType.PierceDamageFalloff;
-                        }
-                    }
-
-                    // PELLET COUNT (hybrid)
-                    {
-                        float raw = GetHybridCost(
-                            tp.PelletCountUpgradeBaseCost,
-                            tp.PelletCountLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.PelletCount);
-                            chosenTurretStat = TurretUpgradeType.PelletCount;
-                        }
-                    }
-
-                    // DAMAGE FALLOFF OVER DISTANCE (hybrid)
-                    {
-                        float raw = GetHybridCost(
-                            tp.DamageFalloffOverDistanceUpgradeBaseCost,
-                            tp.DamageFalloffOverDistanceLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.DamageFalloffOverDistance);
-                            chosenTurretStat = TurretUpgradeType.DamageFalloffOverDistance;
-                        }
-                    }
-
-                    // PERCENT BONUS DPS (hybrid)
-                    {
-                        float raw = GetHybridCost(
-                            tp.PercentBonusDamagePerSecUpgradeBaseCost,
-                            tp.PercentBonusDamagePerSecLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.PercentBonusDamagePerSec);
-                            chosenTurretStat = TurretUpgradeType.PercentBonusDamagePerSec;
-                        }
-                    }
-
-                    // SLOW EFFECT (hybrid)
-                    {
-                        float raw = GetHybridCost(
-                            tp.SlowEffectUpgradeBaseCost,
-                            tp.SlowEffectLevel);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.SlowEffect);
-                            chosenTurretStat = TurretUpgradeType.SlowEffect;
-                        }
-                    }
-
-                    // KNOCKBACK STRENGTH (pure exponential)
-                    {
-                        float raw = GetExponentialCost(
-                            tp.KnockbackStrengthUpgradeBaseCost,
-                            tp.KnockbackStrengthLevel,
-                            tp.KnockbackStrengthCostExponentialMultiplier);
-                        ulong cost = (ulong)Mathf.Ceil(raw);
-                        if (cost > 0 && cost < minCost)
-                        {
-                            minCost = cost;
-                            chooseBase = false;
-                            strategy.SetNextTurretIndex(t);
-                            strategy.SetNextUpgradeType(TurretUpgradeType.KnockbackStrength);
-                            chosenTurretStat = TurretUpgradeType.KnockbackStrength;
-                        }
-                    }
-                    #endregion
-                }
-
-                // allow RANDOM strategy to pick any affordable item
-                bool forceRandom = (mode == SpendingMode.Random);
-
-                if (forceRandom)
-                {
-                    chooseBase = Random.value < 0.5f;          // 50-50
-                    if (chooseBase)
-                        baseChoice = (PlayerUpgradeType)Random.Range(0, 3);
-                }
-
-                if (chooseBase)
-                {
-                    // if the strategy is random, it must set a new min cost
-                    minCost = ulong.MaxValue;
-                }
-
-                // scan base upgrades
-                foreach (PlayerUpgradeType pu in Enum.GetValues(typeof(PlayerUpgradeType)))
-                {
-                    int lvl = pu switch
-                    {
-                        PlayerUpgradeType.MaxHealth => maxHpLvl,
-                        PlayerUpgradeType.RegenAmount => regenAmtLvl,
-                        _ => regenIntLvl
-                    };
-                    float rawCost = CostForBase(pu, lvl);
-                    ulong cost = (ulong)Mathf.RoundToInt(rawCost);
-                    if (cost > 0 && cost < minCost)
-                    {
-                        minCost = cost;
-                        chooseBase = true;
-                        baseChoice = pu;
-                    }                    
-                }
-
-                if (minCost > 0 && coins >= minCost)
-                {
-                    coins -= minCost;
-                    wStat.MoneySpent += minCost;
-                    stats.MoneySpent += minCost;
-
-                    if (chooseBase)
-                    {
-                        switch (baseChoice)
-                        {
-                            case PlayerUpgradeType.MaxHealth:
-                                maxHpLvl++;
-                                baseMaxHealth += baseSO.MaxHealthUpgradeAmount;
-                                baseHealth = Mathf.Min(baseHealth + baseSO.MaxHealthUpgradeAmount, baseMaxHealth);
-
-                                wStat.MaxHealthLevel = maxHpLvl;
-                                wStat.CurrentMaxHealth = baseMaxHealth;
-                                break;
-
-
-                            case PlayerUpgradeType.RegenAmount:
-                                regenAmtLvl++;
-                                regenAmount += baseSO.RegenAmountUpgradeAmount;
-                                wStat.RegenAmountLevel = regenAmtLvl;
-                                wStat.CurrentRegenAmount = regenAmount;
-                                break;
-
-                            case PlayerUpgradeType.RegenInterval:
-                                regenIntLvl++;
-                                regenInterval = Mathf.Max(
-                                    MinBaseRegenInterval,
-                                    regenInterval - baseSO.RegenIntervalUpgradeAmount);
-                                wStat.RegenIntervalLevel = regenIntLvl;
-                                wStat.CurrentRegenInterval = regenInterval;
-                                break;
-
-                        }
+                        coins -= healthCost;
+                        maxHpLvl++;
+                        baseMaxHealth += baseSO.MaxHealthUpgradeAmount;
+                        baseHealth = Mathf.Min(baseHealth + baseSO.MaxHealthUpgradeAmount, baseMaxHealth);
                         wStat.BaseUpgrades++;
+                        wStat.MaxHealthLevel = maxHpLvl;
+                        wStat.CurrentMaxHealth = baseMaxHealth;
+                        wStat.MoneySpent += healthCost;
+                        stats.MoneySpent += healthCost;
                     }
-                    else
-                    {
-                        // Keep track of what was upgraded
-                        switch (chosenTurretStat)
+                    else // 2) Otherwise delegate to your DPS-per-coin turret strategy
+                    {                        
+                        ulong before = coins;
+                        var oldSlots = new List<TurretBlueprint>(slots);
+                        strategy.Tick(ref coins, ref slots, waveIndex);
+                        ulong spent = before - coins;
+                        if (spent > 0)
                         {
-                            case TurretUpgradeType.Damage:
-                                wStat.DamageUpgrades++; break;
-                            case TurretUpgradeType.FireRate:
-                                wStat.FireRateUpgrades++; break;
-                            case TurretUpgradeType.CriticalChance:
-                                wStat.CriticalChanceUpgrades++; break;
-                            case TurretUpgradeType.CriticalDamageMultiplier:
-                                wStat.CriticalDamageMultiplierUpgrades++; break;
-                            case TurretUpgradeType.ExplosionRadius:
-                                wStat.ExplosionRadiusUpgrades++; break;
-                            case TurretUpgradeType.SplashDamage:
-                                wStat.SplashDamageUpgrades++; break;
-                            case TurretUpgradeType.PierceChance:
-                                wStat.PierceChanceUpgrades++; break;
-                            case TurretUpgradeType.PierceDamageFalloff:
-                                wStat.PierceDamageFalloffUpgrades++; break;
-                            case TurretUpgradeType.PelletCount:
-                                wStat.PelletCountUpgrades++; break;
-                            case TurretUpgradeType.KnockbackStrength:
-                                wStat.KnockbackStrengthUpgrades++; break;
-                            case TurretUpgradeType.DamageFalloffOverDistance:
-                                wStat.DamageFalloffOverDistanceUpgrades++; break;
-                            case TurretUpgradeType.PercentBonusDamagePerSec:
-                                wStat.PercentBonusDamagePerSecUpgrades++; break;
-                            case TurretUpgradeType.SlowEffect:
-                                wStat.SlowEffectUpgrades++; break;
+                            wStat.TurretUpgrades++;
+
+                            // detect WHICH turret stat actually increased
+                            for (int i = 0; i < oldSlots.Count; i++)
+                            {
+                                var o = oldSlots[i];
+                                var n = slots[i];
+
+                                #region check which turret stat was upgraded
+                                if (n.DamageLevel != o.DamageLevel)
+                                {
+                                    wStat.DamageUpgrades++;
+                                    break;
+                                }
+                                else if (n.FireRateLevel != o.FireRateLevel)
+                                {
+                                    wStat.FireRateUpgrades++;
+                                    break;
+                                }
+                                else if (n.CriticalChanceLevel != o.CriticalChanceLevel)
+                                {
+                                    wStat.CriticalChanceUpgrades++;
+                                    break;
+                                }
+                                else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel)
+                                {
+                                    wStat.CriticalDamageMultiplierUpgrades++;
+                                    break;
+                                }
+                                else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel)
+                                {
+                                    wStat.ExplosionRadiusUpgrades++;
+                                    break;
+                                }
+                                else if (n.SplashDamageLevel != o.SplashDamageLevel)
+                                {
+                                    wStat.SplashDamageUpgrades++;
+                                    break;
+                                }
+                                else if (n.PierceChanceLevel != o.PierceChanceLevel)
+                                {
+                                    wStat.PierceChanceUpgrades++;
+                                    break;
+                                }
+                                else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel)
+                                {
+                                    wStat.PierceDamageFalloffUpgrades++;
+                                    break;
+                                }
+                                else if (n.PelletCountLevel != o.PelletCountLevel)
+                                {
+                                    wStat.PelletCountUpgrades++;
+                                    break;
+                                }
+                                else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel)
+                                {
+                                    wStat.KnockbackStrengthUpgrades++;
+                                    break;
+                                }
+                                else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel)
+                                {
+                                    wStat.DamageFalloffOverDistanceUpgrades++;
+                                    break;
+                                }
+                                else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel)
+                                {
+                                    wStat.PercentBonusDamagePerSecUpgrades++;
+                                    break;
+                                }
+                                else if (n.SlowEffectLevel != o.SlowEffectLevel)
+                                {
+                                    wStat.SlowEffectUpgrades++;
+                                    break;
+                                }
+                                #endregion
+                            }
                         }
 
-                        strategy.Tick(ref coins, ref slots, waveIndex);
-                        wStat.TurretUpgrades++;                        
+                        // record money spent on that upgrade
+                        wStat.MoneySpent += spent;
+                        stats.MoneySpent += spent;
                     }
-                    // Refresh the minCost for the next round
-                    minCost = ulong.MaxValue;
                 }
+                else // Cheapest or Random
+                {
+                    // build all affordable upgrade candidates (turret and base)
+                    var candidates = new List<(bool isBase, PlayerUpgradeType baseType, TurretUpgradeType turretType, int slot, ulong cost)>();
 
-                if (live.Count == 0 && pendingSpawns.Count == 0 && !bossIncoming)
+                    // 1) turret stat candidates
+                    for (int t = 0; t < slots.Count; t++)
+                    {
+                        var bp = slots[t];
+                        // DAMAGE
+                        {
+                            float raw = GetExponentialCostPlusLevel(
+                                bp.DamageUpgradeBaseCost,
+                                bp.DamageLevel,
+                                bp.DamageCostExponentialMultiplier);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.Damage, t, c));
+                        }
+                        // FIRE RATE
+                        {
+                            float raw = GetExponentialCostPlusLevel(
+                                bp.FireRateUpgradeBaseCost,
+                                bp.FireRateLevel,
+                                bp.FireRateCostExponentialMultiplier);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.FireRate, t, c));
+                        }
+                        // CRIT CHANCE
+                        {
+                            float raw = GetExponentialCost(
+                                bp.CritChanceUpgradeBaseCost,
+                                bp.CriticalChanceLevel,
+                                bp.CriticalChanceCostExponentialMultiplier);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.CriticalChance, t, c));
+                        }
+                        // CRIT DAMAGE
+                        {
+                            float raw = GetExponentialCost(
+                                bp.CritDamageUpgradeBaseCost,
+                                bp.CriticalDamageMultiplierLevel,
+                                bp.CriticalDamageCostExponentialMultiplier);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.CriticalDamageMultiplier, t, c));
+                        }
+                        // EXPLOSION RADIUS
+                        {
+                            float raw = GetHybridCost(
+                                bp.ExplosionRadiusUpgradeBaseCost,
+                                bp.ExplosionRadiusLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.ExplosionRadius, t, c));
+                        }
+                        // SPLASH DAMAGE
+                        {
+                            float raw = GetHybridCost(
+                                bp.SplashDamageUpgradeBaseCost,
+                                bp.SplashDamageLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.SplashDamage, t, c));
+                        }
+                        // PIERCE CHANCE
+                        {
+                            float raw = GetHybridCost(
+                                bp.PierceChanceUpgradeBaseCost,
+                                bp.PierceChanceLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.PierceChance, t, c));
+                        }
+                        // PIERCE FALLOFF
+                        {
+                            float raw = GetHybridCost(
+                                bp.PierceDamageFalloffUpgradeBaseCost,
+                                bp.PierceDamageFalloffLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.PierceDamageFalloff, t, c));
+                        }
+                        // PELLET COUNT
+                        {
+                            float raw = GetHybridCost(
+                                bp.PelletCountUpgradeBaseCost,
+                                bp.PelletCountLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.PelletCount, t, c));
+                        }
+                        // KNOCKBACK
+                        {
+                            float raw = GetExponentialCost(
+                                bp.KnockbackStrengthUpgradeBaseCost,
+                                bp.KnockbackStrengthLevel,
+                                bp.KnockbackStrengthCostExponentialMultiplier);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.KnockbackStrength, t, c));
+                        }
+                        // DAMAGE FALLOFF
+                        {
+                            float raw = GetHybridCost(
+                                bp.DamageFalloffOverDistanceUpgradeBaseCost,
+                                bp.DamageFalloffOverDistanceLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.DamageFalloffOverDistance, t, c));
+                        }
+                        // % BONUS DPS
+                        {
+                            float raw = GetHybridCost(
+                                bp.PercentBonusDamagePerSecUpgradeBaseCost,
+                                bp.PercentBonusDamagePerSecLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.PercentBonusDamagePerSec, t, c));
+                        }
+                        // SLOW EFFECT
+                        {
+                            float raw = GetHybridCost(
+                                bp.SlowEffectUpgradeBaseCost,
+                                bp.SlowEffectLevel);
+                            ulong c = (ulong)Mathf.Ceil(raw);
+                            if (c <= coins)
+                                candidates.Add((false, default, TurretUpgradeType.SlowEffect, t, c));
+                        }
+                    }
+
+                    // 2) base upgrade candidates
+                    foreach (PlayerUpgradeType pu in Enum.GetValues(typeof(PlayerUpgradeType)))
+                    {
+                        int lvl = pu switch
+                        {
+                            PlayerUpgradeType.MaxHealth => maxHpLvl,
+                            PlayerUpgradeType.RegenAmount => regenAmtLvl,
+                            _ => regenIntLvl
+                        };
+                        float raw = CostForBase(pu, lvl);
+                        ulong c = (ulong)Mathf.RoundToInt(raw);
+                        if (c <= coins)
+                            candidates.Add((true, pu, default, -1, c));
+                    }
+
+                    // disregard any zero-cost upgrades
+                    candidates.RemoveAll(x => x.cost == 0);
+
+                    // 3) pick one
+                    if (candidates.Count > 0)
+                    {
+
+                        var pick = mode == SpendingMode.Cheapest
+                            ? candidates.OrderBy(x => x.cost).First()
+                            : candidates[Random.Range(0, candidates.Count)];
+
+                        coins -= pick.cost;
+                        wStat.MoneySpent += pick.cost;
+                        stats.MoneySpent += pick.cost;
+
+                        if (pick.isBase)
+                        {
+                            // apply base upgrade
+                            switch (pick.baseType)
+                            {
+                                case PlayerUpgradeType.MaxHealth:
+                                    maxHpLvl++;
+                                    baseMaxHealth += baseSO.MaxHealthUpgradeAmount;
+                                    baseHealth = Mathf.Min(baseHealth + baseSO.MaxHealthUpgradeAmount, baseMaxHealth);
+                                    wStat.BaseUpgrades++;
+                                    wStat.MaxHealthLevel = maxHpLvl;
+                                    wStat.CurrentMaxHealth = baseMaxHealth;
+                                    break;
+                                case PlayerUpgradeType.RegenAmount:
+                                    regenAmtLvl++;
+                                    regenAmount += baseSO.RegenAmountUpgradeAmount;
+                                    wStat.BaseUpgrades++;
+                                    wStat.RegenAmountLevel = regenAmtLvl;
+                                    wStat.CurrentRegenAmount = regenAmount;
+                                    break;
+                                case PlayerUpgradeType.RegenInterval:
+                                    regenIntLvl++;
+                                    regenInterval = Mathf.Max(MinBaseRegenInterval, regenInterval - baseSO.RegenIntervalUpgradeAmount);
+                                    wStat.BaseUpgrades++;
+                                    wStat.RegenIntervalLevel = regenIntLvl;
+                                    wStat.CurrentRegenInterval = regenInterval;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            // apply turret upgrade
+                            var bp = slots[pick.slot];
+                            switch (pick.turretType)
+                            {
+                                case TurretUpgradeType.Damage:
+                                    slots[pick.slot] = bp.WithDamageUpgraded();
+                                    wStat.DamageUpgrades++;
+                                    break;
+                                case TurretUpgradeType.FireRate:
+                                    slots[pick.slot] = bp.WithFireRateUpgraded();
+                                    wStat.FireRateUpgrades++;
+                                    break;
+                                case TurretUpgradeType.CriticalChance:
+                                    slots[pick.slot] = bp.WithCritChanceUpgraded();
+                                    wStat.CriticalChanceUpgrades++;
+                                    break;
+                                case TurretUpgradeType.CriticalDamageMultiplier:
+                                    slots[pick.slot] = bp.WithCritDamageUpgraded();
+                                    wStat.CriticalDamageMultiplierUpgrades++;
+                                    break;
+                                case TurretUpgradeType.ExplosionRadius:
+                                    slots[pick.slot] = bp.WithExplosionRadiusUpgraded();
+                                    wStat.ExplosionRadiusUpgrades++;
+                                    break;
+                                case TurretUpgradeType.SplashDamage:
+                                    slots[pick.slot] = bp.WithSplashDamageUpgraded();
+                                    wStat.SplashDamageUpgrades++;
+                                    break;
+                                case TurretUpgradeType.PierceChance:
+                                    slots[pick.slot] = bp.WithPierceChanceUpgraded();
+                                    wStat.PierceChanceUpgrades++;
+                                    break;
+                                case TurretUpgradeType.PierceDamageFalloff:
+                                    slots[pick.slot] = bp.WithPierceDamageFalloffUpgraded();
+                                    wStat.PierceDamageFalloffUpgrades++;
+                                    break;
+                                case TurretUpgradeType.PelletCount:
+                                    slots[pick.slot] = bp.WithPelletCountUpgraded();
+                                    wStat.PelletCountUpgrades++;
+                                    break;
+                                case TurretUpgradeType.KnockbackStrength:
+                                    slots[pick.slot] = bp.WithKnockbackStrengthUpgraded();
+                                    wStat.KnockbackStrengthUpgrades++;
+                                    break;
+                                case TurretUpgradeType.DamageFalloffOverDistance:
+                                    slots[pick.slot] = bp.WithDamageFalloffOverDistanceUpgraded();
+                                    wStat.DamageFalloffOverDistanceUpgrades++;
+                                    break;
+                                case TurretUpgradeType.PercentBonusDamagePerSec:
+                                    slots[pick.slot] = bp.WithPercentBonusDamagePerSecUpgraded();
+                                    wStat.PercentBonusDamagePerSecUpgrades++;
+                                    break;
+                                case TurretUpgradeType.SlowEffect:
+                                    slots[pick.slot] = bp.WithSlowEffectUpgraded();
+                                    wStat.SlowEffectUpgrades++;
+                                    break;
+                                }
+                            }
+                            wStat.TurretUpgrades++;
+                        }
+                    }
+                
+            
+
+            if (live.Count == 0 && pendingSpawns.Count == 0 && !bossIncoming)
                 {
                     wStat.HealthEnd = baseHealth;   // before post wave regen
                     wStat.WaveBeaten = true;
@@ -934,7 +1018,6 @@ namespace IdleDefense.Editor.Simulation
                     waveIndex++;
                     InitWave();
                 }
-
 
                 END_OF_FRAME:
                 simTime += dt;
