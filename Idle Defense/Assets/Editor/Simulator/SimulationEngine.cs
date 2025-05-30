@@ -161,6 +161,9 @@ namespace IdleDefense.Editor.Simulation
             // click speed bonus
             float clickBonus = 0f;
             float clicksThisWave = 0f;
+            // discrete click simulation state
+            float nextClickTimer = 0f;
+            float bonusDelayTimer = 0f;
 
             const float bonusPerClick = 1f, decayPerSec = 1f;
 
@@ -375,35 +378,45 @@ namespace IdleDefense.Editor.Simulation
                     spawnTimer = spawnIntervalCurrent;
                 }
 
-                //------------------ click bonus (spdBonus) -----------------------
-                // mirror GameManager: initialBoost=5 per click, holdRate=5/sec, decayDelay=1s, decayRate=holdRate*0.8
+                // ------------------ click bonus (spdBonus) -----------------------
                 const float initialBoost = 5f;
-                const float holdRate = 5f;
                 const float decayDelay = 1f;
-                const float decayRate = holdRate * 0.8f;
-
-                float bonusDelayTimer = 0f;
+                const float decayRate = 5f * 0.8f;  // matches holdRate*0.8
 
                 if (clicksPerSec > 0f)
                 {
-                    // each simulated click adds initialBoost
-                    clickBonus += initialBoost * clicksPerSec * dt;
-                    clicksThisWave += clicksPerSec * dt;
-                    bonusDelayTimer = 0f;
+                    // count down to the next discrete click
+                    nextClickTimer -= dt;
+                    if (nextClickTimer <= 0f)
+                    {
+                        clickBonus += initialBoost;
+                        // reset decay timer on every click
+                        bonusDelayTimer = 0f;
+                        // schedule next click
+                        nextClickTimer += 1f / clicksPerSec;
+                    }
+                    else
+                    {
+                        // between clicks: advance decay timer
+                        bonusDelayTimer += dt;
+                    }
                 }
                 else
                 {
-                    // start decay after delay
-                    bonusDelayTimer += dt;
-                    if (bonusDelayTimer >= decayDelay)
-                        clickBonus = Mathf.Max(0f, clickBonus - decayRate * dt);
+                    // no clicking: no bonus
+                    clickBonus = 0f;
                 }
 
-                // clamp to the same maxSpdBonus = 100f as runtime
+                // after holding period, let it decay each frame
+                if (bonusDelayTimer >= decayDelay)
+                    clickBonus = Mathf.Max(0f, clickBonus - decayRate * dt);
+
+                // enforce in game cap
                 clickBonus = Mathf.Clamp(clickBonus, 0f, 100f);
+                // ---------------------------------------------------------------
 
                 // record the raw spdBonus value for export
-                wStat.SpeedBoostClicks = Mathf.RoundToInt(clicksThisWave);
+                wStat.SpeedBoostClicks = clickBonus;
 
                 // ENEMY MOVEMENT
                 for (int i = 0; i < live.Count; i++) // Iterate carefully if removals happen elsewhere

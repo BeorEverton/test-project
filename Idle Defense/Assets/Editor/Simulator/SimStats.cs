@@ -18,7 +18,7 @@ namespace IdleDefense.Editor.Simulation
         public float HealthEnd;
         public float HealthRegen;
         public bool WaveBeaten;        // true = cleared
-        public int SpeedBoostClicks;
+        public float SpeedBoostClicks;
         public double MachineGunDamage;
         public double ShotgunDamage;
         public double SniperDamage;
