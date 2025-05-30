@@ -9,7 +9,8 @@ namespace Assets.Scripts.UpgradeSystem
         public Action<TurretStatsInstance, float> SetCurrentValue;
         public Func<TurretStatsInstance, int> GetLevel;
         public Action<TurretStatsInstance, int> SetLevel;
-        public Func<TurretStatsInstance, float> GetBaseCode;
+        public Func<TurretStatsInstance, float> GetBaseStat;
+        public Func<TurretStatsInstance, float> GetBaseCost;
         public Func<TurretStatsInstance, float> GetUpgradeAmount;
         public Func<TurretStatsInstance, float> GetCostMultiplier;
         public Func<TurretStatsInstance, float> GetMaxValue;

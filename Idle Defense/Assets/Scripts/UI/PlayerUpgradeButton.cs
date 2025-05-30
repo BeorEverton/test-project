@@ -55,7 +55,7 @@ namespace Assets.Scripts.UI
             _upgradeManager = FindFirstObjectByType<PlayerBaseUpgradeManager>();
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
-            PlayerBaseManager.Instance.OnStatsLoaded += OnStatsLoaded;
+            _playerBaseManager.OnStatsLoaded += OnStatsLoaded;
             MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
         }
 
@@ -73,7 +73,7 @@ namespace Assets.Scripts.UI
 
         public void OnClick()
         {
-            _upgradeManager.UpgradePlayerBaseStat(PlayerBaseManager.Instance.Stats, _upgradeType, this);
+            _upgradeManager.UpgradePlayerBaseStat(_playerBaseManager.Stats, _upgradeType, this);
         }
 
         public void UpdateStats(string value, string bonus, string cost, string count)
@@ -86,7 +86,7 @@ namespace Assets.Scripts.UI
 
         public void UpdateDisplayFromType()
         {
-            _upgradeManager.UpdateUpgradeDisplay(PlayerBaseManager.Instance.Stats, _upgradeType, this);
+            _upgradeManager.UpdateUpgradeDisplay(_playerBaseManager.Stats, _upgradeType, this);
         }
 
         public void EnableTooltip()

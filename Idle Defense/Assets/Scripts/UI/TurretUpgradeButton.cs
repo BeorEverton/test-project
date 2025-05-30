@@ -35,9 +35,7 @@ namespace Assets.Scripts.UI
                 _statUpgradeCost = tmpros[3];
             }
             else
-            {
                 Debug.LogWarning($"[TurretUpgradeButton] Couldn't auto-assign TextMeshProUGUI on {name}");
-            }
         }
 
         public void Init()

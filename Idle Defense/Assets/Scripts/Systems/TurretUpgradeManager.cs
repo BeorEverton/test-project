@@ -35,19 +35,20 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.Damage = v,
                     GetLevel = t => t.DamageLevel,
                     SetLevel = (t, v) => t.DamageLevel = v,
-                    GetBaseCode = t => t.BaseDamage,
+                    GetBaseStat = t => t.BaseDamage,
+                    GetBaseCost = t => t.DamageUpgradeBaseCost,
                     GetUpgradeAmount = t => t.DamageUpgradeAmount,
                     GetCostMultiplier = t => t.DamageCostExponentialMultiplier,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetDamageUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.Damage),
                     GetDisplayStrings = t =>
                         {
                             float current = t.Damage;
                             float nextLevel = t.DamageLevel + 1f;
                             float nextDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, nextLevel) + nextLevel;
                             float bonus = nextDamage - current;
-                            float cost = GetDamageUpgradeCost(t);
+                            float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.Damage);
 
                             return (UIManager.AbbreviateNumber(current),
                                 $"+{UIManager.AbbreviateNumber(bonus)}",
@@ -60,17 +61,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.FireRate = v,
                     GetLevel = t => t.FireRateLevel,
                     SetLevel = (t, v) => t.FireRateLevel = v,
-                    GetBaseCode = t => t.BaseFireRate,
+                    GetBaseStat = t => t.BaseFireRate,
+                    GetBaseCost = t => t.FireRateUpgradeBaseCost,
                     GetUpgradeAmount = t => t.FireRateUpgradeAmount,
                     GetCostMultiplier = t => t.FireRateCostExponentialMultiplier,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetFireRateUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.FireRate),
                     GetDisplayStrings = t =>
                     {
                         float currentFireRate = t.FireRate;
                         float bonusFireRate = t.FireRateUpgradeAmount;
-                        float cost = GetFireRateUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.FireRate);
 
                         return (
                         $"{currentFireRate:F2}/s",
@@ -85,17 +87,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.CriticalChance = v,
                     GetLevel = t => t.CriticalChanceLevel,
                     SetLevel = (t, v) => t.CriticalChanceLevel = v,
-                    GetBaseCode = t => t.BaseCritChance,
+                    GetBaseStat = t => t.BaseCritChance,
+                    GetBaseCost = t => t.CriticalChanceUpgradeBaseCost,
                     GetUpgradeAmount = t => t.CriticalChanceUpgradeAmount,
                     GetCostMultiplier = t => t.CriticalChanceCostExponentialMultiplier,
                     GetMaxValue = t => 50f,
                     GetMinValue = t => 0f,
-                    GetCost = GetCriticalChanceUpgradeCost,
+                    GetCost = t => GetExponentialCost(t, TurretUpgradeType.CriticalChance),
                     GetDisplayStrings = t =>
                     {
                         float current = t.CriticalChance;
                         float bonus = t.CriticalChanceUpgradeAmount;
-                        float cost = GetCriticalChanceUpgradeCost(t);
+                        float cost = GetExponentialCost(t, TurretUpgradeType.CriticalChance);
 
                         if (current >= 50f)
                             return ($"{(int)current}%", "Max", "");
@@ -113,17 +116,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.CriticalDamageMultiplier = v,
                     GetLevel = t => t.CriticalDamageMultiplierLevel,
                     SetLevel = (t, v) => t.CriticalDamageMultiplierLevel = v,
-                    GetBaseCode = t => t.BaseCritDamage,
+                    GetBaseStat = t => t.BaseCritDamage,
+                    GetBaseCost = t => t.CriticalDamageMultiplierUpgradeBaseCost,
                     GetUpgradeAmount = t => t.CriticalDamageMultiplierUpgradeAmount,
                     GetCostMultiplier = t => t.CriticalDamageCostExponentialMultiplier,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetCriticalDamageMultiplierUpgradeCost,
+                    GetCost = t => GetExponentialCost(t, TurretUpgradeType.CriticalDamageMultiplier),
                     GetDisplayStrings = t =>
                     {
                         float current = t.CriticalDamageMultiplier;
                         float bonus = t.CriticalDamageMultiplierUpgradeAmount;
-                        float cost = GetCriticalDamageMultiplierUpgradeCost(t);
+                        float cost = GetExponentialCost(t, TurretUpgradeType.CriticalDamageMultiplier);
 
                         return (
                             $"{(int)current}%",
@@ -138,17 +142,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.ExplosionRadius = v,
                     GetLevel = t => t.ExplosionRadiusLevel,
                     SetLevel = (t, v) => t.ExplosionRadiusLevel = v,
-                    GetBaseCode = t => t.ExplosionRadius,
+                    GetBaseStat = t => t.ExplosionRadius,
+                    GetBaseCost = t => t.ExplosionRadiusUpgradeBaseCost,
                     GetUpgradeAmount = t => t.ExplosionRadiusUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetExplosionRadiusUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.ExplosionRadius),
                     GetDisplayStrings = t =>
                     {
                         float current = t.ExplosionRadius;
                         float bonus = t.ExplosionRadiusUpgradeAmount;
-                        float cost = GetExplosionRadiusUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.ExplosionRadius);
 
                         if (t.ExplosionRadius >= 5f)
                             return ($"{current:F1}", "Max", "");
@@ -166,17 +171,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.SplashDamage = v,
                     GetLevel = t => t.SplashDamageLevel,
                     SetLevel = (t, v) => t.SplashDamageLevel = v,
-                    GetBaseCode = t => t.SplashDamage,
+                    GetBaseStat = t => t.SplashDamage,
+                    GetBaseCost = t => t.SplashDamageUpgradeBaseCost,
                     GetUpgradeAmount = t => t.SplashDamageUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetSplashDamageUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.SplashDamage),
                     GetDisplayStrings = t =>
                     {
                         float current = t.SplashDamage;
                         float bonus = t.SplashDamageUpgradeAmount;
-                        float cost = GetSplashDamageUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.SplashDamage);
 
                         return (
                             UIManager.AbbreviateNumber(current),
@@ -191,17 +197,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PierceChance = v,
                     GetLevel = t => t.PierceChanceLevel,
                     SetLevel = (t, v) => t.PierceChanceLevel = v,
-                    GetBaseCode = t => t.PierceChance,
+                    GetBaseStat = t => t.PierceChance,
+                    GetBaseCost = t => t.PierceChanceUpgradeBaseCost,
                     GetUpgradeAmount = t => t.PierceChanceUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => 100f,
                     GetMinValue = t => 0f,
-                    GetCost = GetPierceChanceUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.PierceChance),
                     GetDisplayStrings = t =>
                     {
                         float current = t.PierceChance;
                         float bonus = t.PierceChanceUpgradeAmount;
-                        float cost = GetPierceChanceUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.PierceChance);
 
                         if (current >= 100f)
                             return ($"{current:F1}%", "Max", "");
@@ -219,12 +226,13 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PierceDamageFalloff = v,
                     GetLevel = t => t.PierceDamageFalloffLevel,
                     SetLevel = (t, v) => t.PierceDamageFalloffLevel = v,
-                    GetBaseCode = t => t.PierceDamageFalloff,
+                    GetBaseStat = t => t.PierceDamageFalloff,
+                    GetBaseCost = t => t.PierceDamageFalloffUpgradeBaseCost,
                     GetUpgradeAmount = t => t.PierceDamageFalloffUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetPierceDamageFalloffUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.PierceDamageFalloff),
                     GetDisplayStrings = t =>
                     {
                         float currentFalloff = t.PierceDamageFalloff;
@@ -234,7 +242,7 @@ namespace Assets.Scripts.Systems
                         float nextRetained = 100f - nextFalloff;
 
                         float bonus = nextRetained - currentRetained;
-                        float cost = GetPierceDamageFalloffUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.PierceDamageFalloff);
 
                         return (
                             $"{currentRetained:F1}%",
@@ -249,17 +257,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PelletCount = (int)v,
                     GetLevel = t => t.PelletCountLevel,
                     SetLevel = (t, v) => t.PelletCountLevel = v,
-                    GetBaseCode = t => t.PelletCount,
+                    GetBaseStat = t => t.PelletCount,
+                    GetBaseCost = t => t.PelletCountUpgradeBaseCost,
                     GetUpgradeAmount = t => t.PelletCountUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetPelletCountUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.PelletCount),
                     GetDisplayStrings = t =>
                     {
                         float current = t.PelletCount;
                         float bonus = t.PelletCountUpgradeAmount;
-                        float cost = GetPelletCountUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.PelletCount);
 
                         return (
                             UIManager.AbbreviateNumber(current),
@@ -274,17 +283,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.DamageFalloffOverDistance = v,
                     GetLevel = t => t.DamageFalloffOverDistanceLevel,
                     SetLevel = (t, v) => t.DamageFalloffOverDistanceLevel = v,
-                    GetBaseCode = t => t.DamageFalloffOverDistance,
+                    GetBaseStat = t => t.DamageFalloffOverDistance,
+                    GetBaseCost = t => t.DamageFalloffOverDistanceUpgradeBaseCost,
                     GetUpgradeAmount = t => t.DamageFalloffOverDistanceUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetDamageFalloffOverDistanceUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.DamageFalloffOverDistance),
                     GetDisplayStrings = t =>
                     {
                         float current = t.DamageFalloffOverDistance;
                         float bonus = t.DamageFalloffOverDistanceUpgradeAmount;
-                        float cost = GetDamageFalloffOverDistanceUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.DamageFalloffOverDistance);
 
                         if (current <= 0f)
                             return ($"{current:F1}%", "Max", "");
@@ -302,17 +312,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.KnockbackStrength = v,
                     GetLevel = t => t.KnockbackStrengthLevel,
                     SetLevel = (t, v) => t.KnockbackStrengthLevel = v,
-                    GetBaseCode = t => t.KnockbackStrength,
+                    GetBaseStat = t => t.KnockbackStrength,
+                    GetBaseCost = t => t.KnockbackStrengthUpgradeBaseCost,
                     GetUpgradeAmount = t => t.KnockbackStrengthUpgradeAmount,
                     GetCostMultiplier = t => t.KnockbackStrengthCostExponentialMultiplier,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetKnockbackStrengthUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.KnockbackStrength),
                     GetDisplayStrings = t =>
                     {
                         float current = t.KnockbackStrength;
                         float bonus = t.KnockbackStrengthUpgradeAmount;
-                        float cost = GetKnockbackStrengthUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.KnockbackStrength);
 
                         return (
                             $"{current:F1}",
@@ -327,17 +338,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.PercentBonusDamagePerSec = v,
                     GetLevel = t => t.PercentBonusDamagePerSecLevel,
                     SetLevel = (t, v) => t.PercentBonusDamagePerSecLevel = v,
-                    GetBaseCode = t => t.PercentBonusDamagePerSec,
+                    GetBaseStat = t => t.PercentBonusDamagePerSec,
+                    GetBaseCost = t => t.PercentBonusDamagePerSecUpgradeBaseCost,
                     GetUpgradeAmount = t => t.PercentBonusDamagePerSecUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = GetBonusDamagePerSecUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.PercentBonusDamagePerSec),
                     GetDisplayStrings = t =>
                     {
                         float current = t.PercentBonusDamagePerSec;
                         float bonus = t.PercentBonusDamagePerSecUpgradeAmount;
-                        float cost = GetBonusDamagePerSecUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.PercentBonusDamagePerSec);
 
                         return (
                             $"{current:F1}%",
@@ -352,17 +364,18 @@ namespace Assets.Scripts.Systems
                     SetCurrentValue = (t, v) => t.SlowEffect = v,
                     GetLevel = t => t.SlowEffectLevel,
                     SetLevel = (t, v) => t.SlowEffectLevel = v,
-                    GetBaseCode = t => t.SlowEffect,
+                    GetBaseStat = t => t.SlowEffect,
+                    GetBaseCost = t => t.SlowEffectUpgradeBaseCost,
                     GetUpgradeAmount = t => t.SlowEffectUpgradeAmount,
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => 100f,
                     GetMinValue = t => 0f,
-                    GetCost = GetSlowEffectUpgradeCost,
+                    GetCost = t => GetExponentialCost_PlusLevel(t, TurretUpgradeType.SlowEffect),
                     GetDisplayStrings = t =>
                     {
                         float current = t.SlowEffect;
                         float bonus = t.SlowEffectUpgradeAmount;
-                        float cost = GetSlowEffectUpgradeCost(t);
+                        float cost = GetExponentialCost_PlusLevel(t, TurretUpgradeType.SlowEffect);
 
                         if (current >= 100f)
                             return ($"{current:F1}%", "Max", "");
@@ -383,6 +396,7 @@ namespace Assets.Scripts.Systems
             if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
                 return;
 
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
             float cost = upgrade.GetCost(turret);
 
             if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(turret) >= upgrade.GetMaxValue(turret))
@@ -415,16 +429,35 @@ namespace Assets.Scripts.Systems
         public float GetTurretUpgradeCost(TurretStatsInstance turret, TurretUpgradeType type) =>
             !_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) ? 0f : upgrade.GetCost(turret);
 
-        private float GetHybridCost(float baseCost, float level)
+        private float GetHybridCost(TurretStatsInstance stats, TurretUpgradeType type)
         {
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
+                return 0f;
+
+            int level = upgrade.GetLevel(stats);
+            float baseCost = upgrade.GetBaseCost(stats);
+
             if (level < hybridThreshold)
                 return baseCost * (1f + level * level * quadraticFactor);
 
             return baseCost * Mathf.Pow(exponentialPower, level);
         }
 
-        private float GetExponentialCost_PlusLevel(float baseCost, float level, float exponentialMultiplier) => baseCost + Mathf.Pow(exponentialMultiplier, level) + level;
-        private float GetExponentialCost(float baseCost, float level, float multiplier) => baseCost * Mathf.Pow(multiplier, level);
+        private float GetExponentialCost_PlusLevel(TurretStatsInstance stats, TurretUpgradeType type)
+        {
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
+                return 0f;
+
+            return upgrade.GetBaseCost(stats) + Mathf.Pow(upgrade.GetCostMultiplier(stats), upgrade.GetLevel(stats)) + upgrade.GetLevel(stats);
+        }
+
+        private float GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type)
+        {
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
+                return 0f;
+
+            return upgrade.GetBaseCost(stats) + Mathf.Pow(upgrade.GetCostMultiplier(stats), upgrade.GetLevel(stats));
+        }
 
         public void UpdateUpgradeDisplay(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
         {
@@ -434,46 +467,6 @@ namespace Assets.Scripts.Systems
             (string value, string bonus, string cost) = upgrade.GetDisplayStrings(turret);
             button.UpdateStats(value, bonus, cost);
         }
-
-        // Used for enabling/disabling the buttons on the UI based on their costs
-        public float GetDamageUpgradeCost(TurretStatsInstance t) =>
-            GetExponentialCost_PlusLevel(t.DamageUpgradeBaseCost, t.DamageLevel, t.DamageCostExponentialMultiplier);
-
-        public float GetFireRateUpgradeCost(TurretStatsInstance t) =>
-            GetExponentialCost_PlusLevel(t.FireRateUpgradeBaseCost, t.FireRateLevel, t.FireRateCostExponentialMultiplier);
-
-        public float GetCriticalChanceUpgradeCost(TurretStatsInstance t) =>
-            GetExponentialCost(t.CriticalChanceUpgradeBaseCost, t.CriticalChanceLevel, t.CriticalChanceCostExponentialMultiplier);
-
-        public float GetCriticalDamageMultiplierUpgradeCost(TurretStatsInstance t) =>
-            GetExponentialCost(t.CriticalDamageMultiplierUpgradeBaseCost, t.CriticalDamageMultiplierLevel, t.CriticalDamageCostExponentialMultiplier);
-
-        public float GetExplosionRadiusUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.ExplosionRadiusUpgradeBaseCost, t.ExplosionRadiusLevel);
-
-        public float GetSplashDamageUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.SplashDamageUpgradeBaseCost, t.SplashDamageLevel);
-
-        public float GetPierceChanceUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.PierceChanceUpgradeBaseCost, t.PierceChanceLevel);
-
-        public float GetPierceDamageFalloffUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.PierceDamageFalloffUpgradeBaseCost, t.PierceDamageFalloffLevel);
-
-        public float GetPelletCountUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.PelletCountUpgradeBaseCost, t.PelletCountLevel);
-
-        public float GetDamageFalloffOverDistanceUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.DamageFalloffOverDistanceUpgradeBaseCost, t.DamageFalloffOverDistanceLevel);
-
-        public float GetBonusDamagePerSecUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.PercentBonusDamagePerSecUpgradeBaseCost, t.PercentBonusDamagePerSecLevel);
-
-        public float GetSlowEffectUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.SlowEffectUpgradeBaseCost, t.SlowEffectLevel);
-
-        public float GetKnockbackStrengthUpgradeCost(TurretStatsInstance t) =>
-            GetHybridCost(t.KnockbackStrengthUpgradeBaseCost, t.KnockbackStrengthLevel);
     }
 
     public enum TurretUpgradeType

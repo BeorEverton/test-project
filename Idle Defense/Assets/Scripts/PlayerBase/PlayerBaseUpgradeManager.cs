@@ -133,29 +133,30 @@ namespace Assets.Scripts.PlayerBase
             }
         }
 
-        private void GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int amount, out float cost, out int maxAmount)
+        private void GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int inAmount, out float cost, out int outAmount)
         {
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
             {
                 cost = 0;
-                maxAmount = 0;
+                outAmount = 0;
                 return;
             }
 
+            const float multiplier = 1.1f;
             int currentLevel = upgrade.GetLevel(stats);
             float baseCost = upgrade.GetBaseCost(stats);
-            const float multiplier = 1.1f;
+            int maxAmount = GetMaxAmount(baseCost, multiplier, currentLevel);
 
-            maxAmount = amount == 9999
-                ? GetMaxAmount(baseCost, multiplier, currentLevel) == 0
+            outAmount = inAmount == 9999
+                ? maxAmount == 0
                     ? 1
-                    : GetMaxAmount(baseCost, multiplier, currentLevel)
-                : amount;
+                    : maxAmount
+                : inAmount;
 
-            cost = RecursiveCost(baseCost, multiplier, currentLevel, maxAmount);
+            cost = RecursiveCost(baseCost, multiplier, currentLevel, outAmount);
         }
 
-        private float GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int amount)
+        private float GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int inAmount)
         {
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
             {
@@ -166,10 +167,10 @@ namespace Assets.Scripts.PlayerBase
             float baseCost = upgrade.GetBaseCost(stats);
             const float multiplier = 1.1f;
 
-            if (amount == 9999)
-                amount = GetMaxAmount(baseCost, multiplier, currentLevel);
+            if (inAmount == 9999)
+                inAmount = GetMaxAmount(baseCost, multiplier, currentLevel);
 
-            return RecursiveCost(baseCost, multiplier, currentLevel, amount);
+            return RecursiveCost(baseCost, multiplier, currentLevel, inAmount);
         }
 
         private int GetMaxAmount(float baseCost, float multiplier, int currentLevel)
