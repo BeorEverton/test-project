@@ -11,7 +11,7 @@ namespace Assets.Scripts.UI
     public class PlayerUpgradeButton : MonoBehaviour
     {
         [Header("UI Elements (Auto-Assigned)")]
-        [SerializeField] private TextMeshProUGUI _statName, _statValue, _statUpgradeAmount, _statUpgradeCost;
+        [SerializeField] private TextMeshProUGUI _statName, _statValue, _statUpgradeAmount, _statUpgradeCost, _statUpgradeCount;
 
         [Header("Upgrade Type")]
         [SerializeField] private PlayerUpgradeType _upgradeType;
@@ -23,12 +23,13 @@ namespace Assets.Scripts.UI
         private void Awake()
         {
             var tmpros = GetComponentsInChildren<TextMeshProUGUI>();
-            if (tmpros.Length >= 4)
+            if (tmpros.Length >= 5)
             {
                 _statName = tmpros[0];
                 _statValue = tmpros[1];
                 _statUpgradeAmount = tmpros[2];
-                _statUpgradeCost = tmpros[3];
+                _statUpgradeCount = tmpros[3];
+                _statUpgradeCost = tmpros[4];
             }
 
             _button = GetComponentInChildren<Button>();
@@ -75,11 +76,12 @@ namespace Assets.Scripts.UI
             _upgradeManager.UpgradePlayerBaseStat(PlayerBaseManager.Instance.Stats, _upgradeType, this);
         }
 
-        public void UpdateStats(string value, string bonus, string cost)
+        public void UpdateStats(string value, string bonus, string cost, string count)
         {
             _statValue.SetText(value);
             _statUpgradeAmount.SetText(bonus);
             _statUpgradeCost.SetText(cost);
+            _statUpgradeCount.SetText(count);
         }
 
         public void UpdateDisplayFromType()

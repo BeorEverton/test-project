@@ -15,6 +15,6 @@ namespace Assets.Scripts.UpgradeSystem
         public Func<PlayerBaseStatsInstance, float> GetMaxValue;
         public Func<PlayerBaseStatsInstance, float> GetMinValue;
         public Func<PlayerBaseStatsInstance, int, float> GetCost;
-        public Func<PlayerBaseStatsInstance, int, (string value, string bonus, string cost)> GetDisplayStrings;
+        public Func<PlayerBaseStatsInstance, int, (string value, string bonus, string cost, string count)> GetDisplayStrings;
     }
 }

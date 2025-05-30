@@ -35,11 +35,12 @@ namespace Assets.Scripts.PlayerBase
                     {
                         float current = p.MaxHealth;
                         float bonus = p.MaxHealthUpgradeAmount;
-                        float cost = GetCost(p, PlayerUpgradeType.MaxHealth, a);
+                        GetCost(p, PlayerUpgradeType.MaxHealth, a, out float cost, out int amount);
 
                         return ($"{current:F0}",
                                 $"+{bonus:F0}",
-                                $"${UIManager.AbbreviateNumber(cost)}");
+                                $"${UIManager.AbbreviateNumber(cost)}",
+                                $"{amount:F0}X");
                     }
                 },
                 [PlayerUpgradeType.RegenAmount] = new()
@@ -57,11 +58,12 @@ namespace Assets.Scripts.PlayerBase
                     {
                         float current = p.RegenAmount;
                         float bonus = p.RegenAmountUpgradeAmount;
-                        float cost = GetCost(p, PlayerUpgradeType.RegenAmount, a);
+                        GetCost(p, PlayerUpgradeType.RegenAmount, a, out float cost, out int amount);
 
-                        return ($"{current:F0}",
-                                $"+{bonus:F0}",
-                                $"${UIManager.AbbreviateNumber(cost)}");
+                        return ($"{current:F2}",
+                                $"+{bonus:F2}",
+                                $"${UIManager.AbbreviateNumber(cost)}",
+                                $"{amount:F0}X");
                     }
                 },
                 [PlayerUpgradeType.RegenInterval] = new()
@@ -79,13 +81,15 @@ namespace Assets.Scripts.PlayerBase
                     {
                         float current = p.RegenInterval;
                         float bonus = p.RegenIntervalUpgradeAmount;
-                        float cost = GetCost(p, PlayerUpgradeType.RegenInterval, a);
+                        GetCost(p, PlayerUpgradeType.RegenInterval, a, out float cost, out int amount);
+
                         if (current <= 0.5f)
-                            return ($"{current:F2}s", "Max", "");
+                            return ($"{current:F2}s", "Max", "", "0");
 
                         return ($"{current:F2}s",
                             $"-{bonus:F2}s",
-                            $"${UIManager.AbbreviateNumber(cost)}");
+                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"{amount:F0}X");
                     }
                 }
             };
@@ -190,8 +194,8 @@ namespace Assets.Scripts.PlayerBase
 
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
 
-            (string value, string bonus, string cost) = upgrade.GetDisplayStrings(stats, amount);
-            button.UpdateStats(value, bonus, cost);
+            (string value, string bonus, string cost, string count) = upgrade.GetDisplayStrings(stats, amount);
+            button.UpdateStats(value, bonus, cost, count);
         }
 
         private bool TrySpend(float cost) => GameManager.Instance.TrySpend(cost);
