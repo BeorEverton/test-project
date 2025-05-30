@@ -27,10 +27,11 @@ namespace Assets.Scripts.PlayerBase
                     GetLevel = p => p.MaxHealthLevel,
                     SetLevel = (p, v) => p.MaxHealthLevel = v,
                     GetUpgradeAmount = p => p.MaxHealthUpgradeAmount,
-                    GetCostMultiplier = p => p.MaxHealthUpgradeBaseCost,
+                    GetBaseCost = p => p.MaxHealthUpgradeBaseCost,
                     GetMaxValue = p => float.MaxValue,
                     GetMinValue = p => 0f,
                     GetCost = (p, a) => GetCost(p, PlayerUpgradeType.MaxHealth, a),
+                    GetAmount = p => GetMaxAmount(p.MaxHealthUpgradeBaseCost, 1.1f, p.MaxHealthLevel),
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
@@ -50,10 +51,11 @@ namespace Assets.Scripts.PlayerBase
                     GetLevel = p => p.RegenAmountLevel,
                     SetLevel = (p, v) => p.RegenAmountLevel = v,
                     GetUpgradeAmount = p => p.RegenAmountUpgradeAmount,
-                    GetCostMultiplier = p => p.RegenAmountUpgradeBaseCost,
+                    GetBaseCost = p => p.RegenAmountUpgradeBaseCost,
                     GetMaxValue = p => float.MaxValue,
                     GetMinValue = p => 0f,
                     GetCost = (p, a) => GetCost(p, PlayerUpgradeType.RegenAmount, a),
+                    GetAmount = p => GetMaxAmount(p.RegenAmountUpgradeBaseCost, 1.1f, p.RegenAmountLevel),
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenAmount;
@@ -73,10 +75,11 @@ namespace Assets.Scripts.PlayerBase
                     GetLevel = p => p.RegenIntervalLevel,
                     SetLevel = (p, v) => p.RegenIntervalLevel = v,
                     GetUpgradeAmount = p => p.RegenIntervalUpgradeAmount,
-                    GetCostMultiplier = p => p.RegenIntervalUpgradeBaseCost,
+                    GetBaseCost = p => p.RegenIntervalUpgradeBaseCost,
                     GetMaxValue = p => 0.5f,
                     GetMinValue = p => 0f,
                     GetCost = (p, a) => GetCost(p, PlayerUpgradeType.RegenInterval, a),
+                    GetAmount = p => GetMaxAmount(p.RegenIntervalUpgradeBaseCost, 1.1f, p.RegenIntervalLevel),
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenInterval;
@@ -97,6 +100,9 @@ namespace Assets.Scripts.PlayerBase
 
         public float GetPlayerBaseUpgradeCost(PlayerBaseStatsInstance turret, PlayerUpgradeType type, int amount) =>
             !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetCost(turret, amount);
+
+        public int GetPlayerBaseAvailableUpgradeAmount(PlayerBaseStatsInstance turret, PlayerUpgradeType type) =>
+            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0 : upgrade.GetAmount(turret);
 
         public void UpgradePlayerBaseStat(PlayerBaseStatsInstance stats, PlayerUpgradeType type, PlayerUpgradeButton button)
         {
@@ -137,10 +143,15 @@ namespace Assets.Scripts.PlayerBase
             }
 
             int currentLevel = upgrade.GetLevel(stats);
-            float baseCost = stats.MaxHealthUpgradeBaseCost;
+            float baseCost = upgrade.GetBaseCost(stats);
             const float multiplier = 1.1f;
 
-            maxAmount = amount == 9999 ? GetMaxAmount(baseCost, multiplier, currentLevel) : amount;
+            maxAmount = amount == 9999
+                ? GetMaxAmount(baseCost, multiplier, currentLevel) == 0
+                    ? 1
+                    : GetMaxAmount(baseCost, multiplier, currentLevel)
+                : amount;
+
             cost = RecursiveCost(baseCost, multiplier, currentLevel, maxAmount);
         }
 
@@ -152,7 +163,7 @@ namespace Assets.Scripts.PlayerBase
             }
 
             int currentLevel = upgrade.GetLevel(stats);
-            float baseCost = stats.MaxHealthUpgradeBaseCost;
+            float baseCost = upgrade.GetBaseCost(stats);
             const float multiplier = 1.1f;
 
             if (amount == 9999)

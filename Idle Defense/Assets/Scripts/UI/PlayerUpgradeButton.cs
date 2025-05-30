@@ -126,8 +126,12 @@ namespace Assets.Scripts.UI
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
 
             float cost = _upgradeManager.GetPlayerBaseUpgradeCost(_playerBaseManager.Stats, _upgradeType, amount);
+            int availableAmount = _upgradeManager.GetPlayerBaseAvailableUpgradeAmount(_playerBaseManager.Stats, _upgradeType);
 
-            _button.interactable = GameManager.Instance.Money >= (ulong)cost;
+            if (GameManager.Instance.Money >= cost && availableAmount > 0)
+                _button.interactable = true;
+            else
+                _button.interactable = false;
         }
     }
 }
