@@ -195,6 +195,7 @@ namespace Assets.Scripts.PlayerBase
         {
             if (amount == 0)
                 return 0f;
+
             float cost = baseCost * Mathf.Pow(multiplier, level);
             return cost + RecursiveCost(baseCost, multiplier, level + 1, amount - 1);
         }

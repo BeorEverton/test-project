@@ -22,7 +22,7 @@ namespace Assets.Scripts.UI
 
         private void Awake()
         {
-            var tmpros = GetComponentsInChildren<TextMeshProUGUI>();
+            TextMeshProUGUI[] tmpros = GetComponentsInChildren<TextMeshProUGUI>();
             if (tmpros.Length >= 5)
             {
                 _statName = tmpros[0];

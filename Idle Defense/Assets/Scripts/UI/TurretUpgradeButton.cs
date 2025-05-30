@@ -17,7 +17,7 @@ namespace Assets.Scripts.UI
         [SerializeField] private TurretStatsInstance _turret;
 
         [Header("UI Elements (Auto-Assigned)")]
-        [SerializeField] private TextMeshProUGUI _statName, _statValue, _statUpgradeAmount, _statUpgradeCost;
+        [SerializeField] private TextMeshProUGUI _statName, _statValue, _statUpgradeAmount, _statUpgradeCost, _statUpgradeCount;
 
         [Header("Upgrade Type")]
         [SerializeField] private TurretUpgradeType _upgradeType;
@@ -32,7 +32,8 @@ namespace Assets.Scripts.UI
                 _statName = tmpros[0];
                 _statValue = tmpros[1];
                 _statUpgradeAmount = tmpros[2];
-                _statUpgradeCost = tmpros[3];
+                _statUpgradeCount = tmpros[3];
+                _statUpgradeCost = tmpros[4];
             }
             else
                 Debug.LogWarning($"[TurretUpgradeButton] Couldn't auto-assign TextMeshProUGUI on {name}");
@@ -84,11 +85,12 @@ namespace Assets.Scripts.UI
             TooltipManager.Instance.HideTooltip();
         }
 
-        public void UpdateStats(string value, string upgradeAmount, string upgradeCost)
+        public void UpdateStats(string value, string upgradeAmount, string upgradeCost, string count)
         {
             _statValue.SetText(value);
             _statUpgradeAmount.SetText(upgradeAmount);
             _statUpgradeCost.SetText(upgradeCost);
+            _statUpgradeCount.SetText(count);
         }
 
         private string GetDisplayNameForUpgrade(TurretUpgradeType type)
@@ -112,8 +114,9 @@ namespace Assets.Scripts.UI
         {
             if (_baseTurret == null || _upgradeManager == null)
                 return;
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+            float cost = _upgradeManager.GetTurretUpgradeCost(_turret, _upgradeType, amount);
 
-            float cost = _upgradeManager.GetTurretUpgradeCost(_turret, _upgradeType);
             Button button = GetComponentInChildren<Button>();
 
             if (button != null)
