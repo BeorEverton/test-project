@@ -45,7 +45,7 @@ namespace Assets.Scripts.UI
 
         private void OnDisable()
         {
-            if (GameManager.Instance != null)
+            if (GameManager.Instance)
                 GameManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
         }
 
@@ -55,8 +55,8 @@ namespace Assets.Scripts.UI
             _upgradeManager = FindFirstObjectByType<PlayerBaseUpgradeManager>();
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
-            _playerBaseManager.OnStatsLoaded += OnStatsLoaded;
             MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
+            _playerBaseManager.OnStatsLoaded += OnStatsLoaded;
         }
 
         private void OnBuyAmountChanged(object sender, EventArgs e)
@@ -124,7 +124,6 @@ namespace Assets.Scripts.UI
                 return;
 
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
-
             float cost = _upgradeManager.GetPlayerBaseUpgradeCost(_playerBaseManager.Stats, _upgradeType, amount);
             int availableAmount = _upgradeManager.GetPlayerBaseAvailableUpgradeAmount(_playerBaseManager.Stats, _upgradeType);
 

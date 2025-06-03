@@ -1,6 +1,7 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.UpgradeSystem;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +23,9 @@ namespace Assets.Scripts.UI
         [Header("Upgrade Type")]
         [SerializeField] private TurretUpgradeType _upgradeType;
 
+        private Button _button;
+        private int _upgradeAmount;
+
         private void Awake()
         {
             // Auto-assign the first two TextMeshProUGUI components in children
@@ -37,6 +41,8 @@ namespace Assets.Scripts.UI
             }
             else
                 Debug.LogWarning($"[TurretUpgradeButton] Couldn't auto-assign TextMeshProUGUI on {name}");
+
+            _button = GetComponentInChildren<Button>();
         }
 
         public void Init()
@@ -52,6 +58,7 @@ namespace Assets.Scripts.UI
         private void OnEnable()
         {
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+            MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
             UpdateInteractableState(); // Run once on enable
         }
 
@@ -59,11 +66,27 @@ namespace Assets.Scripts.UI
         {
             if (GameManager.Instance != null)
                 GameManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
+
+            MultipleBuyOption.Instance.OnBuyAmountChanged -= OnBuyAmountChanged;
+        }
+
+        private void OnBuyAmountChanged(object sender, EventArgs e)
+        {
+            UpdateInteractableState();
+            UpdateDisplayFromType();
+            UpdateUpgradeAmount();
         }
 
         private void HandleMoneyChanged(ulong _)
         {
             UpdateInteractableState();
+            UpdateDisplayFromType();
+            UpdateUpgradeAmount();
+        }
+
+        public void UpdateDisplayFromType()
+        {
+            _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
         }
 
         public void OnClick()
@@ -71,7 +94,7 @@ namespace Assets.Scripts.UI
             if (_upgradeManager == null)
                 _upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
 
-            _upgradeManager.UpgradeTurretStat(_turret, _upgradeType, this);
+            _upgradeManager.UpgradeTurretStat(_turret, _upgradeType, this, _upgradeAmount);
         }
 
         public void EnableTooltip()
@@ -114,13 +137,19 @@ namespace Assets.Scripts.UI
         {
             if (_baseTurret == null || _upgradeManager == null)
                 return;
+
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
             float cost = _upgradeManager.GetTurretUpgradeCost(_turret, _upgradeType, amount);
 
-            Button button = GetComponentInChildren<Button>();
+            if (GameManager.Instance.Money >= cost && _upgradeAmount > 0)
+                _button.interactable = true;
+            else
+                _button.interactable = false;
+        }
 
-            if (button != null)
-                button.interactable = GameManager.Instance.Money >= (ulong)cost;
+        private void UpdateUpgradeAmount()
+        {
+            _upgradeAmount = _upgradeManager.GetTurretAvailableUpgradeAmount(_turret, _upgradeType);
         }
     }
 }

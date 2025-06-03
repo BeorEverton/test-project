@@ -3,6 +3,7 @@ using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using Assets.Scripts.UpgradeSystem;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 
 namespace Assets.Scripts.PlayerBase
@@ -35,7 +36,7 @@ namespace Assets.Scripts.PlayerBase
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
-                        float bonus = p.MaxHealthUpgradeAmount;
+                        float bonus = GetBonusAmount(p, PlayerUpgradeType.MaxHealth);
                         GetCost(p, PlayerUpgradeType.MaxHealth, a, out float cost, out int amount);
 
                         return ($"{current:F0}",
@@ -59,7 +60,7 @@ namespace Assets.Scripts.PlayerBase
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenAmount;
-                        float bonus = p.RegenAmountUpgradeAmount;
+                        float bonus = GetBonusAmount(p, PlayerUpgradeType.RegenAmount);
                         GetCost(p, PlayerUpgradeType.RegenAmount, a, out float cost, out int amount);
 
                         return ($"{current:F2}",
@@ -83,7 +84,7 @@ namespace Assets.Scripts.PlayerBase
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenInterval;
-                        float bonus = p.RegenIntervalUpgradeAmount;
+                        float bonus = GetBonusAmount(p, PlayerUpgradeType.RegenInterval);
                         GetCost(p, PlayerUpgradeType.RegenInterval, a, out float cost, out int amount);
 
                         if (current <= 0.5f)
@@ -98,11 +99,26 @@ namespace Assets.Scripts.PlayerBase
             };
         }
 
-        public float GetPlayerBaseUpgradeCost(PlayerBaseStatsInstance turret, PlayerUpgradeType type, int amount) =>
-            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetCost(turret, amount);
+        public float GetPlayerBaseUpgradeCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int amount) =>
+            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetCost(stats, amount);
 
-        public int GetPlayerBaseAvailableUpgradeAmount(PlayerBaseStatsInstance turret, PlayerUpgradeType type) =>
-            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0 : upgrade.GetAmount(turret);
+        public int GetPlayerBaseAvailableUpgradeAmount(PlayerBaseStatsInstance stats, PlayerUpgradeType type) =>
+            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0 : upgrade.GetAmount(stats);
+
+        private float GetBonusAmount(PlayerBaseStatsInstance stats, PlayerUpgradeType type)
+        {
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+
+            float upgradeAmount = !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetUpgradeAmount(stats);
+
+            if (upgrade == null)
+                return 1f;
+
+            if (amount == 9999)
+                amount = upgrade.GetAmount(stats) == 0 ? 1 : upgrade.GetAmount(stats);
+
+            return upgradeAmount * amount;
+        }
 
         public void UpgradePlayerBaseStat(PlayerBaseStatsInstance stats, PlayerUpgradeType type, PlayerUpgradeButton button)
         {
@@ -123,7 +139,7 @@ namespace Assets.Scripts.PlayerBase
             {
                 float newValue = upgrade.GetCurrentValue(stats) + (upgrade.GetUpgradeAmount(stats) * maxAmount);
                 upgrade.SetCurrentValue(stats, newValue);
-                upgrade.SetLevel(stats, upgrade.GetLevel(stats) + 1);
+                upgrade.SetLevel(stats, upgrade.GetLevel(stats) + maxAmount);
                 AudioManager.Instance.Play("Upgrade");
                 UpdateUpgradeDisplay(stats, type, button);
                 PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
@@ -193,7 +209,7 @@ namespace Assets.Scripts.PlayerBase
 
         private float RecursiveCost(float baseCost, float multiplier, int level, int amount)
         {
-            if (amount == 0)
+            if (amount <= 0)
                 return 0f;
 
             float cost = baseCost * Mathf.Pow(multiplier, level);
