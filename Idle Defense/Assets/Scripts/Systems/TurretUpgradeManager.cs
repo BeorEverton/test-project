@@ -46,7 +46,7 @@ namespace Assets.Scripts.Systems
                         {
                             float current = t.Damage;
                             float nextLevel = t.DamageLevel + 1f;
-                            float nextDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, nextLevel);
+                            float nextDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, nextLevel) + nextLevel;
                             float bonus = nextDamage - current;
                             GetExponentialCost(t, TurretUpgradeType.Damage, a, out float cost, out int amount);
 
@@ -429,7 +429,7 @@ namespace Assets.Scripts.Systems
                 return;
             }
 
-            if (upgrade.GetMinValue != null && upgrade.GetCurrentValue(turret) <= upgrade.GetMinValue(turret))
+            if (upgrade.GetMinValue != null && upgrade.GetCurrentValue(turret) < upgrade.GetMinValue(turret))
             {
                 UpdateUpgradeDisplay(turret, type, button);
                 return;
@@ -444,6 +444,7 @@ namespace Assets.Scripts.Systems
                 button._baseTurret.UpdateTurretAppearance();
                 upgrade.Upgrade?.Invoke(turret);
                 UpdateUpgradeDisplay(turret, type, button);
+                button.UpdateInteractableState();
                 OnAnyTurretUpgraded?.Invoke();
             }
         }
@@ -465,7 +466,7 @@ namespace Assets.Scripts.Systems
             while (true)
             {
                 float cost = baseCost * Mathf.Pow(multiplier, currentLevel + amount);
-                if (totalCost + cost > money)
+                if (Mathf.Floor(totalCost + cost) > money)
                     break;
                 totalCost += cost;
                 amount++;
@@ -499,9 +500,9 @@ namespace Assets.Scripts.Systems
                 outAmount = (int)maxLevel - level;
 
             if (level < outAmount)
-                cost = RecursiveHybridCost(baseCost, level, outAmount);
+                cost = Mathf.Floor(RecursiveHybridCost(baseCost, level, outAmount));
 
-            cost = baseCost * Mathf.Pow(exponentialPower, level);
+            cost = Mathf.Floor(baseCost * Mathf.Pow(exponentialPower, level));
         }
 
         private float GetHybridCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount)
@@ -521,10 +522,9 @@ namespace Assets.Scripts.Systems
             if (level + maxAmount > maxLevel)
                 maxAmount = (int)maxLevel - level;
 
-            if (level < maxLevel)
-                return RecursiveHybridCost(baseCost, level, maxAmount);
-
-            return baseCost * Mathf.Pow(exponentialPower, level);
+            return level < maxLevel
+                ? Mathf.Floor(RecursiveHybridCost(baseCost, level, maxAmount))
+                : baseCost * Mathf.Pow(exponentialPower, level);
         }
 
         private void GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount, out float cost, out int outAmount)
@@ -547,7 +547,7 @@ namespace Assets.Scripts.Systems
                     : maxAmount
                 : inAmount;
 
-            cost = RecursiveExponentialCost(baseCost, multiplier, level, outAmount);
+            cost = Mathf.Floor(RecursiveExponentialCost(baseCost, multiplier, level, outAmount));
         }
 
         private float GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount)
@@ -563,7 +563,7 @@ namespace Assets.Scripts.Systems
                 ? GetMaxAmount(baseCost, multiplier, level)
                 : inAmount;
 
-            return RecursiveExponentialCost(baseCost, multiplier, level, maxAmount);
+            return Mathf.Floor(RecursiveExponentialCost(baseCost, multiplier, level, maxAmount));
         }
 
         private float RecursiveHybridCost(float baseCost, int level, int amount)

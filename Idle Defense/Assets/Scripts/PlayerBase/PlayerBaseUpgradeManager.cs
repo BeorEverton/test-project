@@ -109,13 +109,17 @@ namespace Assets.Scripts.PlayerBase
         {
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
 
-            float upgradeAmount = !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetUpgradeAmount(stats);
+            float upgradeAmount = !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade)
+                ? 0f
+                : upgrade.GetUpgradeAmount(stats);
 
             if (upgrade == null)
                 return 1f;
 
             if (amount == 9999)
-                amount = upgrade.GetAmount(stats) == 0 ? 1 : upgrade.GetAmount(stats);
+                amount = upgrade.GetAmount(stats) == 0
+                    ? 1
+                    : upgrade.GetAmount(stats);
 
             return upgradeAmount * amount;
         }

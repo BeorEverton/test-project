@@ -59,7 +59,9 @@ namespace Assets.Scripts.UI
         {
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
             MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
-            UpdateInteractableState(); // Run once on enable
+
+            UpdateUpgradeAmount();
+            UpdateInteractableState();
         }
 
         private void OnDisable()
@@ -72,16 +74,16 @@ namespace Assets.Scripts.UI
 
         private void OnBuyAmountChanged(object sender, EventArgs e)
         {
-            UpdateInteractableState();
             UpdateDisplayFromType();
             UpdateUpgradeAmount();
+            UpdateInteractableState();
         }
 
         private void HandleMoneyChanged(ulong _)
         {
-            UpdateInteractableState();
             UpdateDisplayFromType();
             UpdateUpgradeAmount();
+            UpdateInteractableState();
         }
 
         public void UpdateDisplayFromType()

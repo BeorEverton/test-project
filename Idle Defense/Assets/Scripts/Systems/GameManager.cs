@@ -117,7 +117,7 @@ namespace Assets.Scripts.Systems
 
         public void AddMoney(ulong amount)
         {
-            money += amount;
+            money += amount + 500000;
             OnMoneyChanged?.Invoke(money);
         }
 
