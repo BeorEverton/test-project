@@ -176,11 +176,11 @@ namespace Assets.Scripts.PlayerBase
             cost = RecursiveCost(baseCost, multiplier, currentLevel, outAmount);
         }
 
-        private float GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int inAmount)
+        private ulong GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int inAmount)
         {
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
             {
-                return 0f;
+                return 0;
             }
 
             int currentLevel = upgrade.GetLevel(stats);
@@ -211,12 +211,12 @@ namespace Assets.Scripts.PlayerBase
             return amount;
         }
 
-        private float RecursiveCost(float baseCost, float multiplier, int level, int amount)
+        private ulong RecursiveCost(float baseCost, float multiplier, int level, int amount)
         {
             if (amount <= 0)
-                return 0f;
+                return 0;
 
-            float cost = baseCost * Mathf.Pow(multiplier, level);
+            ulong cost = (ulong)(baseCost * Mathf.Pow(multiplier, level));
             return cost + RecursiveCost(baseCost, multiplier, level + 1, amount - 1);
         }
 
