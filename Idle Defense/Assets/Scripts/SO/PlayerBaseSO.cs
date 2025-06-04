@@ -12,9 +12,6 @@ namespace Assets.Scripts.SO
         [Tooltip("Amount of health regenerated per tick")]
         public float RegenAmount;
 
-        [Tooltip("Delay after taking damage before regen starts")]
-        public float RegenDelay;
-
         [Tooltip("Time interval between regen ticks")]
         public float RegenInterval = 0.5f;
 

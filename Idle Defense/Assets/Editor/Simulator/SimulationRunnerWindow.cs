@@ -6,8 +6,8 @@ namespace IdleDefense.Editor.Simulation
     public class SimulationRunnerWindow : EditorWindow
     {
         private float minutes = 10f;
-        private float clicksPerSec = 3f;
-        private int iterations = 50;
+        private float clicksPerSec = .48f;
+        private int iterations = 5;
         private SpendingMode mode = SpendingMode.MostEffective;
 
         [MenuItem("Idle Defense/Run Simulation…")]

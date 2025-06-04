@@ -153,10 +153,10 @@ namespace IdleDefense.Editor.Simulation
             float baseMaxHealth = baseSO.MaxHealth;
             float baseHealth = baseMaxHealth;
             float regenAmount = baseSO.RegenAmount;
-            float regenDelay = baseSO.RegenDelay;
             float regenInterval = baseSO.RegenInterval;
-            float regenDelayTimer = 0f, regenTickTimer = 0f;
+            float regenTickTimer = 0f;
             int maxHpLvl = 0, regenAmtLvl = 0, regenIntLvl = 0;
+            bool previousWaveFailed = false;
 
             // click speed bonus
             float clickBonus = 0f;
@@ -235,8 +235,8 @@ namespace IdleDefense.Editor.Simulation
                     Debug.Log($"[Simulation] Wave {waveIndex}: Buying {emptySlots} turrets with {coins} coins.");
                     // choose cheapest unlocked type you can afford this wave
                     foreach (var entry in unlockTable.Entries
-                              .Where(u => u.WaveToUnlock <= waveIndex)
-                              .OrderBy(u => u.FirstCopyCost))
+                      .Where(u => u.WaveToUnlock <= waveIndex)
+                      .OrderByDescending(u => u.FirstCopyCost))
                     {
                         var type = entry.Type;
                         int owned = turretCounts[type];
@@ -301,6 +301,8 @@ namespace IdleDefense.Editor.Simulation
                             TimeSinceLastAttack = 0f,
                             AttackRange = info.AttackRange
                         });
+                    //Debug.Log($"[Simulation] Wave {waveIndex}: Spawning {count}x {info.Name} (HP: {hp}, Speed: {spd}, Dmg: {dmg}, Coin: {coin})");
+                    
                 }
 
                 //----------------------------------------------------------------
@@ -353,6 +355,7 @@ namespace IdleDefense.Editor.Simulation
                     CurrentRegenInterval = regenInterval
                 };
 
+                wStat.EnemiesSpawned = pendingSpawns.Count; // Add to export the amount of enemies
                 Array.Clear(perWaveDmg, 0, perWaveDmg.Length);
             }
 
@@ -376,7 +379,9 @@ namespace IdleDefense.Editor.Simulation
                         bossIncoming = false;
                     }
                     spawnTimer = spawnIntervalCurrent;
+
                 }
+                
 
                 // ------------------ click bonus (spdBonus) -----------------------
                 const float initialBoost = 5f;
@@ -509,249 +514,175 @@ namespace IdleDefense.Editor.Simulation
                                 stats.MissionsFailed++;
                                 waveIndex = Mathf.Max(1, waveIndex - 10); // Or other penalty
                                 baseHealth = baseMaxHealth; // Reset base health
-                                                            // Reset regen timers (original logic)
-                                regenDelayTimer = 0f;
-                                regenTickTimer = 0f;
+                                                        
+                                previousWaveFailed = true;
 
                                 live.Clear(); // Clear all live enemies
                                 pendingSpawns.Clear(); // Clear pending spawns
                                 InitWave(); // Prepare for the new (potentially earlier) wave
                                 goto END_OF_FRAME; // Skip other logic for this dt step
                             }
+                            else previousWaveFailed = false;
                         }
                         live[i] = e; // Update enemy state (like TimeSinceLastAttack)
                     }
                 }
 
-                /* previous method with turret firing first and enemy movement later. it gives turrets an advantage
-                //------------------ turret firing (first!) ---------------------
-                for (int t = 0; t < slots.Count; t++)
-                {
-                    var bp = slots[t];
-                    shotTimers[t] += dt;
-                    float effectiveFireRate = bp.FireRate * (1f + clickBonus);
-                    float interval = 1f / effectiveFireRate;
-
-                    while (shotTimers[t] >= interval)
-                    {
-                        shotTimers[t] -= interval;
-                        // find first enemy in range
-                        int idx = live.FindIndex(e => e.Y <= bp.Range);
-                        if (idx < 0) break;
-                        var e = live[idx];
-
-                        // critital hit chance
-                        bool crit = Random.value < bp.CritChance * 0.01f;
-                        float critMultiplier = 1f + bp.CritDamageMultiplier * 0.01f;  
-                        float dmg = bp.Damage * (crit ? critMultiplier : 1f);
-
-                        // deal damage
-                        if (dmg > e.Hp) dmg = e.Hp; // to simulate correctly the damage dealt
-                        e.Hp -= dmg;
-                        wStat.DamageDealt += dmg;
-                        stats.TotalDamageDealt += dmg;
-                        perWaveDmg[(int)bp.Type] += dmg;
-
-                        if (e.Hp <= 0f)
-                        {
-                            if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
-                            else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
-                            coins += e.Coin;
-                            wStat.MoneyEarned += e.Coin;
-                            live.RemoveAt(idx);
-                        }
-                        else
-                        {
-                            live[idx] = e;
-                        }
-                    }
-                }
-
-                //------------------ enemy movement & base damage ------
-                // flag to track if base has taken damage
-                bool baseDamaged = false;
-
-                for (int i = live.Count - 1; i >= 0; i--)
-                {
-                    var e = live[i];
-                    e.Y -= e.Speed * dt;
-
-                    if (e.Y <= e.AttackRange)
-                    {
-                        e.TimeSinceLastAttack += dt;
-                        var info = enemyInfos[e.Class];
-                        float atkInterval = 1f / info.AttackSpeed;
-                        if (e.TimeSinceLastAttack >= atkInterval)
-                        {
-                            baseHealth = Mathf.Max(0f, baseHealth - e.Damage);
-                            wStat.DamageTaken += e.Damage;
-                            e.TimeSinceLastAttack = 0f;
-
-                            if (baseHealth <= 0f)
-                            {
-                                // record a FAILED wave row
-                                wStat.HealthEnd = 0f;
-                                wStat.WaveBeaten = false;
-                                stats.Waves.Add(wStat);
-                                stats.MissionsFailed++;
-                                waveIndex = Mathf.Max(1, waveIndex - 10);
-                                baseHealth = baseMaxHealth;
-                                regenDelayTimer = 0f;
-                                regenTickTimer = 0f;
-                                baseDamaged = true;
-                                live.Clear();
-                                pendingSpawns.Clear();
-                                InitWave();
-                                break;  // exit movement loop to next frame
-                            }
-                        }
-                    }
-
-                    live[i] = e;
-                }
-                */
-
-                //------------------ base regen ------------------------
-                if (baseDamaged && baseHealth < baseMaxHealth && live.Count == 0)
-                {
-                    regenDelayTimer += dt;
-                    if (regenDelayTimer >= regenDelay)
-                    {
-                        regenTickTimer += dt;
-                        if (regenTickTimer >= regenInterval)
-                        {
-                            float healed = Mathf.Min(regenAmount, baseMaxHealth - baseHealth);
-                            baseHealth += healed;
-                            baseHealth = Mathf.Clamp(baseHealth, 0f, baseMaxHealth);
-                            stats.TotalHealthRepaired += healed;
-                            wStat.HealthRegen += healed;
-                            regenTickTimer = 0f;
-
-                            // Clear damage flag when fully healed
-                            if (baseHealth >= baseMaxHealth)
-                            {
-                                baseDamaged = false;
-                            }
-
-                        }
-                    }
-                }
-                else if (live.Count > 0)
-                {
-                    regenDelayTimer = 0f;
+                // ------------------ base regeneration (single timer) ------------------
+                // 1)  If we were hit this frame, reset the regen stopwatch.
+                if (baseDamaged)            
                     regenTickTimer = 0f;
+
+                // 2)  Every frame we’re below max health, count up the stopwatch.
+                if (baseHealth < baseMaxHealth)
+                {
+                    regenTickTimer += dt;
+
+                    // 3)  Once the stopwatch reaches the interval, heal once and reset it.
+                    if (regenTickTimer >= regenInterval)
+                    {
+                        float healed = Mathf.Min(regenAmount, baseMaxHealth - baseHealth);
+                        baseHealth += healed;
+                        stats.TotalHealthRepaired += healed;
+                        wStat.HealthRegen += healed;
+
+                        regenTickTimer = 0f;                     // restart the same wait period
+
+                        if (baseHealth >= baseMaxHealth)         // fully healed
+                            baseDamaged = false;        // clear the flag until next hit
+                    }
                 }
+
 
                 // ------------------ spending ---------------------------------
                 if (mode == SpendingMode.MostEffective)
                 {
-                    // 1) Prioritise base health if it took damage last wave
+                    // 1) Prioritise base health if died last wave
                     float rawHealthCost = CostForBase(PlayerUpgradeType.MaxHealth, maxHpLvl);
                     ulong healthCost = (ulong)Mathf.Ceil(rawHealthCost);
-                    if (baseHealth < baseMaxHealth
+                    if (previousWaveFailed
                         && healthCost > 0
                         && coins >= healthCost)
-                    {
-                        coins -= healthCost;
-                        maxHpLvl++;
-                        baseMaxHealth += baseSO.MaxHealthUpgradeAmount;
-                        baseHealth = Mathf.Min(baseHealth + baseSO.MaxHealthUpgradeAmount, baseMaxHealth);
-                        wStat.BaseUpgrades++;
-                        wStat.MaxHealthLevel = maxHpLvl;
-                        wStat.CurrentMaxHealth = baseMaxHealth;
-                        wStat.MoneySpent += healthCost;
-                        stats.MoneySpent += healthCost;
-                    }
-                    else // 2) Otherwise delegate to your DPS-per-coin turret strategy
-                    {                        
-                        ulong before = coins;
-                        var oldSlots = new List<TurretBlueprint>(slots);
-                        strategy.Tick(ref coins, ref slots, waveIndex);
-                        ulong spent = before - coins;
-                        if (spent > 0)
                         {
-                            wStat.TurretUpgrades++;
-
-                            // detect WHICH turret stat actually increased
-                            for (int i = 0; i < oldSlots.Count; i++)
+                            coins -= healthCost;
+                            maxHpLvl++;
+                            baseMaxHealth += baseSO.MaxHealthUpgradeAmount;
+                            baseHealth = Mathf.Min(baseHealth + baseSO.MaxHealthUpgradeAmount, baseMaxHealth);
+                            wStat.BaseUpgrades++;
+                            wStat.MaxHealthLevel = maxHpLvl;
+                            wStat.CurrentMaxHealth = baseMaxHealth;
+                            wStat.MoneySpent += healthCost;
+                            stats.MoneySpent += healthCost;
+                        }
+                    
+                    else
+                    {
+                        // 2) If the base was merely damaged (not lost), invest in regeneration
+                        if (wStat.DamageTaken > 0f)
+                        {
+                            // a) Try upgrading Regen Amount first
+                            float rawRegenAmtCost = CostForBase(PlayerUpgradeType.RegenAmount, regenAmtLvl);
+                            ulong regenAmtCost = (ulong)Mathf.Ceil(rawRegenAmtCost);
+                            if (regenAmtCost > 0 && coins >= regenAmtCost)
                             {
-                                var o = oldSlots[i];
-                                var n = slots[i];
+                                coins -= regenAmtCost;
+                                regenAmtLvl++;
+                                regenAmount += baseSO.RegenAmountUpgradeAmount;
+                                wStat.BaseUpgrades++;
+                                wStat.RegenAmountLevel = regenAmtLvl;
+                                wStat.CurrentRegenAmount = regenAmount;
+                                wStat.MoneySpent += regenAmtCost;
+                                stats.MoneySpent += regenAmtCost;
+                            }
+                            else
+                            {
+                                // b) Otherwise, try upgrading Regen Interval
+                                float rawRegenIntCost = CostForBase(PlayerUpgradeType.RegenInterval, regenIntLvl);
+                                ulong regenIntCost = (ulong)Mathf.Ceil(rawRegenIntCost);
 
-                                #region check which turret stat was upgraded
-                                if (n.DamageLevel != o.DamageLevel)
+                                // Only allow interval upgrades if we're not at the floor
+                                bool canUpgradeInterval = regenInterval > MinBaseRegenInterval;
+                                if (canUpgradeInterval && regenIntCost > 0 && coins >= regenIntCost)
                                 {
-                                    wStat.DamageUpgrades++;
-                                    break;
+                                    coins -= regenIntCost;
+                                    regenIntLvl++;
+                                    regenInterval = Mathf.Max(MinBaseRegenInterval, regenInterval - baseSO.RegenIntervalUpgradeAmount);
+                                    wStat.BaseUpgrades++;
+                                    wStat.RegenIntervalLevel = regenIntLvl;
+                                    wStat.CurrentRegenInterval = regenInterval;
+                                    wStat.MoneySpent += regenIntCost;
+                                    stats.MoneySpent += regenIntCost;
                                 }
-                                else if (n.FireRateLevel != o.FireRateLevel)
+                                else
                                 {
-                                    wStat.FireRateUpgrades++;
-                                    break;
+                                    // c) If regen upgrades are unaffordable or maxed, fall back to turret DPS
+                                    ulong before = coins;
+                                    var oldSlots = new List<TurretBlueprint>(slots);
+                                    strategy.Tick(ref coins, ref slots, waveIndex);
+                                    ulong spent = before - coins;
+
+                                    if (spent > 0)
+                                    {
+                                        wStat.TurretUpgrades++;
+                                        // detect WHICH turret stat increased
+                                        for (int i = 0; i < oldSlots.Count; i++)
+                                        {
+                                            var o = oldSlots[i];
+                                            var n = slots[i];
+                                            if (n.DamageLevel != o.DamageLevel) { wStat.DamageUpgrades++; break; }
+                                            else if (n.FireRateLevel != o.FireRateLevel) { wStat.FireRateUpgrades++; break; }
+                                            else if (n.CriticalChanceLevel != o.CriticalChanceLevel) { wStat.CriticalChanceUpgrades++; break; }
+                                            else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel) { wStat.CriticalDamageMultiplierUpgrades++; break; }
+                                            else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel) { wStat.ExplosionRadiusUpgrades++; break; }
+                                            else if (n.SplashDamageLevel != o.SplashDamageLevel) { wStat.SplashDamageUpgrades++; break; }
+                                            else if (n.PierceChanceLevel != o.PierceChanceLevel) { wStat.PierceChanceUpgrades++; break; }
+                                            else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel) { wStat.PierceDamageFalloffUpgrades++; break; }
+                                            else if (n.PelletCountLevel != o.PelletCountLevel) { wStat.PelletCountUpgrades++; break; }
+                                            else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel) { wStat.KnockbackStrengthUpgrades++; break; }
+                                            else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel) { wStat.DamageFalloffOverDistanceUpgrades++; break; }
+                                            else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel) { wStat.PercentBonusDamagePerSecUpgrades++; break; }
+                                            else if (n.SlowEffectLevel != o.SlowEffectLevel) { wStat.SlowEffectUpgrades++; break; }
+                                        }
+                                        wStat.MoneySpent += spent;
+                                        stats.MoneySpent += spent;
+                                    }
                                 }
-                                else if (n.CriticalChanceLevel != o.CriticalChanceLevel)
-                                {
-                                    wStat.CriticalChanceUpgrades++;
-                                    break;
-                                }
-                                else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel)
-                                {
-                                    wStat.CriticalDamageMultiplierUpgrades++;
-                                    break;
-                                }
-                                else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel)
-                                {
-                                    wStat.ExplosionRadiusUpgrades++;
-                                    break;
-                                }
-                                else if (n.SplashDamageLevel != o.SplashDamageLevel)
-                                {
-                                    wStat.SplashDamageUpgrades++;
-                                    break;
-                                }
-                                else if (n.PierceChanceLevel != o.PierceChanceLevel)
-                                {
-                                    wStat.PierceChanceUpgrades++;
-                                    break;
-                                }
-                                else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel)
-                                {
-                                    wStat.PierceDamageFalloffUpgrades++;
-                                    break;
-                                }
-                                else if (n.PelletCountLevel != o.PelletCountLevel)
-                                {
-                                    wStat.PelletCountUpgrades++;
-                                    break;
-                                }
-                                else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel)
-                                {
-                                    wStat.KnockbackStrengthUpgrades++;
-                                    break;
-                                }
-                                else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel)
-                                {
-                                    wStat.DamageFalloffOverDistanceUpgrades++;
-                                    break;
-                                }
-                                else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel)
-                                {
-                                    wStat.PercentBonusDamagePerSecUpgrades++;
-                                    break;
-                                }
-                                else if (n.SlowEffectLevel != o.SlowEffectLevel)
-                                {
-                                    wStat.SlowEffectUpgrades++;
-                                    break;
-                                }
-                                #endregion
                             }
                         }
+                        else
+                        {
+                            // 3) No base damage last wave = delegate directly to turret DPS per coin
+                            ulong before = coins;
+                            var oldSlots = new List<TurretBlueprint>(slots);
+                            strategy.Tick(ref coins, ref slots, waveIndex);
+                            ulong spent = before - coins;
 
-                        // record money spent on that upgrade
-                        wStat.MoneySpent += spent;
-                        stats.MoneySpent += spent;
-                    }
+                            if (spent > 0)
+                            {
+                                wStat.TurretUpgrades++;
+                                for (int i = 0; i < oldSlots.Count; i++)
+                                {
+                                    var o = oldSlots[i];
+                                    var n = slots[i];
+                                    if (n.DamageLevel != o.DamageLevel) { wStat.DamageUpgrades++; break; }
+                                    else if (n.FireRateLevel != o.FireRateLevel) { wStat.FireRateUpgrades++; break; }
+                                    else if (n.CriticalChanceLevel != o.CriticalChanceLevel) { wStat.CriticalChanceUpgrades++; break; }
+                                    else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel) { wStat.CriticalDamageMultiplierUpgrades++; break; }
+                                    else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel) { wStat.ExplosionRadiusUpgrades++; break; }
+                                    else if (n.SplashDamageLevel != o.SplashDamageLevel) { wStat.SplashDamageUpgrades++; break; }
+                                    else if (n.PierceChanceLevel != o.PierceChanceLevel) { wStat.PierceChanceUpgrades++; break; }
+                                    else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel) { wStat.PierceDamageFalloffUpgrades++; break; }
+                                    else if (n.PelletCountLevel != o.PelletCountLevel) { wStat.PelletCountUpgrades++; break; }
+                                    else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel) { wStat.KnockbackStrengthUpgrades++; break; }
+                                    else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel) { wStat.DamageFalloffOverDistanceUpgrades++; break; }
+                                    else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel) { wStat.PercentBonusDamagePerSecUpgrades++; break; }
+                                    else if (n.SlowEffectLevel != o.SlowEffectLevel) { wStat.SlowEffectUpgrades++; break; }
+                                }
+                                wStat.MoneySpent += spent;
+                                stats.MoneySpent += spent;
+                            }
+                        }
+                    }                    
                 }
                 else // Cheapest or Random
                 {
@@ -1007,15 +938,49 @@ namespace IdleDefense.Editor.Simulation
                             }
                             wStat.TurretUpgrades++;
                         }
-                    }
-                
-            
+                }
 
-            if (live.Count == 0 && pendingSpawns.Count == 0 && !bossIncoming)
+                for (int i = 0; i < 5; i++)
+                {
+                    string val;
+                    if (i < slots.Count)
+                    {
+                        // equipped turret: name + total level
+                        var bp = slots[i];
+                        int totalLevel =
+                            bp.DamageLevel + bp.FireRateLevel + bp.CriticalChanceLevel +
+                            bp.CriticalDamageMultiplierLevel + bp.ExplosionRadiusLevel +
+                            bp.SplashDamageLevel + bp.PierceChanceLevel +
+                            bp.PierceDamageFalloffLevel + bp.PelletCountLevel +
+                            bp.KnockbackStrengthLevel + bp.DamageFalloffOverDistanceLevel +
+                            bp.PercentBonusDamagePerSecLevel + bp.SlowEffectLevel;
+                        val = $"{bp.Type}:{totalLevel}";
+                    }
+                    else if (i < nextSlot)
+                    {
+                        // slot unlocked but no turret (rare)
+                        val = "empty";
+                    }
+                    else
+                    {
+                        val = "locked";
+                    }
+
+                    switch (i)
+                    {
+                        case 0: wStat.Slot1 = val; break;
+                        case 1: wStat.Slot2 = val; break;
+                        case 2: wStat.Slot3 = val; break;
+                        case 3: wStat.Slot4 = val; break;
+                        case 4: wStat.Slot5 = val; break;
+                    }
+                }
+
+
+                if (live.Count == 0 && pendingSpawns.Count == 0 && !bossIncoming)
                 {
                     wStat.HealthEnd = baseHealth;   // before post wave regen
                     wStat.WaveBeaten = true;
-                    regenDelayTimer = 0f;           // block extra regen until next wave
                     regenTickTimer = 0f;
 
                     // copy per type DPS

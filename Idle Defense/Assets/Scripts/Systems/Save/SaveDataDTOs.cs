@@ -25,7 +25,6 @@ namespace Assets.Scripts.Systems.Save
             {
                 MaxHealth = player.MaxHealth,
                 RegenAmount = player.RegenAmount,
-                RegenDelay = player.RegenDelay,
                 RegenInterval = player.RegenInterval,
                 MaxHealthUpgradeAmount = player.MaxHealthUpgradeAmount,
                 MaxHealthUpgradeBaseCost = player.MaxHealthUpgradeBaseCost,
@@ -149,7 +148,6 @@ namespace Assets.Scripts.Systems.Save
             PlayerBaseSO playerBaseSO = ScriptableObject.CreateInstance<PlayerBaseSO>();
             playerBaseSO.MaxHealth = playerInfo.MaxHealth;
             playerBaseSO.RegenAmount = playerInfo.RegenAmount;
-            playerBaseSO.RegenDelay = playerInfo.RegenDelay;
             playerBaseSO.RegenInterval = playerInfo.RegenInterval;
             playerBaseSO.MaxHealthUpgradeAmount = playerInfo.MaxHealthUpgradeAmount;
             playerBaseSO.MaxHealthUpgradeBaseCost = playerInfo.MaxHealthUpgradeBaseCost;

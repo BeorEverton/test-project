@@ -237,110 +237,63 @@ namespace IdleDefense.Editor.Simulation
             int bestUpgrade = -1;
             ulong bestCost = 0;
 
+            float expectedEnemyHp = 100f * Mathf.Pow(1.05f, currentWave) + currentWave;
+
             for (int i = 0; i < slots.Count; i++)
             {
                 var t = slots[i];
                 float baseDps = t.DamagePerSecond();
+                float baseShotDamage = t.Damage * (1f + Mathf.Clamp01(t.CritChance / 100f) * ((t.CritDamageMultiplier / 100f) - 1f));
 
-                // simulate each upgrade type’s real cost & DPS gain
                 for (int u = 0; u < 13; u++)
                 {
+                    if (u == 0 && baseShotDamage >= expectedEnemyHp)
+                        continue; // skip damage upgrades if already 1-shotting
+
                     float rawCost;
                     TurretBlueprint up = t;
 
                     switch (u)
                     {
-                        case 0: // Damage
-                            rawCost = CostPlusLevel(
-                                t.DamageUpgradeBaseCost,
-                                t.DamageLevel,
-                                t.DamageCostExponentialMultiplier);
-                            up = t.WithDamageUpgraded();
-                            break;
-                        case 1: // FireRate
-                            rawCost = CostPlusLevel(
-                                t.FireRateUpgradeBaseCost,
-                                t.FireRateLevel,
-                                t.FireRateCostExponentialMultiplier);
-                            up = t.WithFireRateUpgraded();
-                            break;
-                        case 2: // CritChance
-                            rawCost = CostPlusLevel(
-                                t.CritChanceUpgradeBaseCost,
-                                t.CriticalChanceLevel,
-                                t.CriticalChanceCostExponentialMultiplier);
-                            up = t.WithCritChanceUpgraded();
-                            break;
-                        case 3: // CritDamage
-                            rawCost = CostPlusLevel(
-                                t.CritDamageUpgradeBaseCost,
-                                t.CriticalDamageMultiplierLevel,
-                                t.CriticalDamageCostExponentialMultiplier);
-                            up = t.WithCritDamageUpgraded();
-                            break;
-                        case 4: // ExplosionRadius
-                            rawCost = CostPlusLevel(
-                                t.ExplosionRadiusUpgradeBaseCost,
-                                t.ExplosionRadiusLevel,
-                                t.ExplosionRadiusCostExponentialMultiplier);
-                            up = t.WithExplosionRadiusUpgraded();
-                            break;
-                        case 5: // SplashDamage
-                            rawCost = CostPlusLevel(
-                                t.SplashDamageUpgradeBaseCost,
-                                t.SplashDamageLevel,
-                                t.SplashDamageCostExponentialMultiplier);
-                            up = t.WithSplashDamageUpgraded();
-                            break;
-                        case 6: // PierceChance
-                            rawCost = CostPlusLevel(
-                                t.PierceChanceUpgradeBaseCost,
-                                t.PierceChanceLevel,
-                                t.PierceChanceCostExponentialMultiplier);
-                            up = t.WithPierceChanceUpgraded();
-                            break;
-                        case 7: // PierceFalloff
-                            rawCost = CostPlusLevel(
-                                t.PierceDamageFalloffUpgradeBaseCost,
-                                t.PierceDamageFalloffLevel,
-                                t.PierceDamageFalloffCostExponentialMultiplier);
-                            up = t.WithPierceDamageFalloffUpgraded();
-                            break;
-                        case 8: // PelletCount
-                            rawCost = CostPlusLevel(
-                                t.PelletCountUpgradeBaseCost,
-                                t.PelletCountLevel,
-                                t.PelletCountCostExponentialMultiplier);
-                            up = t.WithPelletCountUpgraded();
-                            break;
-                        case 9: // Knockback
-                            rawCost = CostPlusLevel(
-                                t.KnockbackStrengthUpgradeBaseCost,
-                                t.KnockbackStrengthLevel,
-                                t.KnockbackStrengthCostExponentialMultiplier);
-                            up = t.WithKnockbackStrengthUpgraded();
-                            break;
-                        case 10: // DamageFalloff
-                            rawCost = CostPlusLevel(
-                                t.DamageFalloffOverDistanceUpgradeBaseCost,
-                                t.DamageFalloffOverDistanceLevel,
-                                t.DamageFalloffOverDistanceCostExponentialMultiplier);
-                            up = t.WithDamageFalloffOverDistanceUpgraded();
-                            break;
-                        case 11: // % Bonus DPS
-                            rawCost = CostPlusLevel(
-                                t.PercentBonusDamagePerSecUpgradeBaseCost,
-                                t.PercentBonusDamagePerSecLevel,
-                                t.PercentBonusDamagePerSecCostExponentialMultiplier);
-                            up = t.WithPercentBonusDamagePerSecUpgraded();
-                            break;
-                        case 12: // SlowEffect
-                            rawCost = CostPlusLevel(
-                                t.SlowEffectUpgradeBaseCost,
-                                t.SlowEffectLevel,
-                                t.SlowEffectCostExponentialMultiplier);
-                            up = t.WithSlowEffectUpgraded();
-                            break;
+                        case 0:
+                            rawCost = CostPlusLevel(t.DamageUpgradeBaseCost, t.DamageLevel, t.DamageCostExponentialMultiplier);
+                            up = t.WithDamageUpgraded(); break;
+                        case 1:
+                            rawCost = CostPlusLevel(t.FireRateUpgradeBaseCost, t.FireRateLevel, t.FireRateCostExponentialMultiplier);
+                            up = t.WithFireRateUpgraded(); break;
+                        case 2:
+                            rawCost = CostPlusLevel(t.CritChanceUpgradeBaseCost, t.CriticalChanceLevel, t.CriticalChanceCostExponentialMultiplier);
+                            up = t.WithCritChanceUpgraded(); break;
+                        case 3:
+                            rawCost = CostPlusLevel(t.CritDamageUpgradeBaseCost, t.CriticalDamageMultiplierLevel, t.CriticalDamageCostExponentialMultiplier);
+                            up = t.WithCritDamageUpgraded(); break;
+                        case 4:
+                            rawCost = CostPlusLevel(t.ExplosionRadiusUpgradeBaseCost, t.ExplosionRadiusLevel, t.ExplosionRadiusCostExponentialMultiplier);
+                            up = t.WithExplosionRadiusUpgraded(); break;
+                        case 5:
+                            rawCost = CostPlusLevel(t.SplashDamageUpgradeBaseCost, t.SplashDamageLevel, t.SplashDamageCostExponentialMultiplier);
+                            up = t.WithSplashDamageUpgraded(); break;
+                        case 6:
+                            rawCost = CostPlusLevel(t.PierceChanceUpgradeBaseCost, t.PierceChanceLevel, t.PierceChanceCostExponentialMultiplier);
+                            up = t.WithPierceChanceUpgraded(); break;
+                        case 7:
+                            rawCost = CostPlusLevel(t.PierceDamageFalloffUpgradeBaseCost, t.PierceDamageFalloffLevel, t.PierceDamageFalloffCostExponentialMultiplier);
+                            up = t.WithPierceDamageFalloffUpgraded(); break;
+                        case 8:
+                            rawCost = CostPlusLevel(t.PelletCountUpgradeBaseCost, t.PelletCountLevel, t.PelletCountCostExponentialMultiplier);
+                            up = t.WithPelletCountUpgraded(); break;
+                        case 9:
+                            rawCost = CostPlusLevel(t.KnockbackStrengthUpgradeBaseCost, t.KnockbackStrengthLevel, t.KnockbackStrengthCostExponentialMultiplier);
+                            up = t.WithKnockbackStrengthUpgraded(); break;
+                        case 10:
+                            rawCost = CostPlusLevel(t.DamageFalloffOverDistanceUpgradeBaseCost, t.DamageFalloffOverDistanceLevel, t.DamageFalloffOverDistanceCostExponentialMultiplier);
+                            up = t.WithDamageFalloffOverDistanceUpgraded(); break;
+                        case 11:
+                            rawCost = CostPlusLevel(t.PercentBonusDamagePerSecUpgradeBaseCost, t.PercentBonusDamagePerSecLevel, t.PercentBonusDamagePerSecCostExponentialMultiplier);
+                            up = t.WithPercentBonusDamagePerSecUpgraded(); break;
+                        case 12:
+                            rawCost = CostPlusLevel(t.SlowEffectUpgradeBaseCost, t.SlowEffectLevel, t.SlowEffectCostExponentialMultiplier);
+                            up = t.WithSlowEffectUpgraded(); break;
                         default:
                             continue;
                     }
@@ -382,6 +335,7 @@ namespace IdleDefense.Editor.Simulation
                 }
             }
         }
+
 
     }
 }

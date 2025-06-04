@@ -24,7 +24,6 @@ namespace Assets.Scripts.Systems
 
         private float _runtimeMaxHealth;
         private float _runtimeRegenAmount;
-        private float _runtimeRegenDelay;
         private float _runtimeRegenInterval;
         private const float MinRegenInterval = 0.5f;
 
@@ -54,7 +53,6 @@ namespace Assets.Scripts.Systems
             // Recalculate values based on upgrade levels
             _runtimeMaxHealth = Info.MaxHealth + Info.MaxHealthLevel * Info.MaxHealthUpgradeAmount;
             _runtimeRegenAmount = Info.RegenAmount + Info.RegenAmountLevel * Info.RegenAmountUpgradeAmount;
-            _runtimeRegenDelay = Info.RegenDelay; // This one is fixed
             _runtimeRegenInterval = Mathf.Max(
                 MinRegenInterval,
                 Info.RegenInterval - Info.RegenIntervalLevel * Info.RegenIntervalUpgradeAmount
@@ -76,8 +74,6 @@ namespace Assets.Scripts.Systems
                 return;
 
             _currentHealth = Mathf.Max(0f, _currentHealth - amount);
-            _regenDelayTimer = 0f;
-            _regenTickTimer = 0f;
 
             OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
             StatsManager.Instance.TotalDamageTaken += amount;
@@ -100,19 +96,12 @@ namespace Assets.Scripts.Systems
             if (_isDead || _currentHealth >= _runtimeMaxHealth)
                 return;
 
-            _regenDelayTimer += Time.deltaTime;
-
-            if (!(_regenDelayTimer >= _runtimeRegenDelay))
-                return;
-
             _regenTickTimer += Time.deltaTime;
 
             if (!(_regenTickTimer >= _runtimeRegenInterval))
                 return;
 
-            RepairPlayerBase();
-
-            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
+            RepairPlayerBase();            
         }
 
         private void RepairPlayerBase()
@@ -127,6 +116,8 @@ namespace Assets.Scripts.Systems
                 // Play full health sound
                 AudioManager.Instance.Play("Full Health");
             }
+
+            OnHealthChanged?.Invoke(_currentHealth, _runtimeMaxHealth);
         }
 
         private bool TrySpend(float cost)

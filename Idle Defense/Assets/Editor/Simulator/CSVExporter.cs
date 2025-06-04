@@ -18,18 +18,19 @@ namespace IdleDefense.Editor.Simulation
 
             using var sw = new StreamWriter(path, append: true);
             if (writeHeader)
-                sw.WriteLine("SimIndex,RowType,SpendingMode,Wave,EnemiesKilled,BossesKilled,DamageDealt,MaxZone," +
-                        "MoneyEarned,MoneySpent,TurretUps,BaseUps,DamageTaken,HealthStart," +
-                        "HealthEnd,HealthRegen,WaveBeaten,SpeedClicks," +
-                        "MaxHpLvl,RegenAmtLvl,RegenIntLvl,CurrentMaxHp,CurrentRegenAmt,CurrentRegenInt," +
-                        "MG,SG,SN,ML,LA," +
-                        "DamageUpgrades,FireRateUpgrades,CriticalChanceUpgrades," +
-                        "CriticalDamageMultiplierUpgrades,ExplosionRadiusUpgrades," +
-                        "SplashDamageUpgrades,PierceChanceUpgrades," +
-                        "PierceDamageFalloffUpgrades,PelletCountUpgrades," +
-                        "KnockbackStrengthUpgrades,DamageFalloffOverDistanceUpgrades," +
-                        "PercentBonusDamagePerSecUpgrades,SlowEffectUpgrades," +
-                        "TurretMoneySpent,Minutes");
+                sw.WriteLine("SimIndex,SpendingMode,Wave,EnemiesSpawned,EnemiesKilled,BossesKilled,DamageDealt,MaxZone," +
+                    "MoneyEarned,MoneySpent,TurretUps,BaseUps,DamageTaken,HealthStart," +
+                    "HealthEnd,HealthRegen,WaveBeaten,SpeedClicks," +
+                    "MaxHpLvl,RegenAmtLvl,RegenIntLvl,CurrentMaxHp,CurrentRegenAmt,CurrentRegenInt," +
+                    "MG,SG,SN,ML,LA," +
+                    "DamageUpgrades,FireRateUpgrades,CriticalChanceUpgrades," +
+                    "CriticalDamageMultiplierUpgrades,ExplosionRadiusUpgrades," +
+                    "SplashDamageUpgrades,PierceChanceUpgrades," +
+                    "PierceDamageFalloffUpgrades,PelletCountUpgrades," +
+                    "KnockbackStrengthUpgrades,DamageFalloffOverDistanceUpgrades," +
+                    "PercentBonusDamagePerSecUpgrades,SlowEffectUpgrades," +
+                    "TurretMoneySpent,Minutes,Slot1,Slot2,Slot3,Slot4,Slot5");
+
 
 
             // header row for this sim
@@ -38,23 +39,24 @@ namespace IdleDefense.Editor.Simulation
             // one row per wave
             foreach (var w in s.Waves)
             {
-                sw.WriteLine($"{simIndex},WAVE,{mode},{w.Wave},{w.EnemiesKilled},{w.BossesKilled}," +
-                        $"{w.DamageDealt:F2},{s.MaxZone},{w.MoneyEarned},{w.MoneySpent}," +
-                        $"{w.TurretUpgrades},{w.BaseUpgrades},{w.DamageTaken},{w.HealthStart}," +
-                        $"{w.HealthEnd},{w.HealthRegen},{(w.WaveBeaten ? 1 : 0)},{w.SpeedBoostClicks}," +
-                        $"{w.MaxHealthLevel},{w.RegenAmountLevel},{w.RegenIntervalLevel}," +
-                        $"{w.CurrentMaxHealth:F1},{w.CurrentRegenAmount:F2},{w.CurrentRegenInterval:F2}," +
-                        $"{w.MachineGunDamage:F2},{w.ShotgunDamage:F2},{w.SniperDamage:F2}," +
-                        $"{w.MissileLauncherDamage:F2},{w.LaserDamage:F2}," +
-                        $"{w.DamageUpgrades},{w.FireRateUpgrades}," +
-                        $"{w.CriticalChanceUpgrades},{w.CriticalDamageMultiplierUpgrades}," +
-                        $"{w.ExplosionRadiusUpgrades},{w.SplashDamageUpgrades}," +
-                        $"{w.PierceChanceUpgrades},{w.PierceDamageFalloffUpgrades}," +
-                        $"{w.PelletCountUpgrades},{w.KnockbackStrengthUpgrades}," +
-                        $"{w.DamageFalloffOverDistanceUpgrades}," +
-                        $"{w.PercentBonusDamagePerSecUpgrades},{w.SlowEffectUpgrades}," +
-                        $"{w.TurretMoneySpent}," +
-                        $"{s.SimMinutes}");
+                sw.WriteLine($"{simIndex},{mode},{w.Wave},{w.EnemiesSpawned},{w.EnemiesKilled},{w.BossesKilled}," +
+                    $"{w.DamageDealt:F2},{s.MaxZone},{w.MoneyEarned},{w.MoneySpent}," +
+                    $"{w.TurretUpgrades},{w.BaseUpgrades},{w.DamageTaken},{w.HealthStart}," +
+                    $"{w.HealthEnd},{w.HealthRegen},{(w.WaveBeaten ? 1 : 0)},{w.SpeedBoostClicks}," +
+                    $"{w.MaxHealthLevel},{w.RegenAmountLevel},{w.RegenIntervalLevel}," +
+                    $"{w.CurrentMaxHealth:F1},{w.CurrentRegenAmount:F2},{w.CurrentRegenInterval:F2}," +
+                    $"{w.MachineGunDamage:F2},{w.ShotgunDamage:F2},{w.SniperDamage:F2}," +
+                    $"{w.MissileLauncherDamage:F2},{w.LaserDamage:F2}," +
+                    $"{w.DamageUpgrades},{w.FireRateUpgrades}," +
+                    $"{w.CriticalChanceUpgrades},{w.CriticalDamageMultiplierUpgrades}," +
+                    $"{w.ExplosionRadiusUpgrades},{w.SplashDamageUpgrades}," +
+                    $"{w.PierceChanceUpgrades},{w.PierceDamageFalloffUpgrades}," +
+                    $"{w.PelletCountUpgrades},{w.KnockbackStrengthUpgrades}," +
+                    $"{w.DamageFalloffOverDistanceUpgrades}," +
+                    $"{w.PercentBonusDamagePerSecUpgrades},{w.SlowEffectUpgrades}," +
+                    $"{w.TurretMoneySpent},{s.SimMinutes}, " +
+                    $"{w.Slot1},{w.Slot2},{w.Slot3},{w.Slot4},{w.Slot5}");
+
             }
 
             sw.Flush();

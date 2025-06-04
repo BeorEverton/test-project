@@ -6,6 +6,7 @@ namespace IdleDefense.Editor.Simulation
     public struct WaveStat
     {
         public int Wave;
+        public int EnemiesSpawned;
         public int EnemiesKilled;
         public int BossesKilled;
         public float DamageDealt;
@@ -51,6 +52,12 @@ namespace IdleDefense.Editor.Simulation
 
         // total turret-upgrade spend this wave
         public ulong TurretMoneySpent;
+
+        public string Slot1;
+        public string Slot2;
+        public string Slot3;
+        public string Slot4;
+        public string Slot5;
     }
 
     public struct SimStats
@@ -72,6 +79,4 @@ namespace IdleDefense.Editor.Simulation
 
         public float SimMinutes;
     }
-
-
 }
