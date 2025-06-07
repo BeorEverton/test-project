@@ -176,7 +176,7 @@ namespace Assets.Scripts.UI
 
             // Calculate and store rollback wave
             int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
-            rollbackWaveIndex = Mathf.Max(1, currentWave - 10); // clamp to wave 1
+            rollbackWaveIndex = Mathf.Max(1, currentWave - 2); // clamp to wave 1
 
             countdownText.text = $"Restarting from Zone {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
             immediateRestartButton.onClick.RemoveAllListeners();

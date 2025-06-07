@@ -8,7 +8,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
+using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
@@ -55,6 +57,7 @@ namespace Assets.Scripts.WaveSystem
         // Used when the player dies
         private bool _suppressWaveComplete = false;
 
+        private Coroutine _spawnEnemiesCoroutine;
 
         private void Awake()
         {
@@ -82,7 +85,7 @@ namespace Assets.Scripts.WaveSystem
             await CheckIfBossWave(wave);
 
             _canSpawnEnemies = true;
-            StartCoroutine(SpawnEnemies());
+            _spawnEnemiesCoroutine = StartCoroutine(SpawnEnemies());
         }
 
         private async Task CreateWave()
@@ -119,7 +122,7 @@ namespace Assets.Scripts.WaveSystem
                     clonedInfo.MovementSpeed *= 0.85f;
                     clonedInfo.AttackRange += .6f;
                 }
-
+                
                 AudioManager.Instance.Play("Boss Appear");
                 bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
@@ -153,7 +156,7 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator SpawnEnemies()
         {
-            foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies))
+            foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies).ToList())
             {
                 enemyObj.SetActive(true);
                 Enemy enemy = enemyObj.GetComponent<Enemy>();
@@ -242,17 +245,18 @@ namespace Assets.Scripts.WaveSystem
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
             backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
+            StopCoroutine(_spawnEnemiesCoroutine);
+            _enemiesCurrentWave.Clear();
             StartCoroutine(RestartWave());
         }
 
         private IEnumerator RestartWave()
         {
-            _canSpawnEnemies = false;
-            StopCoroutine(SpawnEnemies());
+            _canSpawnEnemies = false;            
 
             _suppressWaveComplete = true;
 
-            yield return new WaitForSecondsRealtime(.5f); //Wait to secure all managers are done with EnemiesAlive list
+            yield return new WaitForSeconds(.5f); //Wait to secure all managers are done with EnemiesAlive list
 
             foreach (GameObject enemy in EnemiesAlive.ToList())
             {
@@ -260,12 +264,13 @@ namespace Assets.Scripts.WaveSystem
                     continue;
 
                 EnemiesAlive.Remove(enemy.gameObject);
-                enemy.GetComponent<Enemy>().OnDeath -= Enemy_OnEnemyDeath;
+                Enemy enemy_ = enemy.GetComponent<Enemy>();
+                enemy_.IsBossInstance = false; // Reset boss state if it was a boss
+                enemy_.OnDeath -= Enemy_OnEnemyDeath;
                 _objectPool.ReturnObject(enemy.GetComponent<Enemy>().Info.Name, enemy);
             }
 
             _suppressWaveComplete = false;
-
         }
 
     }

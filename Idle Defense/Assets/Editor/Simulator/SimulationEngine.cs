@@ -171,6 +171,9 @@ namespace IdleDefense.Editor.Simulation
             var slots = new List<TurretBlueprint>();
             var shotTimers = new List<float>();
             var turretCounts = new Dictionary<TurretType, int>();
+            Dictionary<int, int> laserTargetIndices = new();
+            Dictionary<int, float> laserTargetTimers = new();
+
 
             // init counts to zero
             foreach (var e in unlockTable.Entries)
@@ -457,35 +460,170 @@ namespace IdleDefense.Editor.Simulation
 
                         if (targetEnemyIndex != -1)
                         {
-                            var e = live[targetEnemyIndex];
-                            bool crit = Random.value < bp.CritChance * 0.01f;
-                            float critMultiplier = 1f + bp.CritDamageMultiplier * 0.01f;
-                            float dmg = bp.Damage * (crit ? critMultiplier : 1f);
-
-                            if (dmg >= e.Hp)
-                            { // Enemy is killed
-                                dmg = e.Hp; // Clamp damage to actual HP for accurate stats
-                                wStat.DamageDealt += dmg;
-                                stats.TotalDamageDealt += dmg;
-                                perWaveDmg[(int)bp.Type] += dmg;
-                                coins += e.Coin;
-                                wStat.MoneyEarned += e.Coin;
-                                if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
-                                else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
-                                live.RemoveAt(targetEnemyIndex);
-                                // Important: If iterating with 'i < live.Count' and removing,
-                                // iterate backwards or adjust index after removal.
-                                // For this example, assuming the turret loop completes, then enemy attack loop starts fresh.
-                            }
-                            else // Enemy survives
+                            // --- Sniper ---
+                            if (bp.Type == TurretType.Sniper)
                             {
+                                // multi-enemy line pierce logic
+                                float pierceChance = bp.PierceChance * 0.01f;
+                                float damageFalloff = bp.PierceDamageFalloff * 0.01f;
+                                float dmg = bp.Damage * (Random.value < bp.CritChance * 0.01f ? 1f + bp.CritDamageMultiplier * 0.01f : 1f);
+
+                                for (int i = 0; i < live.Count && dmg > 0.1f; i++)
+                                {
+                                    var e = live[i];
+                                    if (e.Y <= bp.Range)
+                                    {
+                                        var enemy = live[i];
+                                        enemy.Hp -= dmg;
+                                        live[i] = enemy;
+
+                                        wStat.DamageDealt += dmg;
+                                        stats.TotalDamageDealt += dmg;
+                                        perWaveDmg[(int)bp.Type] += dmg;
+
+                                        if (live[i].Hp <= 0f)
+                                        {
+                                            coins += e.Coin;
+                                            wStat.MoneyEarned += e.Coin;
+                                            if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
+                                            else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                            live.RemoveAt(i); i--;
+                                        }
+
+                                        dmg *= damageFalloff;
+                                        if (Random.value > pierceChance)
+                                            break;
+                                    }
+                                }
+                            }
+
+                            // --- Missile ---
+                            else if (bp.Type == TurretType.MissileLauncher)
+                            {
+                                var center = live[targetEnemyIndex];
+                                float radius = bp.ExplosionRadius;
+                                float splashRadius = radius / 3f;
+
+                                for (int i = live.Count - 1; i >= 0; i--)
+                                {
+                                    var e = live[i];
+                                    float dist = Mathf.Abs(e.Y - center.Y);
+                                    if (dist > radius) continue;
+
+                                    float appliedDmg = dist <= splashRadius ? bp.Damage : bp.SplashDamage;
+                                    var enemy = live[i];
+                                    enemy.Hp -= appliedDmg;
+                                    live[i] = enemy;
+
+                                    wStat.DamageDealt += appliedDmg;
+                                    stats.TotalDamageDealt += appliedDmg;
+                                    perWaveDmg[(int)bp.Type] += appliedDmg;
+
+                                    if (live[i].Hp <= 0f)
+                                    {
+                                        coins += e.Coin;
+                                        wStat.MoneyEarned += e.Coin;
+                                        if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
+                                        else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                        live.RemoveAt(i);
+                                    }
+                                }
+                            }
+
+                            // --- Laser ---
+                            else if (bp.Type == TurretType.Laser)
+                            {
+                                if (!laserTargetIndices.ContainsKey(t)) laserTargetIndices[t] = targetEnemyIndex;
+                                if (laserTargetIndices[t] == targetEnemyIndex)
+                                    laserTargetTimers[t] += dt;
+                                else
+                                {
+                                    laserTargetIndices[t] = targetEnemyIndex;
+                                    laserTargetTimers[t] = 0f;
+                                }
+
+                                float rampBonus = bp.Damage * (bp.PercentBonusDamagePerSec / 100f) * laserTargetTimers[t];
+                                float totalDmg = bp.Damage + rampBonus;
+
+                                var e = live[targetEnemyIndex];
+
+                                e.Hp -= totalDmg;
+                                e.Speed *= 1f - Mathf.Clamp01(bp.SlowEffect);
+
+                                wStat.DamageDealt += totalDmg;
+                                stats.TotalDamageDealt += totalDmg;
+                                perWaveDmg[(int)bp.Type] += totalDmg;
+
+                                if (e.Hp <= 0f)
+                                {
+                                    coins += e.Coin;
+                                    wStat.MoneyEarned += e.Coin;
+                                    if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
+                                    else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                    live.RemoveAt(targetEnemyIndex);
+                                }
+                                else
+                                {
+                                    live[targetEnemyIndex] = e; // reassign the modified struct
+                                }
+
+                            }
+
+                            // --- Shotgun ---
+                            else if (bp.Type == TurretType.Shotgun)
+                            {
+                                var e = live[targetEnemyIndex];
+                                bool crit = Random.value < bp.CritChance * 0.01f;
+                                float critMultiplier = 1f + bp.CritDamageMultiplier * 0.01f;
+                                float pelletDmg = bp.Damage * (crit ? critMultiplier : 1f);
+                                pelletDmg *= bp.PelletCount;
+
+                                e.Hp -= pelletDmg;
+                                wStat.DamageDealt += pelletDmg;
+                                stats.TotalDamageDealt += pelletDmg;
+                                perWaveDmg[(int)bp.Type] += pelletDmg;
+
+                                e.Y += bp.KnockbackStrength * 0.5f;
+                                live[targetEnemyIndex] = e;
+
+                                if (e.Hp <= 0f)
+                                {
+                                    coins += e.Coin;
+                                    wStat.MoneyEarned += e.Coin;
+                                    if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
+                                    else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                    live.RemoveAt(targetEnemyIndex);
+                                }
+                            }
+
+                            // --- Default (MachineGun) ---
+                            else
+                            {
+                                var e = live[targetEnemyIndex];
+                                bool crit = Random.value < bp.CritChance * 0.01f;
+                                float critMultiplier = 1f + bp.CritDamageMultiplier * 0.01f;
+                                float dmg = bp.Damage * (crit ? critMultiplier : 1f);
+
                                 e.Hp -= dmg;
-                                live[targetEnemyIndex] = e; // Update HP
                                 wStat.DamageDealt += dmg;
                                 stats.TotalDamageDealt += dmg;
                                 perWaveDmg[(int)bp.Type] += dmg;
+
+                                if (e.Hp <= 0f)
+                                {
+                                    coins += e.Coin;
+                                    wStat.MoneyEarned += e.Coin;
+                                    if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
+                                    else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                    live.RemoveAt(targetEnemyIndex);
+                                }
+                                else
+                                {
+                                    live[targetEnemyIndex] = e;
+                                }
                             }
                         }
+
                     }
                 }
 
@@ -508,14 +646,20 @@ namespace IdleDefense.Editor.Simulation
 
                             if (baseHealth <= 0f)
                             {
+                                wStat.MachineGunDamage = perWaveDmg[(int)TurretType.MachineGun];
+                                wStat.ShotgunDamage = perWaveDmg[(int)TurretType.Shotgun];
+                                wStat.SniperDamage = perWaveDmg[(int)TurretType.Sniper];
+                                wStat.MissileLauncherDamage = perWaveDmg[(int)TurretType.MissileLauncher];
+                                wStat.LaserDamage = perWaveDmg[(int)TurretType.Laser];
+
                                 wStat.HealthEnd = 0f;
                                 wStat.WaveBeaten = false;
                                 stats.Waves.Add(wStat);
                                 stats.MissionsFailed++;
-                                waveIndex = Mathf.Max(1, waveIndex - 10); // Or other penalty
+                                waveIndex = Mathf.Max(1, waveIndex - 1); // Or other penalty
                                 baseHealth = baseMaxHealth; // Reset base health
                                                         
-                                previousWaveFailed = true;
+                                previousWaveFailed = true;                                
 
                                 live.Clear(); // Clear all live enemies
                                 pendingSpawns.Clear(); // Clear pending spawns
@@ -940,6 +1084,7 @@ namespace IdleDefense.Editor.Simulation
                         }
                 }
 
+                // Write stats for each slot
                 for (int i = 0; i < 5; i++)
                 {
                     string val;
@@ -976,7 +1121,7 @@ namespace IdleDefense.Editor.Simulation
                     }
                 }
 
-
+                // Register stats to export
                 if (live.Count == 0 && pendingSpawns.Count == 0 && !bossIncoming)
                 {
                     wStat.HealthEnd = baseHealth;   // before post wave regen

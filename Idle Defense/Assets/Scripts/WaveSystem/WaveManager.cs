@@ -55,7 +55,8 @@ namespace Assets.Scripts.WaveSystem
         public Wave GetCurrentWave() => _waves[_currentWave];
 
         public void LoadWave(int waveNumber)
-        {
+        {            
+            
             _currentWave = Mathf.Clamp(waveNumber, 1, int.MaxValue);
         }
 
@@ -67,6 +68,8 @@ namespace Assets.Scripts.WaveSystem
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
         {
             _waveLost = true;
+            GameRunning = false;
+            StopAllCoroutines();
         }
 
         private IEnumerator StartWaveRoutine()
@@ -104,6 +107,7 @@ namespace Assets.Scripts.WaveSystem
                 if (_waveCompleted)
                 {
                     _currentWave++;
+                    
                     StatsManager.Instance.TotalZonesSecured++;
                     StatsManager.Instance.MaxZone = _currentWave;
                 }
@@ -216,6 +220,8 @@ namespace Assets.Scripts.WaveSystem
             StopAllCoroutines();
             _waveCompleted = false;
             _waveLost = false;
+            
+            GameRunning = true;
             StartCoroutine(StartWaveRoutine());
         }
 
