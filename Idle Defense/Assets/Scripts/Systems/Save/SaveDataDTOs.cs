@@ -253,15 +253,15 @@ public class PlayerInfoDTO
     public float RegenInterval;
 
     public float MaxHealthUpgradeAmount;
-    public int MaxHealthUpgradeBaseCost;
+    public float MaxHealthUpgradeBaseCost;
     public int MaxHealthLevel;
 
     public float RegenAmountUpgradeAmount;
-    public int RegenAmountUpgradeBaseCost;
+    public float RegenAmountUpgradeBaseCost;
     public int RegenAmountLevel;
 
     public float RegenIntervalUpgradeAmount;
-    public int RegenIntervalUpgradeBaseCost;
+    public float RegenIntervalUpgradeBaseCost;
     public int RegenIntervalLevel;
 }
 
@@ -286,62 +286,62 @@ public class TurretInfoDTO
     public float Damage;
     public int DamageLevel;
     public float DamageUpgradeAmount;
-    public int DamageUpgradeBaseCost;
+    public float DamageUpgradeBaseCost;
 
     public float FireRate;
     public int FireRateLevel;
     public float FireRateUpgradeAmount;
-    public int FireRateUpgradeBaseCost;
+    public float FireRateUpgradeBaseCost;
 
     public float CriticalChance;
     public int CriticalChanceLevel;
     public float CriticalChanceUpgradeAmount;
-    public int CriticalChanceUpgradeBaseCost;
+    public float CriticalChanceUpgradeBaseCost;
 
     public float CriticalDamageMultiplier;
     public int CriticalDamageMultiplierLevel;
     public float CriticalDamageMultiplierUpgradeAmount;
-    public int CriticalDamageMultiplierUpgradeBaseCost;
+    public float CriticalDamageMultiplierUpgradeBaseCost;
 
     public float ExplosionRadius;
     public int ExplosionRadiusLevel;
     public float ExplosionRadiusUpgradeAmount;
-    public int ExplosionRadiusUpgradeBaseCost;
+    public float ExplosionRadiusUpgradeBaseCost;
 
     public float SplashDamage;
     public int SplashDamageLevel;
     public float SplashDamageUpgradeAmount;
-    public int SplashDamageUpgradeBaseCost;
+    public float SplashDamageUpgradeBaseCost;
 
     public float PierceChance;
     public int PierceChanceLevel;
     public float PierceChanceUpgradeAmount;
-    public int PierceChanceUpgradeBaseCost;
+    public float PierceChanceUpgradeBaseCost;
 
     public float PierceDamageFalloff;
     public int PierceDamageFalloffLevel;
     public float PierceDamageFalloffUpgradeAmount;
-    public int PierceDamageFalloffUpgradeBaseCost;
+    public float PierceDamageFalloffUpgradeBaseCost;
 
     public int PelletCount;
     public int PelletCountLevel;
     public int PelletCountUpgradeAmount;
-    public int PelletCountUpgradeBaseCost;
+    public float PelletCountUpgradeBaseCost;
 
     public float DamageFalloffOverDistance;
     public int DamageFalloffOverDistanceLevel;
     public float DamageFalloffOverDistanceUpgradeAmount;
-    public int DamageFalloffOverDistanceUpgradeBaseCost;
+    public float DamageFalloffOverDistanceUpgradeBaseCost;
 
     public float PercentBonusDamagePerSec;
     public int PercentBonusDamagePerSecLevel;
     public float PercentBonusDamagePerSecUpgradeAmount;
-    public int PercentBonusDamagePerSecUpgradeBaseCost;
+    public float PercentBonusDamagePerSecUpgradeBaseCost;
 
     public float SlowEffect;
     public int SlowEffectLevel;
     public float SlowEffectUpgradeAmount;
-    public int SlowEffectUpgradeBaseCost;
+    public float SlowEffectUpgradeBaseCost;
 
     public float RotationSpeed;
     public float AngleThreshold;

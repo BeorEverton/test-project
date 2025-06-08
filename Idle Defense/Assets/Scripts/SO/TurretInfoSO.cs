@@ -16,7 +16,7 @@ namespace Assets.Scripts.SO
         public int DamageLevel;
         [Tooltip("Exponential damage upgrade amount")]
         public float DamageUpgradeAmount;
-        public int DamageUpgradeBaseCost;
+        public float DamageUpgradeBaseCost;
         public float DamageCostExponentialMultiplier;
 
         [Tooltip("Amount of shots per second")]
@@ -24,7 +24,7 @@ namespace Assets.Scripts.SO
         public int FireRateLevel;
         [Tooltip("Exponential fire rate upgrade amount")]
         public float FireRateUpgradeAmount;
-        public int FireRateUpgradeBaseCost;
+        public float FireRateUpgradeBaseCost;
         public float FireRateCostExponentialMultiplier;
 
         [Tooltip("How fast the turretHead rotates towards the target")]
@@ -39,7 +39,7 @@ namespace Assets.Scripts.SO
         public int CriticalChanceLevel;
         [Tooltip("Linear critical chance upgrade amount")]
         public float CriticalChanceUpgradeAmount;
-        public int CriticalChanceUpgradeBaseCost;
+        public float CriticalChanceUpgradeBaseCost;
         public float CriticalChanceCostExponentialMultiplier;
 
         [Tooltip("Multiplier for critical damage in Percent")]
@@ -47,7 +47,7 @@ namespace Assets.Scripts.SO
         public int CriticalDamageMultiplierLevel;
         [Tooltip("Linear critical damage upgrade amount")]
         public float CriticalDamageMultiplierUpgradeAmount;
-        public int CriticalDamageMultiplierUpgradeBaseCost;
+        public float CriticalDamageMultiplierUpgradeBaseCost;
         public float CriticalDamageCostExponentialMultiplier;
 
         [Header("Missile Launcher Turret")]
@@ -55,14 +55,14 @@ namespace Assets.Scripts.SO
         public float ExplosionRadius;
         public int ExplosionRadiusLevel;
         public float ExplosionRadiusUpgradeAmount;
-        public int ExplosionRadiusUpgradeBaseCost;
+        public float ExplosionRadiusUpgradeBaseCost;
         public float ExplosionRadiusCostExponentialMultiplier;
 
         [Tooltip("Amount of damage dealt to adjacent enemies in the explosion radius")]
         public float SplashDamage;
         public int SplashDamageLevel;
         public float SplashDamageUpgradeAmount;
-        public int SplashDamageUpgradeBaseCost;
+        public float SplashDamageUpgradeBaseCost;
         public float SplashDamageCostExponentialMultiplier;
 
         [Header("Sniper Turret")]
@@ -70,14 +70,14 @@ namespace Assets.Scripts.SO
         public float PierceChance;
         public int PierceChanceLevel;
         public float PierceChanceUpgradeAmount;
-        public int PierceChanceUpgradeBaseCost;
+        public float PierceChanceUpgradeBaseCost;
         public float PierceChanceCostExponentialMultiplier;
 
         [Tooltip("Amount of damage falloff for each enemy the bullet pierces through")]
         public float PierceDamageFalloff;
         public int PierceDamageFalloffLevel;
         public float PierceDamageFalloffUpgradeAmount;
-        public int PierceDamageFalloffUpgradeBaseCost;
+        public float PierceDamageFalloffUpgradeBaseCost;
         public float PierceDamageFalloffCostExponentialMultiplier;
 
         [Header("Shotgun Turret")]
@@ -85,21 +85,21 @@ namespace Assets.Scripts.SO
         public int PelletCount;
         public int PelletCountLevel;
         public int PelletCountUpgradeAmount;
-        public int PelletCountUpgradeBaseCost;
+        public float PelletCountUpgradeBaseCost;
         public float PelletCountCostExponentialMultiplier;
 
         [Header("Knockback Settings")]
         public float KnockbackStrength;
         public int KnockbackStrengthLevel;
         public float KnockbackStrengthUpgradeAmount;
-        public int KnockbackStrengthUpgradeBaseCost;
+        public float KnockbackStrengthUpgradeBaseCost;
         public float KnockbackStrengthCostExponentialMultiplier;
 
         [Tooltip("Amount of damage falloff over distance, measured in 1 unit")]
         public float DamageFalloffOverDistance;
         public int DamageFalloffOverDistanceLevel;
         public float DamageFalloffOverDistanceUpgradeAmount;
-        public int DamageFalloffOverDistanceUpgradeBaseCost;
+        public float DamageFalloffOverDistanceUpgradeBaseCost;
         public float DamageFalloffOverDistanceCostExponentialMultiplier;
 
         [Header("Laser Turret")]
@@ -107,14 +107,14 @@ namespace Assets.Scripts.SO
         public float PercentBonusDamagePerSec;
         public int PercentBonusDamagePerSecLevel;
         public float PercentBonusDamagePerSecUpgradeAmount;
-        public int PercentBonusDamagePerSecUpgradeBaseCost;
+        public float PercentBonusDamagePerSecUpgradeBaseCost;
         public float PercentBonusDamagePerSecCostExponentialMultiplier;
 
         [Tooltip("Amount of slow effect applied to the target")]
         public float SlowEffect;
         public int SlowEffectLevel;
         public float SlowEffectUpgradeAmount;
-        public int SlowEffectUpgradeBaseCost;
+        public float SlowEffectUpgradeBaseCost;
         public float SlowEffectCostExponentialMultiplier;
 
         private void OnValidate()

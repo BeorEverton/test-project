@@ -12,15 +12,15 @@ namespace Assets.Scripts.PlayerBase
         public float RegenInterval;
 
         public float MaxHealthUpgradeAmount;
-        public int MaxHealthUpgradeBaseCost;
+        public float MaxHealthUpgradeBaseCost;
         public int MaxHealthLevel;
 
         public float RegenAmountUpgradeAmount;
-        public int RegenAmountUpgradeBaseCost;
+        public float RegenAmountUpgradeBaseCost;
         public int RegenAmountLevel;
 
         public float RegenIntervalUpgradeAmount;
-        public int RegenIntervalUpgradeBaseCost;
+        public float RegenIntervalUpgradeBaseCost;
         public int RegenIntervalLevel;
 
         public PlayerBaseStatsInstance(PlayerBaseSO source)

@@ -155,13 +155,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.ExplosionRadius, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.ExplosionRadius, a),
                     GetAmount = t => GetMaxAmount(t.ExplosionRadiusUpgradeBaseCost, 1.1f, t.ExplosionRadiusLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.ExplosionRadius;
                         float bonus = t.ExplosionRadiusUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.ExplosionRadius, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.ExplosionRadius, a, out float cost, out int amount);
 
                         if (t.ExplosionRadius >= 5f)
                             return ($"{current:F1}", "Max", "", "0X");
@@ -186,13 +186,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.SplashDamage, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.SplashDamage, a),
                     GetAmount = t => GetMaxAmount(t.SplashDamageUpgradeBaseCost, exponentialPower, t.SplashDamageLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.SplashDamage;
                         float bonus = t.SplashDamageUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.SplashDamage, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.SplashDamage, a, out float cost, out int amount);
 
                         return (
                             UIManager.AbbreviateNumber(current),
@@ -214,13 +214,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => 100f,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.PierceChance, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.PierceChance, a),
                     GetAmount = t => GetMaxAmount(t.PierceChanceUpgradeBaseCost, exponentialPower, t.PierceChanceLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.PierceChance;
                         float bonus = t.PierceChanceUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.PierceChance, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.PierceChance, a, out float cost, out int amount);
 
                         if (current >= 100f)
                             return ($"{current:F1}%", "Max", "", "0X");
@@ -245,7 +245,7 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.PierceDamageFalloff, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.PierceDamageFalloff, a),
                     GetAmount = t => GetMaxAmount(t.PierceDamageFalloffUpgradeBaseCost, exponentialPower, t.PierceDamageFalloffLevel),
                     GetDisplayStrings = (t, a) =>
                     {
@@ -256,7 +256,7 @@ namespace Assets.Scripts.Systems
                         float nextRetained = 100f - nextFalloff;
 
                         float bonus = nextRetained - currentRetained;
-                        GetExponentialCost(t, TurretUpgradeType.PierceDamageFalloff, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.PierceDamageFalloff, a, out float cost, out int amount);
 
                         return (
                             $"{currentRetained:F1}%",
@@ -278,13 +278,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.PelletCount, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.PelletCount, a),
                     GetAmount = t => GetMaxAmount(t.PelletCountUpgradeBaseCost, exponentialPower, t.PelletCountLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.PelletCount;
                         float bonus = t.PelletCountUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.PelletCount, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.PelletCount, a, out float cost, out int amount);
 
                         return (
                             UIManager.AbbreviateNumber(current),
@@ -306,13 +306,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.DamageFalloffOverDistance, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.DamageFalloffOverDistance, a),
                     GetAmount = t => GetMaxAmount(t.DamageFalloffOverDistanceUpgradeBaseCost, exponentialPower, t.DamageFalloffOverDistanceLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.DamageFalloffOverDistance;
                         float bonus = t.DamageFalloffOverDistanceUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.DamageFalloffOverDistance, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.DamageFalloffOverDistance, a, out float cost, out int amount);
 
                         if (current <= 0f)
                             return ($"{current:F1}%", "Max", "", "0X");
@@ -337,13 +337,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => t.KnockbackStrengthCostExponentialMultiplier,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.KnockbackStrength, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.KnockbackStrength, a),
                     GetAmount = t => GetMaxAmount(t.KnockbackStrengthUpgradeBaseCost, t.KnockbackStrengthCostExponentialMultiplier, t.KnockbackStrengthLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.KnockbackStrength;
                         float bonus = t.KnockbackStrengthUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.KnockbackStrength, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.KnockbackStrength, a, out float cost, out int amount);
 
                         return (
                             $"{current:F1}",
@@ -365,13 +365,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => float.MaxValue,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.PercentBonusDamagePerSec, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.PercentBonusDamagePerSec, a),
                     GetAmount = t => GetMaxAmount(t.PercentBonusDamagePerSecUpgradeBaseCost, exponentialPower, t.PercentBonusDamagePerSecLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.PercentBonusDamagePerSec;
                         float bonus = t.PercentBonusDamagePerSecUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.PercentBonusDamagePerSec, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.PercentBonusDamagePerSec, a, out float cost, out int amount);
 
                         return (
                             $"{current:F1}%",
@@ -393,13 +393,13 @@ namespace Assets.Scripts.Systems
                     GetCostMultiplier = t => 0f,
                     GetMaxValue = t => 100f,
                     GetMinValue = t => 0f,
-                    GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.SlowEffect, a),
+                    GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.SlowEffect, a),
                     GetAmount = t => GetMaxAmount(t.SlowEffectUpgradeBaseCost, exponentialPower, t.SlowEffectLevel),
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.SlowEffect;
                         float bonus = t.SlowEffectUpgradeAmount;
-                        GetExponentialCost(t, TurretUpgradeType.SlowEffect, a, out float cost, out int amount);
+                        GetHybridCost(t, TurretUpgradeType.SlowEffect, a, out float cost, out int amount);
 
                         if (current >= 100f)
                             return ($"{current:F1}%", "Max", "", "0X");
@@ -459,29 +459,72 @@ namespace Assets.Scripts.Systems
 
         private int GetMaxAmount(float baseCost, float multiplier, int currentLevel)
         {
-            ulong money = GameManager.Instance.Money;
-            int minUpgradeAmount = 0, maxUpgradeAmount = 10000;
-            int result = 0;
+            int amount = 0;
+            float totalCost = 0f;
+            float money = GameManager.Instance.Money;
 
-            while (minUpgradeAmount <= maxUpgradeAmount)
+            while (true)
             {
-                int mid = (minUpgradeAmount + maxUpgradeAmount) / 2;
-                ulong start = (ulong)Mathf.Pow(multiplier, currentLevel);
-                ulong end = (ulong)Mathf.Pow(multiplier, currentLevel + mid);
-                ulong totalCost = (ulong)(baseCost * (end - start) / (multiplier - 1));
-
-                if (totalCost <= money)
-                {
-                    result = mid;
-                    minUpgradeAmount = mid + 1;
-                }
-                else
-                {
-                    maxUpgradeAmount = mid - 1;
-                }
+                float cost = baseCost * Mathf.Pow(multiplier, currentLevel + amount);
+                if (Mathf.Floor(totalCost + cost) > money)
+                    break;
+                totalCost += cost;
+                amount++;
             }
 
-            return result;
+            return amount;
+        }
+
+        private void GetHybridCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount, out float cost, out int outAmount)
+        {
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
+            {
+                cost = 0f;
+                outAmount = 0;
+                return;
+            }
+
+            int level = upgrade.GetLevel(stats);
+            float baseCost = upgrade.GetBaseCost(stats);
+            float multiplier = upgrade.GetCostMultiplier(stats);
+            float maxLevel = upgrade.GetMaxValue(stats);
+            int maxAmount = GetMaxAmount(baseCost, multiplier, level);
+
+            outAmount = inAmount == 9999
+                ? maxAmount == 0
+                    ? 1
+                    : maxAmount
+                : inAmount;
+
+            if (level + outAmount > maxLevel)
+                outAmount = (int)maxLevel - level;
+
+            if (level < outAmount)
+                cost = Mathf.Floor(RecursiveHybridCost(baseCost, level, outAmount));
+
+            cost = Mathf.Floor(baseCost * Mathf.Pow(exponentialPower, level));
+        }
+
+        private float GetHybridCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount)
+        {
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
+                return 0f;
+
+            int level = upgrade.GetLevel(stats);
+            float baseCost = upgrade.GetBaseCost(stats);
+            float multiplier = upgrade.GetCostMultiplier(stats);
+            float maxLevel = upgrade.GetMaxValue(stats);
+
+            int maxAmount = inAmount == 9999
+                ? GetMaxAmount(baseCost, multiplier, level)
+                : inAmount;
+
+            if (level + maxAmount > maxLevel)
+                maxAmount = (int)maxLevel - level;
+
+            return level < maxLevel
+                ? Mathf.Floor(RecursiveHybridCost(baseCost, level, maxAmount))
+                : baseCost * Mathf.Pow(exponentialPower, level);
         }
 
         private void GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount, out float cost, out int outAmount)
@@ -507,10 +550,10 @@ namespace Assets.Scripts.Systems
             cost = Mathf.Floor(RecursiveExponentialCost(baseCost, multiplier, level, outAmount));
         }
 
-        private ulong GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount)
+        private float GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount)
         {
             if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
-                return 0;
+                return 0f;
 
             int level = upgrade.GetLevel(stats);
             float baseCost = upgrade.GetBaseCost(stats);
@@ -520,7 +563,7 @@ namespace Assets.Scripts.Systems
                 ? GetMaxAmount(baseCost, multiplier, level)
                 : inAmount;
 
-            return RecursiveExponentialCost(baseCost, multiplier, level, maxAmount);
+            return Mathf.Floor(RecursiveExponentialCost(baseCost, multiplier, level, maxAmount));
         }
 
         private float RecursiveHybridCost(float baseCost, int level, int amount)
@@ -533,14 +576,14 @@ namespace Assets.Scripts.Systems
             return cost + RecursiveHybridCost(baseCost, level + 1, amount - 1);
         }
 
-        private ulong RecursiveExponentialCost(float baseCost, float multiplier, int currentLevel, int amount)
+        private float RecursiveExponentialCost(float baseCost, float multiplier, int level, int amount)
         {
             if (amount <= 0)
-                return 0;
+                return 0f;
 
-            float start = Mathf.Pow(multiplier, currentLevel);
-            float end = Mathf.Pow(multiplier, currentLevel + amount);
-            return (ulong)(baseCost * (end - start) / (multiplier - 1));
+            float cost = baseCost * Mathf.Pow(multiplier, level);
+
+            return cost + RecursiveExponentialCost(baseCost, multiplier, level + 1, amount - 1);
         }
 
         public void UpdateUpgradeDisplay(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
