@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 105, y: 0}
-  m_SizeDelta: {x: 105, y: 0}
+  m_AnchoredPosition: {x: 54.504932, y: 0}
+  m_SizeDelta: {x: 54.5049, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1802628526424597077
 CanvasRenderer:
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 16
-  m_fontSizeBase: 16
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -169,10 +169,10 @@ RectTransform:
   - {fileID: 3930260253190183876}
   m_Father: {fileID: 7190501816854942973}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -21.6643}
-  m_SizeDelta: {x: -51.469, y: 26.5714}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 173.7025, y: 26.5714}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6211729630297669210
 CanvasRenderer:
@@ -229,8 +229,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 17.5
-  m_fontSizeBase: 17.5
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -309,9 +309,9 @@ RectTransform:
   m_Father: {fileID: 7190501816854942973}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 6.6695}
-  m_SizeDelta: {x: -51.4688, y: 27.2305}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 110.8007, y: 27.2305}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &2408687190900053636
 CanvasRenderer:
@@ -350,7 +350,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1.4
+  m_PixelsPerUnitMultiplier: 5
 --- !u!114 &6953482340213589093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,7 +453,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 61.934216, y: -13.050002}
+  m_AnchoredPosition: {x: 58.056873, y: -13.050002}
   m_SizeDelta: {x: -136.7118, y: 26.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &150122148933830622
@@ -511,8 +511,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -590,7 +590,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 104.999985, y: 0}
+  m_SizeDelta: {x: 79.7525, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &7591701645763879492
 CanvasRenderer:
@@ -647,8 +647,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 16
-  m_fontSizeBase: 16
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -703,8 +703,8 @@ GameObject:
   - component: {fileID: 5018059523065107489}
   - component: {fileID: 842709783157166818}
   - component: {fileID: 4429325590337697319}
-  - component: {fileID: 1738818219752017755}
   - component: {fileID: 966371895637463073}
+  - component: {fileID: 3036399310330670301}
   m_Layer: 5
   m_Name: Stat Upgrade Button
   m_TagString: Untagged
@@ -731,7 +731,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5018059523065107489
 CanvasRenderer:
@@ -770,7 +770,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1.4
+  m_PixelsPerUnitMultiplier: 5
 --- !u!114 &4429325590337697319
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -839,6 +839,7 @@ MonoBehaviour:
     KnockbackStrengthLevel: 0
     KnockbackStrengthUpgradeAmount: 0
     KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
     PercentBonusDamagePerSec: 0
     PercentBonusDamagePerSecLevel: 0
     PercentBonusDamagePerSecUpgradeAmount: 0
@@ -854,32 +855,6 @@ MonoBehaviour:
   _statUpgradeAmount: {fileID: 4820963497372966774}
   _statUpgradeCost: {fileID: 2437489956700094653}
   _upgradeType: 0
---- !u!114 &1738818219752017755
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8800368163230755120}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 10
-    m_Right: 10
-    m_Top: 0
-    m_Bottom: 5
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!114 &966371895637463073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -925,3 +900,29 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+--- !u!114 &3036399310330670301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8800368163230755120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 10
+    m_Right: 10
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0

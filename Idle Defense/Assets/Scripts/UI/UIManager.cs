@@ -54,7 +54,7 @@ namespace Assets.Scripts.UI
         private void OnEnemyDeath(object sender, EventArgs _)
         {
             _enemyCount--;
-            _enemies.text = $"{_enemyCount}";
+            _enemies.text = $"Enemies\n{_enemyCount}";
         }
 
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
@@ -71,7 +71,7 @@ namespace Assets.Scripts.UI
         public void UpdateSpdBonus(float value)
         {
             _spdBonusSlider.value = value;
-            _spdBonus.text = "Spd +\n" + value.ToString("F0") + "%";
+            _spdBonus.text = "Spd + " + value.ToString("F0") + "%";
 
             //UpdateBonusColor(_spdBonus, value);
         }
