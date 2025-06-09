@@ -65,7 +65,7 @@ namespace Assets.Scripts.UI
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
         {
             _enemyCount = args.EnemyCount;
-            _enemies.text = $"{_enemyCount}";
+            _enemies.text = $"Enemies\n{_enemyCount}";
         }
 
         public void UpdateSpdBonus(float value)

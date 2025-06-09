@@ -656,7 +656,7 @@ namespace IdleDefense.Editor.Simulation
                                 wStat.WaveBeaten = false;
                                 stats.Waves.Add(wStat);
                                 stats.MissionsFailed++;
-                                waveIndex = Mathf.Max(1, waveIndex - 1); // Or other penalty
+                                waveIndex = Mathf.Max(1, waveIndex - 2); // Roll back 2 waves
                                 baseHealth = baseMaxHealth; // Reset base health
                                                         
                                 previousWaveFailed = true;                                
