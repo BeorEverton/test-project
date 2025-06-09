@@ -23,16 +23,17 @@ namespace Assets.Scripts.UI
                 Instance = this;
             else
                 Destroy(gameObject);
-        }
 
-        public int GetBuyAmount() => _amountOptions[_currentIndex];
+            _amountOptions = new List<int> { 1, 5, 10, 25, 50, 100 };
+        }
 
         private void Start()
         {
-            _amountOptions = new List<int> { 1, 5, 10, 25, 50, 100 };
-
             _buyAmountToggleButton.onClick.AddListener(AdvanceBuyAmount);
+            UpdateLabel(_amountOptions[0]);
         }
+
+        public int GetBuyAmount() => _amountOptions[_currentIndex];
 
         private void AdvanceBuyAmount()
         {
