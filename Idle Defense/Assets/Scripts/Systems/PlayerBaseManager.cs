@@ -21,7 +21,6 @@ namespace Assets.Scripts.Systems
         public PlayerBaseStatsInstance Stats { get; private set; }
 
         private float _currentHealth;
-        private float _regenDelayTimer;
         private float _regenTickTimer;
 
         public float CurrentHealth => _currentHealth;
@@ -55,7 +54,6 @@ namespace Assets.Scripts.Systems
         public void InitializeGame(bool startTime = false)
         {
             _currentHealth = Stats.MaxHealth;
-            _regenDelayTimer = 0f;
             _regenTickTimer = 0f;
 
             UpdatePlayerBaseAppearance();
@@ -93,9 +91,7 @@ namespace Assets.Scripts.Systems
             if (_isDead || _currentHealth >= Stats.MaxHealth)
                 return;
 
-            _regenTickTimer += Time.deltaTime;
-
-            if (_regenTickTimer < _runtimeRegenInterval) 
+            if (_regenTickTimer < Stats.RegenInterval)
             {
                 _regenTickTimer += Time.deltaTime;
                 return;
@@ -117,6 +113,8 @@ namespace Assets.Scripts.Systems
             {
                 AudioManager.Instance.Play("Full Health");
             }
+
+            OnHealthChanged?.Invoke(_currentHealth, MaxHealth);
         }
 
         public void InvokeHealthChangedEvents()

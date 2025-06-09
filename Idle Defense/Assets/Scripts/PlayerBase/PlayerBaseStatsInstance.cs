@@ -27,7 +27,6 @@ namespace Assets.Scripts.PlayerBase
         {
             MaxHealth = source.MaxHealth;
             RegenAmount = source.RegenAmount;
-            RegenDelay = source.RegenDelay;
             RegenInterval = source.RegenInterval;
 
             MaxHealthUpgradeAmount = source.MaxHealthUpgradeAmount;
