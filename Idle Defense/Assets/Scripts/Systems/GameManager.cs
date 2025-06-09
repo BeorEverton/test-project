@@ -44,7 +44,7 @@ namespace Assets.Scripts.Systems
                 Destroy(gameObject);
 
             _ped = new PointerEventData(EventSystem.current);
-            
+
         }
 
         private void Start()
@@ -70,7 +70,8 @@ namespace Assets.Scripts.Systems
 
         private void OnDestroy()
         {
-            if (Input == null) return;
+            if (Input == null)
+                return;
             Input.Player.Click.performed -= OnClickStarted;
             Input.Player.Click.canceled -= OnClickReleased;
             Input.Player.Disable();
@@ -132,7 +133,7 @@ namespace Assets.Scripts.Systems
 
         public void AddMoney(ulong amount)
         {
-            money += amount + 500000;
+            money += amount;
             OnMoneyChanged?.Invoke(money);
         }
 
