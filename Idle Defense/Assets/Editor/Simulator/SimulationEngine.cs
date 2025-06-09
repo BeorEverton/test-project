@@ -2,18 +2,18 @@
 // ------------------------------------------------
 // Main head-less simulator – per-wave stats export
 // ------------------------------------------------
+using Assets.Scripts.Enemies;
+using Assets.Scripts.PlayerBase; // EnemyClass
+using Assets.Scripts.SO;          // EnemyInfoSO, TurretInfoSO, PlayerBaseSO
+using Assets.Scripts.Systems;  // WaveConfigSO, TurretUnlockTableSO
+using Assets.Scripts.Turrets;     // TurretType
+using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
-
-using Assets.Scripts.SO;          // EnemyInfoSO, TurretInfoSO, PlayerBaseSO
-using Assets.Scripts.Enemies;     // EnemyClass
-using Assets.Scripts.Turrets;     // TurretType
-using Assets.Scripts.WaveSystem;
-using Assets.Scripts.Systems;  // WaveConfigSO, TurretUnlockTableSO
 
 // for reference: [^\x00-\x7F]+
 
@@ -93,7 +93,7 @@ namespace IdleDefense.Editor.Simulation
                 float cost = float.MaxValue; // Standardize to max value
                 if (t == PlayerUpgradeType.MaxHealth)
                 {
-                    
+
                     cost = baseSO.MaxHealthUpgradeBaseCost * Mathf.Pow(1.1f, level);
                 }
                 else if (t == PlayerUpgradeType.RegenAmount)
@@ -107,9 +107,9 @@ namespace IdleDefense.Editor.Simulation
                     if (baseSO.RegenInterval - baseSO.RegenIntervalUpgradeAmount * level < MinBaseRegenInterval)
                         return float.MaxValue; // too expensive to upgrade below the min interval
                 }
-                
+
                 return cost;
-                
+
             }
 
             float GetHybridCost(float baseCost, int level)
@@ -305,7 +305,7 @@ namespace IdleDefense.Editor.Simulation
                             AttackRange = info.AttackRange
                         });
                     //Debug.Log($"[Simulation] Wave {waveIndex}: Spawning {count}x {info.Name} (HP: {hp}, Speed: {spd}, Dmg: {dmg}, Coin: {coin})");
-                    
+
                 }
 
                 //----------------------------------------------------------------
@@ -319,8 +319,10 @@ namespace IdleDefense.Editor.Simulation
                           .EnemyPrefab.GetComponent<Enemy>().Info.EnemyClass];
 
                     var clone = ScriptableObject.Instantiate(info);
-                    if (waveIndex % 10 == 0) clone.AttackRange += 0.6f;
-                    else clone.AttackRange += 0.2f;
+                    if (waveIndex % 10 == 0)
+                        clone.AttackRange += 0.6f;
+                    else
+                        clone.AttackRange += 0.2f;
 
                     float hpMult = (waveIndex % 10 == 0) ? 100f : 30f;
                     float dmgMult = (waveIndex % 10 == 0) ? 40f : 20f;
@@ -368,7 +370,7 @@ namespace IdleDefense.Editor.Simulation
             InitWave();
             while (simTime < minutes * 60f)
             {
-                NEXT_FRAME:
+            NEXT_FRAME:
 
                 //------------------ enemy spawning --------------------
                 spawnTimer -= dt;
@@ -384,7 +386,7 @@ namespace IdleDefense.Editor.Simulation
                     spawnTimer = spawnIntervalCurrent;
 
                 }
-                
+
 
                 // ------------------ click bonus (spdBonus) -----------------------
                 const float initialBoost = 5f;
@@ -485,9 +487,12 @@ namespace IdleDefense.Editor.Simulation
                                         {
                                             coins += e.Coin;
                                             wStat.MoneyEarned += e.Coin;
-                                            if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
-                                            else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
-                                            live.RemoveAt(i); i--;
+                                            if (e.IsBoss)
+                                            { wStat.BossesKilled++; stats.BossesKilled++; }
+                                            else
+                                            { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                            live.RemoveAt(i);
+                                            i--;
                                         }
 
                                         dmg *= damageFalloff;
@@ -508,7 +513,8 @@ namespace IdleDefense.Editor.Simulation
                                 {
                                     var e = live[i];
                                     float dist = Mathf.Abs(e.Y - center.Y);
-                                    if (dist > radius) continue;
+                                    if (dist > radius)
+                                        continue;
 
                                     float appliedDmg = dist <= splashRadius ? bp.Damage : bp.SplashDamage;
                                     var enemy = live[i];
@@ -523,8 +529,10 @@ namespace IdleDefense.Editor.Simulation
                                     {
                                         coins += e.Coin;
                                         wStat.MoneyEarned += e.Coin;
-                                        if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
-                                        else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                        if (e.IsBoss)
+                                        { wStat.BossesKilled++; stats.BossesKilled++; }
+                                        else
+                                        { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
                                         live.RemoveAt(i);
                                     }
                                 }
@@ -533,7 +541,8 @@ namespace IdleDefense.Editor.Simulation
                             // --- Laser ---
                             else if (bp.Type == TurretType.Laser)
                             {
-                                if (!laserTargetIndices.ContainsKey(t)) laserTargetIndices[t] = targetEnemyIndex;
+                                if (!laserTargetIndices.ContainsKey(t))
+                                    laserTargetIndices[t] = targetEnemyIndex;
                                 if (laserTargetIndices[t] == targetEnemyIndex)
                                     laserTargetTimers[t] += dt;
                                 else
@@ -558,8 +567,10 @@ namespace IdleDefense.Editor.Simulation
                                 {
                                     coins += e.Coin;
                                     wStat.MoneyEarned += e.Coin;
-                                    if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
-                                    else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                    if (e.IsBoss)
+                                    { wStat.BossesKilled++; stats.BossesKilled++; }
+                                    else
+                                    { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
                                     live.RemoveAt(targetEnemyIndex);
                                 }
                                 else
@@ -590,8 +601,10 @@ namespace IdleDefense.Editor.Simulation
                                 {
                                     coins += e.Coin;
                                     wStat.MoneyEarned += e.Coin;
-                                    if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
-                                    else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                    if (e.IsBoss)
+                                    { wStat.BossesKilled++; stats.BossesKilled++; }
+                                    else
+                                    { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
                                     live.RemoveAt(targetEnemyIndex);
                                 }
                             }
@@ -613,8 +626,10 @@ namespace IdleDefense.Editor.Simulation
                                 {
                                     coins += e.Coin;
                                     wStat.MoneyEarned += e.Coin;
-                                    if (e.IsBoss) { wStat.BossesKilled++; stats.BossesKilled++; }
-                                    else { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
+                                    if (e.IsBoss)
+                                    { wStat.BossesKilled++; stats.BossesKilled++; }
+                                    else
+                                    { wStat.EnemiesKilled++; stats.EnemiesKilled++; }
                                     live.RemoveAt(targetEnemyIndex);
                                 }
                                 else
@@ -658,15 +673,16 @@ namespace IdleDefense.Editor.Simulation
                                 stats.MissionsFailed++;
                                 waveIndex = Mathf.Max(1, waveIndex - 2); // Roll back 2 waves
                                 baseHealth = baseMaxHealth; // Reset base health
-                                                        
-                                previousWaveFailed = true;                                
+
+                                previousWaveFailed = true;
 
                                 live.Clear(); // Clear all live enemies
                                 pendingSpawns.Clear(); // Clear pending spawns
                                 InitWave(); // Prepare for the new (potentially earlier) wave
                                 goto END_OF_FRAME; // Skip other logic for this dt step
                             }
-                            else previousWaveFailed = false;
+                            else
+                                previousWaveFailed = false;
                         }
                         live[i] = e; // Update enemy state (like TimeSinceLastAttack)
                     }
@@ -674,7 +690,7 @@ namespace IdleDefense.Editor.Simulation
 
                 // ------------------ base regeneration (single timer) ------------------
                 // 1)  If we were hit this frame, reset the regen stopwatch.
-                if (baseDamaged)            
+                if (baseDamaged)
                     regenTickTimer = 0f;
 
                 // 2)  Every frame we’re below max health, count up the stopwatch.
@@ -707,18 +723,18 @@ namespace IdleDefense.Editor.Simulation
                     if (previousWaveFailed
                         && healthCost > 0
                         && coins >= healthCost)
-                        {
-                            coins -= healthCost;
-                            maxHpLvl++;
-                            baseMaxHealth += baseSO.MaxHealthUpgradeAmount;
-                            baseHealth = Mathf.Min(baseHealth + baseSO.MaxHealthUpgradeAmount, baseMaxHealth);
-                            wStat.BaseUpgrades++;
-                            wStat.MaxHealthLevel = maxHpLvl;
-                            wStat.CurrentMaxHealth = baseMaxHealth;
-                            wStat.MoneySpent += healthCost;
-                            stats.MoneySpent += healthCost;
-                        }
-                    
+                    {
+                        coins -= healthCost;
+                        maxHpLvl++;
+                        baseMaxHealth += baseSO.MaxHealthUpgradeAmount;
+                        baseHealth = Mathf.Min(baseHealth + baseSO.MaxHealthUpgradeAmount, baseMaxHealth);
+                        wStat.BaseUpgrades++;
+                        wStat.MaxHealthLevel = maxHpLvl;
+                        wStat.CurrentMaxHealth = baseMaxHealth;
+                        wStat.MoneySpent += healthCost;
+                        stats.MoneySpent += healthCost;
+                    }
+
                     else
                     {
                         // 2) If the base was merely damaged (not lost), invest in regeneration
@@ -773,19 +789,32 @@ namespace IdleDefense.Editor.Simulation
                                         {
                                             var o = oldSlots[i];
                                             var n = slots[i];
-                                            if (n.DamageLevel != o.DamageLevel) { wStat.DamageUpgrades++; break; }
-                                            else if (n.FireRateLevel != o.FireRateLevel) { wStat.FireRateUpgrades++; break; }
-                                            else if (n.CriticalChanceLevel != o.CriticalChanceLevel) { wStat.CriticalChanceUpgrades++; break; }
-                                            else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel) { wStat.CriticalDamageMultiplierUpgrades++; break; }
-                                            else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel) { wStat.ExplosionRadiusUpgrades++; break; }
-                                            else if (n.SplashDamageLevel != o.SplashDamageLevel) { wStat.SplashDamageUpgrades++; break; }
-                                            else if (n.PierceChanceLevel != o.PierceChanceLevel) { wStat.PierceChanceUpgrades++; break; }
-                                            else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel) { wStat.PierceDamageFalloffUpgrades++; break; }
-                                            else if (n.PelletCountLevel != o.PelletCountLevel) { wStat.PelletCountUpgrades++; break; }
-                                            else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel) { wStat.KnockbackStrengthUpgrades++; break; }
-                                            else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel) { wStat.DamageFalloffOverDistanceUpgrades++; break; }
-                                            else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel) { wStat.PercentBonusDamagePerSecUpgrades++; break; }
-                                            else if (n.SlowEffectLevel != o.SlowEffectLevel) { wStat.SlowEffectUpgrades++; break; }
+                                            if (n.DamageLevel != o.DamageLevel)
+                                            { wStat.DamageUpgrades++; break; }
+                                            else if (n.FireRateLevel != o.FireRateLevel)
+                                            { wStat.FireRateUpgrades++; break; }
+                                            else if (n.CriticalChanceLevel != o.CriticalChanceLevel)
+                                            { wStat.CriticalChanceUpgrades++; break; }
+                                            else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel)
+                                            { wStat.CriticalDamageMultiplierUpgrades++; break; }
+                                            else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel)
+                                            { wStat.ExplosionRadiusUpgrades++; break; }
+                                            else if (n.SplashDamageLevel != o.SplashDamageLevel)
+                                            { wStat.SplashDamageUpgrades++; break; }
+                                            else if (n.PierceChanceLevel != o.PierceChanceLevel)
+                                            { wStat.PierceChanceUpgrades++; break; }
+                                            else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel)
+                                            { wStat.PierceDamageFalloffUpgrades++; break; }
+                                            else if (n.PelletCountLevel != o.PelletCountLevel)
+                                            { wStat.PelletCountUpgrades++; break; }
+                                            else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel)
+                                            { wStat.KnockbackStrengthUpgrades++; break; }
+                                            else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel)
+                                            { wStat.DamageFalloffOverDistanceUpgrades++; break; }
+                                            else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel)
+                                            { wStat.PercentBonusDamagePerSecUpgrades++; break; }
+                                            else if (n.SlowEffectLevel != o.SlowEffectLevel)
+                                            { wStat.SlowEffectUpgrades++; break; }
                                         }
                                         wStat.MoneySpent += spent;
                                         stats.MoneySpent += spent;
@@ -808,25 +837,38 @@ namespace IdleDefense.Editor.Simulation
                                 {
                                     var o = oldSlots[i];
                                     var n = slots[i];
-                                    if (n.DamageLevel != o.DamageLevel) { wStat.DamageUpgrades++; break; }
-                                    else if (n.FireRateLevel != o.FireRateLevel) { wStat.FireRateUpgrades++; break; }
-                                    else if (n.CriticalChanceLevel != o.CriticalChanceLevel) { wStat.CriticalChanceUpgrades++; break; }
-                                    else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel) { wStat.CriticalDamageMultiplierUpgrades++; break; }
-                                    else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel) { wStat.ExplosionRadiusUpgrades++; break; }
-                                    else if (n.SplashDamageLevel != o.SplashDamageLevel) { wStat.SplashDamageUpgrades++; break; }
-                                    else if (n.PierceChanceLevel != o.PierceChanceLevel) { wStat.PierceChanceUpgrades++; break; }
-                                    else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel) { wStat.PierceDamageFalloffUpgrades++; break; }
-                                    else if (n.PelletCountLevel != o.PelletCountLevel) { wStat.PelletCountUpgrades++; break; }
-                                    else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel) { wStat.KnockbackStrengthUpgrades++; break; }
-                                    else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel) { wStat.DamageFalloffOverDistanceUpgrades++; break; }
-                                    else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel) { wStat.PercentBonusDamagePerSecUpgrades++; break; }
-                                    else if (n.SlowEffectLevel != o.SlowEffectLevel) { wStat.SlowEffectUpgrades++; break; }
+                                    if (n.DamageLevel != o.DamageLevel)
+                                    { wStat.DamageUpgrades++; break; }
+                                    else if (n.FireRateLevel != o.FireRateLevel)
+                                    { wStat.FireRateUpgrades++; break; }
+                                    else if (n.CriticalChanceLevel != o.CriticalChanceLevel)
+                                    { wStat.CriticalChanceUpgrades++; break; }
+                                    else if (n.CriticalDamageMultiplierLevel != o.CriticalDamageMultiplierLevel)
+                                    { wStat.CriticalDamageMultiplierUpgrades++; break; }
+                                    else if (n.ExplosionRadiusLevel != o.ExplosionRadiusLevel)
+                                    { wStat.ExplosionRadiusUpgrades++; break; }
+                                    else if (n.SplashDamageLevel != o.SplashDamageLevel)
+                                    { wStat.SplashDamageUpgrades++; break; }
+                                    else if (n.PierceChanceLevel != o.PierceChanceLevel)
+                                    { wStat.PierceChanceUpgrades++; break; }
+                                    else if (n.PierceDamageFalloffLevel != o.PierceDamageFalloffLevel)
+                                    { wStat.PierceDamageFalloffUpgrades++; break; }
+                                    else if (n.PelletCountLevel != o.PelletCountLevel)
+                                    { wStat.PelletCountUpgrades++; break; }
+                                    else if (n.KnockbackStrengthLevel != o.KnockbackStrengthLevel)
+                                    { wStat.KnockbackStrengthUpgrades++; break; }
+                                    else if (n.DamageFalloffOverDistanceLevel != o.DamageFalloffOverDistanceLevel)
+                                    { wStat.DamageFalloffOverDistanceUpgrades++; break; }
+                                    else if (n.PercentBonusDamagePerSecLevel != o.PercentBonusDamagePerSecLevel)
+                                    { wStat.PercentBonusDamagePerSecUpgrades++; break; }
+                                    else if (n.SlowEffectLevel != o.SlowEffectLevel)
+                                    { wStat.SlowEffectUpgrades++; break; }
                                 }
                                 wStat.MoneySpent += spent;
                                 stats.MoneySpent += spent;
                             }
                         }
-                    }                    
+                    }
                 }
                 else // Cheapest or Random
                 {
@@ -1078,10 +1120,10 @@ namespace IdleDefense.Editor.Simulation
                                     slots[pick.slot] = bp.WithSlowEffectUpgraded();
                                     wStat.SlowEffectUpgrades++;
                                     break;
-                                }
                             }
-                            wStat.TurretUpgrades++;
                         }
+                        wStat.TurretUpgrades++;
+                    }
                 }
 
                 // Write stats for each slot
@@ -1113,11 +1155,21 @@ namespace IdleDefense.Editor.Simulation
 
                     switch (i)
                     {
-                        case 0: wStat.Slot1 = val; break;
-                        case 1: wStat.Slot2 = val; break;
-                        case 2: wStat.Slot3 = val; break;
-                        case 3: wStat.Slot4 = val; break;
-                        case 4: wStat.Slot5 = val; break;
+                        case 0:
+                            wStat.Slot1 = val;
+                            break;
+                        case 1:
+                            wStat.Slot2 = val;
+                            break;
+                        case 2:
+                            wStat.Slot3 = val;
+                            break;
+                        case 3:
+                            wStat.Slot4 = val;
+                            break;
+                        case 4:
+                            wStat.Slot5 = val;
+                            break;
                     }
                 }
 
@@ -1142,7 +1194,7 @@ namespace IdleDefense.Editor.Simulation
                     InitWave();
                 }
 
-                END_OF_FRAME:
+            END_OF_FRAME:
                 simTime += dt;
             }
 
