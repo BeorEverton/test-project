@@ -54,7 +54,7 @@ namespace Assets.Scripts.UI
         private void OnEnemyDeath(object sender, EventArgs _)
         {
             _enemyCount--;
-            _enemies.text = $"{_enemyCount}";
+            _enemies.text = $"Enemies\n{_enemyCount}";
         }
 
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
@@ -65,13 +65,13 @@ namespace Assets.Scripts.UI
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
         {
             _enemyCount = args.EnemyCount;
-            _enemies.text = $"{_enemyCount}";
+            _enemies.text = $"Enemies\n{_enemyCount}";
         }
 
         public void UpdateSpdBonus(float value)
         {
             _spdBonusSlider.value = value;
-            _spdBonus.text = "Spd +\n" + value.ToString("F0") + "%";
+            _spdBonus.text = "Spd + " + value.ToString("F0") + "%";
 
             //UpdateBonusColor(_spdBonus, value);
         }
@@ -176,7 +176,7 @@ namespace Assets.Scripts.UI
 
             // Calculate and store rollback wave
             int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
-            rollbackWaveIndex = Mathf.Max(1, currentWave - 10); // clamp to wave 1
+            rollbackWaveIndex = Mathf.Max(1, currentWave - 2); // clamp to wave 1
 
             countdownText.text = $"Restarting from Zone {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
             immediateRestartButton.onClick.RemoveAllListeners();

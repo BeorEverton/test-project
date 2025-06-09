@@ -26,7 +26,6 @@ namespace Assets.Scripts.Systems.Save
             {
                 MaxHealth = player.MaxHealth,
                 RegenAmount = player.RegenAmount,
-                RegenDelay = player.RegenDelay,
                 RegenInterval = player.RegenInterval,
                 MaxHealthUpgradeAmount = player.MaxHealthUpgradeAmount,
                 MaxHealthUpgradeBaseCost = player.MaxHealthUpgradeBaseCost,

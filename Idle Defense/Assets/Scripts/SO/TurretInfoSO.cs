@@ -27,6 +27,9 @@ namespace Assets.Scripts.SO
         public float FireRateUpgradeBaseCost;
         public float FireRateCostExponentialMultiplier;
 
+        [Tooltip("How far the turret shoots")]
+        public float Range;
+
         [Tooltip("How fast the turretHead rotates towards the target")]
         public float RotationSpeed;
 

@@ -26,12 +26,12 @@ namespace Assets.Editor
 
                 TurretInfoSO turretInfo =
                     AssetDatabase.LoadAssetAtPath<TurretInfoSO>(
-                        $"Assets/Scriptable Objects/Turrets/{lines[0]}Turret.asset");
+                        $"Assets/Resources/Scriptable Objects/Turrets/{lines[0]}Turret.asset");
 
                 if (turretInfo == null)
                 {
                     turretInfo = ScriptableObject.CreateInstance<TurretInfoSO>();
-                    AssetDatabase.CreateAsset(turretInfo, $"Assets/Scriptable Objects/Enemies/{lines[0]}Turret.asset");
+                    AssetDatabase.CreateAsset(turretInfo, $"Assets/Resources/Scriptable Objects/Turrets/{lines[0]}Turret.asset");
 
                 }
 

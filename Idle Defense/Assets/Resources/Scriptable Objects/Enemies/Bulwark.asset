@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
+  m_Name: Bulwark
+  m_EditorClassIdentifier: 
+  Name: Bulwark
+  Icon: {fileID: -3596667999559895167, guid: 3e356e5c05004504d9caaf0513195fc5, type: 3}
+  EnemyClass: 14
+  MaxHealth: 13
+  MovementSpeed: 0.3
+  MovementSpeedDifference: 0.125
+  CoinDropAmount: 10
+  CoinDropMultiplierByWaveCount: 1.7
+  HealthMultiplierByWaveCount: 1.3
+  Damage: 3
+  AttackRange: 0.3
+  AttackSpeed: 0.8

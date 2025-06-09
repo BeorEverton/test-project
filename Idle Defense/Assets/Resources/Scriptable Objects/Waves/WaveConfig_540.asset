@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac1ec8c5ea8013c4ea1e6ab4ed4c9f3b, type: 3}
+  m_Name: WaveConfig_540
+  m_EditorClassIdentifier: 
+  WaveStartIndex: 540
+  EnemyWaveEntries:
+  - EnemyPrefab: {fileID: 2421823485521883177, guid: 3f57fdcfc0931b642b95084cc050800a, type: 3}
+    NumberOfEnemies: 6
+  - EnemyPrefab: {fileID: 7123992395131263753, guid: 94cf78c550e640a4380b2fdf343a462e, type: 3}
+    NumberOfEnemies: 6
+  - EnemyPrefab: {fileID: 2564363347531745174, guid: 1e449502f417fa246807d27aeed42f40, type: 3}
+    NumberOfEnemies: 5
+  - EnemyPrefab: {fileID: 1839752367794514746, guid: 3e2088689de61db4985fb2124d372c23, type: 3}
+    NumberOfEnemies: 6
+  - EnemyPrefab: {fileID: 6578702167637539209, guid: 043aed40a556aea448562c8e4dc614fb, type: 3}
+    NumberOfEnemies: 7
+  - EnemyPrefab: {fileID: 5028625908449465660, guid: ad26592129f420f478a768c07e902981, type: 3}
+    NumberOfEnemies: 6
+  - EnemyPrefab: {fileID: 4027409280155500517, guid: cd2131b6b2375e04080f4061e1647df4, type: 3}
+    NumberOfEnemies: 6
+  - EnemyPrefab: {fileID: 8096845855743557800, guid: 6fe6e556a4814ba45afc61026a287953, type: 3}
+    NumberOfEnemies: 3
+  TimeBetweenSpawns: 0.08

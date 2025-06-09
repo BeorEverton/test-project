@@ -71,8 +71,6 @@ namespace Assets.Scripts.Systems
                 return;
 
             _currentHealth = Mathf.Max(0f, _currentHealth - amount);
-            _regenDelayTimer = 0f;
-            _regenTickTimer = 0f;
 
             OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
             StatsManager.Instance.TotalDamageTaken += amount;
@@ -95,13 +93,9 @@ namespace Assets.Scripts.Systems
             if (_isDead || _currentHealth >= Stats.MaxHealth)
                 return;
 
-            if (_regenDelayTimer < Stats.RegenDelay)
-            {
-                _regenDelayTimer += Time.deltaTime;
-                return;
-            }
+            _regenTickTimer += Time.deltaTime;
 
-            if (_regenTickTimer < Stats.RegenInterval)
+            if (_regenTickTimer < _runtimeRegenInterval) 
             {
                 _regenTickTimer += Time.deltaTime;
                 return;

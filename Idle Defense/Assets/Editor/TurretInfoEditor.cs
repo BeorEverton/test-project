@@ -21,6 +21,7 @@ namespace Assets.Editor
         private SerializedProperty fireRateUpgradeAmountProp;
         private SerializedProperty fireRateUpgradeBaseCostProp;
         private SerializedProperty fireRateCostExponentialMultiplierProp;
+        private SerializedProperty range;
         private SerializedProperty rotationSpeedProp;
         private SerializedProperty angleThresholdProp;
 
@@ -97,7 +98,8 @@ namespace Assets.Editor
             fireRateUpgradeAmountProp = serializedObject.FindProperty("FireRateUpgradeAmount");
             fireRateUpgradeBaseCostProp = serializedObject.FindProperty("FireRateUpgradeBaseCost");
             fireRateCostExponentialMultiplierProp = serializedObject.FindProperty("FireRateCostExponentialMultiplier");
-            rotationSpeedProp = serializedObject.FindProperty("RotationSpeed");
+            range = serializedObject.FindProperty("RotationSpeed");
+            rotationSpeedProp = serializedObject.FindProperty("Range");
             angleThresholdProp = serializedObject.FindProperty("AngleThreshold");
 
             // Machine Gun

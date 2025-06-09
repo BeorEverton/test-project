@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
+  m_Name: Vanish
+  m_EditorClassIdentifier: 
+  Name: Vanish
+  Icon: {fileID: -8626978579551121323, guid: 6703e1b3c8c4e7f438c6357a31637143, type: 3}
+  EnemyClass: 28
+  MaxHealth: 10
+  MovementSpeed: 2.7
+  MovementSpeedDifference: 0.2
+  CoinDropAmount: 18
+  CoinDropMultiplierByWaveCount: 2
+  HealthMultiplierByWaveCount: 1.36
+  Damage: 15
+  AttackRange: 0.4
+  AttackSpeed: 1.5

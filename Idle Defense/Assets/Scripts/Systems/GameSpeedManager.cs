@@ -48,7 +48,7 @@ namespace Assets.Scripts.Systems
 
         private void UpdateLabel(float speed)
         {
-            speedLabel.SetText(speed +"x");
+            speedLabel.SetText($"Speed\n{speed}x");
         }
 
         public void UnlockSpeed(float newSpeed)

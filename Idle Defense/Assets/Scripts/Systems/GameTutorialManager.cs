@@ -159,7 +159,8 @@ namespace Assets.Scripts.Systems
                     }
                     else
                     {
-                        tutorialPanel.SetActive(false); // Hide while waiting
+                        if (tutorialPanel)
+                            tutorialPanel.SetActive(false); // Hide while waiting
                         foreach (GameObject obj in _lastActiveObjects.Where(obj => obj != null))
                         {
                             obj.SetActive(false);
@@ -200,7 +201,8 @@ namespace Assets.Scripts.Systems
             if (tutorialPanel && !tutorialPanel.activeInHierarchy)
                 tutorialPanel.SetActive(true);
 
-            skipButton.SetActive(index != 0);
+            if (skipButton && !skipButton.activeInHierarchy)
+                skipButton.SetActive(index != 0);
 
             if (_currentStep == 1)
             {
@@ -230,7 +232,8 @@ namespace Assets.Scripts.Systems
                 }
             }
 
-            typingText.StartTyping(step.instructionText);
+            if (typingText)
+                typingText.StartTyping(step.instructionText);
         }
 
         private void CompleteTutorial()

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurretType: 2
   IsUnlocked: 0
-  Damage: 100
+  Damage: 2000
   DamageLevel: 0
   DamageUpgradeAmount: 1.06
   DamageUpgradeBaseCost: 2000
@@ -24,7 +24,8 @@ MonoBehaviour:
   FireRateUpgradeAmount: 0.02
   FireRateUpgradeBaseCost: 3000
   FireRateCostExponentialMultiplier: 1.078
-  RotationSpeed: 8
+  Range: 4.4
+  RotationSpeed: 11
   AngleThreshold: 1
   CriticalChance: 0
   CriticalChanceLevel: 0

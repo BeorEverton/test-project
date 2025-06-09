@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurretType: 3
   IsUnlocked: 0
-  Damage: 400
+  Damage: 3500
   DamageLevel: 0
   DamageUpgradeAmount: 1.04
   DamageUpgradeBaseCost: 8000
@@ -24,7 +24,8 @@ MonoBehaviour:
   FireRateUpgradeAmount: 0.02
   FireRateUpgradeBaseCost: 6000
   FireRateCostExponentialMultiplier: 1.078
-  RotationSpeed: 99
+  Range: 4.4
+  RotationSpeed: 10
   AngleThreshold: 10
   CriticalChance: 0
   CriticalChanceLevel: 0
@@ -41,9 +42,9 @@ MonoBehaviour:
   ExplosionRadiusUpgradeAmount: 0.2
   ExplosionRadiusUpgradeBaseCost: 10000
   ExplosionRadiusCostExponentialMultiplier: 1.075
-  SplashDamage: 50
+  SplashDamage: 1500
   SplashDamageLevel: 0
-  SplashDamageUpgradeAmount: 20
+  SplashDamageUpgradeAmount: 150
   SplashDamageUpgradeBaseCost: 12000
   SplashDamageCostExponentialMultiplier: 1.079
   PierceChance: 0

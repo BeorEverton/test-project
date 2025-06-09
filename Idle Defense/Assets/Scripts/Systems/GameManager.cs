@@ -44,10 +44,7 @@ namespace Assets.Scripts.Systems
                 Destroy(gameObject);
 
             _ped = new PointerEventData(EventSystem.current);
-            Input = new PlayerInput();
-            Input.Player.Click.performed += OnClickStarted;
-            Input.Player.Click.canceled += OnClickReleased;
-            Input.Player.Enable();
+            
         }
 
         private void Start()
@@ -55,11 +52,29 @@ namespace Assets.Scripts.Systems
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
         }
 
-        private void OnDestroy()
+        private void OnEnable()
+        {
+            Input = new PlayerInput();
+            Input.Player.Click.performed += OnClickStarted;
+            Input.Player.Click.canceled += OnClickReleased;
+            Input.Player.Enable();
+        }
+
+        private void OnDisable()
         {
             Input.Player.Click.performed -= OnClickStarted;
             Input.Player.Click.canceled -= OnClickReleased;
             Input.Player.Disable();
+            Input = null;
+        }
+
+        private void OnDestroy()
+        {
+            if (Input == null) return;
+            Input.Player.Click.performed -= OnClickStarted;
+            Input.Player.Click.canceled -= OnClickReleased;
+            Input.Player.Disable();
+            Input = null;
         }
 
         private void OnClickStarted(InputAction.CallbackContext ctx)

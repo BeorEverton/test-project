@@ -12,14 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81e726fed7be9554c8d0a06e02e53330, type: 3}
   m_Name: PlayerBaseStats
   m_EditorClassIdentifier: 
-  MaxHealth: 20
-  RegenAmount: 1
-  RegenDelay: 2
+  MaxHealth: 50
+  RegenAmount: 0.1
   RegenInterval: 5
-  MaxHealthUpgradeAmount: 5
+  MaxHealthUpgradeAmount: 10
   MaxHealthUpgradeBaseCost: 10
   MaxHealthLevel: 0
-  RegenAmountUpgradeAmount: 0.1
+  RegenAmountUpgradeAmount: 0.5
   RegenAmountUpgradeBaseCost: 500
   RegenAmountLevel: 0
   RegenIntervalUpgradeAmount: 0.1
