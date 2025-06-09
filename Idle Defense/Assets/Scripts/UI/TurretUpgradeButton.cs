@@ -151,7 +151,7 @@ namespace Assets.Scripts.UI
 
         private void UpdateUpgradeAmount()
         {
-            _upgradeAmount = _upgradeManager.GetTurretAvailableUpgradeAmount(_turret, _upgradeType);
+            _upgradeAmount = MultipleBuyOption.Instance.GetBuyAmount();
         }
     }
 }

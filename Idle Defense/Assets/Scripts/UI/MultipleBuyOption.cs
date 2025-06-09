@@ -29,7 +29,7 @@ namespace Assets.Scripts.UI
 
         private void Start()
         {
-            _amountOptions = new List<int> { 1, 5, 25, 100, 9999 };
+            _amountOptions = new List<int> { 1, 5, 10, 25, 50, 100 };
 
             _buyAmountToggleButton.onClick.AddListener(AdvanceBuyAmount);
         }
@@ -48,12 +48,6 @@ namespace Assets.Scripts.UI
 
         private void UpdateLabel(int amount)
         {
-            if (amount == 9999)
-            {
-                _amountLabel.SetText("MAX");
-                return;
-            }
-
             _amountLabel.SetText(amount.ToString());
         }
     }
