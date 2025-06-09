@@ -49,7 +49,7 @@ namespace Assets.Scripts.UI
 
         private void UpdateLabel(int amount)
         {
-            _amountLabel.SetText(amount.ToString());
+            _amountLabel.SetText("Buy " + amount.ToString());
         }
     }
 }
