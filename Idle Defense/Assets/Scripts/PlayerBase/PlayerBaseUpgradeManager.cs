@@ -36,14 +36,19 @@ namespace Assets.Scripts.PlayerBase
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
-                        float bonus = GetBonusAmount(p, PlayerUpgradeType.MaxHealth);
-                        GetCost(p, PlayerUpgradeType.MaxHealth, a, out float cost, out int amount);
+                        float pct = GetBonusAmount(p, PlayerUpgradeType.MaxHealth); 
+                        float projected = current * Mathf.Pow(1f + pct, a);
+                        float bonus = projected - current;
 
-                        return ($"{current:F0}",
-                                $"+{bonus:F0}",
-                                $"${UIManager.AbbreviateNumber(cost)}",
-                                $"{amount:F0}X");
+                        GetCost(p, PlayerUpgradeType.MaxHealth, a, out float cost, out int amount);
+                        return (
+                            $"{current:F0}",                               
+                            $"+{bonus:F0}",                                
+                            $"${UIManager.AbbreviateNumber(cost)}",        
+                            $"{amount:F0}X"                                
+                        );
                     }
+
                 },
                 [PlayerUpgradeType.RegenAmount] = new()
                 {
@@ -139,18 +144,33 @@ namespace Assets.Scripts.PlayerBase
                 return;
             }
 
-            if (TrySpend(cost))
+            if (!TrySpend(cost))
             {
-                float newValue = upgrade.GetCurrentValue(stats) + (upgrade.GetUpgradeAmount(stats) * maxAmount);
-                upgrade.SetCurrentValue(stats, newValue);
-                upgrade.SetLevel(stats, upgrade.GetLevel(stats) + maxAmount);
-                AudioManager.Instance.Play("Upgrade");
-                UpdateUpgradeDisplay(stats, type, button);
-                PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
-
-                if (type == PlayerUpgradeType.MaxHealth)
-                    PlayerBaseManager.Instance.InvokeHealthChangedEvents();
+                return;
             }
+
+            if (type == PlayerUpgradeType.MaxHealth)
+            {              
+                float oldMax = upgrade.GetCurrentValue(stats);
+                float pct = upgrade.GetUpgradeAmount(stats); 
+                int n = maxAmount;
+                float newMax = oldMax * Mathf.Pow(1f + pct, n);
+                upgrade.SetCurrentValue(stats, newMax);
+                PlayerBaseManager.Instance.InvokeHealthChangedEvents();
+            }
+            else
+            {                
+                float flat = upgrade.GetUpgradeAmount(stats);
+                float newVal = upgrade.GetCurrentValue(stats) + flat * maxAmount;
+                upgrade.SetCurrentValue(stats, newVal);
+            }
+            
+            float prevLvl = upgrade.GetLevel(stats);
+            upgrade.SetLevel(stats, (int)prevLvl + maxAmount);
+            
+            AudioManager.Instance.Play("Upgrade");
+            UpdateUpgradeDisplay(stats, type, button);
+            PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
         }
 
         private void GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int inAmount, out float cost, out int outAmount)
