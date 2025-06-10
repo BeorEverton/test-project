@@ -24,15 +24,18 @@ namespace Assets.Scripts.PlayerBase
                 [PlayerUpgradeType.MaxHealth] = new()
                 {
                     GetCurrentValue = p => p.MaxHealth,
-                    SetCurrentValue = (p, v) => p.MaxHealth = v,
+                    Upgrade = (p, a) =>
+                    {
+                        p.MaxHealthLevel += a;
+                        p.MaxHealth += (p.MaxHealthUpgradeAmount * a);
+                    },
                     GetLevel = p => p.MaxHealthLevel,
-                    SetLevel = (p, v) => p.MaxHealthLevel = v,
                     GetUpgradeAmount = p => p.MaxHealthUpgradeAmount,
                     GetBaseCost = p => p.MaxHealthUpgradeBaseCost,
                     GetMaxValue = p => float.MaxValue,
                     GetMinValue = p => 0f,
                     GetCost = (p, a) => GetCost(p, PlayerUpgradeType.MaxHealth, a),
-                    GetAmount = p => GetMaxAmount(p.MaxHealthUpgradeBaseCost, 1.1f, p.MaxHealthLevel),
+                    //GetAmount = p => GetMaxAmount(p.MaxHealthUpgradeBaseCost, 1.1f, p.MaxHealthLevel),
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
@@ -48,15 +51,18 @@ namespace Assets.Scripts.PlayerBase
                 [PlayerUpgradeType.RegenAmount] = new()
                 {
                     GetCurrentValue = p => p.RegenAmount,
-                    SetCurrentValue = (p, v) => p.RegenAmount = v,
+                    Upgrade = (p, a) =>
+                    {
+                        p.RegenAmountLevel += a;
+                        p.RegenAmount += (p.RegenAmountUpgradeAmount * a);
+                    },
                     GetLevel = p => p.RegenAmountLevel,
-                    SetLevel = (p, v) => p.RegenAmountLevel = v,
                     GetUpgradeAmount = p => p.RegenAmountUpgradeAmount,
                     GetBaseCost = p => p.RegenAmountUpgradeBaseCost,
                     GetMaxValue = p => float.MaxValue,
                     GetMinValue = p => 0f,
                     GetCost = (p, a) => GetCost(p, PlayerUpgradeType.RegenAmount, a),
-                    GetAmount = p => GetMaxAmount(p.RegenAmountUpgradeBaseCost, 1.1f, p.RegenAmountLevel),
+                    //GetAmount = p => GetMaxAmount(p.RegenAmountUpgradeBaseCost, 1.1f, p.RegenAmountLevel),
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenAmount;
@@ -72,15 +78,21 @@ namespace Assets.Scripts.PlayerBase
                 [PlayerUpgradeType.RegenInterval] = new()
                 {
                     GetCurrentValue = p => p.RegenInterval,
-                    SetCurrentValue = (p, v) => p.RegenInterval = v,
+                    Upgrade = (p, a) =>
+                    {
+                        p.RegenIntervalLevel += a;
+                        _playerUpgrades.TryGetValue(PlayerUpgradeType.RegenInterval, out PlayerBaseUpgrade upgrade);
+
+                        p.RegenInterval = Mathf.Max(p.RegenInterval - p.RegenIntervalUpgradeAmount * a,
+                            upgrade == null ? 0.5f : upgrade.GetMinValue(p));
+                    },
                     GetLevel = p => p.RegenIntervalLevel,
-                    SetLevel = (p, v) => p.RegenIntervalLevel = v,
                     GetUpgradeAmount = p => p.RegenIntervalUpgradeAmount,
                     GetBaseCost = p => p.RegenIntervalUpgradeBaseCost,
-                    GetMaxValue = p => 0.5f,
-                    GetMinValue = p => 0f,
+                    GetMaxValue = p => float.MaxValue,
+                    GetMinValue = p => 0.5f,
                     GetCost = (p, a) => GetCost(p, PlayerUpgradeType.RegenInterval, a),
-                    GetAmount = p => GetMaxAmount(p.RegenIntervalUpgradeBaseCost, 1.1f, p.RegenIntervalLevel),
+                    //GetAmount = p => GetMaxAmount(p.RegenIntervalUpgradeBaseCost, 1.1f, p.RegenIntervalLevel),
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.RegenInterval;
@@ -102,8 +114,8 @@ namespace Assets.Scripts.PlayerBase
         public float GetPlayerBaseUpgradeCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int amount) =>
             !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0f : upgrade.GetCost(stats, amount);
 
-        public int GetPlayerBaseAvailableUpgradeAmount(PlayerBaseStatsInstance stats, PlayerUpgradeType type) =>
-            !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0 : upgrade.GetAmount(stats);
+        //public int GetPlayerBaseAvailableUpgradeAmount(PlayerBaseStatsInstance stats, PlayerUpgradeType type) =>
+        //    !_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade) ? 0 : upgrade.GetAmount(stats);
 
         private float GetBonusAmount(PlayerBaseStatsInstance stats, PlayerUpgradeType type)
         {
@@ -116,10 +128,10 @@ namespace Assets.Scripts.PlayerBase
             if (upgrade == null)
                 return 1f;
 
-            if (amount == 9999)
-                amount = upgrade.GetAmount(stats) == 0
-                    ? 1
-                    : upgrade.GetAmount(stats);
+            //if (amount == 9999)
+            //    amount = upgrade.GetAmount(stats) == 0
+            //        ? 1
+            //        : upgrade.GetAmount(stats);
 
             return upgradeAmount * amount;
         }
@@ -141,9 +153,7 @@ namespace Assets.Scripts.PlayerBase
 
             if (TrySpend(cost))
             {
-                float newValue = upgrade.GetCurrentValue(stats) + (upgrade.GetUpgradeAmount(stats) * maxAmount);
-                upgrade.SetCurrentValue(stats, newValue);
-                upgrade.SetLevel(stats, upgrade.GetLevel(stats) + maxAmount);
+                upgrade.Upgrade(stats, amount);
                 AudioManager.Instance.Play("Upgrade");
                 UpdateUpgradeDisplay(stats, type, button);
                 PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
@@ -165,13 +175,15 @@ namespace Assets.Scripts.PlayerBase
             const float multiplier = 1.1f;
             int currentLevel = upgrade.GetLevel(stats);
             float baseCost = upgrade.GetBaseCost(stats);
-            int maxAmount = GetMaxAmount(baseCost, multiplier, currentLevel);
+            //int maxAmount = GetMaxAmount(baseCost, multiplier, currentLevel);
 
-            outAmount = inAmount == 9999
-                ? maxAmount == 0
-                    ? 1
-                    : maxAmount
-                : inAmount;
+            //outAmount = inAmount == 9999
+            //    ? maxAmount == 0
+            //        ? 1
+            //        : maxAmount
+            //    : inAmount;
+
+            outAmount = inAmount;
 
             cost = RecursiveCost(baseCost, multiplier, currentLevel, outAmount);
         }
@@ -187,29 +199,29 @@ namespace Assets.Scripts.PlayerBase
             float baseCost = upgrade.GetBaseCost(stats);
             const float multiplier = 1.1f;
 
-            if (inAmount == 9999)
-                inAmount = GetMaxAmount(baseCost, multiplier, currentLevel);
+            //if (inAmount == 9999)
+            //    inAmount = GetMaxAmount(baseCost, multiplier, currentLevel);
 
             return RecursiveCost(baseCost, multiplier, currentLevel, inAmount);
         }
 
-        private int GetMaxAmount(float baseCost, float multiplier, int currentLevel)
-        {
-            int amount = 0;
-            float totalCost = 0f;
-            float money = GameManager.Instance.Money;
+        //private int GetMaxAmount(float baseCost, float multiplier, int currentLevel)
+        //{
+        //    int amount = 0;
+        //    float totalCost = 0f;
+        //    float money = GameManager.Instance.Money;
 
-            while (true)
-            {
-                float cost = baseCost * Mathf.Pow(multiplier, currentLevel + amount);
-                if (totalCost + cost > money)
-                    break;
-                totalCost += cost;
-                amount++;
-            }
+        //    while (true)
+        //    {
+        //        float cost = baseCost * Mathf.Pow(multiplier, currentLevel + amount);
+        //        if (totalCost + cost > money)
+        //            break;
+        //        totalCost += cost;
+        //        amount++;
+        //    }
 
-            return amount;
-        }
+        //    return amount;
+        //}
 
         private float RecursiveCost(float baseCost, float multiplier, int level, int amount)
         {
