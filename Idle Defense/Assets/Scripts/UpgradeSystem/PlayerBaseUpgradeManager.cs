@@ -36,18 +36,31 @@ namespace Assets.Scripts.PlayerBase
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
-                        float pct = GetBonusAmount(p, PlayerUpgradeType.MaxHealth); 
-                        float projected = current * Mathf.Pow(1f + pct, a);
+                        float pct = p.MaxHealthUpgradeAmount;  
+                        
+                        float projected = current;
+                        for (int i = 0; i < a; i++)
+                        {
+                            projected *= 1f + pct;
+                            if (projected > float.MaxValue * 0.5f)
+                            {
+                                projected = float.MaxValue;
+                                break;
+                            }
+                        }
+                        
                         float bonus = projected - current;
-
+                        
                         GetCost(p, PlayerUpgradeType.MaxHealth, a, out float cost, out int amount);
+
                         return (
-                            $"{current:F0}",                               
-                            $"+{bonus:F0}",                                
-                            $"${UIManager.AbbreviateNumber(cost)}",        
-                            $"{amount:F0}X"                                
+                            $"{UIManager.AbbreviateNumber(current)}",                         
+                            $"+{UIManager.AbbreviateNumber(bonus)}",                          
+                            $"${UIManager.AbbreviateNumber(cost)}",  
+                            $"{UIManager.AbbreviateNumber(amount)}X"                          
                         );
                     }
+
 
                 },
                 [PlayerUpgradeType.RegenAmount] = new()
@@ -68,7 +81,8 @@ namespace Assets.Scripts.PlayerBase
                         float bonus = GetBonusAmount(p, PlayerUpgradeType.RegenAmount);
                         GetCost(p, PlayerUpgradeType.RegenAmount, a, out float cost, out int amount);
 
-                        return ($"{current:F2}",
+                        return (
+                                $"{current:F2}",
                                 $"+{bonus:F2}",
                                 $"${UIManager.AbbreviateNumber(cost)}",
                                 $"{amount:F0}X");
@@ -150,14 +164,28 @@ namespace Assets.Scripts.PlayerBase
             }
 
             if (type == PlayerUpgradeType.MaxHealth)
-            {              
-                float oldMax = upgrade.GetCurrentValue(stats);
-                float pct = upgrade.GetUpgradeAmount(stats); 
-                int n = maxAmount;
-                float newMax = oldMax * Mathf.Pow(1f + pct, n);
+            {
+                float current = upgrade.GetCurrentValue(stats);
+                float pct = upgrade.GetUpgradeAmount(stats);  
+                int n = amount;
+
+                float newMax = current;
+                for (int i = 0; i < n; i++)
+                {
+                    newMax *= 1f + pct;
+                    if (newMax > float.MaxValue * 0.5f)  
+                    {
+                        newMax = float.MaxValue;
+                        break;
+                    }
+                }
+
                 upgrade.SetCurrentValue(stats, newMax);
-                PlayerBaseManager.Instance.InvokeHealthChangedEvents();
+
+                float increaseAmount = newMax - current;
+                PlayerBaseManager.Instance.Heal(increaseAmount);
             }
+
             else
             {                
                 float flat = upgrade.GetUpgradeAmount(stats);

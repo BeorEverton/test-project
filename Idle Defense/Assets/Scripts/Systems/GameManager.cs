@@ -170,5 +170,10 @@ namespace Assets.Scripts.Systems
             UIManager.Instance.UpdateMoney(money);
             UIManager.Instance.UpdateSpdBonus(spdBonus);
         }
+
+        public void DebugAddMoneyInt(int moneyToAdd)
+        {
+            AddMoney((ulong)moneyToAdd);
+        }
     }
 }
