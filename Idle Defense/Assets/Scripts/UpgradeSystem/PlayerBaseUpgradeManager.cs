@@ -26,8 +26,19 @@ namespace Assets.Scripts.PlayerBase
                     GetCurrentValue = p => p.MaxHealth,
                     Upgrade = (p, a) =>
                     {
+                        float newMax = p.MaxHealth;
+                        for (int i = 0; i < a; i++)
+                        {
+                            newMax *= 1f + p.MaxHealthUpgradeAmount;
+                            if (newMax > float.MaxValue * 0.5f)
+                            {
+                                newMax = float.MaxValue;
+                                break;
+                            }
+                        }
+
                         p.MaxHealthLevel += a;
-                        p.MaxHealth += (p.MaxHealthUpgradeAmount * a);
+                        p.MaxHealth = newMax;
                     },
                     GetLevel = p => p.MaxHealthLevel,
                     GetUpgradeAmount = p => p.MaxHealthUpgradeAmount,
@@ -39,8 +50,8 @@ namespace Assets.Scripts.PlayerBase
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
-                        float pct = p.MaxHealthUpgradeAmount;  
-                        
+                        float pct = p.MaxHealthUpgradeAmount;
+
                         float projected = current;
                         for (int i = 0; i < a; i++)
                         {
@@ -51,16 +62,16 @@ namespace Assets.Scripts.PlayerBase
                                 break;
                             }
                         }
-                        
+
                         float bonus = projected - current;
-                        
+
                         GetCost(p, PlayerUpgradeType.MaxHealth, a, out float cost, out int amount);
 
                         return (
-                            $"{UIManager.AbbreviateNumber(current)}",                         
-                            $"+{UIManager.AbbreviateNumber(bonus)}",                          
-                            $"${UIManager.AbbreviateNumber(cost)}",  
-                            $"{UIManager.AbbreviateNumber(amount)}X"                          
+                            $"{UIManager.AbbreviateNumber(current)}",
+                            $"+{UIManager.AbbreviateNumber(bonus)}",
+                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"{UIManager.AbbreviateNumber(amount)}X"
                         );
                     }
 
