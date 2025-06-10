@@ -86,6 +86,19 @@ namespace Assets.Scripts.Systems
             UIManager.Instance.ShowDeathCountdown();
         }
 
+        public void Heal(float amount)
+        {
+            if (_isDead)
+                return;
+            _currentHealth = Mathf.Min(_currentHealth + amount, Stats.MaxHealth);
+            OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
+            StatsManager.Instance.TotalHealthRepaired += amount;
+            if (_currentHealth >= Stats.MaxHealth)
+            {
+                AudioManager.Instance.Play("Full Health");
+            }
+        }
+
         private void Update()
         {
             if (_isDead || _currentHealth >= Stats.MaxHealth)

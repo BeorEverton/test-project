@@ -39,14 +39,32 @@ namespace Assets.Scripts.PlayerBase
                     GetDisplayStrings = (p, a) =>
                     {
                         float current = p.MaxHealth;
-                        float bonus = GetBonusAmount(p, PlayerUpgradeType.MaxHealth);
+                        float pct = p.MaxHealthUpgradeAmount;  
+                        
+                        float projected = current;
+                        for (int i = 0; i < a; i++)
+                        {
+                            projected *= 1f + pct;
+                            if (projected > float.MaxValue * 0.5f)
+                            {
+                                projected = float.MaxValue;
+                                break;
+                            }
+                        }
+                        
+                        float bonus = projected - current;
+                        
                         GetCost(p, PlayerUpgradeType.MaxHealth, a, out float cost, out int amount);
 
-                        return ($"{current:F0}",
-                                $"+{bonus:F0}",
-                                $"${UIManager.AbbreviateNumber(cost)}",
-                                $"{amount:F0}X");
+                        return (
+                            $"{UIManager.AbbreviateNumber(current)}",                         
+                            $"+{UIManager.AbbreviateNumber(bonus)}",                          
+                            $"${UIManager.AbbreviateNumber(cost)}",  
+                            $"{UIManager.AbbreviateNumber(amount)}X"                          
+                        );
                     }
+
+
                 },
                 [PlayerUpgradeType.RegenAmount] = new()
                 {
@@ -69,7 +87,8 @@ namespace Assets.Scripts.PlayerBase
                         float bonus = GetBonusAmount(p, PlayerUpgradeType.RegenAmount);
                         GetCost(p, PlayerUpgradeType.RegenAmount, a, out float cost, out int amount);
 
-                        return ($"{current:F2}",
+                        return (
+                                $"{current:F2}",
                                 $"+{bonus:F2}",
                                 $"${UIManager.AbbreviateNumber(cost)}",
                                 $"{amount:F0}X");
@@ -148,6 +167,11 @@ namespace Assets.Scripts.PlayerBase
             if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(stats) >= upgrade.GetMaxValue(stats))
             {
                 UpdateUpgradeDisplay(stats, type, button);
+                return;
+            }
+
+            if (!TrySpend(cost))
+            {
                 return;
             }
 
