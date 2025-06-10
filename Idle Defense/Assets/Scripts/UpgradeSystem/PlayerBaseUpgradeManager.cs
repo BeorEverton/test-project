@@ -181,11 +181,6 @@ namespace Assets.Scripts.PlayerBase
                 return;
             }
 
-            if (!TrySpend(cost))
-            {
-                return;
-            }
-
             if (TrySpend(cost))
             {
                 upgrade.Upgrade(stats, amount);
