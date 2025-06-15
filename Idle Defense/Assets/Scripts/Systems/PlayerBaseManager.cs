@@ -2,7 +2,9 @@ using Assets.Scripts.PlayerBase;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
+using Assets.Scripts.WaveSystem;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Systems
@@ -84,6 +86,16 @@ namespace Assets.Scripts.Systems
             AudioManager.Instance.StopAllMusics();
             AudioManager.Instance.PlayMusic("Main");
             UIManager.Instance.ShowDeathCountdown();
+
+            // Analytics event for player death
+            AnalyticsManager.Instance.SendCustomEvent("PlayerDeath", new Dictionary<string, string>()
+            {
+                { "WaveOfDeath", WaveManager.Instance.GetCurrentWaveIndex().ToString() },
+                { "DeathNumber", StatsManager.Instance.MissionsFailed.ToString() },
+                { "MaxHealth", MaxHealth.ToString() },
+                { "RegenAmount", Stats.RegenAmount.ToString() },
+                { "RegenDelay", Stats.RegenInterval.ToString() }
+            });
         }
 
         public void Heal(float amount)

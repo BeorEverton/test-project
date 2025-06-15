@@ -6,6 +6,7 @@ using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 
 namespace Assets.Scripts.Systems
@@ -59,10 +60,37 @@ namespace Assets.Scripts.Systems
                     return false;
                 GameManager.Instance.SpendMoney(info.cost);
                 slotInfo[slot].purchased = true;
+
+                #region Analytics
+                var eventData = new Dictionary<string, string>
+                {
+                    { "SlotNumber",        slot.ToString() },
+                    { "PurchasedOnWave",   WaveManager.Instance.GetCurrentWaveIndex().ToString() }
+                };
+
+                // add one entry per equip slot (safe even when some are null)
+                for (int i = 0; i < equipped.Length; i++)
+                {
+                    var pair = AnalyticsForSlot(i);
+                    eventData.Add(pair.Key, pair.Value);
+                }
+
+                AnalyticsManager.Instance.SendCustomEvent("SlotPurchased", eventData);
+                #endregion
+
             }
             OnSlotUnlocked?.Invoke();
             SaveGameManager.Instance.SaveGame();
             return true;
+        }
+
+        private KeyValuePair<string, string> AnalyticsForSlot(int index)
+        {
+            var inst = equipped[index];
+            return inst != null
+                ? new KeyValuePair<string, string>(inst.TurretType.ToString(),
+                                                   inst.TotalLevel().ToString())
+                : new KeyValuePair<string, string>($"Slot{index + 1}", "Locked");
         }
 
         public bool Equip(int slot, TurretStatsInstance inst)

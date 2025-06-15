@@ -175,5 +175,22 @@ namespace Assets.Scripts.Turrets
         }
 
         public TurretStatsInstance() { }//Used to load from DTO
+
+        public int TotalLevel()
+        {
+            return Mathf.FloorToInt(
+                  DamageLevel
+                + FireRateLevel
+                + CriticalChanceLevel
+                + CriticalDamageMultiplierLevel
+                + ExplosionRadiusLevel
+                + SplashDamageLevel
+                + PierceChanceLevel
+                + PierceDamageFalloffLevel
+                + PelletCountLevel
+                + DamageFalloffOverDistanceLevel
+                + PercentBonusDamagePerSecLevel
+                + SlowEffectLevel);
+        }
     }
 }
