@@ -29,6 +29,11 @@ namespace Assets.Scripts.Systems
         private double _missileLauncherDamage;
         private double _laserDamage;
 
+        private double _startTime;
+        private double _gameTime;
+        private double _loadedTime;
+        
+
         private Dictionary<TurretType, Action<double>> _damageDictionary;
 
         private void Awake()
@@ -46,6 +51,16 @@ namespace Assets.Scripts.Systems
                 { TurretType.MissileLauncher, amount => MissileLauncherDamage += amount },
                 { TurretType.Laser, amount => LaserDamage += amount }
             };
+        }
+
+        void Start()
+        {
+            _startTime = Time.realtimeSinceStartupAsDouble;
+        }
+
+        void FixedUpdate()
+        {
+            GameTime = (Time.realtimeSinceStartupAsDouble - _startTime) + _loadedTime;
         }
 
         public void LoadStats(StatsDTO statsDTO)
@@ -66,6 +81,8 @@ namespace Assets.Scripts.Systems
             SniperDamage = statsDTO.SniperDamage;
             MissileLauncherDamage = statsDTO.MissileLauncherDamage;
             LaserDamage = statsDTO.LaserDamage;
+            _loadedTime = statsDTO.GameTime;
+            
         }
 
         public void ResetStats()
@@ -86,6 +103,7 @@ namespace Assets.Scripts.Systems
             _sniperDamage = 0;
             _missileLauncherDamage = 0;
             _laserDamage = 0;
+            _gameTime = 0;
         }
 
         private void SetField<T>(ref T field, T newValue, string statName)
@@ -95,6 +113,12 @@ namespace Assets.Scripts.Systems
 
             field = newValue;
             OnStatChanged?.Invoke(statName, newValue);
+        }
+
+        public double GameTime
+        {
+            get => _gameTime;
+            set => SetField(ref _gameTime, value, nameof(GameTime));
         }
 
         public double TotalDamage

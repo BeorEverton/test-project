@@ -131,6 +131,27 @@ namespace Assets.Scripts.UI
             };
         }
 
+        public static string FormatTime(TimeSpan time)
+        {
+            if (time.TotalSeconds < 60)
+            {
+                return $"{(int)time.TotalSeconds} sec";
+            }
+            else if (time.TotalMinutes < 60)
+            {
+                return $"{time.Minutes:D2}:{time.Seconds:D2}";
+            }
+            else if (time.TotalHours < 24)
+            {
+                return $"{(int)time.TotalHours:D2}:{time.Minutes:D2}:{time.Seconds:D2}";
+            }
+            else
+            {
+                return $"{(int)time.TotalDays}d:{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}";
+            }
+        }
+
+
         public void OpenEquipPanel(int slot)
         {
             DeactivateRightPanels();

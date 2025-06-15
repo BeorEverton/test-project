@@ -1,4 +1,5 @@
 using Assets.Scripts.Systems;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ namespace Assets.Scripts.UI
         {
             StatsManager sm = StatsManager.Instance;
 
+            UpdateGameTime(sm.GameTime);
             UpdateTotalDamage(sm.TotalDamage);
             UpdateMaxWave(sm.MaxZone);
             UpdateWavesSecured(sm.TotalZonesSecured);
@@ -43,6 +45,9 @@ namespace Assets.Scripts.UI
         {
             switch (statName)
             {
+                case nameof(StatsManager.GameTime):
+                    UpdateGameTime((double)newValue);
+                    break;
                 case nameof(StatsManager.TotalDamage):
                     UpdateTotalDamage((double)newValue);
                     break;
@@ -106,6 +111,7 @@ namespace Assets.Scripts.UI
         public TextMeshProUGUI wallRepairedText;
         public TextMeshProUGUI missionsFailedText;
         public TextMeshProUGUI speedBoostsText;
+        public TextMeshProUGUI gameTimeText;
 
         [Header("Weapon Damage")]
         public TextMeshProUGUI machineGunDamageText;
@@ -114,52 +120,55 @@ namespace Assets.Scripts.UI
         public TextMeshProUGUI missileLauncherDamageText;
         public TextMeshProUGUI laserDamageText;
 
+        public void UpdateGameTime(double value) =>
+            gameTimeText.text = " " + UIManager.FormatTime(TimeSpan.FromSeconds(value));
+
         public void UpdateTotalDamage(double value) =>
-            totalDamageText.text = UIManager.AbbreviateNumber(value);
+            totalDamageText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateMaxWave(int value) =>
-            maxWaveText.text = value.ToString();
+            maxWaveText.text = " " + value.ToString();
 
         public void UpdateWavesSecured(int value) =>
-            wavesSecuredText.text = value.ToString();
+            wavesSecuredText.text = " " + value.ToString();
 
         public void UpdateHostilesKilled(int value) =>
-            hostilesKilledText.text = value.ToString();
+            hostilesKilledText.text = " " + value.ToString();
 
         public void UpdateBossesKilled(int value) =>
-            bossesKilledText.text = value.ToString();
+            bossesKilledText.text = " " + value.ToString();
 
         public void UpdateMoneyInvested(double value) =>
-            moneyInvestedText.text = UIManager.AbbreviateNumber(value);
+            moneyInvestedText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateUpgradesMade(int value) =>
-            upgradesMadeText.text = value.ToString();
+            upgradesMadeText.text = " " + value.ToString();
 
         public void UpdateDamageTaken(double value) =>
-            damageTakenText.text = UIManager.AbbreviateNumber(value);
+            damageTakenText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateWallRepaired(double value) =>
-            wallRepairedText.text = UIManager.AbbreviateNumber(value);
+            wallRepairedText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateMissionsFailed(int value) =>
-            missionsFailedText.text = value.ToString();
+            missionsFailedText.text = " " + value.ToString();
 
         public void UpdateSpeedBoosts(int value) =>
-            speedBoostsText.text = value.ToString();
+            speedBoostsText.text = " " + value.ToString();
 
         public void UpdateMachineGunDamage(double value) =>
-            machineGunDamageText.text = UIManager.AbbreviateNumber(value);
+            machineGunDamageText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateShotgunDamage(double value) =>
-            shotgunDamageText.text = UIManager.AbbreviateNumber(value);
+            shotgunDamageText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateSniperDamage(double value) =>
-            sniperDamageText.text = UIManager.AbbreviateNumber(value);
+            sniperDamageText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateMissileLauncherDamage(double value) =>
-            missileLauncherDamageText.text = UIManager.AbbreviateNumber(value);
+            missileLauncherDamageText.text = " " + UIManager.AbbreviateNumber(value);
 
         public void UpdateLaserDamage(double value) =>
-            laserDamageText.text = UIManager.AbbreviateNumber(value);
+            laserDamageText.text = " " + UIManager.AbbreviateNumber(value);
     }
 }

@@ -55,6 +55,7 @@ namespace Assets.Scripts.Systems.Save
             TurretInfoDTO laserTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_laserTurret.GetStats());
             TurretBaseInfoDTO laserTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
             StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();
+            
 
             TurretInventoryDTO turretInventory = TurretInventoryManager.Instance.ExportToDTO();
 
