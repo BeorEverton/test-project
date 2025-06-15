@@ -137,7 +137,8 @@ namespace Assets.Scripts.Systems.Save
                 ShotgunDamage = StatsManager.Instance.ShotgunDamage,
                 SniperDamage = StatsManager.Instance.SniperDamage,
                 MissileLauncherDamage = StatsManager.Instance.MissileLauncherDamage,
-                LaserDamage = StatsManager.Instance.LaserDamage
+                LaserDamage = StatsManager.Instance.LaserDamage,
+                GameTime = StatsManager.Instance.GameTime
             };
         }
     }
@@ -369,6 +370,7 @@ public class StatsDTO
     public double TotalHealthRepaired;
     public int MissionsFailed;
     public int SpeedBoostClicks;
+    public double GameTime;
 
     public double MachineGunDamage;
     public double ShotgunDamage;

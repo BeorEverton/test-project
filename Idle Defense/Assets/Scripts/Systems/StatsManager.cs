@@ -29,6 +29,13 @@ namespace Assets.Scripts.Systems
         private double _missileLauncherDamage;
         private double _laserDamage;
 
+        private double _startTime;
+        private double _gameTime;
+        private double _loadedTime;
+        private bool oneMin, fiveMin, tenMin, fifteenMin, thirtyMin, oneHour, twoHours,
+            threeHours, fiveHours, tenHours, oneDay;
+
+
         private Dictionary<TurretType, Action<double>> _damageDictionary;
 
         private void Awake()
@@ -46,6 +53,250 @@ namespace Assets.Scripts.Systems
                 { TurretType.MissileLauncher, amount => MissileLauncherDamage += amount },
                 { TurretType.Laser, amount => LaserDamage += amount }
             };
+        }
+
+        void Start()
+        {
+            _startTime = Time.realtimeSinceStartupAsDouble;
+        }
+
+        void FixedUpdate()
+        {
+            GameTime = (Time.realtimeSinceStartupAsDouble - _startTime) + _loadedTime;
+
+            #region Analytics
+            if (GameTime >= 60 && GameTime < 300 && !oneMin)
+            {
+                oneMin = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "OneMinute" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 300 && GameTime < 600 && !fiveMin)
+            {
+                fiveMin = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "FiveMinutes" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 600 && GameTime < 900 && !tenMin)
+            {
+                tenMin = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "TenMinutes" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 900 && GameTime < 1800 && !fifteenMin)
+            {
+                fifteenMin = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "FifteenMinutes" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 1800 && GameTime < 3600 && !thirtyMin)
+            {
+                thirtyMin = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "ThirtyMinutes" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 3600 && GameTime < 7200 && !oneHour)
+            {
+                oneHour = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "OneHour" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 7200 && GameTime < 10800 && !twoHours)
+            {
+                twoHours = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "TwoHours" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 10800 && GameTime < 18000 && !threeHours)
+            {
+                threeHours = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "ThreeHours" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 18000 && GameTime < 36000 && !fiveHours)
+            {
+                fiveHours = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "FiveHours" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 36000 && GameTime < 86400 && !tenHours)
+            {
+                tenHours = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "TenHours" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            else if (GameTime >= 86400 && !oneDay)
+            {
+                oneDay = true;
+                AnalyticsManager.Instance.SendCustomEvent("SessionEvents", new Dictionary<string, string>()
+                {
+                    { "Time", "OneDay" },
+                    { "MaxWave", _maxZone.ToString() },
+                    { "WavesBeaten", _totalZonesSecured.ToString() },
+                    { "Deaths", _missionsFailed.ToString() },
+                    { "MoneySpent", _moneySpent.ToString() },
+                    { "UpgradesMade", _upgradeAmount.ToString() },
+                    { "EnemiesKilled", _enemiesKilled.ToString() },
+                    { "SpeedClicks", _speedBoostClicks.ToString() },
+                    { "DamageTaken", _totalDamageTaken.ToString() },
+                    { "MachineGunDamage", _machinegunDamage.ToString() },
+                    { "ShotgunDamage", _shotgunDamage.ToString() },
+                    { "SniperDamage", _sniperDamage.ToString() },
+                    { "MissileLauncherDamage", _missileLauncherDamage.ToString() },
+                    { "LaserDamage", _laserDamage.ToString() }
+                });
+            }
+            #endregion
         }
 
         public void LoadStats(StatsDTO statsDTO)
@@ -66,6 +317,66 @@ namespace Assets.Scripts.Systems
             SniperDamage = statsDTO.SniperDamage;
             MissileLauncherDamage = statsDTO.MissileLauncherDamage;
             LaserDamage = statsDTO.LaserDamage;
+            _loadedTime = statsDTO.GameTime;
+
+            #region Analytics bools
+            // _loadedTime is in seconds.
+            // Every milestone met (and the ones before it) are switched on.
+            switch (_loadedTime)           // still in seconds
+            {
+                case >= 86_400:            // 1 day
+                    oneDay = tenHours = fiveHours = threeHours = twoHours =
+                    oneHour = thirtyMin = fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 36_000:            // 10 h
+                    tenHours = fiveHours = threeHours = twoHours =
+                    oneHour = thirtyMin = fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 18_000:            // 5 h
+                    fiveHours = threeHours = twoHours =
+                    oneHour = thirtyMin = fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 10_800:            // 3 h
+                    threeHours = twoHours =
+                    oneHour = thirtyMin = fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 7_200:             // 2 h
+                    twoHours =
+                    oneHour = thirtyMin = fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 3_600:             // 1 h
+                    oneHour = thirtyMin = fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 1_800:             // 30 min
+                    thirtyMin = fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 900:               // 15 min
+                    fifteenMin = tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 600:               // 10 min
+                    tenMin = fiveMin = oneMin = true;
+                    break;
+
+                case >= 300:               // 5 min
+                    fiveMin = oneMin = true;
+                    break;
+
+                case >= 60:                // 1 min
+                    oneMin = true;
+                    break;
+
+                default:                   // < 1 min — nothing yet
+                    break;
+            }
+            #endregion
         }
 
         public void ResetStats()
@@ -86,6 +397,7 @@ namespace Assets.Scripts.Systems
             _sniperDamage = 0;
             _missileLauncherDamage = 0;
             _laserDamage = 0;
+            _gameTime = 0;
         }
 
         private void SetField<T>(ref T field, T newValue, string statName)
@@ -95,6 +407,12 @@ namespace Assets.Scripts.Systems
 
             field = newValue;
             OnStatChanged?.Invoke(statName, newValue);
+        }
+
+        public double GameTime
+        {
+            get => _gameTime;
+            set => SetField(ref _gameTime, value, nameof(GameTime));
         }
 
         public double TotalDamage

@@ -25,7 +25,7 @@ public class EquipItemButton : MonoBehaviour
         dpsLabel.text = UIManager.AbbreviateNumber(dps) + " DPS";
 
         // ----- Level & stars ---------------------------------------------
-        int totalLvl = TotalLevel(inst);
+        int totalLvl = inst.TotalLevel();
         levelLabel.text = "Lv " + totalLvl;
 
         int starCount = totalLvl >= 500 ? 4 :
@@ -91,20 +91,5 @@ public class EquipItemButton : MonoBehaviour
         return dmgPerProj * pellets * shotsPerSec;
     }
 
-    private static int TotalLevel(TurretStatsInstance s)
-    {
-        return Mathf.FloorToInt(
-              s.DamageLevel
-            + s.FireRateLevel
-            + s.CriticalChanceLevel
-            + s.CriticalDamageMultiplierLevel
-            + s.ExplosionRadiusLevel
-            + s.SplashDamageLevel
-            + s.PierceChanceLevel
-            + s.PierceDamageFalloffLevel
-            + s.PelletCountLevel
-            + s.DamageFalloffOverDistanceLevel
-            + s.PercentBonusDamagePerSecLevel
-            + s.SlowEffectLevel);
-    }
+    
 }
