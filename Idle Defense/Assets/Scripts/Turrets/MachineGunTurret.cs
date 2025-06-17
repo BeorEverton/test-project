@@ -1,5 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Audio;
 using UnityEngine;
 
 namespace Assets.Scripts.Turrets
@@ -31,6 +32,7 @@ namespace Assets.Scripts.Turrets
 
             if (isCritical)
             {
+                AudioManager.Instance.Play("Critical");
                 finalDamage *= 1f + (_stats.CriticalDamageMultiplier / 100f);
             }
 

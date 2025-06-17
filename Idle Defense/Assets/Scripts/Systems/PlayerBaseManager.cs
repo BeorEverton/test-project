@@ -3,9 +3,11 @@ using Assets.Scripts.SO;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Systems
 {
@@ -32,6 +34,8 @@ namespace Assets.Scripts.Systems
 
         [Tooltip("Visuals for the player base upgrades. Assign 3 objects.")]
         [SerializeField] private GameObject[] upgradeVisuals;
+        public GameObject upgradePulseFX;
+        private Vector3 originalPulseScale;
 
         private readonly int[] _unlockThresholds = { 50, 100, 250 };
 
@@ -47,6 +51,7 @@ namespace Assets.Scripts.Systems
         {
             Stats = IsValidSavedStats(SavedStats) ? SavedStats : new PlayerBaseStatsInstance(_baseInfo);
             OnStatsLoaded?.Invoke(this, EventArgs.Empty);
+            originalPulseScale = upgradePulseFX.transform.localScale;
 
             InitializeGame();
         }
@@ -159,6 +164,9 @@ namespace Assets.Scripts.Systems
             if (upgradeVisuals == null || upgradeVisuals.Length == 0)
                 return;
 
+            // Weird call because it needs the base gfx
+            AnimateBaseUpgrade(upgradeVisuals[0].transform.parent.transform);
+            PlayUpgradePulse(upgradePulseFX, upgradePulseFX.transform.parent.transform.localScale);
             float totalLevel = Stats.MaxHealthLevel + Stats.RegenAmountLevel + Stats.RegenIntervalLevel;
 
             for (int i = 0; i < upgradeVisuals.Length; i++)
@@ -167,5 +175,60 @@ namespace Assets.Scripts.Systems
                     upgradeVisuals[i].SetActive(totalLevel >= _unlockThresholds[i]);
             }
         }
+
+        public void AnimateBaseUpgrade(Transform baseGfx)
+        {
+            if (baseGfx == null)
+                return;
+
+            baseGfx.DOKill(); // Cancel any active tweens
+
+            Vector3 originalScale = baseGfx.localScale;
+            float popMultiplier = 1.2f;
+
+            // Pop out and return to original scale
+            Sequence seq = DOTween.Sequence();
+            seq.Append(baseGfx.DOScale(originalScale * popMultiplier, 0.1f).SetEase(Ease.OutQuad));
+            seq.Append(baseGfx.DOScale(originalScale, 0.1f).SetEase(Ease.InOutSine));
+        }
+
+
+        public void PlayUpgradePulse(GameObject upgradePulseFX, Vector3 baseScale)
+        {
+            if (upgradePulseFX == null)
+            {
+                Debug.LogWarning("upgradePulseFX GameObject is missing.");
+                return;
+            }
+
+            SpriteRenderer sr = upgradePulseFX.GetComponent<SpriteRenderer>();
+            if (sr == null)
+            {
+                Debug.LogWarning("upgradePulseFX is missing a SpriteRenderer.");
+                return;
+            }
+
+            Vector3 defaultVisualScale = originalPulseScale;
+
+            float duration = 0.4f;
+            float scaleMultiplier = 6.0f;
+            float startAlpha = 0.8f;
+
+            Vector3 startScale = defaultVisualScale * 0.9f;
+            Vector3 targetScale = defaultVisualScale * scaleMultiplier;
+
+            upgradePulseFX.SetActive(true);
+            upgradePulseFX.transform.localScale = startScale;
+            sr.color = new Color(1f, 1f, 1f, startAlpha);
+
+            DOTween.Kill(upgradePulseFX.transform);
+            DOTween.Kill(sr);
+
+            Sequence seq = DOTween.Sequence();
+            seq.Join(upgradePulseFX.transform.DOScale(targetScale, duration).SetEase(Ease.OutCubic));
+            seq.Join(sr.DOFade(0f, duration).SetEase(Ease.Linear));
+            seq.OnComplete(() => upgradePulseFX.SetActive(false));
+        }
+
     }
 }

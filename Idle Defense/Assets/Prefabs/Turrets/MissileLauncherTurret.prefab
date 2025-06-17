@@ -475,6 +475,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 661742800451786820}
   m_SourcePrefab: {fileID: 100100000, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+--- !u!1 &2731440825349860903 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7097423100859957711, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+  m_PrefabInstance: {fileID: 5158620767546683368}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5368120663563582960 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
@@ -583,5 +588,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: cd1f4561c6cf66b4dbb6409c07686ef3, type: 3}
   - {fileID: 21300000, guid: 8ac97f876a261a447884816376d98322, type: 3}
   - {fileID: 21300000, guid: f357c816a0335024db4871033d3d0012, type: 3}
+  upgradePulseFX: {fileID: 2731440825349860903}
   _missile: {fileID: 2309025908519245819}
   _explosionSound: Rocket Impact

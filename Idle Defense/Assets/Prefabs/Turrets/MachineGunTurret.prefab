@@ -270,6 +270,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 836687350487619833, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 836687350487619833, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 836687350487619833, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 836687350487619833, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -531,6 +547,11 @@ MonoBehaviour:
     DamageFalloffOverDistanceLevel: 0
     DamageFalloffOverDistanceUpgradeAmount: 0
     DamageFalloffOverDistanceUpgradeBaseCost: 0
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
     PercentBonusDamagePerSec: 0
     PercentBonusDamagePerSecLevel: 0
     PercentBonusDamagePerSecUpgradeAmount: 0
@@ -555,6 +576,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8be584035190fff4d8cb34f186a52d55, type: 3}
   - {fileID: 21300000, guid: e65e559c887d6264e96c93184c529594, type: 3}
   - {fileID: 21300000, guid: 896b31b6fce49724899493d0452c852a, type: 3}
+  upgradePulseFX: {fileID: 6056870896508167163}
 --- !u!114 &474684429718730350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -578,5 +600,10 @@ Transform:
 --- !u!4 &4294516794264858668 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+  m_PrefabInstance: {fileID: 3923003927643922996}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6056870896508167163 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7097423100859957711, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
   m_PrefabInstance: {fileID: 3923003927643922996}
   m_PrefabAsset: {fileID: 0}

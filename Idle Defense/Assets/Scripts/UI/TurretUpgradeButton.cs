@@ -1,10 +1,12 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.UpgradeSystem;
+using DG.Tweening;
 using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 namespace Assets.Scripts.UI
 {
@@ -26,6 +28,9 @@ namespace Assets.Scripts.UI
         private Button _button;
         private int _upgradeAmount;
 
+        private Vector3 originalScale;
+        private Color originalColor;
+
         private void Awake()
         {
             // Auto-assign the first two TextMeshProUGUI components in children
@@ -43,6 +48,15 @@ namespace Assets.Scripts.UI
                 Debug.LogWarning($"[TurretUpgradeButton] Couldn't auto-assign TextMeshProUGUI on {name}");
 
             _button = GetComponentInChildren<Button>();
+        }
+
+        private void Start()
+        {
+            // Store original scale and color for animations
+            originalScale = _button.GetComponent<RectTransform>().localScale;
+            originalColor = _button.GetComponent<Image>().color;
+            // Initialize the button interactable state
+            UpdateInteractableState();
         }
 
         public void Init()
@@ -99,6 +113,7 @@ namespace Assets.Scripts.UI
             _upgradeManager.UpgradeTurretStat(_turret, _upgradeType, this, _upgradeAmount);
         }
 
+
         public void EnableTooltip()
         {
             string description = GetUpgradeDescription(_upgradeType);
@@ -152,6 +167,24 @@ namespace Assets.Scripts.UI
         private void UpdateUpgradeAmount()
         {
             _upgradeAmount = MultipleBuyOption.Instance.GetBuyAmount();
+        }
+
+        public void OnPointerEnter()
+        {
+            // Scale down
+            _button.GetComponent<RectTransform>().DOScale(originalScale * 0.96f, 0.05f).SetEase(Ease.OutQuad);
+
+            // Red overlay
+            _button.GetComponent<Image>().DOColor(Color.red, 0.05f);
+        }
+
+        public void OnPointerExit()
+        {
+            // Restore scale
+            _button.GetComponent<RectTransform>().DOScale(originalScale, 0.1f).SetEase(Ease.OutQuad);
+
+            // Restore color
+            _button.GetComponent<Image>().DOColor(originalColor, 0.1f);
         }
     }
 }

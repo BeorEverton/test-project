@@ -1,4 +1,5 @@
 using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Save;
 using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections;
@@ -14,6 +15,8 @@ namespace Assets.Scripts.UI
 
         [SerializeField] private TextMeshProUGUI _dmgBonus, _spdBonus, _wave, _enemies, _money;
         [SerializeField] private Slider _spdBonusSlider;
+        [SerializeField] private Image _decreaseDelayFill;
+        private Coroutine _delayFillRoutine;
 
         // Equip management
         [SerializeField] private GameObject equipPanel;   // drag a panel root in Canvas
@@ -30,10 +33,12 @@ namespace Assets.Scripts.UI
         private int rollbackWaveIndex;
         public float timeSpeedOnDeath;
 
-
         private int activeSlot; // for the equipment
 
         private int _enemyCount;
+
+        private float timeScaleOnPause;
+        public bool gamePaused = false;
 
         private void Awake()
         {
@@ -74,6 +79,32 @@ namespace Assets.Scripts.UI
             _spdBonus.text = "Spd + " + value.ToString("F0") + "%";
 
             //UpdateBonusColor(_spdBonus, value);
+        }
+
+        public void StartDelayFill(float delayDuration)
+        {
+            if (_delayFillRoutine != null)
+                StopCoroutine(_delayFillRoutine);
+
+            _decreaseDelayFill.fillAmount = 1f;
+            _decreaseDelayFill.gameObject.SetActive(true);
+
+            _delayFillRoutine = StartCoroutine(DelayFillRoutine(delayDuration));
+        }
+
+        private IEnumerator DelayFillRoutine(float duration)
+        {
+            float t = 0f;
+            while (t < duration)
+            {
+                t += Time.deltaTime;
+                _decreaseDelayFill.fillAmount = 1f - (t / duration);
+                yield return null;
+            }
+
+            _decreaseDelayFill.fillAmount = 0f;
+            _decreaseDelayFill.gameObject.SetActive(false);
+            _delayFillRoutine = null;
         }
 
         public void UpdateDmgBonus(float value)
@@ -150,7 +181,6 @@ namespace Assets.Scripts.UI
                 return $"{(int)time.TotalDays}d:{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}";
             }
         }
-
 
         public void OpenEquipPanel(int slot)
         {
@@ -250,5 +280,23 @@ namespace Assets.Scripts.UI
             PlayerBaseManager.Instance.InitializeGame(true);
         }
         #endregion
+
+        public void PauseGame(bool pause)
+        {
+            if (pause)
+            {
+                // Save game state or perform any necessary actions on pause
+                gamePaused = true;
+                SaveGameManager.Instance.SaveGame();
+                timeScaleOnPause = Time.timeScale; // Store current time scale
+                Time.timeScale = 0f; // Pause the game                
+            }
+            else
+            {
+                Time.timeScale = timeScaleOnPause; // Resume the game
+                gamePaused = false;
+            }
+        }
+    
     }
 }

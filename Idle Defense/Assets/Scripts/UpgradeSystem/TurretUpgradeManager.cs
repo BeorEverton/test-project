@@ -2,6 +2,7 @@ using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
 using Assets.Scripts.UpgradeSystem;
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -484,8 +485,23 @@ namespace Assets.Scripts.Systems
                 UpdateUpgradeDisplay(turret, type, button);
                 button.UpdateInteractableState();
                 OnAnyTurretUpgraded?.Invoke();
+                AnimateBuyButtonClick(button.GetComponent<RectTransform>());
             }
         }
+
+        public void AnimateBuyButtonClick(RectTransform button)
+        {
+            // Cancel any ongoing tweens on this button
+            button.DOKill();
+
+            // Scale punch: 1 - 1.15 - 1
+            button.DOScale(Vector3.one * 1.15f, 0.1f)
+                .SetEase(Ease.OutBack)
+                .OnComplete(() => {
+                    button.DOScale(Vector3.one, 0.1f).SetEase(Ease.InOutSine);
+                });
+        }
+
 
         private bool TrySpend(float cost) => GameManager.Instance.TrySpend(cost);
 

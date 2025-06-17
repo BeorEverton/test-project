@@ -2,6 +2,7 @@ using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using Assets.Scripts.UpgradeSystem;
+using DG.Tweening;
 using System.Collections.Generic;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
@@ -171,9 +172,8 @@ namespace Assets.Scripts.PlayerBase
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
                 return;
 
-            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();            
             GetCost(stats, type, amount, out float cost, out int maxAmount);
-
 
             if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(stats) >= upgrade.GetMaxValue(stats))
             {
@@ -182,15 +182,42 @@ namespace Assets.Scripts.PlayerBase
             }
 
             if (TrySpend(cost))
-            {
+            {                
                 upgrade.Upgrade(stats, amount);
                 AudioManager.Instance.Play("Upgrade");
                 UpdateUpgradeDisplay(stats, type, button);
                 PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
 
                 if (type == PlayerUpgradeType.MaxHealth)
-                    PlayerBaseManager.Instance.InvokeHealthChangedEvents();
+                {
+                    float originalMax = stats.MaxHealth;
+                    float upgradedMax = originalMax;
+                    float upgradeFactor = 1f + upgrade.GetUpgradeAmount(stats);
+
+                    for (int i = 0; i < amount; i++)
+                    {
+                        upgradedMax *= upgradeFactor;
+                    }
+
+                    float healedAmount = upgradedMax - originalMax;
+                    PlayerBaseManager.Instance.Heal(healedAmount);
+                }
+
+                AnimateBuyButtonClick(button.GetComponent<RectTransform>());
             }
+        }
+
+        public void AnimateBuyButtonClick(RectTransform button)
+        {
+            // Cancel any ongoing tweens on this button
+            button.DOKill();
+
+            // Scale punch: 1 - 1.15 - 1
+            button.DOScale(Vector3.one * 1.15f, 0.1f)
+                .SetEase(Ease.OutBack)
+                .OnComplete(() => {
+                    button.DOScale(Vector3.one, 0.1f).SetEase(Ease.InOutSine);
+                });
         }
 
         private void GetCost(PlayerBaseStatsInstance stats, PlayerUpgradeType type, int inAmount, out float cost, out int outAmount)

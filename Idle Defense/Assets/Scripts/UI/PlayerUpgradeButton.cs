@@ -1,9 +1,11 @@
 using Assets.Scripts.PlayerBase;
 using Assets.Scripts.Systems;
 using Assets.Scripts.UpgradeSystem;
+using DG.Tweening;
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
@@ -19,6 +21,10 @@ namespace Assets.Scripts.UI
         private PlayerBaseManager _playerBaseManager;
         private PlayerBaseUpgradeManager _upgradeManager;
         private Button _button;
+
+        private Vector3 originalScale;
+        private Color originalColor;
+
 
         private void Awake()
         {
@@ -57,6 +63,12 @@ namespace Assets.Scripts.UI
             GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
             MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
             _playerBaseManager.OnStatsLoaded += OnStatsLoaded;
+
+            // For the button animation
+            originalScale = _button.GetComponent<RectTransform>().localScale;
+            originalColor = _button.GetComponent<Image>().color;
+            UpdateInteractableState(); // Initial state
+            UpdateDisplayFromType();
         }
 
         private void OnBuyAmountChanged(object sender, EventArgs e)
@@ -129,5 +141,24 @@ namespace Assets.Scripts.UI
 
             _button.interactable = GameManager.Instance.Money >= cost;
         }
+
+        public void OnPointerEnter()
+        {
+            // Scale down
+            _button.GetComponent<RectTransform>().DOScale(originalScale * 0.96f, 0.05f).SetEase(Ease.OutQuad);
+
+            // Red overlay
+            _button.GetComponent<Image>().DOColor(Color.red, 0.05f);
+        }
+
+        public void OnPointerExit()
+        {
+            // Restore scale
+            _button.GetComponent<RectTransform>().DOScale(originalScale, 0.1f).SetEase(Ease.OutQuad);
+
+            // Restore color
+            _button.GetComponent<Image>().DOColor(originalColor, 0.1f);
+        }
+
     }
 }

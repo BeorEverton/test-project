@@ -3,11 +3,13 @@ using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.WaveSystem;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Turrets
@@ -27,7 +29,6 @@ namespace Assets.Scripts.Turrets
         [SerializeField] private SpriteRenderer _turretBodyRenderer;
         public Sprite[] _turretUpgradeSprites;
         private int[] _upgradeThresholds = new int[] { 50, 100, 200 };
-
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -52,6 +53,8 @@ namespace Assets.Scripts.Turrets
         // How far from the top the enemy needs to be for the turrets to shoot
         private const float _topSpawnMargin = 1f;
         private float _attackRange;
+
+        public GameObject upgradePulseFX;
 
         protected virtual void Start()
         {
@@ -283,6 +286,11 @@ namespace Assets.Scripts.Turrets
             if (_turretBodyRenderer == null || _turretUpgradeSprites == null || _turretUpgradeSprites.Length == 0)
                 return;
 
+            // Called on every upgrade
+            AnimateTurretUpgrade(transform);
+            PlayUpgradePulse(upgradePulseFX, transform.position);
+
+
             int totalLevel = GetTotalUpgradeLevel();
             int spriteIndex = 0;
 
@@ -331,6 +339,47 @@ namespace Assets.Scripts.Turrets
             effectiveDamage *= (1f + bonusDpsPercent);
 
             return effectiveDamage * fireRate;
+        }
+
+        public void AnimateTurretUpgrade(Transform turret)
+        {
+            turret.DOKill(); // Cancel any active tweens
+
+            turret.localScale = Vector3.one; // Ensure starting scale
+
+            // Pop out and return to normal
+            Sequence seq = DOTween.Sequence();
+            seq.Append(turret.DOScale(1.2f, 0.1f).SetEase(Ease.OutQuad));
+            seq.Append(turret.DOScale(1f, 0.1f).SetEase(Ease.InOutSine));
+        }
+
+        public void PlayUpgradePulse(GameObject upgradePulseFX, Vector3 position)
+        {
+            if (upgradePulseFX == null)
+            {
+                Debug.LogWarning("upgradePulseFX prefab is missing.");
+                return;
+            }
+
+            GameObject pulse = Instantiate(upgradePulseFX, position, Quaternion.identity);
+            SpriteRenderer sr = pulse.GetComponent<SpriteRenderer>();
+            if (sr == null)
+            {
+                Debug.LogWarning("upgradePulseFX is missing a SpriteRenderer.");
+                return;
+            }
+
+            float duration = 0.4f;
+            float targetScale = 2.0f;
+            float startAlpha = 0.8f;
+
+            pulse.transform.localScale = Vector3.one * 0.5f;
+            sr.color = new Color(1f, 1f, 1f, startAlpha);
+
+            Sequence seq = DOTween.Sequence();
+            seq.Join(pulse.transform.DOScale(targetScale, duration).SetEase(Ease.OutCubic));
+            seq.Join(sr.DOFade(0f, duration).SetEase(Ease.Linear));
+            seq.OnComplete(() => Destroy(pulse));
         }
 
     }

@@ -422,6 +422,11 @@ MonoBehaviour:
     DamageFalloffOverDistanceLevel: 0
     DamageFalloffOverDistanceUpgradeAmount: 0
     DamageFalloffOverDistanceUpgradeBaseCost: 0
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
     PercentBonusDamagePerSec: 0
     PercentBonusDamagePerSecLevel: 0
     PercentBonusDamagePerSecUpgradeAmount: 0
@@ -443,4 +448,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 66295485b1117664b8c4e8b8207f67e5, type: 3}
   - {fileID: 21300000, guid: fa9872154f0f91a41b77008f92566ba7, type: 3}
   - {fileID: 21300000, guid: 708b93734db32bb409653d79e1668219, type: 3}
+  upgradePulseFX: {fileID: 4861777532509102336}
   _laserLine: {fileID: 6846243893875795196}
+--- !u!1 &4861777532509102336 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7097423100859957711, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+  m_PrefabInstance: {fileID: 2380042850953257167}
+  m_PrefabAsset: {fileID: 0}

@@ -575,6 +575,11 @@ MonoBehaviour:
     DamageFalloffOverDistanceLevel: 0
     DamageFalloffOverDistanceUpgradeAmount: 0
     DamageFalloffOverDistanceUpgradeBaseCost: 0
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
     PercentBonusDamagePerSec: 0
     PercentBonusDamagePerSecLevel: 0
     PercentBonusDamagePerSecUpgradeAmount: 0
@@ -599,6 +604,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 977bde483841bae4a90cf3501c674efd, type: 3}
   - {fileID: 21300000, guid: 19b4518a5109cb146985683b5e0e06a9, type: 3}
   - {fileID: 21300000, guid: c0aa813514540ae4ab8b700baa563d94, type: 3}
+  upgradePulseFX: {fileID: 5825646100381397448}
 --- !u!114 &5837989838757907034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -617,5 +623,10 @@ MonoBehaviour:
 --- !u!4 &4562069437259260447 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+  m_PrefabInstance: {fileID: 3650104789770416135}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5825646100381397448 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7097423100859957711, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
   m_PrefabInstance: {fileID: 3650104789770416135}
   m_PrefabAsset: {fileID: 0}

@@ -23,7 +23,7 @@ namespace Assets.Scripts.Systems
         private const float initialBoost = 5f;
 
         private bool isHolding;
-        private float decreaseDelay = 1f;
+        private float decreaseDelay = 10f;
         private float decreaseTimer = 0f;
 
         public static event Action<float> OnSpdBonusChanged; // Used for the tutorial
@@ -94,6 +94,8 @@ namespace Assets.Scripts.Systems
             decreaseTimer = 0f;
             StatsManager.Instance.SpeedBoostClicks++;
             OnSpdBonusChanged?.Invoke(spdBonus);
+            UIManager.Instance.StartDelayFill(decreaseDelay);
+
         }
 
         private void OnClickReleased(InputAction.CallbackContext ctx)
