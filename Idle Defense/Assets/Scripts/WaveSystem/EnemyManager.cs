@@ -108,7 +108,9 @@ namespace Assets.Scripts.WaveSystem
             if (enemy.TimeSinceLastAttack < 1 / enemy.Info.AttackSpeed)
                 return;
 
+            enemy.AnimateAttack();
             Attack(enemy.Info.Damage);
+
             enemy.TimeSinceLastAttack = 0f;
         }
 

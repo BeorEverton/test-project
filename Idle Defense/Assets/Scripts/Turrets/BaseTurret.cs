@@ -260,7 +260,7 @@ namespace Assets.Scripts.Turrets
 
         public void SetTarget(int index)
         {
-            Debug.Log("Setting index on " + name + "" + index);
+            //Debug.Log("Setting index on " + name + "" + index);
             switch (index)
             {
                 case 0:

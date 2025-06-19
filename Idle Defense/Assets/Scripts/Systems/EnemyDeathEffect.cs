@@ -50,7 +50,7 @@ namespace Assets.Scripts.Systems
             if (_burstSprite != null)
             {
                 _burstSprite.gameObject.SetActive(true);
-                _burstSprite.color = Color.red;
+                _burstSprite.color = Color.white;
                 yield return new WaitForSeconds(_burstDuration);
                 _burstSprite.gameObject.SetActive(false);
             }

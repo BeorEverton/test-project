@@ -5,6 +5,9 @@ using DamageNumbersPro;
 using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using DG.Tweening;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace Assets.Scripts.Enemies
 {
@@ -54,6 +57,20 @@ namespace Assets.Scripts.Enemies
         private ulong _coinDropAmount;
         private float _damage;
 #endif
+                
+        // For visuals
+        private Vector3 _bodyOriginalLocalPos;
+        [SerializeField] private Transform _muzzleFlashPoint;
+        [SerializeField] private SpriteRenderer _muzzleFlashRenderer;
+        [SerializeField] private List<Sprite> _muzzleFlashSprites;
+
+
+        private void Awake()
+        {
+            if (_body != null)
+                _bodyOriginalLocalPos = _body.localPosition;
+        }
+
 
         private void Start()
         {
@@ -107,6 +124,8 @@ namespace Assets.Scripts.Enemies
             if (IsBossInstance)
                 StatsManager.Instance.BossesKilled++;
 
+            DebrisPool.Instance.Play(transform.position);
+
             OnDeath?.Invoke(this, new OnDeathEventArgs
             {
                 CoinDropAmount = _info.CoinDropAmount
@@ -134,6 +153,8 @@ namespace Assets.Scripts.Enemies
             }
 
             ApplyBodySpriteFromInfo();
+            ResetVisualPosition();
+
 
             CanAttack = false;
             IsAlive = true;
@@ -141,6 +162,7 @@ namespace Assets.Scripts.Enemies
             CurrentHealth = MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
             SetRandomMovementSpeed();
+            _muzzleFlashRenderer.enabled = false;
 
             // Apply boss visuals only after reset
             if (_applyBossVisualsAfterReset)
@@ -238,5 +260,60 @@ namespace Assets.Scripts.Enemies
             MovementSpeed = newSpeed;
             IsSlowed = true;
         }
+
+        public void AnimateAttack()
+        {
+            if (_body == null) return;
+
+            _body.DOKill(); // stop any ongoing animation
+
+            if (_info.AttackRange < 0.5f) // Melee enemy
+            {
+                Vector3 start = _bodyOriginalLocalPos;
+                Vector3 windUp = start + Vector3.up * 0.2f; // anticipate
+                Vector3 impact = start + Vector3.down * 0.4f; // attack slam
+
+                Sequence seq = DOTween.Sequence();
+                seq.Append(_body.DOLocalMove(windUp, 0.08f).SetEase(Ease.InOutSine))
+                   .Append(_body.DOLocalMove(impact, 0.06f).SetEase(Ease.InQuad))                   
+                   .Append(_body.DOLocalMove(start, 0.1f).SetEase(Ease.OutBack));
+            }
+
+            else
+            {
+                // Ranged recoil animation
+                Vector3 recoil = _bodyOriginalLocalPos + new Vector3(0, 0.1f, 0); // pushed up
+                _body.DOLocalMove(recoil, 0.1f).SetEase(Ease.OutQuad)
+                      .OnComplete(() =>
+                      {
+                          _body.DOLocalMove(_bodyOriginalLocalPos, 0.25f).SetEase(Ease.OutExpo);
+                      });
+                StartCoroutine(ShowMuzzleFlash());
+            }
+        }
+
+        private IEnumerator ShowMuzzleFlash()
+        {
+            if (_muzzleFlashSprites == null || _muzzleFlashSprites.Count == 0)
+                yield break;
+
+            Sprite flash = _muzzleFlashSprites[Random.Range(0, _muzzleFlashSprites.Count)];
+            _muzzleFlashRenderer.sprite = flash;
+            _muzzleFlashRenderer.enabled = true;
+
+            yield return new WaitForSeconds(0.03f); // Very short flash
+
+            _muzzleFlashRenderer.enabled = false;
+        }
+
+        public void ResetVisualPosition()
+        {
+            if (_body == null) return;
+
+            _body.DOKill(); // cancel any tweens immediately
+            _body.localPosition = _bodyOriginalLocalPos; // snap back to original position
+        }
+
+
     }
 }

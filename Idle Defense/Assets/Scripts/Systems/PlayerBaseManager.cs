@@ -39,6 +39,9 @@ namespace Assets.Scripts.Systems
 
         private readonly int[] _unlockThresholds = { 50, 100, 250 };
 
+        public Transform baseVisual; // The transform of the player base visual
+        Vector3 originalScale;
+
         private void Awake()
         {
             if (Instance == null)
@@ -52,6 +55,7 @@ namespace Assets.Scripts.Systems
             Stats = IsValidSavedStats(SavedStats) ? SavedStats : new PlayerBaseStatsInstance(_baseInfo);
             OnStatsLoaded?.Invoke(this, EventArgs.Empty);
             originalPulseScale = upgradePulseFX.transform.localScale;
+            originalScale = baseVisual.localScale;
 
             InitializeGame();
         }
@@ -80,6 +84,7 @@ namespace Assets.Scripts.Systems
             OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
             StatsManager.Instance.TotalDamageTaken += amount;
             AudioManager.Instance.Play("Take Damage");
+            AnimateBaseDamage();
 
             if (_currentHealth > 0f)
                 return;
@@ -192,7 +197,6 @@ namespace Assets.Scripts.Systems
             seq.Append(baseGfx.DOScale(originalScale, 0.1f).SetEase(Ease.InOutSine));
         }
 
-
         public void PlayUpgradePulse(GameObject upgradePulseFX, Vector3 baseScale)
         {
             if (upgradePulseFX == null)
@@ -230,5 +234,21 @@ namespace Assets.Scripts.Systems
             seq.OnComplete(() => upgradePulseFX.SetActive(false));
         }
 
+        public void AnimateBaseDamage()
+        {
+            if (baseVisual == null) return;
+
+            baseVisual.DOKill(); // cancel any ongoing tweens
+            
+            Vector3 punchScale = new Vector3(
+                originalScale.x * 1.1f,
+                originalScale.y * 0.8f,
+                originalScale.z
+            );
+
+            Sequence seq = DOTween.Sequence();
+            seq.Append(baseVisual.DOScale(punchScale, 0.08f).SetEase(Ease.OutCubic))
+               .Append(baseVisual.DOScale(originalScale, 0.12f).SetEase(Ease.OutBack));
+        }
     }
 }
