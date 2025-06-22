@@ -1,4 +1,4 @@
-using Assets.Scripts.Systems;
+﻿using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
 using Assets.Scripts.WaveSystem;
 using System;
@@ -26,7 +26,7 @@ namespace Assets.Scripts.UI
         public GameObject wallUpgradePanel;
 
         [Tooltip("Death Screen")]
-        [SerializeField] private GameObject deathCountdownPanel;
+        [SerializeField] private GameObject deathCountdownPanel, startGamePanel;
         [SerializeField] private TextMeshProUGUI countdownText;
         [SerializeField] private Button immediateRestartButton;
         private Coroutine deathRoutine;
@@ -39,6 +39,8 @@ namespace Assets.Scripts.UI
 
         private float timeScaleOnPause;
         public bool gamePaused = false;
+
+        private bool stopOnDeath = false; // used to pause the game on death and resume with standard speed
 
         private void Awake()
         {
@@ -124,7 +126,7 @@ namespace Assets.Scripts.UI
 
         public void UpdateMoney(ulong value)
         {
-            _money.SetText("$" + AbbreviateNumber(value));
+            _money.SetText("⚙" + AbbreviateNumber(value));
         }
 
         public static string AbbreviateNumber(double number, bool showPercent = false)
@@ -279,6 +281,29 @@ namespace Assets.Scripts.UI
             WaveManager.Instance.ForceRestartWave();
             PlayerBaseManager.Instance.InitializeGame(true);
         }
+
+        public void StopOnDeath()
+        {
+            GameSpeedManager.Instance.ResetGameSpeed(); // Reset game speed to default
+            Time.timeScale = 0f; // Pause the game
+            stopOnDeath = true; // Set flag to pause on death
+            startGamePanel.SetActive(true);
+            rollbackWaveIndex = 1; // Reset rollback wave index
+            GameManager.Instance.ChangeGameState(GameState.Management); // Change game state to GameOver
+        }
+
+        public void ClickStart()
+        {
+            startGamePanel.SetActive(false);
+            WaveManager.Instance.LoadWave(1); // Load wave 1
+            WaveManager.Instance.ForceRestartWave();
+            PlayerBaseManager.Instance.InitializeGame(true); // Reset player base stats
+            if (!stopOnDeath)
+                Time.timeScale = timeSpeedOnDeath; // Resume game at previous speed
+            else
+                Time.timeScale = 1f; // Resume game at normal speed if stopOnDeath is true
+            GameManager.Instance.ChangeGameState(GameState.InGame); // Change game state to regular
+        }
         #endregion
 
         public void PauseGame(bool pause)
@@ -288,6 +313,8 @@ namespace Assets.Scripts.UI
                 // Save game state or perform any necessary actions on pause
                 gamePaused = true;
                 SaveGameManager.Instance.SaveGame();
+                if (Time.timeScale == 0f)
+                    return; // Already paused
                 timeScaleOnPause = Time.timeScale; // Store current time scale
                 Time.timeScale = 0f; // Pause the game                
             }

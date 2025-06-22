@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
-  m_Name: ChargerEnemy
+  m_Name: Charger
   m_EditorClassIdentifier: 
   Name: Charger
-  Icon: {fileID: -2878657130348812168, guid: 83af56d1f622707428404ddf145153ff, type: 3}
+  Icon: {fileID: 0}
   EnemyClass: 4
   MaxHealth: 4
   MovementSpeed: 1.5
   MovementSpeedDifference: 0.23
   CoinDropAmount: 8
-  CoinDropMultiplierByWaveCount: 1.5
+  CoinDropMultiplierByWaveCount: 3
   HealthMultiplierByWaveCount: 1.075
   Damage: 5
   AttackRange: 0.3

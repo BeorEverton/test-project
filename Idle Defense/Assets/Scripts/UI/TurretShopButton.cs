@@ -1,4 +1,4 @@
-using Assets.Scripts.SO;
+ï»¿using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using System.Linq;
@@ -13,9 +13,9 @@ namespace Assets.Scripts.UI
         [Header("Setup")]
         [SerializeField] private TurretType turretType;
         [SerializeField] private Image icon;          // UI Image
-        [SerializeField] private TextMeshProUGUI countText;     // “x3”
-        [SerializeField] private TextMeshProUGUI costText;      // “$10k”
-        //[SerializeField] private TextMeshProUGUI lockText;      // “Wave 30”
+        [SerializeField] private TextMeshProUGUI countText;     // â€œx3â€
+        [SerializeField] private TextMeshProUGUI costText;      // â€œ$10kâ€
+        //[SerializeField] private TextMeshProUGUI lockText;      // â€œWave 30â€
         [SerializeField] private TextMeshProUGUI dpsText;
         [SerializeField] private Image lockIcon;
         [SerializeField] private Button buyButton;
@@ -81,7 +81,7 @@ namespace Assets.Scripts.UI
             // Continue with normal pricing
             ulong cost = inv.GetCost(turretType, owned);
             countText.text = $"x{owned}";
-            costText.text = $"${UIManager.AbbreviateNumber(cost)}";
+            costText.text = $"âš™{UIManager.AbbreviateNumber(cost)}";
 
             bool afford = GameManager.Instance.Money >= cost;
             buyButton.interactable = afford;

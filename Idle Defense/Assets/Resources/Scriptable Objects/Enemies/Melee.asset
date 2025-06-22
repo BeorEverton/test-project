@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
   m_Name: Melee
   m_EditorClassIdentifier: 
-  Name: Noob
+  Name: Melee
   Icon: {fileID: -7068553724952606805, guid: ff9c7f35851f09f4c91e112653092e30, type: 3}
   EnemyClass: 0
   MaxHealth: 1
   MovementSpeed: 0.5
   MovementSpeedDifference: 0.2
   CoinDropAmount: 2
-  CoinDropMultiplierByWaveCount: 1.1
+  CoinDropMultiplierByWaveCount: 2.2
   HealthMultiplierByWaveCount: 1.09
   Damage: 1
   AttackRange: 0.3

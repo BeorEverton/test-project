@@ -36,6 +36,11 @@ namespace Assets.Scripts.Systems
         PointerEventData _ped;
         List<RaycastResult> _results = new();
 
+        // In game just means not paused. Game Over is the management phase
+        public GameState CurrentGameState { get; private set; } = GameState.InGame;
+        public event Action<GameState> OnGameStateChanged;
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -171,11 +176,26 @@ namespace Assets.Scripts.Systems
             spdBonus = 0;
             UIManager.Instance.UpdateMoney(money);
             UIManager.Instance.UpdateSpdBonus(spdBonus);
+            CurrentGameState = GameState.InGame;
         }
 
         public void DebugAddMoneyInt(int moneyToAdd)
         {
             AddMoney((ulong)moneyToAdd);
         }
+
+        public void ChangeGameState(GameState newState)
+        {
+            if (CurrentGameState == newState) return; // No change needed
+            CurrentGameState = newState;
+            OnGameStateChanged?.Invoke(newState);
+
+        }
     }
+}
+
+public enum GameState
+{    
+    InGame,
+    Management
 }

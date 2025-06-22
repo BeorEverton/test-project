@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
@@ -16,6 +17,13 @@ namespace Assets.Scripts.UI
 
         private List<int> _amountOptions;
         private int _currentIndex = 0;
+
+        // Drag to increase variables
+        private Vector2 _startDragPos;
+        private bool _isDragging = false;
+        private float _dragThreshold = 100f; // pixels needed to trigger a change
+        private float _accumulatedDrag = 0f;
+
 
         private void Awake()
         {
@@ -37,6 +45,7 @@ namespace Assets.Scripts.UI
 
         private void AdvanceBuyAmount()
         {
+            if (_isDragging) return;
             _currentIndex = (_currentIndex + 1) % _amountOptions.Count;
             SetBuyAmount(_amountOptions[_currentIndex]);
             OnBuyAmountChanged?.Invoke(this, EventArgs.Empty);
@@ -51,5 +60,50 @@ namespace Assets.Scripts.UI
         {
             _amountLabel.SetText("Buy " + amount.ToString());
         }
+
+        public void OnPointerDown()
+        {
+            
+            _startDragPos = Input.mousePosition;
+            _isDragging = true;
+            _accumulatedDrag = 0f;
+        }
+
+        public void OnDrag()
+        {
+            
+            if (!_isDragging) return;
+            
+
+            float deltaX = Input.mousePosition.x - _startDragPos.x;
+            _accumulatedDrag += deltaX;
+
+            if (_accumulatedDrag > _dragThreshold)
+            {
+                ChangeBuyAmount(1);
+                _accumulatedDrag = 0f;
+            }
+            else if (_accumulatedDrag < -_dragThreshold)
+            {
+                ChangeBuyAmount(-1);
+                _accumulatedDrag = 0f;
+            }
+        }
+
+        public void OnPointerUp()
+        {
+            
+            _isDragging = false;
+            _accumulatedDrag = 0f;
+        }
+
+        private void ChangeBuyAmount(int direction)
+        {
+            _currentIndex = Mathf.Clamp(_currentIndex + direction, 0, _amountOptions.Count - 1);
+            SetBuyAmount(_amountOptions[_currentIndex]);
+            OnBuyAmountChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+
     }
 }

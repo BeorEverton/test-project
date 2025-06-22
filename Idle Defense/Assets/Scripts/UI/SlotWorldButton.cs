@@ -16,6 +16,8 @@ namespace Assets.Scripts.UI
         [Header("Slot setup")]
         [SerializeField] private int slotIndex;      // 0..4
         [SerializeField] private Transform barrelAnchor;   // prefab spawn point
+        [SerializeField] private GameObject visibilityWrapper;
+
 
         /* ----------- overlay UI --------------------------------- */
         [Header("Locked overlay")]
@@ -51,6 +53,8 @@ namespace Assets.Scripts.UI
             RefreshSlot(slotIndex, TurretSlotManager.Instance.Get(slotIndex));
             UpdateOverlay();
             UpdateColor();
+            GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
+            HandleGameStateChanged(GameManager.Instance.CurrentGameState); // Initial state
         }
 
         private void OnDestroy()
@@ -67,11 +71,11 @@ namespace Assets.Scripts.UI
         public void OnSlotClicked()
         {
             UIManager.Instance.DeactivateRightPanels();
-            TabSelectorButton[] allTabs = FindObjectsByType<TabSelectorButton>(FindObjectsSortMode.None);
+            /*TabSelectorButton[] allTabs = FindObjectsByType<TabSelectorButton>(FindObjectsSortMode.None);
             foreach (var tab in allTabs)
             {
                 tab.Deselect();
-            }
+            }*/
 
             AudioManager.Instance.Play("Click");
 
@@ -192,7 +196,6 @@ namespace Assets.Scripts.UI
                 sr.color = whiteNow ? Color.white : Color.black;
         }
 
-
         private void OnWaveStart(object sender, WaveManager.OnWaveStartedEventArgs _)
         {
             UpdateOverlay();
@@ -270,5 +273,21 @@ namespace Assets.Scripts.UI
 
             UpdateColor();
         }
+
+        private void HandleGameStateChanged(GameState state)
+        {
+
+            // Only change this if stop on death
+            if (!PlayerBaseManager.Instance.stopOnDeath)
+                return;
+            if (visibilityWrapper == null) return;
+
+            bool isManagement = state == GameState.Management;
+            bool isUnlocked = TurretSlotManager.Instance.Purchased(slotIndex);
+            bool shouldBeVisible = isManagement || isUnlocked || slotIndex == 0;
+
+            visibilityWrapper.SetActive(shouldBeVisible);
+        }
+
     }
 }

@@ -18,6 +18,14 @@ namespace Assets.Scripts.Systems
 
         private List<float> speedOptions;
         private int currentSpeedIndex = 0;
+        public static GameSpeedManager Instance { get; private set; }
+        private void Awake()
+        {
+            if (Instance == null)
+                Instance = this;
+            else
+                Destroy(gameObject);
+        }
 
         private void Start()
         {
@@ -70,6 +78,11 @@ namespace Assets.Scripts.Systems
             if (wave >= 100) UnlockSpeed(5f);
         }
 
-
+        public void ResetGameSpeed()
+        {
+            currentSpeedIndex = 0;
+            SetGameSpeed(speedOptions[currentSpeedIndex]);
+            UpdateLabel(speedOptions[currentSpeedIndex]);
+        }
     }
 }

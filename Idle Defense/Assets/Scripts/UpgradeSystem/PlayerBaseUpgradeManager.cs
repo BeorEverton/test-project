@@ -1,4 +1,4 @@
-using Assets.Scripts.Systems;
+﻿using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using Assets.Scripts.UpgradeSystem;
@@ -71,7 +71,7 @@ namespace Assets.Scripts.PlayerBase
                         return (
                             $"{UIManager.AbbreviateNumber(current)}",
                             $"+{UIManager.AbbreviateNumber(bonus)}",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{UIManager.AbbreviateNumber(amount)}X"
                         );
                     }
@@ -102,7 +102,7 @@ namespace Assets.Scripts.PlayerBase
                         return (
                                 $"{current:F2}",
                                 $"+{bonus:F2}",
-                                $"${UIManager.AbbreviateNumber(cost)}",
+                                $"⚙{UIManager.AbbreviateNumber(cost)}",
                                 $"{amount:F0}X");
                     }
                 },
@@ -135,7 +135,7 @@ namespace Assets.Scripts.PlayerBase
 
                         return ($"{current:F2}s",
                             $"-{bonus:F2}s",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount:F0}X");
                     }
                 }

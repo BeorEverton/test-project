@@ -67,8 +67,8 @@ namespace Assets.Scripts.UI
             // For the button animation
             originalScale = _button.GetComponent<RectTransform>().localScale;
             originalColor = _button.GetComponent<Image>().color;
-            UpdateInteractableState(); // Initial state
-            UpdateDisplayFromType();
+            Invoke("UpdateInteractableState", 0.5f); // Needs to delay because of PlayerBaseManager initialization
+            Invoke("UpdateDisplayFromType", 0.5f);
         }
 
         private void OnBuyAmountChanged(object sender, EventArgs e)

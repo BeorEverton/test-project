@@ -28,7 +28,7 @@ namespace Assets.Scripts.Turrets
 
         [SerializeField] private SpriteRenderer _turretBodyRenderer;
         public Sprite[] _turretUpgradeSprites;
-        private int[] _upgradeThresholds = new int[] { 50, 100, 200 };
+        private int[] _upgradeThresholds = new int[] { 50, 150, 300 };
 
         protected GameObject _targetEnemy;
         protected float _timeSinceLastShot = 0f;
@@ -88,7 +88,7 @@ namespace Assets.Scripts.Turrets
             if (_targetEnemy != null)
             {
                 float ty = _targetEnemy.transform.position.y;
-                if (ty > _attackRange || ty < _screenBottom)
+                if (ty > _attackRange)
                 {
                     _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
                     _targetEnemy = null;

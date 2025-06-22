@@ -1,4 +1,4 @@
-using Assets.Scripts.Systems.Audio;
+﻿using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
 using Assets.Scripts.UpgradeSystem;
@@ -63,7 +63,7 @@ namespace Assets.Scripts.Systems
 
                             return (UIManager.AbbreviateNumber(currentDamage),
                                 $"+{UIManager.AbbreviateNumber(bonus)}",
-                                $"${UIManager.AbbreviateNumber(cost)}",
+                                $"⚙{UIManager.AbbreviateNumber(cost)}",
                                 $"{amount}X");
                         }
                 },
@@ -93,7 +93,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{currentFireRate:F2}/s",
                             $"+{bonusFireRate:F2}/s",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -127,7 +127,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{(int)current}%",
                             $"+{(int)bonus}%",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -158,7 +158,7 @@ namespace Assets.Scripts.Systems
                     return (
                         $"{(int)current}%",
                         $"+{(int)bonus}%",
-                        $"${UIManager.AbbreviateNumber(cost)}",
+                        $"⚙{UIManager.AbbreviateNumber(cost)}",
                         $"{amount}X"
                     );
                 }
@@ -192,7 +192,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{current:F1}",
                             $"+{bonus:F1}",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -223,7 +223,7 @@ namespace Assets.Scripts.Systems
                         return (
                             UIManager.AbbreviateNumber(current),
                             $"+{UIManager.AbbreviateNumber(bonus)}",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -257,7 +257,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{current:F1}%",
                             $"+{bonus:F1}%",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -288,7 +288,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{currentFalloff:F1}%",
                             $"+{bonus:F1}%",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -319,7 +319,7 @@ namespace Assets.Scripts.Systems
                         return (
                             UIManager.AbbreviateNumber(current),
                             $"+{UIManager.AbbreviateNumber(bonus)}",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -353,7 +353,7 @@ namespace Assets.Scripts.Systems
                         return (
                                 $"{current:F1}%",
                                 $"-{bonus:F1}%",
-                                $"${UIManager.AbbreviateNumber(cost)}",
+                                $"⚙{UIManager.AbbreviateNumber(cost)}",
                                 $"{amount}X"
                             );
                     }
@@ -384,7 +384,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{current:F1}",
                             $"+{bonus:F1}",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -415,7 +415,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{current:F1}%",
                             $"+{bonus:F1}%",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
@@ -449,7 +449,7 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{current:F1}%",
                             $"+{bonus:F1}%",
-                            $"${UIManager.AbbreviateNumber(cost)}",
+                            $"⚙{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }

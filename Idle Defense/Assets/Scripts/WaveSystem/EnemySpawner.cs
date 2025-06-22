@@ -256,7 +256,7 @@ namespace Assets.Scripts.WaveSystem
 
             _suppressWaveComplete = true;
 
-            yield return new WaitForSeconds(.5f); //Wait to secure all managers are done with EnemiesAlive list
+            yield return new WaitForSecondsRealtime(.5f); //Wait to secure all managers are done with EnemiesAlive list
 
             foreach (GameObject enemy in EnemiesAlive.ToList())
             {

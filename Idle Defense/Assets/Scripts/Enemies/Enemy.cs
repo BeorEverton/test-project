@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Collections;
+using Assets.Scripts.Systems.Audio;
 
 namespace Assets.Scripts.Enemies
 {
@@ -122,7 +123,10 @@ namespace Assets.Scripts.Enemies
             StatsManager.Instance.EnemiesKilled++;
 
             if (IsBossInstance)
+            {
+                TriggerBossExplosion();
                 StatsManager.Instance.BossesKilled++;
+            }
 
             DebrisPool.Instance.Play(transform.position);
 
@@ -131,6 +135,29 @@ namespace Assets.Scripts.Enemies
                 CoinDropAmount = _info.CoinDropAmount
             });
         }
+
+        private void TriggerBossExplosion()
+        {
+            
+            float radius = _isMiniBoss ? 3f : 5f;
+            float explosionDamage = MaxHealth * 0.2f;
+
+            List<Enemy> nearbyEnemies = GridManager.Instance.GetEnemiesInRange(transform.position, Mathf.CeilToInt(radius));
+
+            foreach (Enemy e in nearbyEnemies)
+            {
+                if (e == this || !e.IsAlive) continue;
+
+                float distance = Vector3.Distance(e.transform.position, transform.position);
+                if (distance <= radius)
+                {
+                    e.TakeDamage(explosionDamage);                    
+                }
+            }
+
+            AudioManager.Instance.Play("Rocket Impact");
+        }
+
 
         private void ResetEnemy()
         {
@@ -155,7 +182,6 @@ namespace Assets.Scripts.Enemies
             ApplyBodySpriteFromInfo();
             ResetVisualPosition();
 
-
             CanAttack = false;
             IsAlive = true;
             MaxHealth = Info.MaxHealth;
@@ -173,7 +199,6 @@ namespace Assets.Scripts.Enemies
 
             KnockbackTime = 0f;
             KnockbackVelocity = Vector2.zero;
-
         }
 
         public void SetAsBoss(bool isMini)
@@ -236,7 +261,6 @@ namespace Assets.Scripts.Enemies
 
             sr.sprite = _info.Icon;
         }
-
 
         private bool TryGetBodySpriteRenderer(out SpriteRenderer sr) => _body != null ? sr = _body.GetComponent<SpriteRenderer>() : sr = null;
 
@@ -313,7 +337,5 @@ namespace Assets.Scripts.Enemies
             _body.DOKill(); // cancel any tweens immediately
             _body.localPosition = _bodyOriginalLocalPos; // snap back to original position
         }
-
-
     }
 }

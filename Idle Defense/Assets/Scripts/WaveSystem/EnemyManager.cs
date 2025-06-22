@@ -14,6 +14,7 @@ namespace Assets.Scripts.WaveSystem
             EnemySpawner.Instance.OnWaveStarted += OnWaveStarted;
             EnemySpawner.Instance.OnWaveCompleted += OnWaveStopped;
             PlayerBaseManager.Instance.OnWaveFailed += OnWaveStopped;
+            
         }
 
         private void OnDisable()
@@ -45,6 +46,8 @@ namespace Assets.Scripts.WaveSystem
         {
             foreach (GameObject enemy in EnemySpawner.Instance.EnemiesAlive)
             {
+                if (!_gameRunning)
+                    break;
                 Enemy enemyComponent = enemy.GetComponent<Enemy>();
                 if (!enemyComponent.IsAlive)
                     continue;

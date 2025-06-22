@@ -42,6 +42,9 @@ namespace Assets.Scripts.Systems
         public Transform baseVisual; // The transform of the player base visual
         Vector3 originalScale;
 
+        [Tooltip("Used to change the gameplay style to pause everything on death and start from wave 1")]
+        public bool stopOnDeath = true; 
+
         private void Awake()
         {
             if (Instance == null)
@@ -95,7 +98,13 @@ namespace Assets.Scripts.Systems
             AudioManager.Instance.Stop("Laser V2");
             AudioManager.Instance.StopAllMusics();
             AudioManager.Instance.PlayMusic("Main");
-            UIManager.Instance.ShowDeathCountdown();
+
+            if (stopOnDeath)
+            {
+                UIManager.Instance.StopOnDeath();
+            }
+            else
+                UIManager.Instance.ShowDeathCountdown();
 
             // Analytics event for player death
             AnalyticsManager.Instance.SendCustomEvent("PlayerDeath", new Dictionary<string, string>()

@@ -22,6 +22,10 @@ namespace Assets.Scripts.Systems.Audio
         public float SFXVolume;
         private bool mute = true; // Used only to not play all sounds when the game is loaded. It is set to false on the game load.
 
+        private float hoverPitch = 1.0f;
+        private float hoverPitchDirection = 1f; // 1 for up, -1 for down
+        private float minPitch = 1.0f;
+        private float maxPitch = 2.0f;
         #region Simple Singleton
         public static AudioManager Instance { get; private set; }
         void Awake()
@@ -166,5 +170,35 @@ namespace Assets.Scripts.Systems.Audio
         {
             Play("Click");
         }
+
+        public void PlayHoverSound(string soundName = "Click")
+        {
+            if (mute)
+                return;
+
+            Sound s = Array.Find(sounds, sound => sound.name == soundName);
+            if (s == null)
+            {
+                Debug.LogWarning("Hover sound not found: " + soundName);
+                return;
+            }
+
+            s.source.pitch = hoverPitch;
+            s.source.PlayOneShot(s.clip);
+
+            // Adjust pitch for next call
+            hoverPitch += 0.1f * hoverPitchDirection;
+            if (hoverPitch >= maxPitch)
+            {
+                hoverPitch = maxPitch;
+                hoverPitchDirection = -1f;
+            }
+            else if (hoverPitch <= minPitch)
+            {
+                hoverPitch = minPitch;
+                hoverPitchDirection = 1f;
+            }
+        }
+
     }
 }
