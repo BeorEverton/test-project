@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
@@ -16,11 +17,20 @@ public class SettingsManager : MonoBehaviour
     [Header("UI Settings")]
     public bool AllowPopups = true;
     public bool AllowTooltips = true;
+    public bool Mute = false;
 
     [Header("External Links")]
     [SerializeField] private List<ExternalLink> externalLinks;
 
     private Dictionary<string, string> _linkLookup;
+
+    // Used only for loading
+    [SerializeField] private Slider musicSlider;
+    [SerializeField] private Slider sfxSlider;
+    [SerializeField] private Toggle muteToggle;
+    [SerializeField] private Toggle popupToggle;
+    [SerializeField] private Toggle tooltipToggle;
+
 
     private void Awake()
     {
@@ -53,6 +63,7 @@ public class SettingsManager : MonoBehaviour
 
     public void MuteAll(bool option)
     {
+        Mute = option;
         if (option)
         {
             _masterMixer.SetFloat("MusicVolume", -80f);
@@ -68,12 +79,14 @@ public class SettingsManager : MonoBehaviour
     public void SetMusicVolume(float sliderValue)
     {
         _masterMixer.SetFloat("MusicVolume", sliderValue);
+        MusicVolume = sliderValue;
         savedMusicVolume = sliderValue;
     }
 
     public void SetSFXVolume(float sliderValue)
     {
         _masterMixer.SetFloat("SFXVolume", sliderValue);
+        SFXVolume = sliderValue;
         savedSFXVolume = sliderValue;
     }
 
@@ -88,6 +101,17 @@ public class SettingsManager : MonoBehaviour
             Debug.LogWarning($"No link registered with key: {key}");
         }
     }
+
+    public void UpdateSettingsUI()
+    {
+        musicSlider.SetValueWithoutNotify(MusicVolume);
+        sfxSlider.SetValueWithoutNotify(SFXVolume);
+
+        muteToggle.SetIsOnWithoutNotify(Mute);
+        popupToggle.SetIsOnWithoutNotify(AllowPopups);
+        tooltipToggle.SetIsOnWithoutNotify(AllowTooltips);
+    }
+
 
     [System.Serializable]
     public class ExternalLink

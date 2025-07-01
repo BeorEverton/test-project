@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
@@ -157,9 +158,22 @@ namespace Assets.Scripts.WaveSystem
         private IEnumerator SpawnEnemies()
         {
             foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies).ToList())
-            {
-                enemyObj.SetActive(true);
+            {                
                 Enemy enemy = enemyObj.GetComponent<Enemy>();
+                // Center the boss on screen instead of random spawn
+                if (enemy.IsBossInstance)
+                {
+                    Vector3 center = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 1f, 0));
+                    center.z = 0; // ensure Z is correct for 2D
+                    enemyObj.transform.position = center + new Vector3(0, 1f); // push slightly above the top edge
+                }
+                else
+                {
+                    enemyObj.transform.position = GetRandomSpawnPosition();
+                }
+
+                enemyObj.SetActive(true);
+
                 EnemyLibraryManager.Instance.MarkAsDiscovered(enemy.Info.Name);
 
                 if (enemy.IsBossInstance) //Set boss music when boss is spawned

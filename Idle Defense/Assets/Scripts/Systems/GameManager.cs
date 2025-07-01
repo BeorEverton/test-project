@@ -91,7 +91,8 @@ namespace Assets.Scripts.Systems
             _results.Clear();
             uiRaycaster.Raycast(_ped, _results);
 
-            if (_results.Count > 0) //If any UI was hit, the count is greater than 0
+            //If any UI was hit, the count is greater than 0 or if not in play mode return
+            if (_results.Count > 0 || CurrentGameState == GameState.Management) 
                 return;
 
             spdBonus += initialBoost;

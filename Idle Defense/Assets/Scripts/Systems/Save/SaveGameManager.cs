@@ -1,5 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
 using System.Linq;
@@ -109,6 +110,16 @@ namespace Assets.Scripts.Systems.Save
             StatsManager.Instance.LoadStats(gameData.StatsDTO);
 
             TurretInventoryManager.Instance.ImportFromDTO(gameData.TurretInventory);
+
+            SettingsManager.Instance.SetMusicVolume(gameData.GameDataDTO.MusicVolume);
+            SettingsManager.Instance.SetSFXVolume(gameData.GameDataDTO.SFXVolume);
+            SettingsManager.Instance.Mute = gameData.GameDataDTO.MuteAll;
+            SettingsManager.Instance.AllowPopups = gameData.GameDataDTO.PopupsEnabled;
+            SettingsManager.Instance.AllowTooltips = gameData.GameDataDTO.TooltipsEnabled;
+
+            AudioManager.Instance.audioMixer.SetFloat("Music", gameData.GameDataDTO.MusicVolume);
+            AudioManager.Instance.audioMixer.SetFloat("SFX", gameData.GameDataDTO.SFXVolume);
+
 
             if (gameData.DiscoveredEnemyNames != null)
             {

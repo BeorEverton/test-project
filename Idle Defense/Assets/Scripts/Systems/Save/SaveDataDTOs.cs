@@ -1,6 +1,7 @@
 #nullable enable
 using Assets.Scripts.PlayerBase;
 using Assets.Scripts.SO;
+using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,14 @@ namespace Assets.Scripts.Systems.Save
             {
                 WaveNumber = waveNumber,
                 Money = money,
-                TutorialStep = GameTutorialManager.Instance != null ? GameTutorialManager.Instance._currentStep : 0
+                TutorialStep = GameTutorialManager.Instance != null ? GameTutorialManager.Instance._currentStep : 0,
+
+                MusicVolume = SettingsManager.Instance.MusicVolume,
+                SFXVolume = SettingsManager.Instance.SFXVolume,
+                PopupsEnabled = SettingsManager.Instance.AllowPopups,
+                TooltipsEnabled = SettingsManager.Instance.AllowTooltips,
+                MuteAll = SettingsManager.Instance.Mute, 
+
             };
         }
 
@@ -242,6 +250,12 @@ public class GameDataDTO
     public int WaveNumber;
     public ulong Money;
     public int TutorialStep;
+
+    public float MusicVolume;
+    public float SFXVolume;
+    public bool MuteAll;
+    public bool PopupsEnabled;
+    public bool TooltipsEnabled;
 }
 
 [Serializable]

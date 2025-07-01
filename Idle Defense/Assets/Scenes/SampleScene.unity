@@ -19218,11 +19218,17 @@ MonoBehaviour:
   _masterMixer: {fileID: 24100000, guid: 9b34d8dda837a7b4b955c6f7ca55ca48, type: 2}
   AllowPopups: 1
   AllowTooltips: 1
+  Mute: 0
   externalLinks:
   - key: discord
     url: https://discord.gg/XCVVkGhcxr
   - key: feedback
     url: https://docs.google.com/forms/d/e/1FAIpQLScBsnUyed1XmiujwTIgws7IBOv_Gdkwf9R86bDqNpc-7UfZRg/viewform?usp=header
+  musicSlider: {fileID: 7544613333897724889}
+  sfxSlider: {fileID: 9145712974938607739}
+  muteToggle: {fileID: 589076485311345500}
+  popupToggle: {fileID: 4132533905704991996}
+  tooltipToggle: {fileID: 4316146628174461768}
 --- !u!1 &759365073
 GameObject:
   m_ObjectHideFlags: 0
@@ -70736,7 +70742,7 @@ GameObject:
   - component: {fileID: 2800137372619483268}
   - component: {fileID: 6086199933221933023}
   - component: {fileID: 8109904548833505308}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: UI Bg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -72998,7 +73004,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -211.71948, y: 64.06213}
+  m_AnchoredPosition: {x: -211.71948, y: -72.8}
   m_SizeDelta: {x: -554.0324, y: -321.0098}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6785330028050857141
@@ -74063,6 +74069,18 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 752268301}
+        m_TargetAssemblyTypeName: SettingsManager, Assembly-CSharp
+        m_MethodName: UpdateSettingsUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 

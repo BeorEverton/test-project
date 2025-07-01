@@ -47,6 +47,11 @@ namespace Assets.Scripts.UI
 
         private void Start()
         {
+            Initialize();//Invoke(nameof(Initialize), 0.1f); // Delay to ensure systems are initialized
+        }
+
+        private void Initialize()
+        {
             TurretSlotManager.Instance.OnEquippedChanged += RefreshSlot;
             WaveManager.Instance.OnWaveStarted += OnWaveStart;
 
