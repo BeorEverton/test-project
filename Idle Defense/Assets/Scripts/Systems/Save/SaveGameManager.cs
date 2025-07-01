@@ -21,7 +21,7 @@ namespace Assets.Scripts.Systems.Save
 
         [Header("First-Time Disclaimer")]
         [SerializeField] private GameObject disclaimerPanel;
-        private bool _disclaimerShown = false;
+        public bool _disclaimerShown = true;
 
 
         private void Awake()

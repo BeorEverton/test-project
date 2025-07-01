@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
 using Assets.Scripts.WaveSystem;
+using CrazyGames;
 using System;
 using System.Collections;
 using TMPro;
@@ -19,9 +20,9 @@ namespace Assets.Scripts.UI
         private Coroutine _delayFillRoutine;
 
         // Equip management
-        [SerializeField] private GameObject equipPanel;   // drag a panel root in Canvas
-        [SerializeField] private GameObject unequipPanel; // another panel if you like
-        [SerializeField] private TextMeshProUGUI toast;   // optional 1-line overlay
+        [SerializeField] private GameObject equipPanel;   
+        [SerializeField] private GameObject unequipPanel; 
+        [SerializeField] private TextMeshProUGUI toast;   
         [SerializeField] private GameObject[] rightPanels;
         public GameObject wallUpgradePanel;
 
@@ -32,6 +33,7 @@ namespace Assets.Scripts.UI
         private Coroutine deathRoutine;
         private int rollbackWaveIndex;
         public float timeSpeedOnDeath;
+        public int amountOfWavesToRollBack;
 
         private int activeSlot; // for the equipment
 
@@ -41,6 +43,11 @@ namespace Assets.Scripts.UI
         public bool gamePaused = false;
 
         private bool stopOnDeath = false; // used to pause the game on death and resume with standard speed
+
+        [Tooltip("Boss Reward")]
+        [SerializeField] private GameObject bossRewardPanel;
+        [SerializeField] private TextMeshProUGUI bossRewardText;
+        [SerializeField] private TextMeshProUGUI multiplyBossRewardText;
 
         private void Awake()
         {
@@ -56,6 +63,8 @@ namespace Assets.Scripts.UI
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
             GameManager.Instance.OnMoneyChanged += UpdateMoney;
+            if (CrazySDK.IsInitialized)
+                CrazySDK.Game.GameplayStart();
         }
 
         private void OnEnemyDeath(object sender, EventArgs _)
@@ -229,11 +238,20 @@ namespace Assets.Scripts.UI
 
             // Calculate and store rollback wave
             int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
-            rollbackWaveIndex = Mathf.Max(1, currentWave - 2); // clamp to wave 1
+            rollbackWaveIndex = Mathf.Max(1, currentWave - amountOfWavesToRollBack); // clamp to wave 1
 
             countdownText.text = $"Restarting from Zone {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
-            immediateRestartButton.onClick.RemoveAllListeners();
-            immediateRestartButton.onClick.AddListener(SkipDeathCountdown);
+
+            if (CrazySDK.IsInitialized && CrazySDK.Ad.AdblockStatus == AdblockStatus.Missing)
+            {
+                immediateRestartButton.gameObject.SetActive(true);
+                immediateRestartButton.onClick.RemoveAllListeners();
+                immediateRestartButton.onClick.AddListener(SkipDeathCountdown);
+            }
+            else
+            {
+                immediateRestartButton.gameObject.SetActive(false);
+            }
 
             deathRoutine = StartCoroutine(DeathCountdownRoutine(seconds));
         }
@@ -274,6 +292,17 @@ namespace Assets.Scripts.UI
             if (deathRoutine != null)
                 StopCoroutine(deathRoutine);
 
+            if (CrazySDK.IsInitialized)
+            {
+                CrazySDK.Ad.RequestAd(CrazyAdType.Rewarded,
+                        () => { }, // onStart
+                        (error) => { }, // onError
+                        () => // Success
+                        {
+                            
+                        });
+            }
+
             deathCountdownPanel.SetActive(false);
 
             // Set to current wave minus one, since LoadWave will increment to it
@@ -310,6 +339,8 @@ namespace Assets.Scripts.UI
         {
             if (pause)
             {
+                if (CrazySDK.IsInitialized)
+                    CrazySDK.Game.GameplayStop();
                 // Save game state or perform any necessary actions on pause
                 gamePaused = true;
                 SaveGameManager.Instance.SaveGame();
@@ -322,8 +353,32 @@ namespace Assets.Scripts.UI
             {
                 Time.timeScale = timeScaleOnPause; // Resume the game
                 gamePaused = false;
+                if (CrazySDK.IsInitialized)
+                    CrazySDK.Game.GameplayStart();
             }
         }
-    
+
+
+        public void BossRewardPanel(double coins)
+        { 
+            if (CrazySDK.IsInitialized && CrazySDK.Ad.AdblockStatus == AdblockStatus.Missing)
+            {
+                bossRewardPanel.SetActive(true);
+                bossRewardText.text = $"You earned {coins} ⚙!";
+                multiplyBossRewardText.text = "Get more " + coins * 2 + " ⚙!";
+                CrazySDK.Ad.RequestAd(CrazyAdType.Rewarded,
+                    () => { }, // onStart
+                    (error) => { }, // onError
+                    () => // Success
+                    {
+                        GameManager.Instance.AddMoney((ulong)(coins * 2));
+                        bossRewardPanel.SetActive(false);
+                    });
+            }
+            else
+            {
+                bossRewardPanel.SetActive(false);
+            }
+        }
     }
 }
