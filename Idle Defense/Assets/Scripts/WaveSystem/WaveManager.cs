@@ -133,7 +133,7 @@ namespace Assets.Scripts.WaveSystem
         private EnemyInfoSO CloneEnemyInfoWithScale(Enemy enemy, int waveIndex)
         {
             EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
-            clonedInfo.MaxHealth *= (float)Math.Pow(clonedInfo.HealthMultiplierByWaveCount, waveIndex) + waveIndex;
+            clonedInfo.MaxHealth *= clonedInfo.HealthMultiplierByWaveCount * waveIndex;
             clonedInfo.Damage += clonedInfo.Damage * (waveIndex / 100 * 2);
             clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * clonedInfo.CoinDropMultiplierByWaveCount +
                                                 waveIndex * clonedInfo.CoinDropMultiplierByWaveCount);
