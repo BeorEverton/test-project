@@ -204,7 +204,7 @@ namespace Assets.Scripts.Systems
             if (skipButton && !skipButton.activeInHierarchy)
                 skipButton.SetActive(index != 0);
 
-            if (_currentStep == 1)
+            if (_currentStep == 2)
             {
                 // Just completed step 0 resume game
                 Time.timeScale = 1f;

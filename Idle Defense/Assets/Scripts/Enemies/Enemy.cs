@@ -9,6 +9,7 @@ using DG.Tweening;
 using System.Collections.Generic;
 using System.Collections;
 using Assets.Scripts.Systems.Audio;
+using Assets.Scripts.UI;
 
 namespace Assets.Scripts.Enemies
 {
@@ -126,6 +127,7 @@ namespace Assets.Scripts.Enemies
             {
                 TriggerBossExplosion();
                 StatsManager.Instance.BossesKilled++;
+                UIManager.Instance.BossRewardPanel(_info.CoinDropAmount);
             }
 
             DebrisPool.Instance.Play(transform.position);

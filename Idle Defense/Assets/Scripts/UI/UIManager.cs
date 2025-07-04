@@ -20,9 +20,9 @@ namespace Assets.Scripts.UI
         private Coroutine _delayFillRoutine;
 
         // Equip management
-        [SerializeField] private GameObject equipPanel;   
-        [SerializeField] private GameObject unequipPanel; 
-        [SerializeField] private TextMeshProUGUI toast;   
+        [SerializeField] private GameObject equipPanel;
+        [SerializeField] private GameObject unequipPanel;
+        [SerializeField] private TextMeshProUGUI toast;
         [SerializeField] private GameObject[] rightPanels;
         public GameObject wallUpgradePanel;
 
@@ -30,6 +30,7 @@ namespace Assets.Scripts.UI
         [SerializeField] private GameObject deathCountdownPanel, startGamePanel;
         [SerializeField] private TextMeshProUGUI countdownText;
         [SerializeField] private Button immediateRestartButton;
+        [SerializeField] private Button restartSameWaveButton;
         private Coroutine deathRoutine;
         private int rollbackWaveIndex;
         public float timeSpeedOnDeath;
@@ -48,6 +49,8 @@ namespace Assets.Scripts.UI
         [SerializeField] private GameObject bossRewardPanel;
         [SerializeField] private TextMeshProUGUI bossRewardText;
         [SerializeField] private TextMeshProUGUI multiplyBossRewardText;
+        [SerializeField] private Slider bossRewardTimer;
+        private double bossReward;
 
         private void Awake()
         {
@@ -231,8 +234,7 @@ namespace Assets.Scripts.UI
             if (deathRoutine != null)
                 StopCoroutine(deathRoutine);
 
-            timeSpeedOnDeath = Time.timeScale; // Store current time scale
-            Time.timeScale = 0f; // Pause the game
+            PauseGame(true); // Pause the game
 
             deathCountdownPanel.SetActive(true);
 
@@ -242,15 +244,17 @@ namespace Assets.Scripts.UI
 
             countdownText.text = $"Restarting from Zone {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
 
-            if (CrazySDK.IsInitialized && CrazySDK.Ad.AdblockStatus == AdblockStatus.Missing)
+            immediateRestartButton.onClick.RemoveAllListeners();
+            immediateRestartButton.onClick.AddListener(SkipDeathCountdown);
+
+            if (CrazySDK.IsInitialized && CrazySDK.Ad.AdblockStatus == AdblockStatus.Missing
+                || CrazySDK.Ad.AdblockStatus == AdblockStatus.Detecting)
             {
-                immediateRestartButton.gameObject.SetActive(true);
-                immediateRestartButton.onClick.RemoveAllListeners();
-                immediateRestartButton.onClick.AddListener(SkipDeathCountdown);
+                restartSameWaveButton.gameObject.SetActive(true);
             }
             else
             {
-                immediateRestartButton.gameObject.SetActive(false);
+                restartSameWaveButton.gameObject.SetActive(false);
             }
 
             deathRoutine = StartCoroutine(DeathCountdownRoutine(seconds));
@@ -285,6 +289,7 @@ namespace Assets.Scripts.UI
             WaveManager.Instance.LoadWave(rollbackWaveIndex);
             WaveManager.Instance.ForceRestartWave();
             PlayerBaseManager.Instance.InitializeGame(true);
+            PauseGame(false); // Resume game at previous speed
         }
 
         public void RestartCurrentWave()
@@ -292,20 +297,25 @@ namespace Assets.Scripts.UI
             if (deathRoutine != null)
                 StopCoroutine(deathRoutine);
 
+            PauseGame(true);
             if (CrazySDK.IsInitialized)
             {
                 CrazySDK.Ad.RequestAd(CrazyAdType.Rewarded,
-                        () => { }, // onStart
-                        (error) => { }, // onError
+                        () => {
+                            
+                        }, // onStart
+                        (error) => {                            
+                        }, // onError
                         () => // Success
                         {
-                            
+                            PauseGame(false);
                         });
             }
-
+            rollbackWaveIndex = WaveManager.Instance.GetCurrentWaveIndex();
             deathCountdownPanel.SetActive(false);
 
             // Set to current wave minus one, since LoadWave will increment to it
+            PauseGame(false);
             WaveManager.Instance.LoadWave(rollbackWaveIndex);
             WaveManager.Instance.ForceRestartWave();
             PlayerBaseManager.Instance.InitializeGame(true);
@@ -314,7 +324,7 @@ namespace Assets.Scripts.UI
         public void StopOnDeath()
         {
             GameSpeedManager.Instance.ResetGameSpeed(); // Reset game speed to default
-            Time.timeScale = 0f; // Pause the game
+            PauseGame(true); // Pause the game
             stopOnDeath = true; // Set flag to pause on death
             startGamePanel.SetActive(true);
             rollbackWaveIndex = 1; // Reset rollback wave index
@@ -328,7 +338,7 @@ namespace Assets.Scripts.UI
             WaveManager.Instance.ForceRestartWave();
             PlayerBaseManager.Instance.InitializeGame(true); // Reset player base stats
             if (!stopOnDeath)
-                Time.timeScale = timeSpeedOnDeath; // Resume game at previous speed
+                PauseGame(false); // Resume game at previous speed
             else
                 Time.timeScale = 1f; // Resume game at normal speed if stopOnDeath is true
             GameManager.Instance.ChangeGameState(GameState.InGame); // Change game state to regular
@@ -358,27 +368,51 @@ namespace Assets.Scripts.UI
             }
         }
 
-
         public void BossRewardPanel(double coins)
-        { 
+        {
             if (CrazySDK.IsInitialized && CrazySDK.Ad.AdblockStatus == AdblockStatus.Missing)
             {
-                bossRewardPanel.SetActive(true);
-                bossRewardText.text = $"You earned {coins} ⚙!";
-                multiplyBossRewardText.text = "Get more " + coins * 2 + " ⚙!";
-                CrazySDK.Ad.RequestAd(CrazyAdType.Rewarded,
-                    () => { }, // onStart
-                    (error) => { }, // onError
-                    () => // Success
-                    {
-                        GameManager.Instance.AddMoney((ulong)(coins * 2));
-                        bossRewardPanel.SetActive(false);
-                    });
+                StartCoroutine(DisableBossPanel(coins));
             }
             else
             {
                 bossRewardPanel.SetActive(false);
             }
         }
+
+        // Disable Boss panel, show slider going down for the time remaining
+        IEnumerator DisableBossPanel(double coins)
+        {
+            yield return new WaitForSeconds(.5f);
+            bossReward = coins * 2;
+            float duration = 10f;
+            bossRewardPanel.SetActive(true);
+            bossRewardText.text = $"You earned {AbbreviateNumber(coins)} ⚙!";
+            multiplyBossRewardText.text = "Get more " + AbbreviateNumber(bossReward) + " ⚙!";     
+            bossRewardTimer.maxValue = duration;
+            bossRewardTimer.value = duration;
+            for (float t = duration; t >= 0; t -= Time.unscaledDeltaTime)
+            {
+                bossRewardTimer.value = t;
+                yield return null;
+            }
+            bossRewardPanel.SetActive(false);            
+        }
+
+        public void GetBossReward()
+        {
+            if (CrazySDK.IsInitialized && CrazySDK.Ad.AdblockStatus == AdblockStatus.Missing)
+            {
+                CrazySDK.Ad.RequestAd(CrazyAdType.Rewarded,
+                () => { }, // onStart
+                (error) => { }, // onError
+                () => // Success
+                {
+                    GameManager.Instance.AddMoney((ulong)(bossReward));
+                    bossRewardPanel.SetActive(false);
+                });
+            }
+        }
+
     }
 }
