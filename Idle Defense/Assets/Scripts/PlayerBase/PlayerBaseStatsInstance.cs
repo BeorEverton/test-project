@@ -22,6 +22,8 @@ namespace Assets.Scripts.PlayerBase
         public float RegenIntervalUpgradeAmount;
         public float RegenIntervalUpgradeBaseCost;
         public int RegenIntervalLevel;
+        public float MinRegenInterval;
+
 
         public PlayerBaseStatsInstance(PlayerBaseSO source)
         {
@@ -40,6 +42,7 @@ namespace Assets.Scripts.PlayerBase
             RegenIntervalUpgradeAmount = source.RegenIntervalUpgradeAmount;
             RegenIntervalUpgradeBaseCost = source.RegenIntervalUpgradeBaseCost;
             RegenIntervalLevel = source.RegenIntervalLevel;
+            MinRegenInterval = source.MinRegenInterval;
         }
 
         public PlayerBaseStatsInstance() { } //Used to load from DTO

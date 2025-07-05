@@ -37,5 +37,22 @@ namespace Assets.Scripts.WaveSystem
             obj.SetActive(false);
             _pool[key].Enqueue(obj);
         }
+
+        public void Prewarm(string key, GameObject prefab, int count)
+        {
+            if (!_pool.ContainsKey(key))
+            {
+                _pool[key] = new Queue<GameObject>();
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                GameObject obj = Object.Instantiate(prefab);
+                obj.SetActive(false);
+                obj.transform.SetParent(_poolParent);
+                _pool[key].Enqueue(obj);
+            }
+        }
+
     }
 }

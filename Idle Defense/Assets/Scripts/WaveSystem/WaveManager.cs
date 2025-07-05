@@ -123,10 +123,17 @@ namespace Assets.Scripts.WaveSystem
 
         private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry, int waveNumber)
         {
+            int scaled = baseEntry.NumberOfEnemies + waveNumber;
+#if UNITY_WEBGL
+            int maxPerType = 200; 
+#elif UNITY_STANDALONE
+            int maxPerType = 500; 
+#endif
+
             return new EnemyWaveEntry
             {
                 EnemyPrefab = baseEntry.EnemyPrefab,
-                NumberOfEnemies = baseEntry.NumberOfEnemies + waveNumber
+                NumberOfEnemies = Mathf.Min(scaled, maxPerType)
             };
         }
 

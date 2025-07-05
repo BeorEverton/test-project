@@ -29,5 +29,6 @@ namespace Assets.Scripts.SO
         public float RegenIntervalUpgradeAmount;
         public float RegenIntervalUpgradeBaseCost;
         public int RegenIntervalLevel;
+        public float MinRegenInterval = 0.5f;
     }
 }

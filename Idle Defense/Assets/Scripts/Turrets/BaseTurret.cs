@@ -110,7 +110,7 @@ namespace Assets.Scripts.Turrets
             if (_timeSinceLastShot < _atkSpeed)
                 return;
 
-            if (_targetInAim && _targetInRange && IsTargetVisibleOnScreen())
+            if (_targetInAim && _targetInRange)
                 Shoot();
             else
                 TargetEnemy();

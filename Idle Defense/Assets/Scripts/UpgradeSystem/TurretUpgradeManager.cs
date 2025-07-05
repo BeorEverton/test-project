@@ -104,14 +104,18 @@ namespace Assets.Scripts.Systems
                     UpgradeTurret = (t, a) =>
                     {
                         t.CriticalChanceLevel += a;
-                        t.CriticalChance += (t.CriticalChanceUpgradeAmount * a);
+                        t.CriticalChance = Mathf.Min(
+                        t.CriticalChance + (t.CriticalChanceUpgradeAmount * a),
+                        t.MaxCriticalChance
+                        );
+
                     },
                     GetLevel = t => t.CriticalChanceLevel,
                     GetBaseStat = t => t.BaseCritChance,
                     GetBaseCost = t => t.CriticalChanceUpgradeBaseCost,
                     GetUpgradeAmount = t => t.CriticalChanceUpgradeAmount,
                     GetCostMultiplier = t => t.CriticalChanceCostExponentialMultiplier,
-                    GetMaxValue = t => 50f,
+                    GetMaxValue = t => t.MaxCriticalChance,
                     GetMinValue = t => 0f,
                     GetCost = (t, a) => GetExponentialCost(t, TurretUpgradeType.CriticalChance, a),
                     //GetAmount = t => GetMaxAmount(t.CriticalChanceUpgradeBaseCost, t.CriticalChanceCostExponentialMultiplier, t.CriticalChanceLevel),
@@ -169,14 +173,15 @@ namespace Assets.Scripts.Systems
                     UpgradeTurret = (t, a) =>
                     {
                         t.ExplosionRadiusLevel += a;
-                        t.ExplosionRadius += (t.ExplosionRadiusUpgradeAmount * a);
+                        t.ExplosionRadius = Mathf.Min(t.ExplosionRadius + (t.ExplosionRadiusUpgradeAmount * a), t.MaxExplosionRadius);
                     },
+
                     GetLevel = t => t.ExplosionRadiusLevel,
                     GetBaseStat = t => t.ExplosionRadius,
                     GetBaseCost = t => t.ExplosionRadiusUpgradeBaseCost,
                     GetUpgradeAmount = t => t.ExplosionRadiusUpgradeAmount,
                     GetCostMultiplier = t => 0f,
-                    GetMaxValue = t => float.MaxValue,
+                    GetMaxValue = t => t.MaxExplosionRadius,
                     GetMinValue = t => 0f,
                     GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.ExplosionRadius, a),
                     //GetAmount = t => GetMaxAmount(t.ExplosionRadiusUpgradeBaseCost, 1.1f, t.ExplosionRadiusLevel),
@@ -234,14 +239,14 @@ namespace Assets.Scripts.Systems
                     UpgradeTurret = (t, a) =>
                     {
                         t.PierceChanceLevel += a;
-                        t.PierceChance += (t.PierceChanceUpgradeAmount * a);
+                        t.PierceChance = Mathf.Min(t.PierceChance + (t.PierceChanceUpgradeAmount * a), t.MaxPierceChance);
                     },
                     GetLevel = t => t.PierceChanceLevel,
                     GetBaseStat = t => t.PierceChance,
                     GetBaseCost = t => t.PierceChanceUpgradeBaseCost,
                     GetUpgradeAmount = t => t.PierceChanceUpgradeAmount,
                     GetCostMultiplier = t => 0f,
-                    GetMaxValue = t => 100f,
+                    GetMaxValue = t => t.MaxPierceChance,
                     GetMinValue = t => 0f,
                     GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.PierceChance, a),
                     //GetAmount = t => GetMaxAmount(t.PierceChanceUpgradeBaseCost, exponentialPower, t.PierceChanceLevel),
@@ -330,7 +335,7 @@ namespace Assets.Scripts.Systems
                     UpgradeTurret = (t, a) =>
                     {
                         t.DamageFalloffOverDistanceLevel += a;
-                        t.DamageFalloffOverDistance -= (t.DamageFalloffOverDistanceUpgradeAmount * a);
+                        t.DamageFalloffOverDistance = Mathf.Max(t.DamageFalloffOverDistance - (t.DamageFalloffOverDistanceUpgradeAmount * a), t.MinDamageFalloff);
                     },
                     GetLevel = t => t.DamageFalloffOverDistanceLevel,
                     GetBaseStat = t => t.DamageFalloffOverDistance,
@@ -426,14 +431,14 @@ namespace Assets.Scripts.Systems
                     UpgradeTurret = (t, a) =>
                     {
                         t.SlowEffectLevel += a;
-                        t.SlowEffect += (t.SlowEffectUpgradeAmount * a);
+                        t.SlowEffect = Mathf.Min(t.SlowEffect + (t.SlowEffectUpgradeAmount * a), t.MaxSlowEffect);
                     },
                     GetLevel = t => t.SlowEffectLevel,
                     GetBaseStat = t => t.SlowEffect,
                     GetBaseCost = t => t.SlowEffectUpgradeBaseCost,
                     GetUpgradeAmount = t => t.SlowEffectUpgradeAmount,
                     GetCostMultiplier = t => 0f,
-                    GetMaxValue = t => 100f,
+                    GetMaxValue = t => t.MaxSlowEffect,
                     GetMinValue = t => 0f,
                     GetCost = (t, a) => GetHybridCost(t, TurretUpgradeType.SlowEffect, a),
                     //GetAmount = t => GetMaxAmount(t.SlowEffectUpgradeBaseCost, exponentialPower, t.SlowEffectLevel),
@@ -463,23 +468,51 @@ namespace Assets.Scripts.Systems
             if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
                 return;
 
-            float cost = upgrade.GetCost(turret, amount);
+            float current = upgrade.GetCurrentValue(turret);
+            float max = upgrade.GetMaxValue?.Invoke(turret) ?? float.MaxValue;
+            float step = upgrade.GetUpgradeAmount(turret);
 
-            if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(turret) >= upgrade.GetMaxValue(turret))
+            int allowedAmount = amount;
+
+            // Handle upgrades that increase (e.g. damage, crit) or decrease (e.g. falloff)
+            bool increasing = step >= 0;
+            while (allowedAmount > 0)
+            {
+                float projected = increasing
+                    ? current + (step * allowedAmount)
+                    : current - (Mathf.Abs(step) * allowedAmount);
+
+                if ((increasing && projected > max) || (!increasing && projected < max))
+                    allowedAmount--;
+                else
+                    break;
+            }
+
+            if (allowedAmount <= 0)
             {
                 UpdateUpgradeDisplay(turret, type, button);
                 return;
             }
 
-            if (upgrade.GetMinValue != null && upgrade.GetCurrentValue(turret) < upgrade.GetMinValue(turret))
+            // Recalculate actual stat change with clamped amount
+            float projectedValue = upgrade.GetCurrentValue(turret);
+            float change = step * allowedAmount;
+            float targetValue = increasing
+                ? Mathf.Min(projectedValue + change, max)
+                : Mathf.Max(projectedValue - Mathf.Abs(change), max);
+
+            // If the projected value is the same as current, skip it
+            if (Mathf.Approximately(projectedValue, targetValue))
             {
                 UpdateUpgradeDisplay(turret, type, button);
                 return;
             }
+
+            float cost = upgrade.GetCost(turret, allowedAmount);
 
             if (TrySpend(cost))
             {
-                upgrade.UpgradeTurret(turret, amount);
+                upgrade.UpgradeTurret(turret, allowedAmount);
                 AudioManager.Instance.Play("Upgrade");
                 button._baseTurret.UpdateTurretAppearance();
                 UpdateUpgradeDisplay(turret, type, button);
@@ -487,6 +520,30 @@ namespace Assets.Scripts.Systems
                 OnAnyTurretUpgraded?.Invoke();
                 AnimateBuyButtonClick(button.GetComponent<RectTransform>());
             }
+        }
+
+        private int ClampUpgradeAmountToMax(TurretStatsInstance stats, TurretUpgrade upgrade, int requestedAmount)
+        {
+            float current = upgrade.GetCurrentValue(stats);
+            float max = upgrade.GetMaxValue?.Invoke(stats) ?? float.MaxValue;
+            float step = upgrade.GetUpgradeAmount(stats);
+
+            int allowed = requestedAmount;
+            bool increasing = step >= 0;
+
+            while (allowed > 0)
+            {
+                float projected = increasing
+                    ? current + (step * allowed)
+                    : current - (Mathf.Abs(step) * allowed);
+
+                if ((increasing && projected > max) || (!increasing && projected < max))
+                    allowed--;
+                else
+                    break;
+            }
+
+            return Mathf.Max(allowed, 0);
         }
 
         public void AnimateBuyButtonClick(RectTransform button)
@@ -501,7 +558,6 @@ namespace Assets.Scripts.Systems
                     button.DOScale(Vector3.one, 0.1f).SetEase(Ease.InOutSine);
                 });
         }
-
 
         private bool TrySpend(float cost) => GameManager.Instance.TrySpend(cost);
 
@@ -548,6 +604,31 @@ namespace Assets.Scripts.Systems
 
             return upgradeAmount * amount;
         }
+
+        private int ClampPreviewAmount(TurretStatsInstance stats, TurretUpgrade upgrade, int requestedAmount)
+        {
+            float current = upgrade.GetCurrentValue(stats);
+            float max = upgrade.GetMaxValue?.Invoke(stats) ?? float.MaxValue;
+            float step = upgrade.GetUpgradeAmount(stats);
+
+            int allowed = requestedAmount;
+            bool increasing = step >= 0;
+
+            while (allowed > 0)
+            {
+                float projected = increasing
+                    ? current + (step * allowed)
+                    : current - (Mathf.Abs(step) * allowed);
+
+                if ((increasing && projected > max) || (!increasing && projected < max))
+                    allowed--;
+                else
+                    break;
+            }
+
+            return Mathf.Max(allowed, 0);
+        }
+
 
         private void GetHybridCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount, out float cost, out int outAmount)
         {
@@ -665,9 +746,10 @@ namespace Assets.Scripts.Systems
             if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) || turret == null)
                 return;
 
-            int amount = MultipleBuyOption.Instance.GetBuyAmount();
-
-            (string value, string bonus, string cost, string count) = upgrade.GetDisplayStrings(turret, amount);
+            int requested = MultipleBuyOption.Instance.GetBuyAmount();
+            int rawAmount = MultipleBuyOption.Instance.GetBuyAmount();
+            int clampedAmount = ClampPreviewAmount(turret, upgrade, rawAmount);
+            (string value, string bonus, string cost, string count) = upgrade.GetDisplayStrings(turret, clampedAmount);
             button.UpdateStats(value, bonus, cost, count);
         }
     }

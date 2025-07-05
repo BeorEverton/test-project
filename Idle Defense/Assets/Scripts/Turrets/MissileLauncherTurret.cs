@@ -42,6 +42,11 @@ namespace Assets.Scripts.Turrets
             // Final predicted position (clamped if enemy would stop)
             Vector3 predictedPosition = enemyStartPos + Vector3.down * actualTravelDistance;
 
+            if (enemyStartPos.y < 0)
+            {
+                predictedPosition = enemyStartPos;
+            }
+
             LaunchMissile(predictedPosition, travelTime);
 
             _timeSinceLastShot = 0f;

@@ -73,13 +73,26 @@ namespace Assets.Scripts.WaveSystem
         private void Start()
         {
             PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
+            StartCoroutine(AutoCleanup());
         }
 
         public async void StartWave(Wave wave)
         {
-            _currentWaveConfig = wave.WaveConfig;
+            _currentWaveConfig = wave.WaveConfig;     
             _waveSpawned = false;
             OnWaveStarted?.Invoke(this, EventArgs.Empty);
+
+            HashSet<string> _prewarmed = new HashSet<string>();
+            foreach (var entry in _currentWaveConfig.EnemyWaveEntries)
+            {
+                string entryName = entry.EnemyPrefab.GetComponent<Enemy>().Info.Name;
+
+                if (!_prewarmed.Contains(entryName))
+                {
+                    _objectPool.Prewarm(entryName, entry.EnemyPrefab, entry.NumberOfEnemies);
+                    _prewarmed.Add(entryName);
+                }
+            }
 
             await CreateWave();
             await Shuffle.ShuffleList(_enemiesCurrentWave);
@@ -109,7 +122,7 @@ namespace Assets.Scripts.WaveSystem
                 if (wave.IsMiniBossWave())
                 {
                     clonedInfo.Damage *= 3f;
-                    clonedInfo.MaxHealth *= 30f;
+                    clonedInfo.MaxHealth *= 50f;
                     clonedInfo.CoinDropAmount *= 20;
                     clonedInfo.MovementSpeed *= 0.9f;
                     clonedInfo.AttackRange += .2f; // Because the gfx size changes
@@ -118,7 +131,7 @@ namespace Assets.Scripts.WaveSystem
                 if (wave.IsBossWave())
                 {
                     clonedInfo.Damage *= 5f;
-                    clonedInfo.MaxHealth *= 100f;
+                    clonedInfo.MaxHealth *= 400f;
                     clonedInfo.CoinDropAmount *= 40;
                     clonedInfo.MovementSpeed *= 0.85f;
                     clonedInfo.AttackRange += .6f;
@@ -286,6 +299,22 @@ namespace Assets.Scripts.WaveSystem
 
             _suppressWaveComplete = false;
         }
+
+        private IEnumerator AutoCleanup()
+        {
+            while (true)
+            {
+                for (int i = EnemiesAlive.Count - 1; i >= 0; i--)
+                {
+                    if (EnemiesAlive[i] == null || !EnemiesAlive[i].activeInHierarchy)
+                    {
+                        EnemiesAlive.RemoveAt(i);
+                    }
+                }
+                yield return new WaitForSeconds(5f);
+            }
+        }
+
 
     }
 }

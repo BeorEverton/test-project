@@ -37,11 +37,13 @@ MonoBehaviour:
   CriticalDamageMultiplierUpgradeAmount: 0
   CriticalDamageMultiplierUpgradeBaseCost: 0
   CriticalDamageCostExponentialMultiplier: 0
+  MaxCriticalChance: 50
   ExplosionRadius: 1
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0.2
   ExplosionRadiusUpgradeBaseCost: 10000
   ExplosionRadiusCostExponentialMultiplier: 1.075
+  MaxExplosionRadius: 5
   SplashDamage: 1500
   SplashDamageLevel: 0
   SplashDamageUpgradeAmount: 150
@@ -52,6 +54,7 @@ MonoBehaviour:
   PierceChanceUpgradeAmount: 0
   PierceChanceUpgradeBaseCost: 0
   PierceChanceCostExponentialMultiplier: 0
+  MaxPierceChance: 100
   PierceDamageFalloff: 0
   PierceDamageFalloffLevel: 0
   PierceDamageFalloffUpgradeAmount: 0
@@ -72,6 +75,7 @@ MonoBehaviour:
   DamageFalloffOverDistanceUpgradeAmount: 0
   DamageFalloffOverDistanceUpgradeBaseCost: 0
   DamageFalloffOverDistanceCostExponentialMultiplier: 0
+  MinDamageFalloff: 0
   PercentBonusDamagePerSec: 0
   PercentBonusDamagePerSecLevel: 0
   PercentBonusDamagePerSecUpgradeAmount: 0
@@ -82,3 +86,4 @@ MonoBehaviour:
   SlowEffectUpgradeAmount: 0
   SlowEffectUpgradeBaseCost: 0
   SlowEffectCostExponentialMultiplier: 0
+  MaxSlowEffect: 100
