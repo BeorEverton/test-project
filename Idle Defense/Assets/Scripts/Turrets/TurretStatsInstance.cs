@@ -92,6 +92,12 @@ namespace Assets.Scripts.Turrets
         public float RotationSpeed;
         public float AngleThreshold;
 
+        public float MaxCriticalChance;
+        public float MaxSlowEffect;
+        public float MaxPierceChance;
+        public float MinDamageFalloff;
+        public float MaxExplosionRadius;
+
         public TurretStatsInstance(TurretInfoSO source)
         {
             IsUnlocked = source.IsUnlocked;
@@ -169,6 +175,12 @@ namespace Assets.Scripts.Turrets
             SlowEffectLevel = source.SlowEffectLevel;
             SlowEffectUpgradeAmount = source.SlowEffectUpgradeAmount;
             SlowEffectUpgradeBaseCost = source.SlowEffectUpgradeBaseCost;
+
+            MaxCriticalChance = source.MaxCriticalChance;
+            MaxSlowEffect = source.MaxSlowEffect;
+            MaxPierceChance = source.MaxPierceChance;
+            MinDamageFalloff = source.MinDamageFalloff;
+            MaxExplosionRadius = source.MaxExplosionRadius;
 
             RotationSpeed = source.RotationSpeed;
             AngleThreshold = source.AngleThreshold;

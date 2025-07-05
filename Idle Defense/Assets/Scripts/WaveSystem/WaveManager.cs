@@ -123,17 +123,26 @@ namespace Assets.Scripts.WaveSystem
 
         private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry, int waveNumber)
         {
+            int scaled = baseEntry.NumberOfEnemies + waveNumber;
+#if UNITY_WEBGL
+            int maxPerType = 200; 
+#elif UNITY_STANDALONE
+            int maxPerType = 500; 
+#endif
+
             return new EnemyWaveEntry
             {
                 EnemyPrefab = baseEntry.EnemyPrefab,
-                NumberOfEnemies = baseEntry.NumberOfEnemies + waveNumber
+                NumberOfEnemies = Mathf.Min(scaled, maxPerType)
             };
         }
 
         private EnemyInfoSO CloneEnemyInfoWithScale(Enemy enemy, int waveIndex)
         {
             EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
-            clonedInfo.MaxHealth *= clonedInfo.HealthMultiplierByWaveCount * waveIndex; 
+
+            clonedInfo.MaxHealth *= clonedInfo.HealthMultiplierByWaveCount * waveIndex;
+
             clonedInfo.Damage += clonedInfo.Damage * (waveIndex / 100 * 2);
             clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * clonedInfo.CoinDropMultiplierByWaveCount +
                                                 waveIndex * clonedInfo.CoinDropMultiplierByWaveCount);

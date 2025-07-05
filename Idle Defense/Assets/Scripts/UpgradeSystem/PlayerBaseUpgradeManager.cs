@@ -112,16 +112,17 @@ namespace Assets.Scripts.PlayerBase
                     Upgrade = (p, a) =>
                     {
                         p.RegenIntervalLevel += a;
-                        _playerUpgrades.TryGetValue(PlayerUpgradeType.RegenInterval, out PlayerBaseUpgrade upgrade);
-
-                        p.RegenInterval = Mathf.Max(p.RegenInterval - p.RegenIntervalUpgradeAmount * a,
-                            upgrade == null ? 0.5f : upgrade.GetMinValue(p));
+                        p.RegenInterval = Mathf.Max(
+                            p.RegenInterval - p.RegenIntervalUpgradeAmount * a,
+                            p.MinRegenInterval
+                        );
                     },
+
                     GetLevel = p => p.RegenIntervalLevel,
                     GetUpgradeAmount = p => p.RegenIntervalUpgradeAmount,
                     GetBaseCost = p => p.RegenIntervalUpgradeBaseCost,
                     GetMaxValue = p => float.MaxValue,
-                    GetMinValue = p => 0.5f,
+                    GetMinValue = p => p.MinRegenInterval,
                     GetCost = (p, a) => GetCost(p, PlayerUpgradeType.RegenInterval, a),
                     //GetAmount = p => GetMaxAmount(p.RegenIntervalUpgradeBaseCost, 1.1f, p.RegenIntervalLevel),
                     GetDisplayStrings = (p, a) =>
@@ -172,18 +173,47 @@ namespace Assets.Scripts.PlayerBase
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
                 return;
 
-            int amount = MultipleBuyOption.Instance.GetBuyAmount();            
-            GetCost(stats, type, amount, out float cost, out int maxAmount);
+            int requestedAmount = MultipleBuyOption.Instance.GetBuyAmount();
+            float currentValue = upgrade.GetCurrentValue(stats);
+            float maxValue = upgrade.GetMaxValue?.Invoke(stats) ?? float.MaxValue;
+            float upgradeAmount = upgrade.GetUpgradeAmount(stats);
 
-            if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(stats) >= upgrade.GetMaxValue(stats))
+            // Clamp the upgrade amount to not exceed max value and don't spend money
+            int allowedAmount = requestedAmount;
+            bool increasing = upgradeAmount >= 0;
+            while (allowedAmount > 0)
             {
-                UpdateUpgradeDisplay(stats, type, button);
-                return;
+                float projected = increasing
+                    ? currentValue + (upgradeAmount * allowedAmount)
+                    : currentValue - (Mathf.Abs(upgradeAmount) * allowedAmount);
+
+                if ((increasing && projected > maxValue) || (!increasing && projected < upgrade.GetMinValue(stats)))
+                    allowedAmount--;
+                else
+                    break;
             }
+
+
+            if (allowedAmount <= 0)
+            {
+                float projected = increasing
+                ? currentValue + (upgradeAmount * allowedAmount)
+                : currentValue - (Mathf.Abs(upgradeAmount) * allowedAmount);
+
+                // If value doesn't change, cancel upgrade
+                if (Mathf.Approximately(projected, currentValue))
+                {
+                    UpdateUpgradeDisplay(stats, type, button);
+                    return;
+                }
+            }
+
+            GetCost(stats, type, allowedAmount, out float cost, out int maxAmount);
+
 
             if (TrySpend(cost))
             {                
-                upgrade.Upgrade(stats, amount);
+                upgrade.Upgrade(stats, allowedAmount);
                 AudioManager.Instance.Play("Upgrade");
                 UpdateUpgradeDisplay(stats, type, button);
                 PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
@@ -194,7 +224,7 @@ namespace Assets.Scripts.PlayerBase
                     float upgradedMax = originalMax;
                     float upgradeFactor = 1f + upgrade.GetUpgradeAmount(stats);
 
-                    for (int i = 0; i < amount; i++)
+                    for (int i = 0; i < allowedAmount; i++)
                     {
                         upgradedMax *= upgradeFactor;
                     }

@@ -52,6 +52,7 @@ namespace Assets.Scripts.SO
         public float CriticalDamageMultiplierUpgradeAmount;
         public float CriticalDamageMultiplierUpgradeBaseCost;
         public float CriticalDamageCostExponentialMultiplier;
+        public float MaxCriticalChance = 50f;
 
         [Header("Missile Launcher Turret")]
         [Tooltip("Radius of the explosion")]
@@ -60,6 +61,7 @@ namespace Assets.Scripts.SO
         public float ExplosionRadiusUpgradeAmount;
         public float ExplosionRadiusUpgradeBaseCost;
         public float ExplosionRadiusCostExponentialMultiplier;
+        public float MaxExplosionRadius = 5f;
 
         [Tooltip("Amount of damage dealt to adjacent enemies in the explosion radius")]
         public float SplashDamage;
@@ -75,6 +77,7 @@ namespace Assets.Scripts.SO
         public float PierceChanceUpgradeAmount;
         public float PierceChanceUpgradeBaseCost;
         public float PierceChanceCostExponentialMultiplier;
+        public float MaxPierceChance = 100f;
 
         [Tooltip("Amount of damage falloff for each enemy the bullet pierces through")]
         public float PierceDamageFalloff;
@@ -104,6 +107,7 @@ namespace Assets.Scripts.SO
         public float DamageFalloffOverDistanceUpgradeAmount;
         public float DamageFalloffOverDistanceUpgradeBaseCost;
         public float DamageFalloffOverDistanceCostExponentialMultiplier;
+        public float MinDamageFalloff = 0f;
 
         [Header("Laser Turret")]
         [Tooltip("Amount of damage added to initial Damage per second active on the same target")]
@@ -119,6 +123,7 @@ namespace Assets.Scripts.SO
         public float SlowEffectUpgradeAmount;
         public float SlowEffectUpgradeBaseCost;
         public float SlowEffectCostExponentialMultiplier;
+        public float MaxSlowEffect = 100f;
 
         private void OnValidate()
         {
