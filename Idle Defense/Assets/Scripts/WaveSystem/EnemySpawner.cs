@@ -121,18 +121,56 @@ namespace Assets.Scripts.WaveSystem
 
                 if (wave.IsMiniBossWave())
                 {
-                    clonedInfo.Damage *= 3f;
-                    clonedInfo.MaxHealth *= 50f;
-                    clonedInfo.CoinDropAmount *= 20;
+                    int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
+                    float healthMultiplier;
+                    float damageMultiplier;
+                    float coinMultiplier;
+                    if (currentWave == 5) // First mini boss is weaker
+                    {
+                        healthMultiplier = 30f;
+                        damageMultiplier = 15f;
+                        coinMultiplier = 20f;
+                    }
+                    else
+                    {
+                        healthMultiplier = Mathf.Min(currentWave * 50f, 500f);
+                        damageMultiplier = Mathf.Min(currentWave * 10f, 100f);
+                        coinMultiplier = Mathf.Min(currentWave * 10f, 100f);
+                    }
+                    
+
+                    clonedInfo.MaxHealth *= healthMultiplier;
+                    clonedInfo.Damage *= damageMultiplier;
+                    clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
+
                     clonedInfo.MovementSpeed *= 0.9f;
                     clonedInfo.AttackRange += .2f; // Because the gfx size changes
                 }
 
                 if (wave.IsBossWave())
                 {
-                    clonedInfo.Damage *= 5f;
-                    clonedInfo.MaxHealth *= 400f;
-                    clonedInfo.CoinDropAmount *= 40;
+                    int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
+                    float healthMultiplier;
+                    float damageMultiplier;
+                    float coinMultiplier;
+                    if (currentWave == 10) // First boss is weaker
+                    {
+                        healthMultiplier = 60f;
+                        damageMultiplier = 25f;
+                        coinMultiplier = 45f;
+                    }
+                    else
+                    {
+                        healthMultiplier = Mathf.Min(currentWave * 100f, 1000f);
+                        damageMultiplier = Mathf.Min(currentWave * 20f, 500f);
+                        coinMultiplier = Mathf.Min(currentWave * 20f, 500f);
+                    }
+                    
+
+                    clonedInfo.MaxHealth *= healthMultiplier;
+                    clonedInfo.Damage *= damageMultiplier;
+                    clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
+
                     clonedInfo.MovementSpeed *= 0.85f;
                     clonedInfo.AttackRange += .6f;
                 }
@@ -279,26 +317,33 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator RestartWave()
         {
-            _canSpawnEnemies = false;            
-
+            _canSpawnEnemies = false;
             _suppressWaveComplete = true;
 
-            yield return new WaitForSecondsRealtime(.5f); //Wait to secure all managers are done with EnemiesAlive list
+            yield return new WaitForSecondsRealtime(.5f); // Let other systems settle
 
-            foreach (GameObject enemy in EnemiesAlive.ToList())
+            int cleaned = 0;
+            for (int i = EnemiesAlive.Count - 1; i >= 0; i--)
             {
-                if (enemy == null)
-                    continue;
+                if (i >= EnemiesAlive.Count) continue;
 
-                EnemiesAlive.Remove(enemy.gameObject);
+                GameObject enemy = EnemiesAlive[i];
+                if (enemy == null) continue;
+
+                EnemiesAlive.RemoveAt(i);
                 Enemy enemy_ = enemy.GetComponent<Enemy>();
-                enemy_.IsBossInstance = false; // Reset boss state if it was a boss
+                enemy_.IsBossInstance = false;
                 enemy_.OnDeath -= Enemy_OnEnemyDeath;
-                _objectPool.ReturnObject(enemy.GetComponent<Enemy>().Info.Name, enemy);
+                _objectPool.ReturnObject(enemy_.Info.Name, enemy);
+
+                cleaned++;
+                if (cleaned % 20 == 0)
+                    yield return null; // Spread cleanup across multiple frames
             }
 
             _suppressWaveComplete = false;
         }
+
 
         private IEnumerator AutoCleanup()
         {

@@ -4,6 +4,7 @@ using Assets.Scripts.UpgradeSystem;
 using DG.Tweening;
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -69,6 +70,8 @@ namespace Assets.Scripts.UI
             originalColor = _button.GetComponent<Image>().color;
             Invoke("UpdateInteractableState", 0.5f); // Needs to delay because of PlayerBaseManager initialization
             Invoke("UpdateDisplayFromType", 0.5f);
+
+            Invoke("UpdateInteractableState", 0.5f);
         }
 
         private void OnBuyAmountChanged(object sender, EventArgs e)

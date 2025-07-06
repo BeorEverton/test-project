@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ed6a1d62cfa34a408e1069998dc6696, type: 3}
   m_Name: CrazyGamesSettings
   m_EditorClassIdentifier: 
-  whitelistedDomains: []
+  whitelistedDomains:
+  - https://v6p9d9t4.ssl.hwcdn.net
+  - https://itch.zone
+  - https://itch.io
+  - https://embed-itchio.fra1.cdn.digitaloceanspaces.com
   pauseGameDuringAd: 1
   accountAvailableResponse: 0
   linkAccountResponse: 0
@@ -23,4 +27,4 @@ MonoBehaviour:
   disableAdPreviews: 0
   alwaysThrowAdError: 0
   deviceType: 0
-  applicationType: 0
+  applicationType: 3
