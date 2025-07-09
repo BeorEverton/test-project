@@ -12,6 +12,9 @@ namespace Assets.Scripts.UI
 {
     public class TurretUpgradeButton : MonoBehaviour
     {
+        [Header("Currency Type")]
+        [SerializeField] private Currency currencyType = Currency.Scraps;
+
         [Header("Set in Runtime")]
         private TurretUpgradeManager _upgradeManager;
 
@@ -59,29 +62,41 @@ namespace Assets.Scripts.UI
             UpdateInteractableState();
         }
 
-        public void Init()
+        /// <summary>
+        /// Called by TurretUpgradePanelUI each time the panel opens.
+        /// </summary>
+        public void Init(BaseTurret baseTurret, Currency curType)
         {
-            _upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
-            _turret = _baseTurret.GetStats();
+            _baseTurret = baseTurret;
+            currencyType = curType;                 //  decide which pool we’ll spend
+            _upgradeManager ??= FindFirstObjectByType<TurretUpgradeManager>();
 
-            // Update the initial data
+            // Pick the correct stat container (runtime or permanent)
+            _turret = currencyType == Currency.BlackSteel
+                ? _baseTurret.PermanentStats        // management-phase upgrades
+                : _baseTurret.GetStats();           // in-game upgrades
+
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             UpdateDisplay();
+            UpdateUpgradeAmount();
+            UpdateInteractableState();
         }
 
         private void OnEnable()
         {
-            GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+            GameManager.Instance.OnCurrencyChanged += HandleCurrencyChanged;
             MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
 
             UpdateUpgradeAmount();
             UpdateInteractableState();
+            UpdateDisplayFromType();
         }
 
         private void OnDisable()
         {
             if (GameManager.Instance != null)
-                GameManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
+                GameManager.Instance.OnCurrencyChanged -= HandleCurrencyChanged;
+
 
             MultipleBuyOption.Instance.OnBuyAmountChanged -= OnBuyAmountChanged;
         }
@@ -93,15 +108,20 @@ namespace Assets.Scripts.UI
             UpdateInteractableState();
         }
 
-        private void HandleMoneyChanged(ulong _)
+        private void HandleCurrencyChanged(Currency type, ulong _)
         {
+            if (type != currencyType) return;
+
             UpdateDisplayFromType();
             UpdateUpgradeAmount();
             UpdateInteractableState();
         }
 
+
         public void UpdateDisplayFromType()
         {
+            if (_upgradeManager == null)
+                return;
             _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
         }
 
@@ -110,7 +130,12 @@ namespace Assets.Scripts.UI
             if (_upgradeManager == null)
                 _upgradeManager = FindFirstObjectByType<TurretUpgradeManager>();
 
-            _upgradeManager.UpgradeTurretStat(_turret, _upgradeType, this, _upgradeAmount);
+            if (currencyType == Currency.BlackSteel)
+                _upgradeManager.UpgradePermanentTurretStat(
+                    _baseTurret, _upgradeType, this, _upgradeAmount);   // edits PermanentStats
+            else
+                _upgradeManager.UpgradeTurretStat(
+                    _turret, _upgradeType, this, _upgradeAmount, currencyType);
         }
 
 
@@ -129,7 +154,7 @@ namespace Assets.Scripts.UI
         {
             _statValue.SetText(value);
             _statUpgradeAmount.SetText(upgradeAmount);
-            _statUpgradeCost.SetText(upgradeCost);
+            _statUpgradeCost.SetText(UIManager.GetCurrencyIcon(currencyType) + " " + upgradeCost);
             _statUpgradeCount.SetText(count);
         }
 
@@ -156,12 +181,12 @@ namespace Assets.Scripts.UI
                 return;
 
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
-            float cost = _upgradeManager.GetTurretUpgradeCost(_turret, _upgradeType, amount);
+            float cost = _upgradeManager.GetTurretUpgradeCost(
+                _turret, _upgradeType, amount, currencyType);
 
-            if (GameManager.Instance.Money >= cost && _upgradeAmount > 0)
-                _button.interactable = true;
-            else
-                _button.interactable = false;
+            bool hasEnough = GameManager.Instance.GetCurrency(currencyType) >= (ulong)cost;
+            _button.interactable = hasEnough && _upgradeAmount > 0;
+
         }
 
         private void UpdateUpgradeAmount()
@@ -172,19 +197,19 @@ namespace Assets.Scripts.UI
         public void OnPointerEnter()
         {
             // Scale down
-            _button.GetComponent<RectTransform>().DOScale(originalScale * 0.96f, 0.05f).SetEase(Ease.OutQuad);
+            _button.GetComponent<RectTransform>().DOScale(originalScale * 0.96f, 0.05f).SetEase(Ease.OutQuad).SetUpdate(true);
 
             // Red overlay
-            _button.GetComponent<Image>().DOColor(Color.red, 0.05f);
+            _button.GetComponent<Image>().DOColor(Color.red, 0.05f).SetUpdate(true);
         }
 
         public void OnPointerExit()
         {
             // Restore scale
-            _button.GetComponent<RectTransform>().DOScale(originalScale, 0.1f).SetEase(Ease.OutQuad);
+            _button.GetComponent<RectTransform>().DOScale(originalScale, 0.1f).SetEase(Ease.OutQuad).SetUpdate(true);
 
             // Restore color
-            _button.GetComponent<Image>().DOColor(originalColor, 0.1f);
+            _button.GetComponent<Image>().DOColor(originalColor, 0.1f).SetUpdate(true);
         }
     }
 }

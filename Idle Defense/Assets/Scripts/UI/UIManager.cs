@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
+using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections;
@@ -13,19 +14,29 @@ namespace Assets.Scripts.UI
     {
         public static UIManager Instance { get; private set; }
 
-        [SerializeField] private TextMeshProUGUI _dmgBonus, _spdBonus, _wave, _enemies, _money;
+        [Header("Panels and UI Elements")]
+        [SerializeField] private GameObject[] rightPanels;
+        [SerializeField] private TextMeshProUGUI _dmgBonus, _spdBonus, _wave, _enemies;
+        [SerializeField] private GameObject permanentUpgradePanels;
+        [SerializeField] private GameObject temporaryUpgradePanels;
+
+        [Header("Currency UI")]
+        [SerializeField] private TextMeshProUGUI _scraps;
+        [SerializeField] private TextMeshProUGUI _blackSteelText;
+        [SerializeField] private TextMeshProUGUI _crimsonCoreText;
+
+        [Header("Speed click")]
         [SerializeField] private Slider _spdBonusSlider;
         [SerializeField] private Image _decreaseDelayFill;
         private Coroutine _delayFillRoutine;
 
-        // Equip management
-        [SerializeField] private GameObject equipPanel;   // drag a panel root in Canvas
-        [SerializeField] private GameObject unequipPanel; // another panel if you like
-        [SerializeField] private TextMeshProUGUI toast;   // optional 1-line overlay
-        [SerializeField] private GameObject[] rightPanels;
+        [Header("Equip Management")]
+        [SerializeField] private GameObject equipPanel;   
+        [SerializeField] private GameObject permanentEquipPanel;
+        [SerializeField] private TextMeshProUGUI toast;   // 1-line overlay
         public GameObject wallUpgradePanel;
 
-        [Tooltip("Death Screen")]
+        [Header("Death Screen")]        
         [SerializeField] private GameObject deathCountdownPanel, startGamePanel;
         [SerializeField] private TextMeshProUGUI countdownText;
         [SerializeField] private Button immediateRestartButton;
@@ -42,6 +53,11 @@ namespace Assets.Scripts.UI
 
         private bool stopOnDeath = false; // used to pause the game on death and resume with standard speed
 
+        private const string ICON_SCRAPS = "⚙";      // U+2699
+        private const string ICON_BLACKSTEEL = "§";  // U+00A7
+        private const string ICON_CRIMSONCORE = "Ø"; // U+00D8
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -55,7 +71,7 @@ namespace Assets.Scripts.UI
             EnemySpawner.Instance.OnWaveCreated += OnWaveCreated;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
-            GameManager.Instance.OnMoneyChanged += UpdateMoney;
+            GameManager.Instance.OnCurrencyChanged += UpdateCurrency;
         }
 
         private void OnEnemyDeath(object sender, EventArgs _)
@@ -124,9 +140,36 @@ namespace Assets.Scripts.UI
             element.color = Color.Lerp(Color.black, Color.red, t);
         }
 
-        public void UpdateMoney(ulong value)
+        public void UpdateCurrency(Currency type, ulong value)
         {
-            _money.SetText("⚙" + AbbreviateNumber(value));
+            switch (type)
+            {
+                case Currency.Scraps:
+                    _scraps.SetText(FormatCurrency(ICON_SCRAPS, value));
+                    break;
+                case Currency.BlackSteel:
+                    _blackSteelText.SetText(FormatCurrency(ICON_BLACKSTEEL, value));
+                    break;
+                case Currency.CrimsonCore:
+                    _crimsonCoreText.SetText(FormatCurrency(ICON_CRIMSONCORE, value));
+                    break;
+            }
+        }
+
+        private string FormatCurrency(string icon, ulong value)
+        {
+            return icon + " " + AbbreviateNumber(value);
+        }
+
+        public static string GetCurrencyIcon(Currency type)
+        {
+            return type switch
+            {
+                Currency.Scraps => ICON_SCRAPS,
+                Currency.BlackSteel => ICON_BLACKSTEEL,
+                Currency.CrimsonCore => ICON_CRIMSONCORE,
+                _ => string.Empty
+            };
         }
 
         public static string AbbreviateNumber(double number, bool showPercent = false)
@@ -188,9 +231,14 @@ namespace Assets.Scripts.UI
         {
             DeactivateRightPanels();
             activeSlot = slot;
-            equipPanel.SetActive(true);
-            equipPanel.GetComponent<EquipPanelUI>().Open(slot);
+
+            bool isManagement = GameManager.Instance.CurrentGameState == GameState.Management;
+            GameObject panel = isManagement ? permanentEquipPanel : equipPanel;
+
+            panel.SetActive(true);
+            panel.GetComponent<EquipPanelUI>().Open(slot);
         }
+
 
         public void ShowToast(string msg, float time = 1.5f)
         {
@@ -297,11 +345,13 @@ namespace Assets.Scripts.UI
             startGamePanel.SetActive(false);
             WaveManager.Instance.LoadWave(1); // Load wave 1
             WaveManager.Instance.ForceRestartWave();
-            PlayerBaseManager.Instance.InitializeGame(true); // Reset player base stats
+            PlayerBaseManager.Instance.InitializeGame(true, true); // Reset player base stats
             if (!stopOnDeath)
                 Time.timeScale = timeSpeedOnDeath; // Resume game at previous speed
             else
+            {
                 Time.timeScale = 1f; // Resume game at normal speed if stopOnDeath is true
+            }
             GameManager.Instance.ChangeGameState(GameState.InGame); // Change game state to regular
         }
         #endregion
@@ -324,6 +374,16 @@ namespace Assets.Scripts.UI
                 gamePaused = false;
             }
         }
-    
+
+        public void ToggleUpgradePanels(GameState state)
+        {
+            bool isManagement = (state == GameState.Management);
+
+            permanentUpgradePanels.SetActive(isManagement);
+            temporaryUpgradePanels.SetActive(!isManagement);
+
+        }
+
+
     }
 }

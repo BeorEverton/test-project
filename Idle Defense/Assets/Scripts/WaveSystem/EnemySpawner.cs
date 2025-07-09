@@ -31,7 +31,8 @@ namespace Assets.Scripts.WaveSystem
 
         public class OnEnemyDeathEventArgs : EventArgs
         {
-            public ulong CoinDropAmount;
+            public Currency CurrencyType;
+            public ulong Amount;
         }
 
         public class OnWaveCreatedEventArgs : EventArgs
@@ -224,7 +225,8 @@ namespace Assets.Scripts.WaveSystem
 
                 OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
                 {
-                    CoinDropAmount = enemy.Info.CoinDropAmount
+                    CurrencyType = enemy.Info.CurrencyDropType, 
+                    Amount = enemy.Info.CoinDropAmount
                 });
             }
 

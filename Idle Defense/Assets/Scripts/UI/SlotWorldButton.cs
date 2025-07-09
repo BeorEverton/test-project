@@ -1,4 +1,4 @@
-using Assets.Scripts.SO;
+﻿using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
@@ -29,6 +29,7 @@ namespace Assets.Scripts.UI
         /* ----------- turret prefab setup ------------------------ */
         [Header("Turret prefab")]
         [SerializeField] private Transform canvasTransform;       // parent of upgrade panel
+        [SerializeField] private Transform canvasTransformPermanent;       // parent of upgrade panel
         [SerializeField] private TurretUpgradePanelMapping[] panelMappings;
         private GameObject activePanel;
         private TurretType? currentPanelTurretType;
@@ -39,6 +40,7 @@ namespace Assets.Scripts.UI
         {
             public TurretType type;
             public GameObject panelPrefab;
+            public GameObject permanentPanelPrefab;
         }
 
         private GameObject spawned;
@@ -85,11 +87,19 @@ namespace Assets.Scripts.UI
             AudioManager.Instance.Play("Click");
 
             // Skip first children because it's the title
-            for (int i = 1; i < canvasTransform.transform.childCount; i++)
-            {
-                canvasTransform.transform.GetChild(i).gameObject.SetActive(false);
-            }
-            canvasTransform.gameObject.SetActive(true);
+            bool management = GameManager.Instance.CurrentGameState == GameState.Management;
+
+            // 1️ Hide every previously opened upgrade panel in **both** holders (skip index 0 = title)
+            for (int i = 1; i < canvasTransform.childCount; i++)
+                canvasTransform.GetChild(i).gameObject.SetActive(false);
+
+            for (int i = 1; i < canvasTransformPermanent.childCount; i++)
+                canvasTransformPermanent.GetChild(i).gameObject.SetActive(false);
+
+            // 2️ Activate the holder that belongs to the current phase, hide the other
+            canvasTransform.gameObject.SetActive(!management);
+            canvasTransformPermanent.gameObject.SetActive(management);
+
 
             if (!TurretSlotManager.Instance.Purchased(slotIndex))
             {
@@ -113,34 +123,41 @@ namespace Assets.Scripts.UI
             }
 
             // turret is equipped
-            if (currentPanelTurretType == inst.TurretType && activePanel != null)
+            Transform expectedParent = management ? canvasTransformPermanent : canvasTransform;
+
+            if (activePanel != null &&
+                currentPanelTurretType == inst.TurretType &&
+                activePanel.transform.parent == expectedParent)          // ← parent matches phase?
             {
-                // reuse current panel
+                // Safe to reuse
                 activePanel.SetActive(true);
                 activePanel.GetComponent<TurretUpgradePanelUI>()
                     .Open(slotIndex, GetComponentInChildren<BaseTurret>());
             }
             else
             {
-                // close previous panel if type changed
                 if (activePanel != null)
-                    Destroy(activePanel);
+                    Destroy(activePanel);                                 // discard wrong-phase panel
 
-                GameObject panelPrefab = (from mapping in panelMappings where mapping.type == inst.TurretType select mapping.panelPrefab).FirstOrDefault();
+                GameObject panelPrefab = (from m in panelMappings
+                                          where m.type == inst.TurretType
+                                          select (management ? m.permanentPanelPrefab
+                                                             : m.panelPrefab)).FirstOrDefault();
 
                 if (panelPrefab != null)
                 {
-                    activePanel = Instantiate(panelPrefab, canvasTransform);
+                    activePanel = Instantiate(panelPrefab, expectedParent);
                     currentPanelTurretType = inst.TurretType;
 
-                    TurretUpgradePanelUI ui = activePanel.GetComponent<TurretUpgradePanelUI>();
-                    ui.Open(slotIndex, GetComponentInChildren<BaseTurret>());
+                    activePanel.GetComponent<TurretUpgradePanelUI>()
+                               .Open(slotIndex, GetComponentInChildren<BaseTurret>());
                 }
                 else
                 {
                     Debug.LogWarning($"No panel prefab assigned for {inst.TurretType}");
                 }
             }
+
 
         }
 
@@ -153,27 +170,50 @@ namespace Assets.Scripts.UI
             if (changed != slotIndex)
                 return;
 
+            // Deactivate existing object (not destroy!)
             if (spawned != null)
-                Destroy(spawned);
+            {
+                spawned.gameObject.SetActive(false);
+                spawned.transform.SetParent(null);
+            }
 
             if (inst != null)
             {
-                GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
-                spawned = Instantiate(prefab, barrelAnchor.position,
-                    Quaternion.identity, barrelAnchor);
-                spawned.GetComponent<BaseTurret>().SavedStats = inst;
+                // Try to reuse a tracked turret object
+                GameObject existing = TurretInventoryManager.Instance.GetGameObjectForInstance(inst);
+                if (existing != null)
+                {
+                    existing.transform.position = barrelAnchor.position;
+                    existing.transform.SetParent(barrelAnchor);
+                    existing.SetActive(true);
+                    spawned = existing;
+                }
+                else
+                {
+                    // No tracked turret, spawn new
+                    GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
+                    spawned = Instantiate(prefab, barrelAnchor.position, Quaternion.identity, barrelAnchor);
+
+                    var turret = spawned.GetComponent<BaseTurret>();
+                    turret.PermanentStats = inst;
+                    turret.SavedStats = inst; // Use current instance (not clone)
+
+                    TurretInventoryManager.Instance.RegisterTurretInstance(inst, spawned);
+                }
 
                 if (noTurretHint != null)
                     noTurretHint.SetActive(false);
             }
             else
             {
+                spawned = null;
                 if (noTurretHint != null)
                     noTurretHint.SetActive(true);
             }
 
             UpdateOverlay();
         }
+
 
         //  Called whenever slot state / wave changes.
         //  Controls the tint of the Slot sprite (black = unavailable).
@@ -247,7 +287,7 @@ namespace Assets.Scripts.UI
                     priceText.gameObject.SetActive(true);
 
                     waveText.text = "Wave " + needWave;
-                    priceText.text = "$" + UIManager.AbbreviateNumber(cost);
+                    priceText.text = "§" + UIManager.AbbreviateNumber(cost);
 
                     waveText.color = Color.white;
                     priceText.color = Color.white;
@@ -259,7 +299,7 @@ namespace Assets.Scripts.UI
                     waveText.gameObject.SetActive(false);
                     priceText.gameObject.SetActive(true);
 
-                    priceText.text = "$" + UIManager.AbbreviateNumber(cost);
+                    priceText.text = "§" + UIManager.AbbreviateNumber(cost);
                     priceText.color = Color.black;
 
                     buyButton.interactable = true;

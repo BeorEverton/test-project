@@ -23,7 +23,7 @@ namespace Assets.Scripts.Systems
         private bool _tutorialRunning = false;
         private bool _waitingToStartStep = true;
         private List<GameObject> _lastActiveObjects = new();
-        private ulong _lastKnownMoney = 0;
+        private ulong _lastKnownScraps = 0;
         private bool _turretWasUpgraded = false;
 
         private void Awake()
@@ -64,7 +64,7 @@ namespace Assets.Scripts.Systems
             GameManager.OnSpdBonusChanged += OnGameEventTriggered;
             PlayerBaseManager.Instance.OnHealthChanged += OnHealthChanged;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
-            GameManager.Instance.OnMoneyChanged += OnMoneyChanged;
+            GameManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
             PlayerBaseManager.Instance.OnMaxHealthChanged += OnMaxHealthChanged;
             TurretSlotManager.Instance.OnEquippedChanged += OnAnyTurretEquipped;
             TurretSlotManager.Instance.OnSlotUnlocked += TryAdvanceTutorial;
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Systems
             GameManager.OnSpdBonusChanged -= OnGameEventTriggered;
             PlayerBaseManager.Instance.OnHealthChanged -= OnHealthChanged;
             WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
-            GameManager.Instance.OnMoneyChanged -= OnMoneyChanged;
+            GameManager.Instance.OnCurrencyChanged -= OnCurrencyChanged;
             PlayerBaseManager.Instance.OnMaxHealthChanged -= OnHealthChanged;
             TurretSlotManager.Instance.OnEquippedChanged -= OnAnyTurretEquipped;
             TurretSlotManager.Instance.OnSlotUnlocked -= TryAdvanceTutorial;
@@ -103,10 +103,11 @@ namespace Assets.Scripts.Systems
             TryAdvanceTutorial();
         }
 
-        private void OnMoneyChanged(ulong currentMoney)
+        private void OnCurrencyChanged(Currency type, ulong current)
         {
+            if (type != Currency.Scraps) return;
             TryAdvanceTutorial();
-            _lastKnownMoney = currentMoney;
+            _lastKnownScraps = current;
         }
 
         private void OnAnyTurretEquipped(int slotIndex, TurretStatsInstance stats)
@@ -184,11 +185,11 @@ namespace Assets.Scripts.Systems
                 TutorialConditionType.HealthAbove => PlayerBaseManager.Instance.CurrentHealth > threshold,
                 TutorialConditionType.MaxHealthAbove => PlayerBaseManager.Instance.MaxHealth > threshold,
                 TutorialConditionType.WaveReached => WaveManager.Instance.GetCurrentWaveIndex() >= (int)threshold,
-                TutorialConditionType.MoneyChanged => true,
-                TutorialConditionType.MoneyAbove => GameManager.Instance.Money > threshold,
-                TutorialConditionType.MoneyBelow => GameManager.Instance.Money < threshold,
-                TutorialConditionType.MoneyIncreased => GameManager.Instance.Money > _lastKnownMoney,
-                TutorialConditionType.MoneyDecreased => GameManager.Instance.Money < _lastKnownMoney,
+                TutorialConditionType.ScrapsChanged => true,
+                TutorialConditionType.ScrapsAbove => GameManager.Instance.GetCurrency(Currency.Scraps) > (ulong)threshold,
+                TutorialConditionType.ScrapsBelow => GameManager.Instance.GetCurrency(Currency.Scraps) < (ulong)threshold,
+                TutorialConditionType.ScrapsIncreased => GameManager.Instance.GetCurrency(Currency.Scraps) > _lastKnownScraps,
+                TutorialConditionType.ScrapsDecreased => GameManager.Instance.GetCurrency(Currency.Scraps) < _lastKnownScraps,
                 TutorialConditionType.TurretEquipped => TurretSlotManager.Instance.IsAnyTurretEquipped(),
                 TutorialConditionType.SlotUnlocked => TurretSlotManager.Instance.UnlockedSlotCount() >= (int)threshold,
                 TutorialConditionType.TurretUpgraded => _turretWasUpgraded,
@@ -327,11 +328,11 @@ namespace Assets.Scripts.Systems
         MaxHealthAbove,
         HealthAbove,
         WaveReached,
-        MoneyChanged,
-        MoneyAbove,
-        MoneyBelow,
-        MoneyIncreased,
-        MoneyDecreased,
+        ScrapsChanged,
+        ScrapsAbove,
+        ScrapsBelow,
+        ScrapsIncreased,
+        ScrapsDecreased,
         TurretEquipped,
         SlotUnlocked,
         TurretUpgraded

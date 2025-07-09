@@ -1,4 +1,4 @@
-using Assets.Scripts.Systems.Audio;
+﻿using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
 using System;
@@ -28,10 +28,6 @@ namespace Assets.Scripts.Systems
 
         public static event Action<float> OnSpdBonusChanged; // Used for the tutorial
 
-        private ulong money;
-        public ulong Money => money;
-        public event Action<ulong> OnMoneyChanged;
-
         [SerializeField] GraphicRaycaster uiRaycaster;
         PointerEventData _ped;
         List<RaycastResult> _results = new();
@@ -40,6 +36,11 @@ namespace Assets.Scripts.Systems
         public GameState CurrentGameState { get; private set; } = GameState.InGame;
         public event Action<GameState> OnGameStateChanged;
 
+        // Currency Management
+        private readonly Dictionary<Currency, ulong> currencies = new();
+        public ulong GetCurrency(Currency currency) => currencies[currency];
+
+        public event Action<Currency, ulong> OnCurrencyChanged;
 
         private void Awake()
         {
@@ -49,7 +50,10 @@ namespace Assets.Scripts.Systems
                 Destroy(gameObject);
 
             _ped = new PointerEventData(EventSystem.current);
-
+            foreach (Currency currency in Enum.GetValues(typeof(Currency)))
+            {
+                currencies[currency] = 0;
+            }
         }
 
         private void Start()
@@ -134,23 +138,25 @@ namespace Assets.Scripts.Systems
             UIManager.Instance.UpdateSpdBonus(spdBonus);
 
         }
+
         private void OnEnemyDeath(object sender, EnemySpawner.OnEnemyDeathEventArgs e)
         {
-            AddMoney(e.CoinDropAmount);
+            AddCurrency(e.CurrencyType, e.Amount);
         }
 
-        public void AddMoney(ulong amount)
+        public void AddCurrency(Currency currency, ulong amount)
         {
-            money += amount;
-            OnMoneyChanged?.Invoke(money);
+            currencies[currency] += amount;
+            OnCurrencyChanged?.Invoke(currency, currencies[currency]);
         }
 
-        public bool TrySpend(float cost)
+        public bool TrySpendCurrency(Currency currency, ulong cost)
         {
-            if (money >= cost)
+            if (currencies[currency] >= cost)
             {
-                SpendMoney((ulong)cost);
-                StatsManager.Instance.UpgradeAmount++;
+                SpendCurrency(currency, cost);
+                if (currency == Currency.Scraps)
+                    StatsManager.Instance.UpgradeAmount++;
                 return true;
             }
 
@@ -158,39 +164,61 @@ namespace Assets.Scripts.Systems
             return false;
         }
 
-        public void SpendMoney(ulong amount)
+        public void SpendCurrency(Currency currency, ulong amount)
         {
-            money -= amount;
-            StatsManager.Instance.MoneySpent += amount;
-            OnMoneyChanged?.Invoke(money);
+            currencies[currency] -= amount;
+
+            if (currency == Currency.Scraps)
+                StatsManager.Instance.MoneySpent += amount;
+
+            OnCurrencyChanged?.Invoke(currency, currencies[currency]);
         }
 
-        public void LoadMoney(ulong amount)
+        public void LoadCurrency(Currency currency, ulong amount)
         {
-            money = amount;
-            UIManager.Instance.UpdateMoney(money);
+            if (!currencies.ContainsKey(currency))
+            {
+                currencies[currency] = 0;
+            }
+
+            currencies[currency] = amount;
+
+            UIManager.Instance.UpdateCurrency(currency, amount);
         }
+
 
         public void ResetGame()
         {
-            money = 0;
+            foreach (Currency currency in Enum.GetValues(typeof(Currency)))
+            {
+                currencies[currency] = 0;
+            }
             spdBonus = 0;
-            UIManager.Instance.UpdateMoney(money);
             UIManager.Instance.UpdateSpdBonus(spdBonus);
             CurrentGameState = GameState.InGame;
         }
 
         public void DebugAddMoneyInt(int moneyToAdd)
         {
-            AddMoney((ulong)moneyToAdd);
+            AddCurrency(Currency.Scraps, (ulong)moneyToAdd);
+        }
+
+        public void DebugAddBlackSteel(int moneyToAdd)
+        {
+            AddCurrency(Currency.BlackSteel, (ulong)moneyToAdd);
         }
 
         public void ChangeGameState(GameState newState)
         {
             if (CurrentGameState == newState) return; // No change needed
+            if (newState == GameState.Management)
+            {
+                currencies[Currency.Scraps] = 0;
+                OnCurrencyChanged?.Invoke(Currency.Scraps, 0);
+            }
             CurrentGameState = newState;
             OnGameStateChanged?.Invoke(newState);
-
+            UIManager.Instance.ToggleUpgradePanels(newState);
         }
     }
 }
@@ -199,4 +227,12 @@ public enum GameState
 {    
     InGame,
     Management
+}
+
+public enum Currency
+{
+    Scraps,      // ⚙ U+2699 – The junk that keeps your machines moving... for now.
+    BlackSteel,  // §  U+00A7 – Forged in battle. Reinforced between wars. Used to rebuild and evolve.
+    CrimsonCore  // Ø  U+00D8 – Red-hot cores forged in chaos. Unlocking them reshapes your arsenal.
+
 }

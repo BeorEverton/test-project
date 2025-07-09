@@ -12,6 +12,11 @@ namespace Assets.Scripts.UI
 {
     public class PlayerUpgradeButton : MonoBehaviour
     {
+        [Header("Currency")]
+        [SerializeField] private Currency currencyType = Currency.Scraps;
+
+        [SerializeField] private bool isPermanentUpgrade = false;
+
         [Header("UI Elements (Auto-Assigned)")]
         [SerializeField] private TextMeshProUGUI _statName, _statValue, _statUpgradeAmount, _statUpgradeCost, _statUpgradeCount;
 
@@ -44,15 +49,16 @@ namespace Assets.Scripts.UI
         private void OnEnable()
         {
             if (GameManager.Instance)
-                GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+                GameManager.Instance.OnCurrencyChanged += HandleCurrencyChanged;
 
             UpdateInteractableState(); // Run immediately on enable
+            UpdateDisplayFromType();
         }
 
         private void OnDisable()
         {
             if (GameManager.Instance)
-                GameManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
+                GameManager.Instance.OnCurrencyChanged -= HandleCurrencyChanged;
         }
 
         private void Start()
@@ -60,15 +66,16 @@ namespace Assets.Scripts.UI
             _playerBaseManager = PlayerBaseManager.Instance;
             _upgradeManager = FindFirstObjectByType<PlayerBaseUpgradeManager>();
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
-            GameManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+            GameManager.Instance.OnCurrencyChanged += HandleCurrencyChanged;
+
             MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
             _playerBaseManager.OnStatsLoaded += OnStatsLoaded;
 
             // For the button animation
             originalScale = _button.GetComponent<RectTransform>().localScale;
             originalColor = _button.GetComponent<Image>().color;
-            Invoke("UpdateInteractableState", 0.5f); // Needs to delay because of PlayerBaseManager initialization
-            Invoke("UpdateDisplayFromType", 0.5f);
+            Invoke("UpdateInteractableState", .5f); // Needs to delay because of PlayerBaseManager initialization
+            Invoke("UpdateDisplayFromType", .5f);
         }
 
         private void OnBuyAmountChanged(object sender, EventArgs e)
@@ -85,20 +92,29 @@ namespace Assets.Scripts.UI
 
         public void OnClick()
         {
-            _upgradeManager.UpgradePlayerBaseStat(_playerBaseManager.Stats, _upgradeType, this);
+            if (isPermanentUpgrade)
+                _upgradeManager.UpgradePermanentStat(_upgradeType, this);
+            else
+                _upgradeManager.UpgradePlayerBaseStat(_playerBaseManager.Stats, _upgradeType, this);
+
         }
 
         public void UpdateStats(string value, string bonus, string cost, string count)
         {
             _statValue.SetText(value);
             _statUpgradeAmount.SetText(bonus);
-            _statUpgradeCost.SetText(cost);
+            _statUpgradeCost.SetText(UIManager.GetCurrencyIcon(currencyType) + " " + cost);
             _statUpgradeCount.SetText(count);
         }
 
         public void UpdateDisplayFromType()
         {
-            _upgradeManager.UpdateUpgradeDisplay(_playerBaseManager.Stats, _upgradeType, this);
+            // Avoid errors on first activation
+            if (_playerBaseManager == null || _upgradeManager == null)
+                return;
+            var stats = isPermanentUpgrade ? _playerBaseManager.PermanentStats : _playerBaseManager.Stats;
+            _upgradeManager.UpdateUpgradeDisplay(stats, _upgradeType, this);
+
         }
 
         public void EnableTooltip()
@@ -124,11 +140,14 @@ namespace Assets.Scripts.UI
             return meta != null ? meta.Description : "Upgrade effect not documented.";
         }
 
-        private void HandleMoneyChanged(ulong _)
+        private void HandleCurrencyChanged(Currency changedCurrency, ulong _)
         {
+            if (changedCurrency != currencyType) return;
+
             UpdateInteractableState();
             UpdateDisplayFromType();
         }
+
 
         private void UpdateInteractableState()
         {
@@ -136,10 +155,10 @@ namespace Assets.Scripts.UI
                 return;
 
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
-            float cost = _upgradeManager.GetPlayerBaseUpgradeCost(_playerBaseManager.Stats, _upgradeType, amount);
-            //int availableAmount = _upgradeManager.GetPlayerBaseAvailableUpgradeAmount(_playerBaseManager.Stats, _upgradeType);
+            var stats = isPermanentUpgrade ? _playerBaseManager.PermanentStats : _playerBaseManager.Stats;
+            float cost = _upgradeManager.GetPlayerBaseUpgradeCost(stats, _upgradeType, amount);
 
-            _button.interactable = GameManager.Instance.Money >= cost;
+            _button.interactable = GameManager.Instance.GetCurrency(currencyType) >= (ulong)cost;
         }
 
         public void OnPointerEnter()

@@ -3,6 +3,7 @@ using Assets.Scripts.SO;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -40,23 +41,45 @@ namespace Assets.Scripts.Systems.Save
         public void SaveGame()
         {
             int waveNumber = WaveManager.Instance.GetCurrentWaveIndex();
-            ulong money = GameManager.Instance.Money;
-            GameDataDTO gameDataDTO = SaveDataDTOs.CreateGameDataDTO(waveNumber, money);
+            
+            GameDataDTO gameDataDTO = SaveDataDTOs.CreateGameDataDTO(waveNumber);
 
-            PlayerInfoDTO playerInfoDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.Stats);
+            PlayerInfoDTO sessionStatsDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.Stats);
+            PlayerInfoDTO permanentStatsDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.PermanentStats);
 
+            // TEMPORARY STATS (Scrap upgrades)
             TurretInfoDTO machineGunTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_machineGunTurret.GetStats());
             TurretBaseInfoDTO machineGunTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
+
             TurretInfoDTO shotgunTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_shotgunTurret.GetStats());
-            TurretBaseInfoDTO shotgunTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
+            TurretBaseInfoDTO shotgunTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_shotgunTurret.GetStats());
+
             TurretInfoDTO sniperTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_sniperTurret.GetStats());
-            TurretBaseInfoDTO sniperTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
+            TurretBaseInfoDTO sniperTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_sniperTurret.GetStats());
+
             TurretInfoDTO missileLauncherTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_missileLauncherTurret.GetStats());
-            TurretBaseInfoDTO missileLauncherTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
+            TurretBaseInfoDTO missileLauncherTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_missileLauncherTurret.GetStats());
+
             TurretInfoDTO laserTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_laserTurret.GetStats());
-            TurretBaseInfoDTO laserTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.GetStats());
-            StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();
-            
+            TurretBaseInfoDTO laserTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_laserTurret.GetStats());
+
+            // PERMANENT STATS (BlackSteel upgrades)
+            TurretInfoDTO machineGunPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_machineGunTurret.PermanentStats);
+            TurretBaseInfoDTO machineGunPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.PermanentStats);
+
+            TurretInfoDTO shotgunPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_shotgunTurret.PermanentStats);
+            TurretBaseInfoDTO shotgunPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_shotgunTurret.PermanentStats);
+
+            TurretInfoDTO sniperPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_sniperTurret.PermanentStats);
+            TurretBaseInfoDTO sniperPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_sniperTurret.PermanentStats);
+
+            TurretInfoDTO missileLauncherPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_missileLauncherTurret.PermanentStats);
+            TurretBaseInfoDTO missileLauncherPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_missileLauncherTurret.PermanentStats);
+
+            TurretInfoDTO laserPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_laserTurret.PermanentStats);
+            TurretBaseInfoDTO laserPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_laserTurret.PermanentStats);
+
+            StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();            
 
             TurretInventoryDTO turretInventory = TurretInventoryManager.Instance.ExportToDTO();
 
@@ -67,7 +90,8 @@ namespace Assets.Scripts.Systems.Save
 
             GameData gameData = new(
                 gameDataDTO,
-                playerInfoDTO,
+                sessionStatsDTO,
+                permanentStatsDTO,
                 machineGunTurretDTO,
                 machineGunTurretBaseDTO,
                 shotgunTurretDTO,
@@ -79,7 +103,18 @@ namespace Assets.Scripts.Systems.Save
                 laserTurretDTO,
                 laserTurretBaseDTO,
                 statsDTO,
-                turretInventory);
+                turretInventory,                
+                machineGunPermanentDTO,
+                machineGunPermanentBaseDTO,
+                shotgunPermanentDTO,
+                shotgunPermanentBaseDTO,
+                sniperPermanentDTO,
+                sniperPermanentBaseDTO,
+                missileLauncherPermanentDTO,
+                missileLauncherPermanentBaseDTO,
+                laserPermanentDTO,
+                laserPermanentBaseDTO);
+
             gameData.DiscoveredEnemyNames = discoveredEnemies;
 
             SaveGameToFile.SaveGameDataToFile(gameData);
@@ -101,9 +136,39 @@ namespace Assets.Scripts.Systems.Save
             _missileLauncherTurret.SavedStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.MissileLauncherTurretInfoDTO, gameData.MissileLauncherTurretBaseInfoDTO);
             _laserTurret.SavedStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.LaserTurretInfoDTO, gameData.LaserTurretBaseInfoDTO);
 
-            PlayerBaseManager.Instance.SavedStats = LoadDataDTOs.CreatePlayerBaseSO(gameData.PlayerInfoDTO);
+            _machineGunTurret.SetPermanentStats(LoadDataDTOs.CreateTurretStatsInstance(
+                gameData.MachineGunPermanentDTO,
+                gameData.MachineGunPermanentBaseDTO));
 
-            GameManager.Instance.LoadMoney(gameData.GameDataDTO.Money);
+            _shotgunTurret.SetPermanentStats(LoadDataDTOs.CreateTurretStatsInstance(
+                gameData.ShotgunPermanentDTO,
+                gameData.ShotgunPermanentBaseDTO));
+
+            _sniperTurret.SetPermanentStats(LoadDataDTOs.CreateTurretStatsInstance(
+                gameData.SniperPermanentDTO,
+                gameData.SniperPermanentBaseDTO));
+
+            _missileLauncherTurret.SetPermanentStats(LoadDataDTOs.CreateTurretStatsInstance(
+                gameData.MissileLauncherPermanentDTO,
+                gameData.MissileLauncherPermanentBaseDTO));
+
+            _laserTurret.SetPermanentStats(LoadDataDTOs.CreateTurretStatsInstance(
+                gameData.LaserPermanentDTO,
+                gameData.LaserPermanentBaseDTO));
+
+
+            PlayerBaseManager.Instance.SavedStats = LoadDataDTOs.CreatePlayerBaseSO(gameData.PlayerInfoDTO);
+            if (gameData.PermanentPlayerInfoDTO != null)
+            {
+                PlayerBaseManager.Instance.SetPermanentStats(LoadDataDTOs.CreatePlayerBaseSO(gameData.PermanentPlayerInfoDTO));
+            }
+
+            foreach (var entry in gameData.GameDataDTO.Currencies ?? Array.Empty<CurrencyEntry>())
+            {
+                GameManager.Instance.LoadCurrency(entry.Currency, entry.Amount);
+            }
+
+
             WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
             GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);
 
@@ -120,6 +185,10 @@ namespace Assets.Scripts.Systems.Save
             AudioManager.Instance.audioMixer.SetFloat("Music", gameData.GameDataDTO.MusicVolume);
             AudioManager.Instance.audioMixer.SetFloat("SFX", gameData.GameDataDTO.SFXVolume);
 
+            foreach (var entry in gameData.GameDataDTO.Currencies)
+            {
+                GameManager.Instance.LoadCurrency(entry.Currency, entry.Amount);
+            }
 
             if (gameData.DiscoveredEnemyNames != null)
             {

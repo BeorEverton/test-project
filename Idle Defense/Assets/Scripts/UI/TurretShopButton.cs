@@ -23,7 +23,8 @@ namespace Assets.Scripts.UI
         private void Start()
         {
             buyButton.onClick.AddListener(TryBuy);
-            GameManager.Instance.OnMoneyChanged += _ => Refresh();
+            GameManager.Instance.OnCurrencyChanged += HandleCurrencyChanged;
+
             TurretInventoryManager.Instance.OnInventoryChanged += Refresh;
             WaveManager.Instance.OnWaveStarted += (_, __) => Refresh();
             Refresh();
@@ -33,7 +34,8 @@ namespace Assets.Scripts.UI
         {
             buyButton.onClick.RemoveListener(TryBuy);
             if (GameManager.Instance != null)
-                GameManager.Instance.OnMoneyChanged -= _ => Refresh();
+                GameManager.Instance.OnCurrencyChanged -= HandleCurrencyChanged;
+
 
             if (TurretInventoryManager.Instance != null)
                 TurretInventoryManager.Instance.OnInventoryChanged -= Refresh;
@@ -79,11 +81,12 @@ namespace Assets.Scripts.UI
             }
 
             // Continue with normal pricing
-            ulong cost = inv.GetCost(turretType, owned);
+            (Currency currency, ulong cost) = inv.GetCostAndCurrency(turretType, owned);
             countText.text = $"x{owned}";
-            costText.text = $"⚙{UIManager.AbbreviateNumber(cost)}";
+            costText.text = $"{UIManager.GetCurrencyIcon(currency)}{UIManager.AbbreviateNumber(cost)}";
 
-            bool afford = GameManager.Instance.Money >= cost;
+            bool afford = GameManager.Instance.GetCurrency(currency) >= cost;
+
             buyButton.interactable = afford;
             costText.color = afford ? Color.black : Color.red;
 
@@ -134,12 +137,17 @@ namespace Assets.Scripts.UI
                 : $"{dps:F1} DPS";
         }
 
-
         private void TryBuy()
         {
             UIManager.Instance.ShowToast(TurretInventoryManager.Instance.TryPurchase(turretType)
                 ? "Turret bought!"
                 : "Need more coins");
+            Refresh();
+        }
+
+        private void HandleCurrencyChanged(Currency changed, ulong _)
+        {
+            // Refresh only if relevant, or always for now
             Refresh();
         }
     }

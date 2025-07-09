@@ -14,8 +14,9 @@ namespace Assets.Scripts.UpgradeSystem
         public Func<TurretStatsInstance, float> GetCostMultiplier;
         public Func<TurretStatsInstance, float> GetMaxValue;
         public Func<TurretStatsInstance, float> GetMinValue;
-        public Func<TurretStatsInstance, int, float> GetCost;
+        public Func<TurretStatsInstance, int, Currency, float> GetCost;
         //public Func<TurretStatsInstance, int> GetAmount;
         public Func<TurretStatsInstance, int, (string value, string bonus, string cost, string count)> GetDisplayStrings;
+        public Currency CurrencyUsed = Currency.Scraps;
     }
 }

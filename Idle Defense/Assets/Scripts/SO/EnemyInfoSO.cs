@@ -20,6 +20,7 @@ namespace Assets.Scripts.SO
         public float MovementSpeedDifference;
         [Tooltip("Amount of coins to drop on death. Will be randomized with +- 5%")]
         public ulong CoinDropAmount;
+        public Currency CurrencyDropType;
 
         [Header("Wave Multipliers")]
         [Tooltip("CoinDrop = Ceil(CoinDrop * coinDropmultiplier) (Default = 1.05, 5% increase per wave)")]

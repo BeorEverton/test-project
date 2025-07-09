@@ -18,6 +18,8 @@ namespace Assets.Scripts.Systems
         // 5 equip slots
         private readonly TurretStatsInstance[] equipped = new TurretStatsInstance[5];
 
+        private readonly Dictionary<int, TurretStatsInstance> _runtimeTempStats = new();
+
         private readonly SlotUnlock[] slotInfo =
         {
             new SlotUnlock(  1,     0),      // wave, cost
@@ -45,6 +47,11 @@ namespace Assets.Scripts.Systems
 
         private void Awake() { if (Instance == null) Instance = this; else Destroy(gameObject); }
 
+        private void Start()
+        {
+            GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
+        }
+
         public bool IsUnlocked(int slot) => Purchased(slot) && WaveManager.Instance.GetCurrentWaveIndex() >= slotInfo[slot].wave;
 
         // try to pay and mark purchased
@@ -56,9 +63,9 @@ namespace Assets.Scripts.Systems
 
             if (!info.purchased)
             {
-                if (GameManager.Instance.Money < info.cost)
+                if (!GameManager.Instance.TrySpendCurrency(Currency.BlackSteel, info.cost))
                     return false;
-                GameManager.Instance.SpendMoney(info.cost);
+
                 slotInfo[slot].purchased = true;
 
                 #region Analytics
@@ -98,8 +105,45 @@ namespace Assets.Scripts.Systems
             AudioManager.Instance.Play("Click");
             UIManager.Instance.DeactivateRightPanels();
             UIManager.Instance.wallUpgradePanel.gameObject.SetActive(true); // to help the tutorial progression
-            equipped[slot] = inst;
-            OnEquippedChanged?.Invoke(slot, inst);
+            if (GameManager.Instance.CurrentGameState == GameState.InGame)
+            {
+                // Check if this turret is already used in another slot
+                int previousSlot = -1;
+                for (int i = 0; i < equipped.Length; i++)
+                {
+                    if (i != slot && equipped[i] == inst)
+                    {
+                        previousSlot = i;
+                        break;
+                    }
+                }
+
+                if (previousSlot != -1)
+                {
+                    // Move same turret instance to new slot
+                    equipped[slot] = equipped[previousSlot];
+                    equipped[previousSlot] = null;
+                    _runtimeTempStats[slot] = _runtimeTempStats[previousSlot];
+                    _runtimeTempStats.Remove(previousSlot);
+                }
+                else if (_runtimeTempStats.TryGetValue(slot, out var existingTemp))
+                {
+                    equipped[slot] = existingTemp;
+                }
+                else
+                {
+                    var clone = BaseTurret.CloneStatsWithoutLevels(inst);
+                    equipped[slot] = clone;
+                    _runtimeTempStats[slot] = clone;
+                }
+            }
+            else
+            {
+                equipped[slot] = inst; // Management phase  assign permanent reference
+            }
+
+            OnEquippedChanged?.Invoke(slot, equipped[slot]);
+
             SaveGameManager.Instance.SaveGame();
             return true;
         }
@@ -150,5 +194,22 @@ namespace Assets.Scripts.Systems
                 OnEquippedChanged?.Invoke(i, equipped[i]);   // refresh visuals
             }
         }
+
+        private void HandleGameStateChanged(GameState newState)
+        {
+            if (newState == GameState.Management)
+            {
+                _runtimeTempStats.Clear();
+                TurretInventoryManager.Instance.ClearUnusedTurrets();
+            }
+        }
+
+
+        private void OnDestroy()
+        {
+            GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
+
+        }
+
     }
 }

@@ -126,6 +126,7 @@ namespace Assets.Scripts.Enemies
             {
                 TriggerBossExplosion();
                 StatsManager.Instance.BossesKilled++;
+                GameManager.Instance.AddCurrency(Currency.BlackSteel, (ulong)MathF.Round(_info.CoinDropAmount / 10));
             }
 
             DebrisPool.Instance.Play(transform.position);

@@ -68,9 +68,9 @@ namespace Assets.Scripts.UI
 
         private void UnlockTurret()
         {
-            if (GameManager.Instance.Money >= _unlockCost)
+            if (GameManager.Instance.GetCurrency(Currency.BlackSteel) >= _unlockCost)
             {
-                GameManager.Instance.SpendMoney(_unlockCost);
+                GameManager.Instance.SpendCurrency(Currency.BlackSteel, _unlockCost);
                 _isUnlocked = true;
                 RefreshState(WaveManager.Instance.GetCurrentWaveIndex());
 

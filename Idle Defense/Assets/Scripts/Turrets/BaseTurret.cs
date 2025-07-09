@@ -1,4 +1,4 @@
-using Assets.Scripts.Enemies;
+﻿using Assets.Scripts.Enemies;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 using Random = UnityEngine.Random;
@@ -18,9 +19,12 @@ namespace Assets.Scripts.Turrets
     {
         public EnemyTarget EnemyTargetChoice = EnemyTarget.First;
 
-        [SerializeField] protected TurretInfoSO _turretInfo;
+        public TurretInfoSO _turretInfo;
         [HideInInspector] public TurretStatsInstance SavedStats;
         protected TurretStatsInstance _stats;
+        public TurretStatsInstance RuntimeStats;     // For session upgrades
+        public TurretStatsInstance PermanentStats;   // Saved base
+
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] protected List<Sprite> _muzzleFlashSprites;
@@ -56,16 +60,90 @@ namespace Assets.Scripts.Turrets
 
         public GameObject upgradePulseFX;
 
+        private bool IsValidStats(TurretStatsInstance stats)
+        {
+            return stats != null && stats.Damage > 0; // or use another required field
+        }
+
+        private void Awake()
+        {
+            /*  PHASE 0 ─ game first loads  (or prefab is instantiated)  */
+            // 0-a  ALWAYS build PermanentStats straight from the SO
+            if (PermanentStats == null || PermanentStats.Damage <= 0)
+                PermanentStats = new TurretStatsInstance(_turretInfo);
+
+
+            /*  PHASE 1 ─ resume a running wave?*/
+            // SavedStats holds session-only upgrades (Scraps). If it exists, keep playing with it.
+            if (SavedStats != null && IsValidStats(SavedStats))
+            {
+                RuntimeStats = SavedStats;
+            }
+            else
+            {
+                /*  PHASE 2 ─ brand-new run*/
+                RuntimeStats = CloneStatsWithoutLevels(PermanentStats);
+            }
+
+            _stats = RuntimeStats;
+
+            // Listen so we can rebuild RuntimeStats every time a new run starts
+            GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
+        }
+
+        private void OnDestroy() =>
+            GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
+
+        private void HandleGameStateChanged(GameState newState)
+        {
+            if (newState != GameState.InGame) { return; }
+
+            // new run  discard any previous RuntimeStats and rebuild from Permanent
+            RuntimeStats = CloneStatsWithoutLevels(PermanentStats);
+            SavedStats = null;            // wipe leftovers from the last run
+            _stats = RuntimeStats;
+            UpdateTurretAppearance();
+        }
+
+
         protected virtual void Start()
         {
-            _stats = SavedStats ?? new TurretStatsInstance(_turretInfo);
+            if (PermanentStats == null)
+                PermanentStats = new TurretStatsInstance(_turretInfo);   // base SO - permanent
+
+            RuntimeStats = SavedStats != null && IsValidStats(SavedStats)
+                ? SavedStats                                           // loaded mid-run
+                : CloneStatsWithoutLevels(PermanentStats);             // fresh session
+
+            _stats = RuntimeStats;                                     //  prevents null-refs
 
             UpdateTurretAppearance();
+        }
+
+
+        /// <summary>Overwrite the whole permanent profile, preserving level counts.</summary>
+        public void SetPermanentStats(TurretStatsInstance stats)
+        {
+            if (PermanentStats == null)              // first call? just adopt the reference
+            {
+                PermanentStats = stats;
+                return;
+            }
+
+            // Overwrite field-by-field so every existing reference (UI buttons, saves, etc.)
+            // now sees the updated values *without* losing the object identity.
+            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(stats), PermanentStats);
         }
 
         protected virtual void OnEnable()
         {
             UpdateScreenBoundsIfNeeded();
+            if (RuntimeStats == null && SavedStats != null)
+            {
+                RuntimeStats = SavedStats;
+                _stats = RuntimeStats;
+            }
+
         }
 
         protected virtual void Update()
@@ -349,8 +427,8 @@ namespace Assets.Scripts.Turrets
 
             // Pop out and return to normal
             Sequence seq = DOTween.Sequence();
-            seq.Append(turret.DOScale(1.2f, 0.1f).SetEase(Ease.OutQuad));
-            seq.Append(turret.DOScale(1f, 0.1f).SetEase(Ease.InOutSine));
+            seq.Append(turret.DOScale(1.2f, 0.1f).SetEase(Ease.OutQuad).SetUpdate(true));
+            seq.Append(turret.DOScale(1f, 0.1f).SetEase(Ease.InOutSine).SetUpdate(true));
         }
 
         public void PlayUpgradePulse(GameObject upgradePulseFX, Vector3 position)
@@ -376,10 +454,97 @@ namespace Assets.Scripts.Turrets
             pulse.transform.localScale = Vector3.one * 0.5f;
             sr.color = new Color(1f, 1f, 1f, startAlpha);
 
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetUpdate(true);
             seq.Join(pulse.transform.DOScale(targetScale, duration).SetEase(Ease.OutCubic));
             seq.Join(sr.DOFade(0f, duration).SetEase(Ease.Linear));
             seq.OnComplete(() => Destroy(pulse));
+        }
+
+        public static TurretStatsInstance CloneStatsWithoutLevels(TurretStatsInstance src)
+        {
+            return new TurretStatsInstance
+            {
+                IsUnlocked = src.IsUnlocked,
+                TurretType = src.TurretType,
+
+                BaseDamage = src.BaseDamage,
+                BaseFireRate = src.BaseFireRate,
+                BaseCritChance = src.BaseCritChance,
+                BaseCritDamage = src.BaseCritDamage,
+
+                Damage = src.Damage,
+                DamageLevel = 0,
+                DamageUpgradeAmount = src.DamageUpgradeAmount,
+                DamageUpgradeBaseCost = src.DamageUpgradeBaseCost,
+                DamageCostExponentialMultiplier = src.DamageCostExponentialMultiplier,
+
+                FireRate = src.FireRate,
+                FireRateLevel = 0,
+                FireRateUpgradeAmount = src.FireRateUpgradeAmount,
+                FireRateUpgradeBaseCost = src.FireRateUpgradeBaseCost,
+                FireRateCostExponentialMultiplier = src.FireRateCostExponentialMultiplier,
+
+                CriticalChance = src.CriticalChance,
+                CriticalChanceLevel = 0,
+                CriticalChanceUpgradeAmount = src.CriticalChanceUpgradeAmount,
+                CriticalChanceUpgradeBaseCost = src.CriticalChanceUpgradeBaseCost,
+                CriticalChanceCostExponentialMultiplier = src.CriticalChanceCostExponentialMultiplier,
+
+                CriticalDamageMultiplier = src.CriticalDamageMultiplier,
+                CriticalDamageMultiplierLevel = 0,
+                CriticalDamageMultiplierUpgradeAmount = src.CriticalDamageMultiplierUpgradeAmount,
+                CriticalDamageMultiplierUpgradeBaseCost = src.CriticalDamageMultiplierUpgradeBaseCost,
+                CriticalDamageCostExponentialMultiplier = src.CriticalDamageCostExponentialMultiplier,
+
+                ExplosionRadius = src.ExplosionRadius,
+                ExplosionRadiusLevel = 0,
+                ExplosionRadiusUpgradeAmount = src.ExplosionRadiusUpgradeAmount,
+                ExplosionRadiusUpgradeBaseCost = src.ExplosionRadiusUpgradeBaseCost,
+
+                SplashDamage = src.SplashDamage,
+                SplashDamageLevel = 0,
+                SplashDamageUpgradeAmount = src.SplashDamageUpgradeAmount,
+                SplashDamageUpgradeBaseCost = src.SplashDamageUpgradeBaseCost,
+
+                PierceChance = src.PierceChance,
+                PierceChanceLevel = 0,
+                PierceChanceUpgradeAmount = src.PierceChanceUpgradeAmount,
+                PierceChanceUpgradeBaseCost = src.PierceChanceUpgradeBaseCost,
+
+                PierceDamageFalloff = src.PierceDamageFalloff,
+                PierceDamageFalloffLevel = 0,
+                PierceDamageFalloffUpgradeAmount = src.PierceDamageFalloffUpgradeAmount,
+                PierceDamageFalloffUpgradeBaseCost = src.PierceDamageFalloffUpgradeBaseCost,
+
+                PelletCount = src.PelletCount,
+                PelletCountLevel = 0,
+                PelletCountUpgradeAmount = src.PelletCountUpgradeAmount,
+                PelletCountUpgradeBaseCost = src.PelletCountUpgradeBaseCost,
+
+                DamageFalloffOverDistance = src.DamageFalloffOverDistance,
+                DamageFalloffOverDistanceLevel = 0,
+                DamageFalloffOverDistanceUpgradeAmount = src.DamageFalloffOverDistanceUpgradeAmount,
+                DamageFalloffOverDistanceUpgradeBaseCost = src.DamageFalloffOverDistanceUpgradeBaseCost,
+
+                KnockbackStrength = src.KnockbackStrength,
+                KnockbackStrengthLevel = 0,
+                KnockbackStrengthUpgradeAmount = src.KnockbackStrengthUpgradeAmount,
+                KnockbackStrengthUpgradeBaseCost = src.KnockbackStrengthUpgradeBaseCost,
+                KnockbackStrengthCostExponentialMultiplier = src.KnockbackStrengthCostExponentialMultiplier,
+
+                PercentBonusDamagePerSec = src.PercentBonusDamagePerSec,
+                PercentBonusDamagePerSecLevel = 0,
+                PercentBonusDamagePerSecUpgradeAmount = src.PercentBonusDamagePerSecUpgradeAmount,
+                PercentBonusDamagePerSecUpgradeBaseCost = src.PercentBonusDamagePerSecUpgradeBaseCost,
+
+                SlowEffect = src.SlowEffect,
+                SlowEffectLevel = 0,
+                SlowEffectUpgradeAmount = src.SlowEffectUpgradeAmount,
+                SlowEffectUpgradeBaseCost = src.SlowEffectUpgradeBaseCost,
+
+                RotationSpeed = src.RotationSpeed,
+                AngleThreshold = src.AngleThreshold
+            };
         }
 
     }

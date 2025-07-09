@@ -8,6 +8,7 @@ namespace Assets.Scripts.Systems.Save
     {
         public GameDataDTO GameDataDTO;
         public PlayerInfoDTO PlayerInfoDTO;
+        public PlayerInfoDTO PermanentPlayerInfoDTO;
         public TurretInfoDTO MachineGunTurretInfoDTO;
         public TurretBaseInfoDTO MachineGunTurretBaseInfoDTO;
         public TurretInfoDTO? ShotgunTurretInfoDTO;
@@ -18,13 +19,24 @@ namespace Assets.Scripts.Systems.Save
         public TurretBaseInfoDTO? MissileLauncherTurretBaseInfoDTO;
         public TurretInfoDTO? LaserTurretInfoDTO;
         public TurretBaseInfoDTO? LaserTurretBaseInfoDTO;
-        public TurretInventoryDTO TurretInventory;
         public StatsDTO StatsDTO;
+        public TurretInventoryDTO TurretInventory;
+        public TurretInfoDTO MachineGunPermanentDTO;
+        public TurretBaseInfoDTO MachineGunPermanentBaseDTO;
+        public TurretInfoDTO ShotgunPermanentDTO;
+        public TurretBaseInfoDTO ShotgunPermanentBaseDTO;
+        public TurretInfoDTO SniperPermanentDTO;
+        public TurretBaseInfoDTO SniperPermanentBaseDTO;
+        public TurretInfoDTO MissileLauncherPermanentDTO;
+        public TurretBaseInfoDTO MissileLauncherPermanentBaseDTO;
+        public TurretInfoDTO LaserPermanentDTO;
+        public TurretBaseInfoDTO LaserPermanentBaseDTO;    
 
         public List<string> DiscoveredEnemyNames;
 
         public GameData(GameDataDTO gameData,
             PlayerInfoDTO playerInfo,
+            PlayerInfoDTO permanentPlayerInfo,
             TurretInfoDTO machineGunTurretInfoDTO,
             TurretBaseInfoDTO machineGunTurretBaseInfoDTO,
             TurretInfoDTO? shotgunTurretInfoDTO,
@@ -36,10 +48,21 @@ namespace Assets.Scripts.Systems.Save
             TurretInfoDTO? laserTurretInfoDTO,
             TurretBaseInfoDTO? laserTurretBaseInfoDTO,
             StatsDTO statsDTO,
-            TurretInventoryDTO turretInventory)
+            TurretInventoryDTO turretInventory,
+            TurretInfoDTO machineGunPermanentDTO,
+            TurretBaseInfoDTO machineGunPermanentBaseDTO,
+            TurretInfoDTO shotgunPermanentDTO,
+            TurretBaseInfoDTO shotgunPermanentBaseDTO,
+            TurretInfoDTO sniperPermanentDTO,
+            TurretBaseInfoDTO sniperPermanentBaseDTO,
+            TurretInfoDTO missileLauncherPermanentDTO,
+            TurretBaseInfoDTO missileLauncherPermanentBaseDTO,
+            TurretInfoDTO laserPermanentDTO,
+            TurretBaseInfoDTO laserPermanentBaseDTO)
         {
             GameDataDTO = gameData;
             PlayerInfoDTO = playerInfo;
+            PermanentPlayerInfoDTO = permanentPlayerInfo;
             MachineGunTurretInfoDTO = machineGunTurretInfoDTO;
             MachineGunTurretBaseInfoDTO = machineGunTurretBaseInfoDTO;
             ShotgunTurretInfoDTO = shotgunTurretInfoDTO;
@@ -49,9 +72,19 @@ namespace Assets.Scripts.Systems.Save
             MissileLauncherTurretInfoDTO = missileLauncherTurretInfoDTO;
             MissileLauncherTurretBaseInfoDTO = missileLauncherTurretBaseInfoDTO;
             LaserTurretInfoDTO = laserTurretInfoDTO;
-            LaserTurretBaseInfoDTO = laserTurretBaseInfoDTO;
-            StatsDTO = statsDTO;
+            LaserTurretBaseInfoDTO = laserTurretBaseInfoDTO;            
+            StatsDTO = statsDTO;           
             TurretInventory = turretInventory;
+            MachineGunPermanentDTO = machineGunPermanentDTO;
+            MachineGunPermanentBaseDTO = machineGunPermanentBaseDTO;
+            ShotgunPermanentDTO = shotgunPermanentDTO;
+            ShotgunPermanentBaseDTO = shotgunPermanentBaseDTO;
+            SniperPermanentDTO = sniperPermanentDTO;
+            SniperPermanentBaseDTO = sniperPermanentBaseDTO;
+            MissileLauncherPermanentDTO = missileLauncherPermanentDTO;
+            MissileLauncherPermanentBaseDTO = missileLauncherPermanentBaseDTO;
+            LaserPermanentDTO = laserPermanentDTO;
+            LaserPermanentBaseDTO = laserPermanentBaseDTO;
         }
     }
 }

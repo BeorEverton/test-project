@@ -71,7 +71,7 @@ namespace Assets.Scripts.PlayerBase
                         return (
                             $"{UIManager.AbbreviateNumber(current)}",
                             $"+{UIManager.AbbreviateNumber(bonus)}",
-                            $"⚙{UIManager.AbbreviateNumber(cost)}",
+                            $"{UIManager.AbbreviateNumber(cost)}",
                             $"{UIManager.AbbreviateNumber(amount)}X"
                         );
                     }
@@ -102,7 +102,7 @@ namespace Assets.Scripts.PlayerBase
                         return (
                                 $"{current:F2}",
                                 $"+{bonus:F2}",
-                                $"⚙{UIManager.AbbreviateNumber(cost)}",
+                                $"{UIManager.AbbreviateNumber(cost)}",
                                 $"{amount:F0}X");
                     }
                 },
@@ -135,7 +135,7 @@ namespace Assets.Scripts.PlayerBase
 
                         return ($"{current:F2}s",
                             $"-{bonus:F2}s",
-                            $"⚙{UIManager.AbbreviateNumber(cost)}",
+                            $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount:F0}X");
                     }
                 }
@@ -206,6 +206,34 @@ namespace Assets.Scripts.PlayerBase
                 AnimateBuyButtonClick(button.GetComponent<RectTransform>());
             }
         }
+
+        public void UpgradePermanentStat(PlayerUpgradeType type, PlayerUpgradeButton button)
+        {
+            if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
+                return;
+
+            PlayerBaseStatsInstance stats = PlayerBaseManager.Instance.PermanentStats;
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+
+            GetCost(stats, type, amount, out float cost, out int maxAmount);
+
+            if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(stats) >= upgrade.GetMaxValue(stats))
+            {
+                UpdateUpgradeDisplay(stats, type, button);
+                return;
+            }
+
+            if (GameManager.Instance.TrySpendCurrency(Currency.BlackSteel, (ulong)cost))
+            {
+                upgrade.Upgrade(stats, amount);
+                AudioManager.Instance.Play("Upgrade");
+                UpdateUpgradeDisplay(stats, type, button);
+                PlayerBaseManager.Instance.UpdatePlayerBaseAppearance();
+
+                AnimateBuyButtonClick(button.GetComponent<RectTransform>());
+            }
+        }
+
 
         public void AnimateBuyButtonClick(RectTransform button)
         {
@@ -300,7 +328,11 @@ namespace Assets.Scripts.PlayerBase
             button.UpdateStats(value, bonus, cost, count);
         }
 
-        private bool TrySpend(float cost) => GameManager.Instance.TrySpend(cost);
+        private bool TrySpend(float cost)
+        {
+            return GameManager.Instance.TrySpendCurrency(Currency.Scraps, (ulong)cost);
+        }
+
     }
 
     public enum PlayerUpgradeType

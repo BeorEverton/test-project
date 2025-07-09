@@ -43,7 +43,10 @@ namespace Assets.Scripts.Systems
         Vector3 originalScale;
 
         [Tooltip("Used to change the gameplay style to pause everything on death and start from wave 1")]
-        public bool stopOnDeath = true; 
+        public bool stopOnDeath = true;
+        private PlayerBaseStatsInstance _permanentStats;
+        public PlayerBaseStatsInstance PermanentStats => _permanentStats;
+
 
         private void Awake()
         {
@@ -55,8 +58,15 @@ namespace Assets.Scripts.Systems
 
         private void Start()
         {
-            Stats = IsValidSavedStats(SavedStats) ? SavedStats : new PlayerBaseStatsInstance(_baseInfo);
+            if (_permanentStats == null)
+                _permanentStats = new PlayerBaseStatsInstance(_baseInfo); // Clone base if there's nothing loaded
+
+            Stats = SavedStats != null && IsValidSavedStats(SavedStats)
+                ? SavedStats
+                : CloneStats(_permanentStats); // start with a runtime clone
+
             OnStatsLoaded?.Invoke(this, EventArgs.Empty);
+
             originalPulseScale = upgradePulseFX.transform.localScale;
             originalScale = baseVisual.localScale;
 
@@ -65,8 +75,13 @@ namespace Assets.Scripts.Systems
 
         private bool IsValidSavedStats(PlayerBaseStatsInstance stats) => stats is { MaxHealth: > 0 };
 
-        public void InitializeGame(bool startTime = false)
-        {
+        public void InitializeGame(bool startTime = false, bool usePermanentStats = false)
+        {            
+            if (usePermanentStats && _permanentStats != null)
+            {
+                Stats = CloneStats(_permanentStats);                            
+            }
+
             _currentHealth = Stats.MaxHealth;
             _regenTickTimer = 0f;
 
@@ -259,5 +274,33 @@ namespace Assets.Scripts.Systems
             seq.Append(baseVisual.DOScale(punchScale, 0.08f).SetEase(Ease.OutCubic))
                .Append(baseVisual.DOScale(originalScale, 0.12f).SetEase(Ease.OutBack));
         }
+
+        private PlayerBaseStatsInstance CloneStats(PlayerBaseStatsInstance original)
+        {
+            return new PlayerBaseStatsInstance
+            {
+                MaxHealth = original.MaxHealth,
+                RegenAmount = original.RegenAmount,
+                RegenInterval = original.RegenInterval,
+                MaxHealthLevel = 0,
+                RegenAmountLevel = 0,
+                RegenIntervalLevel = 0,
+
+                MaxHealthUpgradeAmount = original.MaxHealthUpgradeAmount,
+                RegenAmountUpgradeAmount = original.RegenAmountUpgradeAmount,
+                RegenIntervalUpgradeAmount = original.RegenIntervalUpgradeAmount,
+
+                MaxHealthUpgradeBaseCost = original.MaxHealthUpgradeBaseCost,
+                RegenAmountUpgradeBaseCost = original.RegenAmountUpgradeBaseCost,
+                RegenIntervalUpgradeBaseCost = original.RegenIntervalUpgradeBaseCost
+            };
+        }
+
+        public void SetPermanentStats(PlayerBaseStatsInstance stats)
+        {
+            _permanentStats = CloneStats(stats);
+            
+        }
+
     }
 }

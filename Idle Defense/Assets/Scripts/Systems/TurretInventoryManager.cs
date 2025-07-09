@@ -23,6 +23,9 @@ namespace Assets.Scripts.Systems
         private List<int> pendingEquipped;
         private List<bool> pendingPurchased;
 
+        private readonly Dictionary<TurretStatsInstance, GameObject> instanceToGO = new();
+
+
         public int WaveRequirement(TurretType t) =>
             unlockTable.Entries.First(e => e.Type == t).WaveToUnlock;
 
@@ -105,9 +108,9 @@ namespace Assets.Scripts.Systems
 
             ulong cost = GetCost(type, countOwned);
 
-            if (GameManager.Instance.Money < cost)
+            if (!GameManager.Instance.TrySpendCurrency(Currency.BlackSteel, cost))
                 return false;
-            GameManager.Instance.SpendMoney(cost);
+
 
             // create runtime copy from the original SO
             TurretInfoSO baseSO = turretLibrary.GetInfo(type);
@@ -135,6 +138,15 @@ namespace Assets.Scripts.Systems
         public GameObject GetPrefab(TurretType t) => turretLibrary.GetPrefab(t);
 
         public TurretInfoSO GetInfoSO(TurretType type) => turretLibrary.GetInfo(type);
+
+        public (Currency currency, ulong cost) GetCostAndCurrency(TurretType type, int owned)
+        {
+            Currency currency = Currency.BlackSteel;
+            ulong cost = GetCost(type, owned); 
+
+            return (currency, cost);
+        }
+
 
         // ---------- save / load ----------
 
@@ -168,6 +180,50 @@ namespace Assets.Scripts.Systems
                 pendingPurchased = dto.SlotPurchased;
             }
         }
+
+        // Used to deactivate and activate object logic to replace destroy and instantiate
+
+        public GameObject GetGameObjectForInstance(TurretStatsInstance stats)
+        {
+            instanceToGO.TryGetValue(stats, out var go);
+            return go;
+        }
+
+        public void RegisterTurretInstance(TurretStatsInstance stats, GameObject go)
+        {
+            Debug.Log("registering turret instance: " + stats.TurretType);
+            if (!instanceToGO.ContainsKey(stats))
+                instanceToGO[stats] = go;
+        }
+
+        public void UnregisterTurretInstance(TurretStatsInstance stats)
+        {
+            if (instanceToGO.ContainsKey(stats))
+                instanceToGO.Remove(stats);
+        }
+
+        public void ClearUnusedTurrets()
+        {
+            // Only keep turrets that are currently equipped
+            var equipped = TurretSlotManager.Instance.ExportEquipped()
+                .Where(i => i >= 0 && i < owned.Count)
+                .Select(i => owned[i])
+                .ToHashSet();
+
+            var keysToRemove = instanceToGO.Keys
+                .Where(stats => !equipped.Contains(stats))
+                .ToList();
+
+            foreach (var key in keysToRemove)
+            {
+                if (instanceToGO.TryGetValue(key, out var go) && go != null)
+                {
+                    Destroy(go);
+                }
+                instanceToGO.Remove(key);
+            }
+        }
+
 
     }
 }

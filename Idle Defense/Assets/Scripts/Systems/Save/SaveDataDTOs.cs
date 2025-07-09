@@ -11,21 +11,34 @@ namespace Assets.Scripts.Systems.Save
 {
     public static class SaveDataDTOs
     {
-        public static GameDataDTO CreateGameDataDTO(int waveNumber, ulong money)
+        public static GameDataDTO CreateGameDataDTO(int waveNumber)
         {
-            return new GameDataDTO
+            var dto = new GameDataDTO
             {
                 WaveNumber = waveNumber,
-                Money = money,
                 TutorialStep = GameTutorialManager.Instance != null ? GameTutorialManager.Instance._currentStep : 0,
-
                 MusicVolume = SettingsManager.Instance.MusicVolume,
                 SFXVolume = SettingsManager.Instance.SFXVolume,
                 PopupsEnabled = SettingsManager.Instance.AllowPopups,
                 TooltipsEnabled = SettingsManager.Instance.AllowTooltips,
-                MuteAll = SettingsManager.Instance.Mute, 
-
+                MuteAll = SettingsManager.Instance.Mute,
+                Currencies = new CurrencyEntry[3]
             };
+
+            var currencyList = new List<CurrencyEntry>();
+            foreach (Currency currency in Enum.GetValues(typeof(Currency)))
+            {
+                currencyList.Add(new CurrencyEntry
+                {
+                    Currency = currency,
+                    Amount = GameManager.Instance.GetCurrency(currency)
+                });
+            }
+            dto.Currencies = currencyList.ToArray();
+
+
+            return dto;
+
         }
 
         public static PlayerInfoDTO CreatePlayerInfoDTO(PlayerBaseStatsInstance player)
@@ -249,6 +262,7 @@ public class GameDataDTO
 {
     public int WaveNumber;
     public ulong Money;
+    public CurrencyEntry[] Currencies;
     public int TutorialStep;
 
     public float MusicVolume;
@@ -257,6 +271,14 @@ public class GameDataDTO
     public bool PopupsEnabled;
     public bool TooltipsEnabled;
 }
+
+[Serializable]
+public class CurrencyEntry
+{
+    public Currency Currency;
+    public ulong Amount;
+}
+
 
 [Serializable]
 public class PlayerInfoDTO

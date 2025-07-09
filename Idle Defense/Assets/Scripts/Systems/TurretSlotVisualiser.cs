@@ -1,4 +1,5 @@
 using Assets.Scripts.Turrets;
+using System.Linq;
 using UnityEngine;
 // for BaseTurret
 
@@ -34,23 +35,52 @@ namespace Assets.Scripts.Systems
 
         void HandleChanged(int slot, TurretStatsInstance inst)
         {
-            // 1. Remove previous
+            Debug.Log($"TurretSlotVisualiser: slot {slot} changed to {inst?.TurretType}");
+            // Deactivate current turret on this slot
             if (spawned[slot] != null)
-                Destroy(spawned[slot]);
+            {
+                spawned[slot].SetActive(false);
+                spawned[slot].transform.SetParent(null);
+            }
 
-            // 2. Empty slot -> nothing to do
             if (inst == null)
-            { spawned[slot] = null; return; }
+            {
+                spawned[slot] = null;
+                return;
+            }
 
-            // 3. Spawn new prefab
+            Debug.Log($"TurretSlotVisualiser: slot {slot} will spawn {inst.TurretType}");
+
+            // Try to get existing turret from inventory manager
+            GameObject reused = TurretInventoryManager.Instance.GetGameObjectForInstance(inst);
+            Debug.Log($"TurretSlotVisualiser: reused turret for slot {slot} is {reused?.name}");
+            if (reused != null)
+            {
+                reused.transform.position = slotAnchors[slot].position;
+                reused.transform.SetParent(slotAnchors[slot]);
+                reused.SetActive(true);
+                spawned[slot] = reused;
+                return;
+            }
+
+            // If not found, instantiate new and register it
             GameObject prefab = library.GetPrefab(inst.TurretType);
             GameObject go = Instantiate(prefab, slotAnchors[slot].position, Quaternion.identity, slotAnchors[slot]);
 
-            // Pass runtime stats to the turret behaviour
             var baseTurret = go.GetComponent<BaseTurret>();
             baseTurret.SavedStats = inst;
 
+            // Make sure the turret is tracked
+            if (TurretInventoryManager.Instance.GetGameObjectForInstance(inst) == null)
+            {
+                Debug.Log($"TurretSlotVisualiser: registered new turret instance for {inst.TurretType} at slot {slot}");
+                TurretInventoryManager.Instance.RegisterTurretInstance(inst, go);
+            }
+
+            Debug.Log($"TurretSlotVisualiser: spawned new turret for slot {slot} is {go.name}");
             spawned[slot] = go;
         }
+
+
     }
 }

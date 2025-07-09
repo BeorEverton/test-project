@@ -20,11 +20,14 @@ namespace Assets.Scripts.UI
             _baseTurret = baseTurret;
 
             // Assign turret to all upgrade buttons inside this panel
-            foreach (TurretUpgradeButton btn in contentRoot.GetComponentsInChildren<TurretUpgradeButton>())
+            Currency cur = GameManager.Instance.CurrentGameState == GameState.Management
+            ? Currency.BlackSteel        // permanent
+            : Currency.Scraps;           // temporary
+
+            foreach (TurretUpgradeButton btn in contentRoot.GetComponentsInChildren<TurretUpgradeButton>(true))
             {
-                btn._baseTurret = _baseTurret;
                 btn.enabled = true;
-                btn.Init();
+                btn.Init(_baseTurret, cur);  // <-- now passes turret & currency
             }
 
             gameObject.SetActive(true);
