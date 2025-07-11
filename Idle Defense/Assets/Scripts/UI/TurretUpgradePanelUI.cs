@@ -31,6 +31,15 @@ namespace Assets.Scripts.UI
             }
 
             gameObject.SetActive(true);
+
+            if (GameManager.Instance.CurrentGameState == GameState.InGame)
+            {
+                unequipButton.gameObject.SetActive(false); // hide unequip button in-game
+            }
+            else
+            {
+                unequipButton.gameObject.SetActive(true);  // show unequip button in management
+            }
         }
 
         public void Close() => gameObject.SetActive(false);

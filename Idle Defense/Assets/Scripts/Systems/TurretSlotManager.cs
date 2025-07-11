@@ -220,36 +220,27 @@ namespace Assets.Scripts.Systems
 
         private void HandleGameStateChanged(GameState newState)
         {
-            // Entering management phase clears runtime stats and resets equipped turrets
-            if (newState == GameState.Management)
+            if (newState != GameState.InGame)
+                return;
+
+            _runtimeTempStats.Clear();
+
+            foreach (var kvp in _equippedTurrets)
             {
-                _runtimeTempStats.Clear();
-                TurretInventoryManager.Instance.ClearUnusedTurrets();
+                int slot = kvp.Key;
+                EquippedTurret equipped = kvp.Value;
 
-                foreach (var stats in equipped)
-                {
-                    if (stats == null) continue;
+                if (equipped == null || equipped.Permanent == null)
+                    continue;
 
-                    // Find matching GameObject and BaseTurret
-                    GameObject turretGO = TurretInventoryManager.Instance.GetGameObjectForInstance(stats);
-                    if (turretGO == null) continue;
+                // Clone fresh runtime stats from permanent
+                var newRuntime = BaseTurret.CloneStatsWithoutLevels(equipped.Permanent);
 
-                    BaseTurret turret = turretGO.GetComponent<BaseTurret>();
-                    if (turret == null || turret.PermanentStats == null) continue;
+                // Assign and track
+                equipped.Runtime = newRuntime;
+                _runtimeTempStats[slot] = newRuntime;
 
-                    // Reset RuntimeStats by cloning from Permanent
-                    turret.RuntimeStats = BaseTurret.CloneStatsWithoutLevels(turret.PermanentStats);
-                    TurretInventoryManager.Instance.RegisterTurretInstance(turret.RuntimeStats, turretGO);
-
-                    // Reassign in slot
-                    int slot = Array.IndexOf(equipped, stats);
-                    if (slot >= 0)
-                    {
-                        equipped[slot] = turret.RuntimeStats;
-                        _runtimeTempStats[slot] = turret.RuntimeStats;
-                        OnEquippedChanged?.Invoke(slot, turret.RuntimeStats);
-                    }
-                }
+                OnEquippedChanged?.Invoke(slot, newRuntime);
             }
         }
 
