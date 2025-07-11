@@ -89,7 +89,6 @@ namespace Assets.Scripts.Systems.Save
                 ShowDisclaimerPanel();
                 return;
             }
-
             
             PlayerBaseManager.Instance.SavedStats = LoadDataDTOs.CreatePlayerBaseSO(gameData.PlayerInfoDTO);
             if (gameData.PermanentPlayerInfoDTO != null)
@@ -101,7 +100,6 @@ namespace Assets.Scripts.Systems.Save
             {
                 GameManager.Instance.LoadCurrency(entry.Currency, entry.Amount);
             }
-
 
             WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
             GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);

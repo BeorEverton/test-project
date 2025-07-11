@@ -165,59 +165,69 @@ namespace Assets.Scripts.UI
 
         private void RefreshSlot(int changed, TurretStatsInstance inst)
         {
+            Debug.Log("[SlotWorldButton] Refreshing slot " + changed);
             UpdateColor();
 
             if (changed != slotIndex)
                 return;
 
-            // Deactivate existing object (not destroy!)
+            // Deactivate any existing object
             if (spawned != null)
             {
                 spawned.gameObject.SetActive(false);
                 spawned.transform.SetParent(null);
             }
 
-            if (inst != null)
-            {
-                // Try to reuse a tracked turret object
-                GameObject existing = TurretInventoryManager.Instance.GetGameObjectForInstance(inst);
-                if (existing != null)
-                {
-                    existing.transform.position = barrelAnchor.position;
-                    existing.transform.SetParent(barrelAnchor);
-                    existing.SetActive(true);
-                    spawned = existing;
-                }
-                else
-                {
-                    // No tracked turret, spawn new
-                    GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
-                    spawned = Instantiate(prefab, barrelAnchor.position, Quaternion.identity, barrelAnchor);
-                    // Adjust the prefab so it uses the restored stats
-                    var turret = spawned != null ? spawned.GetComponent<BaseTurret>() : null;
-                    if (turret != null && inst != null)
-                    {
-                        turret.PermanentStats = inst;                // link permanent copy
-                        if (GameManager.Instance.CurrentGameState == GameState.Management)
-                            turret.RuntimeStats = inst;              // show exact numbers in UI
-                        turret.UpdateTurretAppearance();             // refresh sprite tiers
-                    }
-
-                    TurretInventoryManager.Instance.RegisterTurretInstance(inst, spawned);
-                }
-
-                if (noTurretHint != null)
-                    noTurretHint.SetActive(false);
-            }
-            else
+            if (inst == null)
             {
                 spawned = null;
                 if (noTurretHint != null)
                     noTurretHint.SetActive(true);
+                UpdateOverlay();
+                return;
             }
+
+            // Look up the EquippedTurret object instead of guessing stats
+            if (!TurretSlotManager.Instance.TryGetEquippedTurret(slotIndex, out var equippedTurret) || equippedTurret == null)
+            {
+                Debug.LogWarning($"[SlotWorldButton] Slot {slotIndex} does not have a valid EquippedTurret reference.");
+                return;
+            }
+
+            // Try to reuse the GameObject if it already exists
+            GameObject go = TurretInventoryManager.Instance.GetGameObjectForInstance(equippedTurret.Runtime);
+            if (go == null)
+            {
+                // Fallback: instantiate and register
+                GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
+                go = Instantiate(prefab);
+                var baseTurret = go.GetComponent<BaseTurret>();
+
+                if (baseTurret != null)
+                {
+                    baseTurret.PermanentStats = equippedTurret.Permanent;
+                    baseTurret.RuntimeStats = equippedTurret.Runtime;
+                    baseTurret.UpdateTurretAppearance();
+
+                    TurretInventoryManager.Instance.RegisterTurretInstance(baseTurret.PermanentStats, go);
+                    TurretInventoryManager.Instance.RegisterTurretInstance(baseTurret.RuntimeStats, go);
+                }
+            }
+
+            // Place the turret in the anchor
+            go.transform.position = barrelAnchor.position;
+            go.transform.rotation = Quaternion.identity;
+            go.transform.SetParent(barrelAnchor);
+            go.SetActive(true);
+
+            spawned = go;
+
+            if (noTurretHint != null)
+                noTurretHint.SetActive(false);
 
             UpdateOverlay();
         }
+
 
 
         //  Called whenever slot state / wave changes.

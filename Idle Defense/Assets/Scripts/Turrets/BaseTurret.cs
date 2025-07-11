@@ -270,15 +270,6 @@ namespace Assets.Scripts.Turrets
             Gizmos.DrawLine(position + new Vector3(-_aimSize, _aimSize, 0), position + new Vector3(_aimSize, -_aimSize, 0));
         }
 
-        public TurretStatsInstance GetStats() 
-        {
-            if (RuntimeStats == null)
-            {
-                RuntimeStats = new TurretStatsInstance(_turretInfo);
-                Debug.Log($"{name} RuntimeStats was null, creating a new instance from TurretInfoSO. At Get Stats");
-            }
-            return RuntimeStats;
-        }
         public bool IsUnlocked() => RuntimeStats.IsUnlocked;
         public void UnlockTurret() => RuntimeStats.IsUnlocked = true;
 
@@ -513,11 +504,6 @@ namespace Assets.Scripts.Turrets
                 RotationSpeed = src.RotationSpeed,
                 AngleThreshold = src.AngleThreshold
             };
-        }
-
-        private void DeepCopyStats(TurretStatsInstance target, TurretStatsInstance origin)
-        {
-            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(origin), target);
         }
 
         public TurretStatsInstance GetUpgradeableStats(Currency currency)

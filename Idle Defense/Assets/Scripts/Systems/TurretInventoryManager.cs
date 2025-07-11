@@ -83,6 +83,9 @@ namespace Assets.Scripts.Systems
                 IsUnlocked = true
             };
             owned.Add(inst);
+            // Prevent auto-equipping to slot 0 by default
+            pendingEquipped = new List<int> { -1, -1, -1, -1, -1 };
+
         }
 
         private void OnDestroy()
@@ -162,14 +165,6 @@ namespace Assets.Scripts.Systems
 
         public TurretInventoryDTO ExportToDTO()
         {
-            for (int i = 0; i < owned.Count; i++)
-            {
-                if (owned[i] != null)
-                {
-                    Debug.Log("exporting turret " + owned[i].TurretType + " with damage " + owned[i].Damage);                   
-                    
-                }
-            }
             return new TurretInventoryDTO
             {
                 Owned = owned,
@@ -187,34 +182,25 @@ namespace Assets.Scripts.Systems
             owned.Clear();
             owned.AddRange(dto.Owned ?? new List<TurretStatsInstance>());
 
-            Debug.Log($"[Inventory] Loaded {owned.Count} turrets");
-
             unlockedTypes.Clear();
             unlockedTypes.UnionWith(dto.UnlockedTypes ?? new List<TurretType>());
 
             if (TurretSlotManager.Instance != null)
             {
-                TurretSlotManager.Instance.ImportEquipped(dto.EquippedIds);
+                //  Skip this entirely if full turrets are present
+                if (dto.EquippedTurrets == null || dto.EquippedTurrets.Count == 0)
+                    TurretSlotManager.Instance.ImportEquipped(dto.EquippedIds);
 
-                // Only use this if EquippedTurrets is null
                 if (dto.EquippedTurrets != null && dto.EquippedTurrets.Count > 0)
                 {
                     TurretSlotManager.Instance.ImportEquippedTurrets(dto.EquippedTurrets);
                 }
                 else
                 {
-                    TurretSlotManager.Instance.ImportRuntimeStats(dto.EquippedRuntimeStats); //  skip if already loaded via EquippedTurrets
+                    TurretSlotManager.Instance.ImportRuntimeStats(dto.EquippedRuntimeStats);
                 }
 
                 TurretSlotManager.Instance.ImportPurchasedFlags(dto.SlotPurchased);
-            }
-            else
-            {
-                pendingEquipped = dto.EquippedIds;
-                pendingPurchased = dto.SlotPurchased;
-
-                if (dto.EquippedTurrets == null)
-                    pendingRuntimeStats = dto.EquippedRuntimeStats;
             }
         }
 
@@ -229,10 +215,15 @@ namespace Assets.Scripts.Systems
 
         public void RegisterTurretInstance(TurretStatsInstance stats, GameObject go)
         {
-            
+            if (stats == null || go == null)
+                return;
+
             if (!instanceToGO.ContainsKey(stats))
+                instanceToGO.Add(stats, go);
+            else
                 instanceToGO[stats] = go;
         }
+
 
         public void UnregisterTurretInstance(TurretStatsInstance stats)
         {
@@ -242,23 +233,29 @@ namespace Assets.Scripts.Systems
 
         public void ClearUnusedTurrets()
         {
-            // Get the actual TurretStatsInstance objects currently equipped
             var equippedStats = TurretSlotManager.Instance.GetEquippedStats()
                 .Where(s => s != null)
                 .ToHashSet();
 
-            var keysToRemove = instanceToGO.Keys
-                .Where(stats => !equippedStats.Contains(stats))
+            var keysToRemove = instanceToGO
+                .Where(pair => !equippedStats.Contains(pair.Key))
                 .ToList();
 
-            foreach (var key in keysToRemove)
+            foreach (var pair in keysToRemove)
             {
-                if (instanceToGO.TryGetValue(key, out var go) && go != null)
-                {
-                    Destroy(go);
-                }
-                instanceToGO.Remove(key);
+                if (pair.Value != null)
+                    Destroy(pair.Value);
+
+                instanceToGO.Remove(pair.Key);
+            }
+
+            // Extra cleanup for any lingering scene turrets (fallback)
+            foreach (var obj in FindObjectsByType<BaseTurret>(FindObjectsSortMode.None))
+            {
+                if (!instanceToGO.ContainsValue(obj.gameObject))
+                    Destroy(obj.gameObject);
             }
         }
+
     }
 }
