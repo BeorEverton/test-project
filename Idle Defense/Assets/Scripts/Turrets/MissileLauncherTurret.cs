@@ -59,23 +59,23 @@ namespace Assets.Scripts.Turrets
 
         private void CreateExplosion(Vector3 target)
         {
-            List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(_stats.ExplosionRadius));
-            float impactArea = _stats.ExplosionRadius / 3;
+            List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(RuntimeStats.ExplosionRadius));
+            float impactArea = RuntimeStats.ExplosionRadius / 3;
             AudioManager.Instance.PlayWithVariation(_explosionSound, 0.5f, 1f);
 
             foreach (Enemy enemy in enemiesInAdjecentGrids
                          .Where(enemy => Vector3.Distance(enemy.transform.position, target) <= impactArea))
             {
-                enemy.TakeDamage(_stats.Damage);
-                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, _stats.Damage);
+                enemy.TakeDamage(RuntimeStats.Damage);
+                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, RuntimeStats.Damage);
             }
 
             foreach (Enemy enemy in enemiesInAdjecentGrids
                          .Where(enemy => Vector3.Distance(enemy.transform.position, target) > impactArea &&
-                             Vector3.Distance(enemy.transform.position, target) <= _stats.ExplosionRadius))
+                             Vector3.Distance(enemy.transform.position, target) <= RuntimeStats.ExplosionRadius))
             {
-                enemy.TakeDamage(_stats.SplashDamage);
-                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, _stats.SplashDamage);
+                enemy.TakeDamage(RuntimeStats.SplashDamage);
+                StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, RuntimeStats.SplashDamage);
             }
         }
 
@@ -86,9 +86,9 @@ namespace Assets.Scripts.Turrets
                 return;
 
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(_targetEnemy.transform.position, _stats.ExplosionRadius);
+            Gizmos.DrawWireSphere(_targetEnemy.transform.position, RuntimeStats.ExplosionRadius);
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(_targetEnemy.transform.position, _stats.ExplosionRadius / 3);
+            Gizmos.DrawWireSphere(_targetEnemy.transform.position, RuntimeStats.ExplosionRadius / 3);
         }
     }
 }

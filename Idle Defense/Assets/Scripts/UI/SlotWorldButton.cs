@@ -193,10 +193,15 @@ namespace Assets.Scripts.UI
                     // No tracked turret, spawn new
                     GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
                     spawned = Instantiate(prefab, barrelAnchor.position, Quaternion.identity, barrelAnchor);
-
-                    var turret = spawned.GetComponent<BaseTurret>();
-                    turret.PermanentStats = inst;
-                    turret.SavedStats = inst; // Use current instance (not clone)
+                    // Adjust the prefab so it uses the restored stats
+                    var turret = spawned != null ? spawned.GetComponent<BaseTurret>() : null;
+                    if (turret != null && inst != null)
+                    {
+                        turret.PermanentStats = inst;                // link permanent copy
+                        if (GameManager.Instance.CurrentGameState == GameState.Management)
+                            turret.RuntimeStats = inst;              // show exact numbers in UI
+                        turret.UpdateTurretAppearance();             // refresh sprite tiers
+                    }
 
                     TurretInventoryManager.Instance.RegisterTurretInstance(inst, spawned);
                 }

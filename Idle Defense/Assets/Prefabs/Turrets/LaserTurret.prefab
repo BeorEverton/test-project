@@ -371,23 +371,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnemyTargetChoice: 0
   _turretInfo: {fileID: 11400000, guid: 43a962a1d20eeb548a80327e5843ee19, type: 2}
-  SavedStats:
+  RuntimeStats:
     IsUnlocked: 0
-    TurretType: 0
-    BaseDamage: 0
-    BaseFireRate: 0
+    TurretType: 4
+    BaseDamage: 500
+    BaseFireRate: 8
     BaseCritChance: 0
     BaseCritDamage: 0
-    Damage: 0
+    Damage: 500
     DamageLevel: 0
-    DamageUpgradeAmount: 0
-    DamageUpgradeBaseCost: 0
-    DamageCostExponentialMultiplier: 0
-    FireRate: 0
+    DamageUpgradeAmount: 1.04
+    DamageUpgradeBaseCost: 15000
+    DamageCostExponentialMultiplier: 1.08
+    FireRate: 8
     FireRateLevel: 0
-    FireRateUpgradeAmount: 0
-    FireRateUpgradeBaseCost: 0
-    FireRateCostExponentialMultiplier: 0
+    FireRateUpgradeAmount: 0.04
+    FireRateUpgradeBaseCost: 50000
+    FireRateCostExponentialMultiplier: 1.078
     CriticalChance: 0
     CriticalChanceLevel: 0
     CriticalChanceUpgradeAmount: 0
@@ -427,16 +427,82 @@ MonoBehaviour:
     KnockbackStrengthUpgradeAmount: 0
     KnockbackStrengthUpgradeBaseCost: 0
     KnockbackStrengthCostExponentialMultiplier: 0
-    PercentBonusDamagePerSec: 0
+    PercentBonusDamagePerSec: 10
     PercentBonusDamagePerSecLevel: 0
-    PercentBonusDamagePerSecUpgradeAmount: 0
-    PercentBonusDamagePerSecUpgradeBaseCost: 0
-    SlowEffect: 0
+    PercentBonusDamagePerSecUpgradeAmount: 0.2
+    PercentBonusDamagePerSecUpgradeBaseCost: 3000
+    SlowEffect: 20
     SlowEffectLevel: 0
-    SlowEffectUpgradeAmount: 0
-    SlowEffectUpgradeBaseCost: 0
-    RotationSpeed: 0
-    AngleThreshold: 0
+    SlowEffectUpgradeAmount: 2
+    SlowEffectUpgradeBaseCost: 8000
+    RotationSpeed: 14
+    AngleThreshold: 3
+  PermanentStats:
+    IsUnlocked: 0
+    TurretType: 4
+    BaseDamage: 500
+    BaseFireRate: 8
+    BaseCritChance: 0
+    BaseCritDamage: 0
+    Damage: 500
+    DamageLevel: 0
+    DamageUpgradeAmount: 1.04
+    DamageUpgradeBaseCost: 15000
+    DamageCostExponentialMultiplier: 1.08
+    FireRate: 8
+    FireRateLevel: 0
+    FireRateUpgradeAmount: 0.04
+    FireRateUpgradeBaseCost: 50000
+    FireRateCostExponentialMultiplier: 1.078
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalChanceUpgradeAmount: 0
+    CriticalChanceUpgradeBaseCost: 0
+    CriticalChanceCostExponentialMultiplier: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    CriticalDamageMultiplierUpgradeAmount: 0
+    CriticalDamageMultiplierUpgradeBaseCost: 0
+    CriticalDamageCostExponentialMultiplier: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    ExplosionRadiusUpgradeAmount: 0
+    ExplosionRadiusUpgradeBaseCost: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    SplashDamageUpgradeAmount: 0
+    SplashDamageUpgradeBaseCost: 0
+    PierceChance: 0
+    PierceChanceLevel: 0
+    PierceChanceUpgradeAmount: 0
+    PierceChanceUpgradeBaseCost: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PierceDamageFalloffUpgradeAmount: 0
+    PierceDamageFalloffUpgradeBaseCost: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    PelletCountUpgradeAmount: 0
+    PelletCountUpgradeBaseCost: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    DamageFalloffOverDistanceUpgradeAmount: 0
+    DamageFalloffOverDistanceUpgradeBaseCost: 0
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
+    PercentBonusDamagePerSec: 10
+    PercentBonusDamagePerSecLevel: 0
+    PercentBonusDamagePerSecUpgradeAmount: 0.2
+    PercentBonusDamagePerSecUpgradeBaseCost: 3000
+    SlowEffect: 20
+    SlowEffectLevel: 0
+    SlowEffectUpgradeAmount: 2
+    SlowEffectUpgradeBaseCost: 8000
+    RotationSpeed: 14
+    AngleThreshold: 3
   _rotationPoint: {fileID: 3238056590023094999}
   _muzzleFlashPosition: {fileID: 2171005184245118268}
   _muzzleFlashSprites: []

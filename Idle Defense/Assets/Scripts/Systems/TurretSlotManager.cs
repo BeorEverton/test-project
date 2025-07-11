@@ -1,3 +1,4 @@
+using Assets.Scripts.SO;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Systems.Save;
 using Assets.Scripts.Turrets;
@@ -170,6 +171,17 @@ namespace Assets.Scripts.Systems
 
         //  save helpers 
         public List<bool> GetPurchasedFlags() => slotInfo.Select(s => s.purchased).ToList();
+
+        public List<TurretStatsInstance> ExportRuntimeStats()
+        {
+            var list = new List<TurretStatsInstance>(5);
+            foreach (var inst in equipped)
+                list.Add(inst);
+            Debug.Log($"[SlotMgr] ExportRuntimeStats  {list.Count(s => s != null)} copies");
+
+            return list;
+        }
+
         public void ImportPurchasedFlags(List<bool> flags)
         {
             for (int i = 0; i < flags.Count && i < slotInfo.Length; i++)
@@ -195,13 +207,42 @@ namespace Assets.Scripts.Systems
             }
         }
 
+        public void ImportRuntimeStats(List<TurretStatsInstance> stats)
+        {
+            if (stats == null) return;
+            Debug.Log($"[SlotMgr] ImportRuntimeStats {stats.Count(s => s != null)} copies");
+            for (int i = 0; i < stats.Count && i < equipped.Length; i++)
+            {
+                if (stats[i] == null) continue;
+                equipped[i] = stats[i];
+                _runtimeTempStats[i] = stats[i];     // mark as runtime copy
+                OnEquippedChanged?.Invoke(i, stats[i]);
+            }
+        }
+
+        //  Returns the first equipped runtime copy for the requested type, or null.
+        public TurretStatsInstance GetRuntimeStatsOfType(TurretType type)
+        {
+            foreach (TurretStatsInstance inst in equipped)
+                if (inst != null && inst.TurretType == type)
+                    return inst;
+            return null;
+        }
+
+
         private void HandleGameStateChanged(GameState newState)
         {
-            if (newState == GameState.Management)
+            if (newState == GameState.InGame)
             {
-                _runtimeTempStats.Clear();
+                Debug.Log("[SlotMgr] Clearing old runtime stats – new run is starting");
+                _runtimeTempStats.Clear();            // fresh run forget old Scrap buffs
                 TurretInventoryManager.Instance.ClearUnusedTurrets();
             }
+        }
+
+        public IEnumerable<TurretStatsInstance> GetEquippedStats()
+        {
+            return equipped.Where(e => e != null);
         }
 
 

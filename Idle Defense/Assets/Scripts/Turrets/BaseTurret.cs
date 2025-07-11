@@ -19,12 +19,12 @@ namespace Assets.Scripts.Turrets
     {
         public EnemyTarget EnemyTargetChoice = EnemyTarget.First;
 
+        /// <summary>
+        /// Reference to the TurretInfoSO that contains the base stats and info for this turret. DONT CHANGE AT RUNTIME!
+        /// </summary>
         public TurretInfoSO _turretInfo;
-        [HideInInspector] public TurretStatsInstance SavedStats;
-        protected TurretStatsInstance _stats;
-        public TurretStatsInstance RuntimeStats;     // For session upgrades
+        public TurretStatsInstance RuntimeStats; // For session upgrades
         public TurretStatsInstance PermanentStats;   // Saved base
-
 
         [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] protected List<Sprite> _muzzleFlashSprites;
@@ -60,37 +60,6 @@ namespace Assets.Scripts.Turrets
 
         public GameObject upgradePulseFX;
 
-        private bool IsValidStats(TurretStatsInstance stats)
-        {
-            return stats != null && stats.Damage > 0; // or use another required field
-        }
-
-        private void Awake()
-        {
-            /*  PHASE 0 ─ game first loads  (or prefab is instantiated)  */
-            // 0-a  ALWAYS build PermanentStats straight from the SO
-            if (PermanentStats == null || PermanentStats.Damage <= 0)
-                PermanentStats = new TurretStatsInstance(_turretInfo);
-
-
-            /*  PHASE 1 ─ resume a running wave?*/
-            // SavedStats holds session-only upgrades (Scraps). If it exists, keep playing with it.
-            if (SavedStats != null && IsValidStats(SavedStats))
-            {
-                RuntimeStats = SavedStats;
-            }
-            else
-            {
-                /*  PHASE 2 ─ brand-new run*/
-                RuntimeStats = CloneStatsWithoutLevels(PermanentStats);
-            }
-
-            _stats = RuntimeStats;
-
-            // Listen so we can rebuild RuntimeStats every time a new run starts
-            GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
-        }
-
         private void OnDestroy() =>
             GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
 
@@ -100,50 +69,41 @@ namespace Assets.Scripts.Turrets
 
             // new run  discard any previous RuntimeStats and rebuild from Permanent
             RuntimeStats = CloneStatsWithoutLevels(PermanentStats);
-            SavedStats = null;            // wipe leftovers from the last run
-            _stats = RuntimeStats;
             UpdateTurretAppearance();
         }
 
 
         protected virtual void Start()
         {
+            // If there are no saved permanent stats create a new fresh from the SO
             if (PermanentStats == null)
-                PermanentStats = new TurretStatsInstance(_turretInfo);   // base SO - permanent
+                PermanentStats = new TurretStatsInstance(_turretInfo);
 
-            RuntimeStats = SavedStats != null && IsValidStats(SavedStats)
-                ? SavedStats                                           // loaded mid-run
-                : CloneStatsWithoutLevels(PermanentStats);             // fresh session
-
-            _stats = RuntimeStats;                                     //  prevents null-refs
+            // Listen so we can rebuild RuntimeStats every time a new run starts
+            GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
 
             UpdateTurretAppearance();
         }
 
 
-        /// <summary>Overwrite the whole permanent profile, preserving level counts.</summary>
+        /// <summary>Overwrite the whole stats, preserving level counts, called on load.</summary>
         public void SetPermanentStats(TurretStatsInstance stats)
         {
-            if (PermanentStats == null)              // first call? just adopt the reference
-            {
-                PermanentStats = stats;
-                return;
-            }
-
-            // Overwrite field-by-field so every existing reference (UI buttons, saves, etc.)
-            // now sees the updated values *without* losing the object identity.
-            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(stats), PermanentStats);
+            PermanentStats = stats;
         }
 
         protected virtual void OnEnable()
         {
             UpdateScreenBoundsIfNeeded();
-            if (RuntimeStats == null && SavedStats != null)
+            if (RuntimeStats == null && PermanentStats != null)
             {
-                RuntimeStats = SavedStats;
-                _stats = RuntimeStats;
+                RuntimeStats = CloneStatsWithoutLevels(PermanentStats); // New enable, if cleaned runtime, clone the permanent
+                Debug.Log("runtime stats was null, cloning from permanent stats on Enable on " + name);
             }
-
+            if (ReferenceEquals(PermanentStats, RuntimeStats))
+            {
+                Debug.LogError($"{name}  PermanentStats and RuntimeStats are sharing the same reference! This will break upgrades.");
+            }
         }
 
         protected virtual void Update()
@@ -152,7 +112,7 @@ namespace Assets.Scripts.Turrets
             _bonusSpdMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
 
             // Calculate attack speed and damage
-            _atkSpeed = (1 / _stats.FireRate) / _bonusSpdMultiplier;
+            _atkSpeed = (1 / RuntimeStats.FireRate) / _bonusSpdMultiplier;
 
             _timeSinceLastShot += Time.deltaTime;
             Attack();
@@ -266,7 +226,7 @@ namespace Assets.Scripts.Turrets
             Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
 
             _rotationPoint.localRotation = Quaternion.Slerp(
-                _rotationPoint.rotation, targetRotation, _stats.RotationSpeed * bonusMultiplier * Time.deltaTime);
+                _rotationPoint.rotation, targetRotation, RuntimeStats.RotationSpeed * bonusMultiplier * Time.deltaTime);
 
             IsAimingOnTarget(angle);
         }
@@ -283,7 +243,7 @@ namespace Assets.Scripts.Turrets
 
             float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
 
-            _targetInAim = angleDifference <= _stats.AngleThreshold;
+            _targetInAim = angleDifference <= RuntimeStats.AngleThreshold;
         }
 
         private IEnumerator ShowMuzzleFlash()
@@ -310,9 +270,17 @@ namespace Assets.Scripts.Turrets
             Gizmos.DrawLine(position + new Vector3(-_aimSize, _aimSize, 0), position + new Vector3(_aimSize, -_aimSize, 0));
         }
 
-        public TurretStatsInstance GetStats() => _stats;
-        public bool IsUnlocked() => _stats.IsUnlocked;
-        public void UnlockTurret() => _stats.IsUnlocked = true;
+        public TurretStatsInstance GetStats() 
+        {
+            if (RuntimeStats == null)
+            {
+                RuntimeStats = new TurretStatsInstance(_turretInfo);
+                Debug.Log($"{name} RuntimeStats was null, creating a new instance from TurretInfoSO. At Get Stats");
+            }
+            return RuntimeStats;
+        }
+        public bool IsUnlocked() => RuntimeStats.IsUnlocked;
+        public void UnlockTurret() => RuntimeStats.IsUnlocked = true;
 
         private void UpdateScreenBoundsIfNeeded()
         {
@@ -388,29 +356,29 @@ namespace Assets.Scripts.Turrets
         private int GetTotalUpgradeLevel()
         {
             return Mathf.FloorToInt(
-                _stats.DamageLevel +
-                _stats.FireRateLevel +
-                _stats.CriticalChanceLevel +
-                _stats.CriticalDamageMultiplierLevel +
-                _stats.ExplosionRadiusLevel +
-                _stats.SplashDamageLevel +
-                _stats.PierceChanceLevel +
-                _stats.PierceDamageFalloffLevel +
-                _stats.PelletCountLevel +
-                _stats.DamageFalloffOverDistanceLevel +
-                _stats.PercentBonusDamagePerSecLevel +
-                _stats.SlowEffectLevel +
-                _stats.KnockbackStrengthLevel
+                RuntimeStats.DamageLevel +
+                RuntimeStats.FireRateLevel +
+                RuntimeStats.CriticalChanceLevel +
+                RuntimeStats.CriticalDamageMultiplierLevel +
+                RuntimeStats.ExplosionRadiusLevel +
+                RuntimeStats.SplashDamageLevel +
+                RuntimeStats.PierceChanceLevel +
+                RuntimeStats.PierceDamageFalloffLevel +
+                RuntimeStats.PelletCountLevel +
+                RuntimeStats.DamageFalloffOverDistanceLevel +
+                RuntimeStats.PercentBonusDamagePerSecLevel +
+                RuntimeStats.SlowEffectLevel +
+                RuntimeStats.KnockbackStrengthLevel
             );
         }
 
         public virtual float GetDPS()
         {
-            float baseDamage = _stats.Damage;
-            float fireRate = _stats.FireRate;
-            float critChance = Mathf.Clamp01(_stats.CriticalChance / 100f);
-            float critMultiplier = _stats.CriticalDamageMultiplier / 100f;
-            float bonusDpsPercent = _stats.PercentBonusDamagePerSec / 100f;
+            float baseDamage = RuntimeStats.Damage;
+            float fireRate = RuntimeStats.FireRate;
+            float critChance = Mathf.Clamp01(RuntimeStats.CriticalChance / 100f);
+            float critMultiplier = RuntimeStats.CriticalDamageMultiplier / 100f;
+            float bonusDpsPercent = RuntimeStats.PercentBonusDamagePerSec / 100f;
 
             // Effective damage per shot with crit chance
             float effectiveDamage = baseDamage * (1f + critChance * (critMultiplier - 1f));
@@ -545,6 +513,16 @@ namespace Assets.Scripts.Turrets
                 RotationSpeed = src.RotationSpeed,
                 AngleThreshold = src.AngleThreshold
             };
+        }
+
+        private void DeepCopyStats(TurretStatsInstance target, TurretStatsInstance origin)
+        {
+            JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(origin), target);
+        }
+
+        public TurretStatsInstance GetUpgradeableStats(Currency currency)
+        {
+            return currency == Currency.BlackSteel ? PermanentStats : RuntimeStats;
         }
 
     }

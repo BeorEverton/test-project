@@ -33,8 +33,8 @@ namespace Assets.Scripts.Turrets
 
             _recoil.AddRecoil();
 
-            float pierceDamageMultiplier = _stats.PierceDamageFalloff / 100f;
-            float currentDamage = _stats.Damage;
+            float pierceDamageMultiplier = RuntimeStats.PierceDamageFalloff / 100f;
+            float currentDamage = RuntimeStats.Damage;
             bool firstHit = true;
 
             Vector2 startPos = _muzzleFlashPosition.position;
@@ -74,7 +74,7 @@ namespace Assets.Scripts.Turrets
                 else
                 {
                     float roll = Random.Range(0f, 100f);
-                    if (roll > _stats.PierceChance)
+                    if (roll > RuntimeStats.PierceChance)
                         break;
                 }
 
@@ -111,13 +111,13 @@ namespace Assets.Scripts.Turrets
 
         public override float GetDPS()
         {
-            float baseDamage = _stats.Damage;
-            float fireRate = _stats.FireRate;
-            float critChance = Mathf.Clamp01(_stats.CriticalChance / 100f);
-            float critMultiplier = _stats.CriticalDamageMultiplier / 100f;
-            float pierceChance = Mathf.Clamp01(_stats.PierceChance / 100f);
-            float pierceFalloff = _stats.PierceDamageFalloff / 100f;
-            float bonusDpsPercent = _stats.PercentBonusDamagePerSec / 100f;
+            float baseDamage = RuntimeStats.Damage;
+            float fireRate = RuntimeStats.FireRate;
+            float critChance = Mathf.Clamp01(RuntimeStats.CriticalChance / 100f);
+            float critMultiplier = RuntimeStats.CriticalDamageMultiplier / 100f;
+            float pierceChance = Mathf.Clamp01(RuntimeStats.PierceChance / 100f);
+            float pierceFalloff = RuntimeStats.PierceDamageFalloff / 100f;
+            float bonusDpsPercent = RuntimeStats.PercentBonusDamagePerSec / 100f;
 
             float damage = baseDamage * (1f + critChance * (critMultiplier - 1f));
             damage *= (1f + bonusDpsPercent);

@@ -25,6 +25,7 @@ namespace Assets.Scripts.Systems
 
         private readonly Dictionary<TurretStatsInstance, GameObject> instanceToGO = new();
 
+        private List<TurretStatsInstance> pendingRuntimeStats;  
 
         public int WaveRequirement(TurretType t) =>
             unlockTable.Entries.First(e => e.Type == t).WaveToUnlock;
@@ -54,6 +55,12 @@ namespace Assets.Scripts.Systems
                 TurretSlotManager.Instance.ImportPurchasedFlags(pendingPurchased);
                 pendingPurchased = null;
             }
+            if (pendingRuntimeStats != null)
+            {
+                TurretSlotManager.Instance.ImportRuntimeStats(pendingRuntimeStats);
+                pendingRuntimeStats = null;
+            }
+
         }
 
         private void EnsureStarterTurret()
@@ -156,6 +163,7 @@ namespace Assets.Scripts.Systems
             {
                 Owned = owned,
                 EquippedIds = TurretSlotManager.Instance.ExportEquipped(),
+                EquippedRuntimeStats = TurretSlotManager.Instance.ExportRuntimeStats(),   // keep Scrap buffs
                 UnlockedTypes = unlockedTypes.ToList(),
                 SlotPurchased = TurretSlotManager.Instance.GetPurchasedFlags()
             };
@@ -166,19 +174,26 @@ namespace Assets.Scripts.Systems
             owned.Clear();
             owned.AddRange(dto.Owned ?? new List<TurretStatsInstance>());
 
+            Debug.Log($"[Inventory] Loaded {owned.Count} turrets, "
+                      + $"{unlockedTypes.Count} types unlocked.");
+
+
             unlockedTypes.Clear();
             unlockedTypes.UnionWith(dto.UnlockedTypes ?? new List<TurretType>());
 
             if (TurretSlotManager.Instance != null)
             {
                 TurretSlotManager.Instance.ImportEquipped(dto.EquippedIds);
+                TurretSlotManager.Instance.ImportRuntimeStats(dto.EquippedRuntimeStats); // NEW
                 TurretSlotManager.Instance.ImportPurchasedFlags(dto.SlotPurchased);
             }
             else
             {
                 pendingEquipped = dto.EquippedIds;
+                pendingRuntimeStats = dto.EquippedRuntimeStats;   
                 pendingPurchased = dto.SlotPurchased;
             }
+
         }
 
         // Used to deactivate and activate object logic to replace destroy and instantiate
@@ -204,14 +219,13 @@ namespace Assets.Scripts.Systems
 
         public void ClearUnusedTurrets()
         {
-            // Only keep turrets that are currently equipped
-            var equipped = TurretSlotManager.Instance.ExportEquipped()
-                .Where(i => i >= 0 && i < owned.Count)
-                .Select(i => owned[i])
+            // Get the actual TurretStatsInstance objects currently equipped
+            var equippedStats = TurretSlotManager.Instance.GetEquippedStats()
+                .Where(s => s != null)
                 .ToHashSet();
 
             var keysToRemove = instanceToGO.Keys
-                .Where(stats => !equipped.Contains(stats))
+                .Where(stats => !equippedStats.Contains(stats))
                 .ToList();
 
             foreach (var key in keysToRemove)
@@ -223,6 +237,9 @@ namespace Assets.Scripts.Systems
                 instanceToGO.Remove(key);
             }
         }
+
+        
+
 
 
     }

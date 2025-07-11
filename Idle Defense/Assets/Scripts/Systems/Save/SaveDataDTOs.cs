@@ -387,7 +387,8 @@ public class TurretInfoDTO
 public class TurretInventoryDTO
 {
     public List<TurretStatsInstance> Owned;
-    public List<int> EquippedIds;
+    public List<int> EquippedIds;          // -1  = runtime copy
+    public List<TurretStatsInstance> EquippedRuntimeStats;   // NEW (size 5)
     public List<TurretType> UnlockedTypes;
     public List<bool> SlotPurchased;
 }

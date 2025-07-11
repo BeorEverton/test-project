@@ -20,7 +20,7 @@ namespace Assets.Scripts.Turrets
         {
             base.Start();
 
-            _bonusDmgPerSec = 1f + _stats.PercentBonusDamagePerSec / 100f;
+            _bonusDmgPerSec = 1f + RuntimeStats.PercentBonusDamagePerSec / 100f;
         }
 
         protected override void Update()
@@ -46,13 +46,13 @@ namespace Assets.Scripts.Turrets
             base.Shoot();
 
             Enemy enemy = _targetEnemy.GetComponent<Enemy>();
-            float damage = _stats.Damage + _rampedDamageBonus;
+            float damage = RuntimeStats.Damage + _rampedDamageBonus;
 
             enemy.TakeDamage(damage);
             StatsManager.Instance.AddTurretDamage(_turretInfo.TurretType, damage);
 
             if (!enemy.IsSlowed)
-                enemy.ReduceMovementSpeed(_stats.SlowEffect);
+                enemy.ReduceMovementSpeed(RuntimeStats.SlowEffect);
 
             _timeSinceLastShot = 0f;
         }
@@ -83,7 +83,7 @@ namespace Assets.Scripts.Turrets
                 return;
 
             _timeOnSameTarget += Time.deltaTime;
-            _rampedDamageBonus = _stats.Damage * _bonusDmgPerSec * _timeOnSameTarget;
+            _rampedDamageBonus = RuntimeStats.Damage * _bonusDmgPerSec * _timeOnSameTarget;
         }
 
         protected override void Enemy_OnDeath(object sender, EventArgs _)

@@ -290,23 +290,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnemyTargetChoice: 0
   _turretInfo: {fileID: 11400000, guid: 201a812d2671bd142a6aeaa5f8510788, type: 2}
-  SavedStats:
+  RuntimeStats:
     IsUnlocked: 0
-    TurretType: 0
-    BaseDamage: 0
-    BaseFireRate: 0
+    TurretType: 1
+    BaseDamage: 150
+    BaseFireRate: 0.3
     BaseCritChance: 0
     BaseCritDamage: 0
-    Damage: 0
+    Damage: 150
     DamageLevel: 0
-    DamageUpgradeAmount: 0
-    DamageUpgradeBaseCost: 0
-    DamageCostExponentialMultiplier: 0
-    FireRate: 0
+    DamageUpgradeAmount: 1.05
+    DamageUpgradeBaseCost: 60
+    DamageCostExponentialMultiplier: 1.08
+    FireRate: 0.3
     FireRateLevel: 0
-    FireRateUpgradeAmount: 0
-    FireRateUpgradeBaseCost: 0
-    FireRateCostExponentialMultiplier: 0
+    FireRateUpgradeAmount: 0.02
+    FireRateUpgradeBaseCost: 450
+    FireRateCostExponentialMultiplier: 1.078
     CriticalChance: 0
     CriticalChanceLevel: 0
     CriticalChanceUpgradeAmount: 0
@@ -333,14 +333,14 @@ MonoBehaviour:
     PierceDamageFalloffLevel: 0
     PierceDamageFalloffUpgradeAmount: 0
     PierceDamageFalloffUpgradeBaseCost: 0
-    PelletCount: 0
+    PelletCount: 2
     PelletCountLevel: 0
-    PelletCountUpgradeAmount: 0
-    PelletCountUpgradeBaseCost: 0
-    DamageFalloffOverDistance: 0
+    PelletCountUpgradeAmount: 1
+    PelletCountUpgradeBaseCost: 5000
+    DamageFalloffOverDistance: 35
     DamageFalloffOverDistanceLevel: 0
-    DamageFalloffOverDistanceUpgradeAmount: 0
-    DamageFalloffOverDistanceUpgradeBaseCost: 0
+    DamageFalloffOverDistanceUpgradeAmount: 0.5
+    DamageFalloffOverDistanceUpgradeBaseCost: 80
     KnockbackStrength: 0
     KnockbackStrengthLevel: 0
     KnockbackStrengthUpgradeAmount: 0
@@ -354,8 +354,74 @@ MonoBehaviour:
     SlowEffectLevel: 0
     SlowEffectUpgradeAmount: 0
     SlowEffectUpgradeBaseCost: 0
-    RotationSpeed: 0
-    AngleThreshold: 0
+    RotationSpeed: 8
+    AngleThreshold: 4
+  PermanentStats:
+    IsUnlocked: 0
+    TurretType: 1
+    BaseDamage: 150
+    BaseFireRate: 0.3
+    BaseCritChance: 0
+    BaseCritDamage: 0
+    Damage: 150
+    DamageLevel: 0
+    DamageUpgradeAmount: 1.05
+    DamageUpgradeBaseCost: 60
+    DamageCostExponentialMultiplier: 1.08
+    FireRate: 0.3
+    FireRateLevel: 0
+    FireRateUpgradeAmount: 0.02
+    FireRateUpgradeBaseCost: 450
+    FireRateCostExponentialMultiplier: 1.078
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalChanceUpgradeAmount: 0
+    CriticalChanceUpgradeBaseCost: 0
+    CriticalChanceCostExponentialMultiplier: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    CriticalDamageMultiplierUpgradeAmount: 0
+    CriticalDamageMultiplierUpgradeBaseCost: 0
+    CriticalDamageCostExponentialMultiplier: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    ExplosionRadiusUpgradeAmount: 0
+    ExplosionRadiusUpgradeBaseCost: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    SplashDamageUpgradeAmount: 0
+    SplashDamageUpgradeBaseCost: 0
+    PierceChance: 0
+    PierceChanceLevel: 0
+    PierceChanceUpgradeAmount: 0
+    PierceChanceUpgradeBaseCost: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PierceDamageFalloffUpgradeAmount: 0
+    PierceDamageFalloffUpgradeBaseCost: 0
+    PelletCount: 2
+    PelletCountLevel: 0
+    PelletCountUpgradeAmount: 1
+    PelletCountUpgradeBaseCost: 5000
+    DamageFalloffOverDistance: 35
+    DamageFalloffOverDistanceLevel: 0
+    DamageFalloffOverDistanceUpgradeAmount: 0.5
+    DamageFalloffOverDistanceUpgradeBaseCost: 80
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
+    PercentBonusDamagePerSec: 0
+    PercentBonusDamagePerSecLevel: 0
+    PercentBonusDamagePerSecUpgradeAmount: 0
+    PercentBonusDamagePerSecUpgradeBaseCost: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
+    SlowEffectUpgradeAmount: 0
+    SlowEffectUpgradeBaseCost: 0
+    RotationSpeed: 8
+    AngleThreshold: 4
   _rotationPoint: {fileID: 7381070214935486543}
   _muzzleFlashPosition: {fileID: 6098369391239653284}
   _muzzleFlashSprites:

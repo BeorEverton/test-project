@@ -27,13 +27,13 @@ namespace Assets.Scripts.Turrets
 
             _recoil.AddRecoil();
 
-            float finalDamage = _stats.Damage;
+            float finalDamage = RuntimeStats.Damage;
             bool isCritical = IsCriticalHit();
 
             if (isCritical)
             {
                 AudioManager.Instance.Play("Critical");
-                finalDamage *= 1f + (_stats.CriticalDamageMultiplier / 100f);
+                finalDamage *= 1f + (RuntimeStats.CriticalDamageMultiplier / 100f);
             }
 
             _targetEnemy.GetComponent<Enemy>().TakeDamage(finalDamage, isCritical);
@@ -44,7 +44,7 @@ namespace Assets.Scripts.Turrets
 
         private bool IsCriticalHit()
         {
-            return Random.Range(0, 100) < _stats.CriticalChance;
+            return Random.Range(0, 100) < RuntimeStats.CriticalChance;
         }
     }
 }

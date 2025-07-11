@@ -72,9 +72,7 @@ namespace Assets.Scripts.UI
             _upgradeManager ??= FindFirstObjectByType<TurretUpgradeManager>();
 
             // Pick the correct stat container (runtime or permanent)
-            _turret = currencyType == Currency.BlackSteel
-                ? _baseTurret.PermanentStats        // management-phase upgrades
-                : _baseTurret.GetStats();           // in-game upgrades
+            _turret = _baseTurret.GetUpgradeableStats(currencyType);
 
             _statName.SetText(GetDisplayNameForUpgrade(_upgradeType));
             UpdateDisplay();

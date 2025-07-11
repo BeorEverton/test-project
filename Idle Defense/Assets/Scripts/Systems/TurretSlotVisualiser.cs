@@ -67,9 +67,6 @@ namespace Assets.Scripts.Systems
             GameObject prefab = library.GetPrefab(inst.TurretType);
             GameObject go = Instantiate(prefab, slotAnchors[slot].position, Quaternion.identity, slotAnchors[slot]);
 
-            var baseTurret = go.GetComponent<BaseTurret>();
-            baseTurret.SavedStats = inst;
-
             // Make sure the turret is tracked
             if (TurretInventoryManager.Instance.GetGameObjectForInstance(inst) == null)
             {
