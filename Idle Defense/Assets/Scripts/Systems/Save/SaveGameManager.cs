@@ -47,45 +47,19 @@ namespace Assets.Scripts.Systems.Save
             PlayerInfoDTO sessionStatsDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.Stats);
             PlayerInfoDTO permanentStatsDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.PermanentStats);
 
-            // TEMPORARY STATS (Scrap upgrades)
-            var machineGunRuntime = TurretSlotManager.Instance.GetRuntimeStatsOfType(TurretType.MachineGun);
-            Debug.Log($"Machine Gun Runtime Stats: {machineGunRuntime?.Damage}");
-            TurretInfoDTO machineGunTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(machineGunRuntime);
-            TurretBaseInfoDTO machineGunTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(machineGunRuntime);
-
-            Debug.Log("Saved machine gun with damage: " + machineGunTurretDTO.Damage);
-
-            TurretInfoDTO shotgunTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_shotgunTurret.RuntimeStats);
-            TurretBaseInfoDTO shotgunTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_shotgunTurret.RuntimeStats);
-
-            TurretInfoDTO sniperTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_sniperTurret.RuntimeStats);
-            TurretBaseInfoDTO sniperTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_sniperTurret.RuntimeStats);
-
-            TurretInfoDTO missileLauncherTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_missileLauncherTurret.RuntimeStats);
-            TurretBaseInfoDTO missileLauncherTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_missileLauncherTurret.RuntimeStats);
-
-            TurretInfoDTO laserTurretDTO = SaveDataDTOs.CreateTurretInfoDTO(_laserTurret.RuntimeStats);
-            TurretBaseInfoDTO laserTurretBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_laserTurret.RuntimeStats);
-
-            // PERMANENT STATS (BlackSteel upgrades)
-            TurretInfoDTO machineGunPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_machineGunTurret.PermanentStats);
-            TurretBaseInfoDTO machineGunPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_machineGunTurret.PermanentStats);
-
-            TurretInfoDTO shotgunPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_shotgunTurret.PermanentStats);
-            TurretBaseInfoDTO shotgunPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_shotgunTurret.PermanentStats);
-
-            TurretInfoDTO sniperPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_sniperTurret.PermanentStats);
-            TurretBaseInfoDTO sniperPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_sniperTurret.PermanentStats);
-
-            TurretInfoDTO missileLauncherPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_missileLauncherTurret.PermanentStats);
-            TurretBaseInfoDTO missileLauncherPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_missileLauncherTurret.PermanentStats);
-
-            TurretInfoDTO laserPermanentDTO = SaveDataDTOs.CreateTurretInfoDTO(_laserTurret.PermanentStats);
-            TurretBaseInfoDTO laserPermanentBaseDTO = SaveDataDTOs.CreateTurretBaseInfoDTO(_laserTurret.PermanentStats);
+            // Removed individual turret save calls — inventory handles it all now
+            TurretInventoryDTO turretInventory = TurretInventoryManager.Instance.ExportToDTO();
+            Debug.Log($"[SAVE] Exported {turretInventory.Owned?.Count} owned turrets. " +
+                $"Equipped: {turretInventory.EquippedIds?.Count} ids, {turretInventory.EquippedRuntimeStats?.Count} runtime stats.");
+            for (int i = 0; i < turretInventory.EquippedIds.Count; i++)
+            {
+                if (turretInventory.EquippedIds[i] >= 0)
+                {
+                    Debug.Log($"[SAVE] Slot {i} equipped with turret ID: {turretInventory.EquippedIds[i]}");
+                }
+            }
 
             StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();            
-
-            TurretInventoryDTO turretInventory = TurretInventoryManager.Instance.ExportToDTO();
 
             var discoveredEnemies = EnemyLibraryManager.Instance.GetAllEntries()
                 .Where(e => e.discovered)
@@ -96,28 +70,10 @@ namespace Assets.Scripts.Systems.Save
                 gameDataDTO,
                 sessionStatsDTO,
                 permanentStatsDTO,
-                machineGunTurretDTO,
-                machineGunTurretBaseDTO,
-                shotgunTurretDTO,
-                shotgunTurretBaseDTO,
-                sniperTurretDTO,
-                sniperTurretBaseDTO,
-                missileLauncherTurretDTO,
-                missileLauncherTurretBaseDTO,
-                laserTurretDTO,
-                laserTurretBaseDTO,
+                
                 statsDTO,
-                turretInventory,                
-                machineGunPermanentDTO,
-                machineGunPermanentBaseDTO,
-                shotgunPermanentDTO,
-                shotgunPermanentBaseDTO,
-                sniperPermanentDTO,
-                sniperPermanentBaseDTO,
-                missileLauncherPermanentDTO,
-                missileLauncherPermanentBaseDTO,
-                laserPermanentDTO,
-                laserPermanentBaseDTO);
+                turretInventory
+                );
 
             gameData.DiscoveredEnemyNames = discoveredEnemies;
 
@@ -134,31 +90,7 @@ namespace Assets.Scripts.Systems.Save
                 return;
             }
 
-            if (gameData.MachineGunTurretInfoDTO != null)
-            {
-                _machineGunTurret.RuntimeStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.MachineGunTurretInfoDTO, gameData.MachineGunTurretBaseInfoDTO);
-                Debug.Log($"Loaded Machine Gun Turret: {_machineGunTurret.RuntimeStats.Damage}");
-            }
-            if (gameData.ShotgunTurretInfoDTO != null)
-                _shotgunTurret.RuntimeStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.ShotgunTurretInfoDTO, gameData.ShotgunTurretBaseInfoDTO);
-            if (gameData.SniperTurretInfoDTO != null)
-                _sniperTurret.RuntimeStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.SniperTurretInfoDTO, gameData.SniperTurretBaseInfoDTO);
-            if (gameData.MissileLauncherTurretInfoDTO != null)
-                _missileLauncherTurret.RuntimeStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.MissileLauncherTurretInfoDTO, gameData.MissileLauncherTurretBaseInfoDTO);
-            if (gameData.LaserTurretInfoDTO != null)
-                _laserTurret.RuntimeStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.LaserTurretInfoDTO, gameData.LaserTurretBaseInfoDTO);
-
-            if (gameData.MachineGunPermanentDTO != null)
-                _machineGunTurret.PermanentStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.MachineGunPermanentDTO, gameData.MachineGunPermanentBaseDTO);
-            if (gameData.ShotgunPermanentDTO != null)
-                _shotgunTurret.PermanentStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.ShotgunPermanentDTO, gameData.ShotgunPermanentBaseDTO);
-            if (gameData.SniperPermanentDTO != null)
-                _sniperTurret.PermanentStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.SniperPermanentDTO, gameData.SniperPermanentBaseDTO);
-            if (gameData.MissileLauncherPermanentDTO != null)
-                _missileLauncherTurret.PermanentStats = LoadDataDTOs.CreateTurretStatsInstance(gameData.MissileLauncherPermanentDTO, gameData.MissileLauncherPermanentBaseDTO);
-            if (gameData.LaserPermanentDTO != null)
-                _laserTurret.SetPermanentStats(LoadDataDTOs.CreateTurretStatsInstance(gameData.LaserPermanentDTO, gameData.LaserPermanentBaseDTO));
-
+            
             PlayerBaseManager.Instance.SavedStats = LoadDataDTOs.CreatePlayerBaseSO(gameData.PlayerInfoDTO);
             if (gameData.PermanentPlayerInfoDTO != null)
             {

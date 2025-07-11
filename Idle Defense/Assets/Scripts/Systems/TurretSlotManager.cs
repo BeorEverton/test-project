@@ -17,7 +17,7 @@ namespace Assets.Scripts.Systems
         public static TurretSlotManager Instance { get; private set; }
 
         // 5 equip slots
-        private readonly TurretStatsInstance[] equipped = new TurretStatsInstance[5];
+        public TurretStatsInstance[] equipped = new TurretStatsInstance[5];
 
         private readonly Dictionary<int, TurretStatsInstance> _runtimeTempStats = new();
 
@@ -177,7 +177,11 @@ namespace Assets.Scripts.Systems
             var list = new List<TurretStatsInstance>(5);
             foreach (var inst in equipped)
                 list.Add(inst);
-            Debug.Log($"[SlotMgr] ExportRuntimeStats  {list.Count(s => s != null)} copies");
+
+            for (int i = list.Count; i < 5; i++)
+            {
+                Debug.Log("slot " + i + " is turret " + list[i].TurretType + " damage is " + list[i].Damage);
+            }                
 
             return list;
         }
@@ -210,31 +214,22 @@ namespace Assets.Scripts.Systems
         public void ImportRuntimeStats(List<TurretStatsInstance> stats)
         {
             if (stats == null) return;
-            Debug.Log($"[SlotMgr] ImportRuntimeStats {stats.Count(s => s != null)} copies");
+            
             for (int i = 0; i < stats.Count && i < equipped.Length; i++)
             {
                 if (stats[i] == null) continue;
                 equipped[i] = stats[i];
                 _runtimeTempStats[i] = stats[i];     // mark as runtime copy
                 OnEquippedChanged?.Invoke(i, stats[i]);
+                Debug.Log($"Importing runtime stats for slot {i}: {stats[i].TurretType} with damage {stats[i].Damage}");
             }
         }
-
-        //  Returns the first equipped runtime copy for the requested type, or null.
-        public TurretStatsInstance GetRuntimeStatsOfType(TurretType type)
-        {
-            foreach (TurretStatsInstance inst in equipped)
-                if (inst != null && inst.TurretType == type)
-                    return inst;
-            return null;
-        }
-
 
         private void HandleGameStateChanged(GameState newState)
         {
             if (newState == GameState.InGame)
             {
-                Debug.Log("[SlotMgr] Clearing old runtime stats – new run is starting");
+                
                 _runtimeTempStats.Clear();            // fresh run forget old Scrap buffs
                 TurretInventoryManager.Instance.ClearUnusedTurrets();
             }
@@ -243,6 +238,79 @@ namespace Assets.Scripts.Systems
         public IEnumerable<TurretStatsInstance> GetEquippedStats()
         {
             return equipped.Where(e => e != null);
+        }
+
+        public List<EquippedTurretDTO> ExportEquippedTurrets()
+        {
+            var list = new List<EquippedTurretDTO>();
+            for (int i = 0; i < equipped.Length; i++)
+            {
+                var inst = equipped[i];
+                if (inst == null) continue;
+
+                BaseTurret baseTurret = TurretInventoryManager.Instance.GetGameObjectForInstance(inst)?.GetComponent<BaseTurret>();
+                if (baseTurret == null)
+                {
+                    Debug.LogWarning($"[Export] Missing BaseTurret component for equipped instance at slot {i}");
+                    continue;
+                }
+
+                var dto = new EquippedTurretDTO
+                {
+                    Type = inst.TurretType,
+                    SlotIndex = i,
+                    PermanentStats = SaveDataDTOs.CreateTurretInfoDTO(baseTurret.PermanentStats),
+                    RuntimeStats = SaveDataDTOs.CreateTurretInfoDTO(baseTurret.RuntimeStats),
+                    PermanentBase = SaveDataDTOs.CreateTurretBaseInfoDTO(baseTurret.PermanentStats),
+                    RuntimeBase = SaveDataDTOs.CreateTurretBaseInfoDTO(baseTurret.RuntimeStats),
+                };
+
+                list.Add(dto);
+                Debug.Log($"[Export] Saved turret {dto.Type} in slot {i} with runtime damage {baseTurret.RuntimeStats?.Damage}");
+                Debug.Log($"[Export] Saved turret {dto.Type} in slot {i} with permanent damage {baseTurret.PermanentStats?.Damage}");
+            }
+
+            return list;
+        }
+
+        public void ImportEquippedTurrets(List<EquippedTurretDTO> dtos)
+        {
+            if (dtos == null || dtos.Count == 0)
+            {
+                Debug.LogWarning("[SlotMgr] No EquippedTurrets to import.");
+                return;
+            }
+
+            foreach (var dto in dtos)
+            {
+                GameObject prefab = TurretInventoryManager.Instance.GetPrefab(dto.Type);
+                GameObject go = Instantiate(prefab);
+                BaseTurret turret = go.GetComponent<BaseTurret>();
+
+                if (turret == null)
+                {
+                    Debug.LogError($"[SlotMgr] Prefab for {dto.Type} is missing BaseTurret.");
+                    Destroy(go);
+                    continue;
+                }
+
+                turret.PermanentStats = LoadDataDTOs.CreateTurretStatsInstance(dto.PermanentStats, dto.PermanentBase);
+                turret.RuntimeStats = LoadDataDTOs.CreateTurretStatsInstance(dto.RuntimeStats, dto.RuntimeBase);
+
+                // Assign stats to slot
+                equipped[dto.SlotIndex] = turret.RuntimeStats;
+                _runtimeTempStats[dto.SlotIndex] = turret.RuntimeStats;
+
+                // Save mapping to allow reuse
+                TurretInventoryManager.Instance.RegisterTurretInstance(turret.RuntimeStats, go);
+
+                Debug.Log($"[SlotMgr] Imported turret {dto.Type} into slot {dto.SlotIndex} with Runtime damage {turret.RuntimeStats.Damage}");
+                Debug.Log($"[SlotMgr] Imported turret {dto.Type} into slot {dto.SlotIndex} with PErmanent damage {turret.PermanentStats.Damage}");
+            }
+
+            // Trigger UI refresh
+            for (int i = 0; i < equipped.Length; i++)
+                OnEquippedChanged?.Invoke(i, equipped[i]);
         }
 
 

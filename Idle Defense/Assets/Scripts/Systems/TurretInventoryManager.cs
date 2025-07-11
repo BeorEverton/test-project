@@ -14,7 +14,7 @@ namespace Assets.Scripts.Systems
         public static TurretInventoryManager Instance { get; private set; }
 
         [SerializeField] private TurretUnlockTableSO unlockTable;
-        private readonly List<TurretStatsInstance> owned = new();
+        public List<TurretStatsInstance> owned = new();
         public readonly HashSet<TurretType> unlockedTypes = new();
         [SerializeField] private TurretLibrarySO turretLibrary;   // assign the new asset
 
@@ -25,7 +25,10 @@ namespace Assets.Scripts.Systems
 
         private readonly Dictionary<TurretStatsInstance, GameObject> instanceToGO = new();
 
-        private List<TurretStatsInstance> pendingRuntimeStats;  
+        private List<TurretStatsInstance> pendingRuntimeStats;
+
+        public List<EquippedTurretDTO> EquippedTurrets; 
+
 
         public int WaveRequirement(TurretType t) =>
             unlockTable.Entries.First(e => e.Type == t).WaveToUnlock;
@@ -159,14 +162,24 @@ namespace Assets.Scripts.Systems
 
         public TurretInventoryDTO ExportToDTO()
         {
+            for (int i = 0; i < owned.Count; i++)
+            {
+                if (owned[i] != null)
+                {
+                    Debug.Log("exporting turret " + owned[i].TurretType + " with damage " + owned[i].Damage);                   
+                    
+                }
+            }
             return new TurretInventoryDTO
             {
                 Owned = owned,
                 EquippedIds = TurretSlotManager.Instance.ExportEquipped(),
-                EquippedRuntimeStats = TurretSlotManager.Instance.ExportRuntimeStats(),   // keep Scrap buffs
+                EquippedRuntimeStats = TurretSlotManager.Instance.ExportRuntimeStats(),
+                EquippedTurrets = TurretSlotManager.Instance.ExportEquippedTurrets(), 
                 UnlockedTypes = unlockedTypes.ToList(),
                 SlotPurchased = TurretSlotManager.Instance.GetPurchasedFlags()
             };
+
         }
 
         public void ImportFromDTO(TurretInventoryDTO dto)
@@ -174,9 +187,7 @@ namespace Assets.Scripts.Systems
             owned.Clear();
             owned.AddRange(dto.Owned ?? new List<TurretStatsInstance>());
 
-            Debug.Log($"[Inventory] Loaded {owned.Count} turrets, "
-                      + $"{unlockedTypes.Count} types unlocked.");
-
+            Debug.Log($"[Inventory] Loaded {owned.Count} turrets");
 
             unlockedTypes.Clear();
             unlockedTypes.UnionWith(dto.UnlockedTypes ?? new List<TurretType>());
@@ -184,17 +195,29 @@ namespace Assets.Scripts.Systems
             if (TurretSlotManager.Instance != null)
             {
                 TurretSlotManager.Instance.ImportEquipped(dto.EquippedIds);
-                TurretSlotManager.Instance.ImportRuntimeStats(dto.EquippedRuntimeStats); // NEW
+
+                // Only use this if EquippedTurrets is null
+                if (dto.EquippedTurrets != null && dto.EquippedTurrets.Count > 0)
+                {
+                    TurretSlotManager.Instance.ImportEquippedTurrets(dto.EquippedTurrets);
+                }
+                else
+                {
+                    TurretSlotManager.Instance.ImportRuntimeStats(dto.EquippedRuntimeStats); //  skip if already loaded via EquippedTurrets
+                }
+
                 TurretSlotManager.Instance.ImportPurchasedFlags(dto.SlotPurchased);
             }
             else
             {
                 pendingEquipped = dto.EquippedIds;
-                pendingRuntimeStats = dto.EquippedRuntimeStats;   
                 pendingPurchased = dto.SlotPurchased;
-            }
 
+                if (dto.EquippedTurrets == null)
+                    pendingRuntimeStats = dto.EquippedRuntimeStats;
+            }
         }
+
 
         // Used to deactivate and activate object logic to replace destroy and instantiate
 
@@ -206,7 +229,7 @@ namespace Assets.Scripts.Systems
 
         public void RegisterTurretInstance(TurretStatsInstance stats, GameObject go)
         {
-            Debug.Log("registering turret instance: " + stats.TurretType);
+            
             if (!instanceToGO.ContainsKey(stats))
                 instanceToGO[stats] = go;
         }
@@ -237,10 +260,5 @@ namespace Assets.Scripts.Systems
                 instanceToGO.Remove(key);
             }
         }
-
-        
-
-
-
     }
 }
