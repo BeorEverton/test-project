@@ -126,12 +126,12 @@ namespace Assets.Scripts.Enemies
             {
                 TriggerBossExplosion();
                 StatsManager.Instance.BossesKilled++;
-                GameManager.Instance.AddCurrency(Currency.BlackSteel, (ulong)MathF.Round(_info.CoinDropAmount / 10));
+                GameManager.Instance.AddCurrency(Currency.BlackSteel, (ulong)MathF.Round(_info.CoinDropAmount / 2));
             }
             // Has 1/1000 chance to drop black steel
             else if (Random.Range(0, 1000) == 0)
             {
-                GameManager.Instance.AddCurrency(Currency.BlackSteel, (ulong)MathF.Round(_info.CoinDropAmount / 10));
+                GameManager.Instance.AddCurrency(Currency.BlackSteel, (ulong)MathF.Round(_info.CoinDropAmount / 5));
             }
 
             DebrisPool.Instance.Play(transform.position);

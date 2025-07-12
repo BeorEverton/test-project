@@ -35,8 +35,12 @@ namespace Assets.Scripts.Systems
                     UpgradeTurret = (t, a) =>
                     {
                         t.DamageLevel += a;
+                        t.Damage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, t.DamageLevel);
+
+                        /* previous damage scaling logic
+                        t.DamageLevel += a;
                         float increment = t.BaseDamage * (Mathf.Pow(t.DamageUpgradeAmount, a) - 1f) + a;
-                        t.Damage += increment;
+                        t.Damage += increment;*/
                     },
 
                     GetLevel = t => t.DamageLevel,
@@ -50,8 +54,13 @@ namespace Assets.Scripts.Systems
                     //GetAmount = t => GetMaxAmount(t.DamageUpgradeBaseCost, t.DamageCostExponentialMultiplier, t.DamageLevel),
                     GetDisplayStrings = (t, a) =>
                     {
+                        float currentDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, t.DamageLevel);
+                        float newDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, t.DamageLevel + a);
+                        float bonus = newDamage - currentDamage;
+
+                        /*previous damage scaling logic
                         float bonus = t.BaseDamage * (Mathf.Pow(t.DamageUpgradeAmount, a) - 1f) + a;
-                        float currentDamage = t.Damage;
+                        float currentDamage = t.Damage;*/
 
                         GetExponentialCost(t, TurretUpgradeType.Damage, a, out float cost, out int amount);
 

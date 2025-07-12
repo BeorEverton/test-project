@@ -172,7 +172,7 @@ namespace Assets.Scripts.UI
             };
         }
 
-        public static string AbbreviateNumber(double number, bool showPercent = false)
+        public static string AbbreviateNumber(double number, bool showPercent = false, bool showTwoDecimals = false)
         {
             const double Thousand = 1E3;
             const double Million = 1E6;
@@ -188,24 +188,27 @@ namespace Assets.Scripts.UI
             const double Undecillion = 1E36;
             const double Duodecillion = 1E39;
 
+            string format = showTwoDecimals ? "0.##" : "0.#";
+
             return number switch
             {
-                >= Duodecillion => (number / Duodecillion).ToString("0.#") + "D",
-                >= Undecillion => (number / Undecillion).ToString("0.#") + "U",
-                >= Decillion => (number / Decillion).ToString("0.#") + "d",
-                >= Nonillion => (number / Nonillion).ToString("0.#") + "N",
-                >= Octillion => (number / Octillion).ToString("0.#") + "O",
-                >= Septillion => (number / Septillion).ToString("0.#") + "S",
-                >= Sextillion => (number / Sextillion).ToString("0.#") + "s",
-                >= Quintillion => (number / Quintillion).ToString("0.#") + "Q",
-                >= Quadrillion => (number / Quadrillion).ToString("0.#") + "q",
-                >= Trillion => (number / Trillion).ToString("0.#") + "T",
-                >= Billion => (number / Billion).ToString("0.#") + "B",
-                >= Million => (number / Million).ToString("0.#") + "M",
-                >= Thousand => (number / Thousand).ToString("0.#") + "K",
+                >= Duodecillion => (number / Duodecillion).ToString(format) + "D",
+                >= Undecillion => (number / Undecillion).ToString(format) + "U",
+                >= Decillion => (number / Decillion).ToString(format) + "d",
+                >= Nonillion => (number / Nonillion).ToString(format) + "N",
+                >= Octillion => (number / Octillion).ToString(format) + "O",
+                >= Septillion => (number / Septillion).ToString(format) + "S",
+                >= Sextillion => (number / Sextillion).ToString(format) + "s",
+                >= Quintillion => (number / Quintillion).ToString(format) + "Q",
+                >= Quadrillion => (number / Quadrillion).ToString(format) + "q",
+                >= Trillion => (number / Trillion).ToString(format) + "T",
+                >= Billion => (number / Billion).ToString(format) + "B",
+                >= Million => (number / Million).ToString(format) + "M",
+                >= Thousand => (number / Thousand).ToString(format) + "K",
                 _ => number.ToString(showPercent ? "F2" : "F0")
             };
         }
+
 
         public static string FormatTime(TimeSpan time)
         {

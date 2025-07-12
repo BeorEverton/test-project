@@ -130,7 +130,36 @@ namespace Assets.Scripts.WaveSystem
             };
         }
 
+        // NEW METHOD WITH PLATEAUED SCALING
         private EnemyInfoSO CloneEnemyInfoWithScale(Enemy enemy, int waveIndex)
+        {
+            EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
+
+            // --- Health Plateaued Scaling ---
+            float baseHealth = clonedInfo.MaxHealth;
+            int bossInterval = 10;
+            int bossIndex = waveIndex / bossInterval;
+            int plateauBaseWave = bossIndex * bossInterval;
+
+            float spikeMultiplier = Mathf.Pow(1.25f, bossIndex);
+            float plateauMultiplier = 1f + ((waveIndex - plateauBaseWave) * 0.01f);
+            float wavePower = Mathf.Pow(plateauBaseWave > 0 ? plateauBaseWave : 1f, 1.3f);
+
+            clonedInfo.MaxHealth = baseHealth * wavePower * spikeMultiplier * plateauMultiplier;
+
+            // --- Damage Scaling (mild exponential) ---
+            clonedInfo.Damage += clonedInfo.Damage * (bossIndex * 0.2f); // 20% more per 10 waves
+
+            // --- Coin Drop Scaling ---
+            float coinBase = clonedInfo.CoinDropAmount * clonedInfo.CoinDropMultiplierByWaveCount;
+            float coinBonus = waveIndex * clonedInfo.CoinDropMultiplierByWaveCount;
+            clonedInfo.CoinDropAmount = (ulong)(coinBase + coinBonus);
+
+            return clonedInfo;
+        }
+
+        /*PREVIOUS METHOD OF SCALING ENEMIES
+         * private EnemyInfoSO CloneEnemyInfoWithScale(Enemy enemy, int waveIndex)
         {
             EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
             clonedInfo.MaxHealth *= clonedInfo.HealthMultiplierByWaveCount * waveIndex;
@@ -138,7 +167,7 @@ namespace Assets.Scripts.WaveSystem
             clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * clonedInfo.CoinDropMultiplierByWaveCount +
                                                 waveIndex * clonedInfo.CoinDropMultiplierByWaveCount);
             return clonedInfo;
-        }
+        }*/
 
         private async void GenerateWaves(int startWaveNumber = 1, int amountToGenerate = 100)
         {
