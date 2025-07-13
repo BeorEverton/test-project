@@ -61,6 +61,10 @@ namespace Assets.Scripts.WaveSystem
 
         private Coroutine _spawnEnemiesCoroutine;
 
+        // to ensure we check for wave completion regularly
+        private Coroutine _waveCompletionCheckCoroutine;
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -88,6 +92,9 @@ namespace Assets.Scripts.WaveSystem
 
             _canSpawnEnemies = true;
             _spawnEnemiesCoroutine = StartCoroutine(SpawnEnemies());
+
+            _waveCompletionCheckCoroutine = StartCoroutine(PeriodicWaveCompletionCheck());
+
         }
 
         private async Task CreateWave()
@@ -109,22 +116,60 @@ namespace Assets.Scripts.WaveSystem
 
                 if (wave.IsMiniBossWave())
                 {
-                    clonedInfo.Damage *= 3f;
-                    clonedInfo.MaxHealth *= 30f;
-                    clonedInfo.CoinDropAmount *= 20;
+                    int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
+                    float healthMultiplier;
+                    float damageMultiplier;
+                    float coinMultiplier;
+                    if (currentWave == 5) // First mini boss is weaker
+                    {
+                        healthMultiplier = 30f;
+                        damageMultiplier = 15f;
+                        coinMultiplier = 20f;
+                    }
+                    else
+                    {
+                        healthMultiplier = Mathf.Min(currentWave * 50f, 500f);
+                        damageMultiplier = Mathf.Min(currentWave * 10f, 100f);
+                        coinMultiplier = Mathf.Min(currentWave * 10f, 100f);
+                    }
+
+
+                    clonedInfo.MaxHealth *= healthMultiplier;
+                    clonedInfo.Damage *= damageMultiplier;
+                    clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
+
                     clonedInfo.MovementSpeed *= 0.9f;
                     clonedInfo.AttackRange += .2f; // Because the gfx size changes
                 }
 
                 if (wave.IsBossWave())
                 {
-                    clonedInfo.Damage *= 5f;
-                    clonedInfo.MaxHealth *= 100f;
-                    clonedInfo.CoinDropAmount *= 40;
+                    int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
+                    float healthMultiplier;
+                    float damageMultiplier;
+                    float coinMultiplier;
+                    if (currentWave == 10) // First boss is weaker
+                    {
+                        healthMultiplier = 60f;
+                        damageMultiplier = 25f;
+                        coinMultiplier = 45f;
+                    }
+                    else
+                    {
+                        healthMultiplier = Mathf.Min(currentWave * 100f, 1000f);
+                        damageMultiplier = Mathf.Min(currentWave * 20f, 500f);
+                        coinMultiplier = Mathf.Min(currentWave * 20f, 500f);
+                    }
+
+
+                    clonedInfo.MaxHealth *= healthMultiplier;
+                    clonedInfo.Damage *= damageMultiplier;
+                    clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
+
                     clonedInfo.MovementSpeed *= 0.85f;
                     clonedInfo.AttackRange += .6f;
                 }
-                
+
                 AudioManager.Instance.Play("Boss Appear");
                 bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
@@ -264,6 +309,9 @@ namespace Assets.Scripts.WaveSystem
             StopCoroutine(_spawnEnemiesCoroutine);
             _enemiesCurrentWave.Clear();
             StartCoroutine(RestartWave());
+            if (_waveCompletionCheckCoroutine != null)
+                StopCoroutine(_waveCompletionCheckCoroutine);
+
         }
 
         private IEnumerator RestartWave()
@@ -288,6 +336,17 @@ namespace Assets.Scripts.WaveSystem
 
             _suppressWaveComplete = false;
         }
+
+        private IEnumerator PeriodicWaveCompletionCheck()
+        {
+            WaitForSeconds wait = new WaitForSeconds(2f); // adjust as needed for performance
+            while (_waveSpawned && !_suppressWaveComplete)
+            {
+                CheckIfWaveCompleted();
+                yield return wait;
+            }
+        }
+
 
     }
 }

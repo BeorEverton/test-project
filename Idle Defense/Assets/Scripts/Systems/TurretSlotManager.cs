@@ -20,7 +20,6 @@ namespace Assets.Scripts.Systems
         public TurretStatsInstance[] equipped = new TurretStatsInstance[5];
         private Dictionary<int, EquippedTurret> _equippedTurrets = new();
 
-
         private readonly Dictionary<int, TurretStatsInstance> _runtimeTempStats = new();
 
         private readonly SlotUnlock[] slotInfo =
@@ -140,7 +139,6 @@ namespace Assets.Scripts.Systems
             SaveGameManager.Instance.SaveGame();
             return true;
         }
-
 
         public void Unequip(int slot)
         {
@@ -310,10 +308,7 @@ namespace Assets.Scripts.Systems
                 TurretInventoryManager.Instance.RegisterTurretInstance(runtimeStats, null);
 
                 OnEquippedChanged?.Invoke(dto.SlotIndex, runtimeStats);
-
             }
-
-
         }
 
         public bool TryGetEquippedTurret(int slot, out EquippedTurret equippedTurret)
@@ -321,13 +316,11 @@ namespace Assets.Scripts.Systems
             return _equippedTurrets.TryGetValue(slot, out equippedTurret);
         }
 
-
         private void OnDestroy()
         {
             GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
 
         }
-
     }
 }
 

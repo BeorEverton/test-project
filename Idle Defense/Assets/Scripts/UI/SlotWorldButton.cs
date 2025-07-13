@@ -3,6 +3,7 @@ using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
+using System.Collections;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -61,7 +62,7 @@ namespace Assets.Scripts.UI
             UpdateOverlay();
             UpdateColor();
             GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
-            HandleGameStateChanged(GameManager.Instance.CurrentGameState); // Initial state
+            StartCoroutine(DelayHandleChange()); // Initial call to set visibility
         }
 
         private void OnDestroy()
@@ -165,8 +166,7 @@ namespace Assets.Scripts.UI
 
         private void RefreshSlot(int changed, TurretStatsInstance inst)
         {
-            Debug.Log("[SlotWorldButton] Refreshing slot " + changed);
-            UpdateColor();
+            Debug.Log("[SlotWorldButton] Refreshing slot " + changed);            
 
             if (changed != slotIndex)
                 return;
@@ -174,6 +174,7 @@ namespace Assets.Scripts.UI
             // Deactivate any existing object
             if (spawned != null)
             {
+                Debug.Log("[SlotWorldButton] Deactivating existing turret in slot " + slotIndex);
                 spawned.gameObject.SetActive(false);
                 spawned.transform.SetParent(null);
             }
@@ -202,7 +203,7 @@ namespace Assets.Scripts.UI
                 GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
                 go = Instantiate(prefab);
                 var baseTurret = go.GetComponent<BaseTurret>();
-
+                Debug.Log("[SlotWorldButton] Instantiated new turret prefab for slot " + slotIndex);
                 if (baseTurret != null)
                 {
                     baseTurret.PermanentStats = equippedTurret.Permanent;
@@ -221,17 +222,14 @@ namespace Assets.Scripts.UI
             go.SetActive(true);
 
             spawned = go;
+            Debug.Log("[SlotWorldButton] Spawned turret in slot " + slotIndex);
 
             if (noTurretHint != null)
                 noTurretHint.SetActive(false);
 
             UpdateOverlay();
+            UpdateColor();
         }
-
-
-
-        //  Called whenever slot state / wave changes.
-        //  Controls the tint of the Slot sprite (black = unavailable).
 
         private void UpdateColor()
         {
@@ -260,8 +258,6 @@ namespace Assets.Scripts.UI
         {
             UpdateOverlay();
         }
-
-        //  Shows the correct overlay text & button state.
 
         private void UpdateOverlay()
         {
@@ -334,9 +330,14 @@ namespace Assets.Scripts.UI
             UpdateColor();
         }
 
+        IEnumerator DelayHandleChange()
+        {
+            yield return new WaitForSeconds(0.3f); // Delay to ensure systems are initialized
+            HandleGameStateChanged(GameManager.Instance.CurrentGameState);
+        }
+
         private void HandleGameStateChanged(GameState state)
         {
-
             // Only change this if stop on death
             if (!PlayerBaseManager.Instance.stopOnDeath)
                 return;
@@ -347,7 +348,7 @@ namespace Assets.Scripts.UI
             bool shouldBeVisible = isManagement || isUnlocked || slotIndex == 0;
 
             visibilityWrapper.SetActive(shouldBeVisible);
+            UpdateColor();
         }
-
     }
 }

@@ -9,6 +9,7 @@ using DG.Tweening;
 using System.Collections.Generic;
 using System.Collections;
 using Assets.Scripts.Systems.Audio;
+using Assets.Scripts.UI;
 
 namespace Assets.Scripts.Enemies
 {
@@ -102,9 +103,9 @@ namespace Assets.Scripts.Enemies
             if (SettingsManager.Instance.AllowPopups)
             {
                 if (damageNumberCritical && isCritical)
-                    damageNumberCritical.Spawn(transform.position, amount);
+                    damageNumberCritical.Spawn(transform.position, UIManager.AbbreviateNumber(amount, false,true));
                 else if (damageNumber)
-                    damageNumber.Spawn(transform.position, amount);
+                    damageNumber.Spawn(transform.position, UIManager.AbbreviateNumber(amount, false, true));
             }
 
             OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
