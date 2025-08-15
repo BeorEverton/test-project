@@ -34,12 +34,20 @@ namespace Assets.Scripts.UI
         private Vector3 originalScale;
         private Color originalColor;
 
+        public void SetUpgradeType(TurretUpgradeType type)
+        {
+            _upgradeType = type;
+            if (_statName != null)
+                _statName.SetText(GetDisplayNameForUpgrade(type));
+            UpdateDisplayFromType();
+        }
+
         private void Awake()
         {
             // Auto-assign the first two TextMeshProUGUI components in children
             TextMeshProUGUI[] tmpros = GetComponentsInChildren<TextMeshProUGUI>();
 
-            if (tmpros.Length >= 4)
+            if (tmpros.Length >= 5)
             {
                 _statName = tmpros[0];
                 _statValue = tmpros[1];
