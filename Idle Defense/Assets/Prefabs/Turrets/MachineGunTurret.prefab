@@ -496,138 +496,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnemyTargetChoice: 0
   _turretInfo: {fileID: 11400000, guid: d382a866b82a96449b631cb2dc2ef75a, type: 2}
-  RuntimeStats:
-    IsUnlocked: 1
-    TurretType: 0
-    BaseDamage: 5
-    BaseFireRate: 0.5
-    BaseCritChance: 0
-    BaseCritDamage: 105
-    Damage: 5
-    DamageLevel: 0
-    DamageUpgradeAmount: 1.03
-    DamageUpgradeBaseCost: 1
-    DamageCostExponentialMultiplier: 1.08
-    FireRate: 0.5
-    FireRateLevel: 0
-    FireRateUpgradeAmount: 0.06
-    FireRateUpgradeBaseCost: 25
-    FireRateCostExponentialMultiplier: 1.078
-    CriticalChance: 0
-    CriticalChanceLevel: 0
-    CriticalChanceUpgradeAmount: 1
-    CriticalChanceUpgradeBaseCost: 100
-    CriticalChanceCostExponentialMultiplier: 1.35
-    CriticalDamageMultiplier: 105
-    CriticalDamageMultiplierLevel: 0
-    CriticalDamageMultiplierUpgradeAmount: 5
-    CriticalDamageMultiplierUpgradeBaseCost: 50
-    CriticalDamageCostExponentialMultiplier: 1.079
-    ExplosionRadius: 0
-    ExplosionRadiusLevel: 0
-    ExplosionRadiusUpgradeAmount: 0
-    ExplosionRadiusUpgradeBaseCost: 0
-    SplashDamage: 0
-    SplashDamageLevel: 0
-    SplashDamageUpgradeAmount: 0
-    SplashDamageUpgradeBaseCost: 0
-    PierceChance: 0
-    PierceChanceLevel: 0
-    PierceChanceUpgradeAmount: 0
-    PierceChanceUpgradeBaseCost: 0
-    PierceDamageFalloff: 0
-    PierceDamageFalloffLevel: 0
-    PierceDamageFalloffUpgradeAmount: 0
-    PierceDamageFalloffUpgradeBaseCost: 0
-    PelletCount: 0
-    PelletCountLevel: 0
-    PelletCountUpgradeAmount: 0
-    PelletCountUpgradeBaseCost: 0
-    DamageFalloffOverDistance: 0
-    DamageFalloffOverDistanceLevel: 0
-    DamageFalloffOverDistanceUpgradeAmount: 0
-    DamageFalloffOverDistanceUpgradeBaseCost: 0
-    KnockbackStrength: 0
-    KnockbackStrengthLevel: 0
-    KnockbackStrengthUpgradeAmount: 0
-    KnockbackStrengthUpgradeBaseCost: 0
-    KnockbackStrengthCostExponentialMultiplier: 0
-    PercentBonusDamagePerSec: 0
-    PercentBonusDamagePerSecLevel: 0
-    PercentBonusDamagePerSecUpgradeAmount: 0
-    PercentBonusDamagePerSecUpgradeBaseCost: 0
-    SlowEffect: 0
-    SlowEffectLevel: 0
-    SlowEffectUpgradeAmount: 0
-    SlowEffectUpgradeBaseCost: 0
-    RotationSpeed: 8
-    AngleThreshold: 5
-  PermanentStats:
-    IsUnlocked: 1
-    TurretType: 0
-    BaseDamage: 5
-    BaseFireRate: 0.5
-    BaseCritChance: 0
-    BaseCritDamage: 105
-    Damage: 5
-    DamageLevel: 0
-    DamageUpgradeAmount: 1.03
-    DamageUpgradeBaseCost: 1
-    DamageCostExponentialMultiplier: 1.08
-    FireRate: 0.5
-    FireRateLevel: 0
-    FireRateUpgradeAmount: 0.06
-    FireRateUpgradeBaseCost: 25
-    FireRateCostExponentialMultiplier: 1.078
-    CriticalChance: 0
-    CriticalChanceLevel: 0
-    CriticalChanceUpgradeAmount: 1
-    CriticalChanceUpgradeBaseCost: 100
-    CriticalChanceCostExponentialMultiplier: 1.35
-    CriticalDamageMultiplier: 105
-    CriticalDamageMultiplierLevel: 0
-    CriticalDamageMultiplierUpgradeAmount: 5
-    CriticalDamageMultiplierUpgradeBaseCost: 50
-    CriticalDamageCostExponentialMultiplier: 1.079
-    ExplosionRadius: 0
-    ExplosionRadiusLevel: 0
-    ExplosionRadiusUpgradeAmount: 0
-    ExplosionRadiusUpgradeBaseCost: 0
-    SplashDamage: 0
-    SplashDamageLevel: 0
-    SplashDamageUpgradeAmount: 0
-    SplashDamageUpgradeBaseCost: 0
-    PierceChance: 0
-    PierceChanceLevel: 0
-    PierceChanceUpgradeAmount: 0
-    PierceChanceUpgradeBaseCost: 0
-    PierceDamageFalloff: 0
-    PierceDamageFalloffLevel: 0
-    PierceDamageFalloffUpgradeAmount: 0
-    PierceDamageFalloffUpgradeBaseCost: 0
-    PelletCount: 0
-    PelletCountLevel: 0
-    PelletCountUpgradeAmount: 0
-    PelletCountUpgradeBaseCost: 0
-    DamageFalloffOverDistance: 0
-    DamageFalloffOverDistanceLevel: 0
-    DamageFalloffOverDistanceUpgradeAmount: 0
-    DamageFalloffOverDistanceUpgradeBaseCost: 0
-    KnockbackStrength: 0
-    KnockbackStrengthLevel: 0
-    KnockbackStrengthUpgradeAmount: 0
-    KnockbackStrengthUpgradeBaseCost: 0
-    KnockbackStrengthCostExponentialMultiplier: 0
-    PercentBonusDamagePerSec: 0
-    PercentBonusDamagePerSecLevel: 0
-    PercentBonusDamagePerSecUpgradeAmount: 0
-    PercentBonusDamagePerSecUpgradeBaseCost: 0
-    SlowEffect: 0
-    SlowEffectLevel: 0
-    SlowEffectUpgradeAmount: 0
-    SlowEffectUpgradeBaseCost: 0
-    RotationSpeed: 8
-    AngleThreshold: 5
   _rotationPoint: {fileID: 4294516794264858668}
   _muzzleFlashPosition: {fileID: 672767675903866823}
   _muzzleFlashSprites:
@@ -643,6 +511,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e65e559c887d6264e96c93184c529594, type: 3}
   - {fileID: 21300000, guid: 896b31b6fce49724899493d0452c852a, type: 3}
   upgradePulseFX: {fileID: 6056870896508167163}
+  targetingPatternBehaviour: {fileID: 0}
 --- !u!114 &474684429718730350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -658,6 +527,21 @@ MonoBehaviour:
   _barrel: {fileID: 4765491046842047527}
   _recoilDuration: 0.1
   _recoilDistance: -0.15
+  _returnCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1.25
+      outSlope: -1.25
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!4 &2948967594423300107 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}

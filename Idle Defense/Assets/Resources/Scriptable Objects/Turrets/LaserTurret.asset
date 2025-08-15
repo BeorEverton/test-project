@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurretType: 4
   IsUnlocked: 0
+  RotationSpeed: 14
+  AngleThreshold: 3
   Damage: 500
   DamageLevel: 0
   DamageUpgradeAmount: 1.07
@@ -24,9 +26,7 @@ MonoBehaviour:
   FireRateUpgradeAmount: 0.04
   FireRateUpgradeBaseCost: 5000
   FireRateCostExponentialMultiplier: 1.078
-  Range: 4.4
-  RotationSpeed: 14
-  AngleThreshold: 3
+  Range: 5
   CriticalChance: 0
   CriticalChanceLevel: 0
   CriticalChanceUpgradeAmount: 0
@@ -82,3 +82,44 @@ MonoBehaviour:
   SlowEffectUpgradeAmount: 2
   SlowEffectUpgradeBaseCost: 800
   SlowEffectCostExponentialMultiplier: 1.079
+  BounceCount: 0
+  BounceCountLevel: 0
+  BounceCountUpgradeAmount: 0
+  BounceCountUpgradeBaseCost: 0
+  BounceCountCostExponentialMultiplier: 0
+  BounceRange: 0
+  BounceRangeLevel: 0
+  BounceRangeUpgradeAmount: 0
+  BounceRangeUpgradeBaseCost: 0
+  BounceRangeCostExponentialMultiplier: 0
+  BounceDelay: 0
+  BounceDelayLevel: 0
+  BounceDelayUpgradeAmount: 0
+  BounceDelayUpgradeBaseCost: 0
+  BounceDelayCostExponentialMultiplier: 0
+  BounceDamagePct: 0.2
+  BounceDamagePctLevel: 0
+  BounceDamagePctUpgradeAmount: 0
+  BounceDamagePctUpgradeBaseCost: 0
+  BounceDamagePctCostExponentialMultiplier: 0
+  ConeAngle: 0
+  ConeAngleLevel: 0
+  ConeAngleUpgradeAmount: 0
+  ConeAngleUpgradeBaseCost: 0
+  ConeAngleCostExponentialMultiplier: 0
+  ExplosionDelay: 0
+  ExplosionDelayLevel: 0
+  ExplosionDelayUpgradeAmount: 0
+  ExplosionDelayUpgradeBaseCost: 0
+  ExplosionDelayCostExponentialMultiplier: 0
+  AheadDistance: 0
+  AheadDistanceLevel: 0
+  AheadDistanceUpgradeAmount: 0
+  AheadDistanceUpgradeBaseCost: 0
+  AheadDistanceCostExponentialMultiplier: 0
+  TrapPrefab: {fileID: 0}
+  MaxTrapsActive: 0
+  MaxTrapsActiveLevel: 0
+  MaxTrapsActiveUpgradeAmount: 0
+  MaxTrapsActiveUpgradeBaseCost: 0
+  MaxTrapsActiveCostExponentialMultiplier: 0

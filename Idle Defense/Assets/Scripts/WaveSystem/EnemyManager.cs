@@ -1,6 +1,8 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.WaveSystem
@@ -8,6 +10,8 @@ namespace Assets.Scripts.WaveSystem
     public class EnemyManager : MonoBehaviour
     {
         private bool _gameRunning;
+
+        private readonly List<GameObject> _pendingRemovals = new List<GameObject>();
 
         private void Start()
         {
@@ -44,14 +48,25 @@ namespace Assets.Scripts.WaveSystem
 
         private void HandleEnemiesAlive()
         {
-            foreach (GameObject enemy in EnemySpawner.Instance.EnemiesAlive)
-            {
-                if (!_gameRunning)
-                    break;
-                Enemy enemyComponent = enemy.GetComponent<Enemy>();
-                if (!enemyComponent.IsAlive)
-                    continue;
+            var enemies = EnemySpawner.Instance.EnemiesAlive;
 
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                var enemyGO = enemies[i];
+                if (enemyGO == null)
+                {
+                    _pendingRemovals.Add(enemyGO);
+                    continue;
+                }
+
+                Enemy enemyComponent = enemyGO.GetComponent<Enemy>();
+                if (enemyComponent == null || !enemyComponent.IsAlive)
+                {
+                    _pendingRemovals.Add(enemyGO);
+                    continue;
+                }
+
+                // Knockback handling
                 if (enemyComponent.KnockbackTime > 0f)
                 {
                     if (enemyComponent.IsBossInstance)
@@ -60,34 +75,68 @@ namespace Assets.Scripts.WaveSystem
                         enemyComponent.KnockbackTime /= 2f;
                     }
 
-                    enemy.transform.position += (Vector3)(enemyComponent.KnockbackVelocity * Time.deltaTime);
+                    enemyComponent.KnockbackVelocity.x = 0f; // Ensure no lateral movement
+                    enemyComponent.transform.position +=
+                        (Vector3)(enemyComponent.KnockbackVelocity * Time.deltaTime);
+
                     enemyComponent.KnockbackTime -= Time.deltaTime;
                     continue; // Skip movement/attack while being pushed
                 }
 
+                // Movement & grid position
                 if (!enemyComponent.CanAttack || enemyComponent.KnockbackTime > 0f)
                 {
                     MoveEnemy(enemyComponent);
-                    HandleGridPosition(enemy, enemyComponent);
+                    HandleGridPosition(enemyGO, enemyComponent);
                 }
                 else
                 {
-                    if (enemy.transform.position.y <= enemyComponent.Info.AttackRange)
-                        TryAttack(enemyComponent);
-                    else
-                        enemyComponent.CanAttack = false; // Cancel attack state if pushed out of range
+                    // Within attack range
+                    if (enemyComponent.transform.position.Depth() <= enemyComponent.Info.AttackRange)
+                    {
+                        // Check for trap in current cell
+                        if (TrapPoolManager.Instance.hasAnyTrapActive)
+                        {
+                            Trap trap = TrapPoolManager.Instance.GetTrapAtCell(enemyComponent.LastGridPos);
+                            if (trap != null)
+                                StartCoroutine(TriggerTrapCoroutine(trap, enemyComponent));
+                        }
 
+                        TryAttack(enemyComponent);
+                    }
+                    else
+                    {
+                        // Cancel attack state if pushed out of range
+                        enemyComponent.CanAttack = false;
+                    }
                 }
             }
+
+            // Remove any dead/null enemies in one pass
+            if (_pendingRemovals.Count > 0)
+            {
+                for (int r = 0; r < _pendingRemovals.Count; r++)
+                {
+                    enemies.Remove(_pendingRemovals[r]);
+                }
+                _pendingRemovals.Clear();
+            }
         }
+
 
         private void MoveEnemy(Enemy enemy)
         {
             GameObject enemyGameObject = enemy.gameObject;
-            enemyGameObject.transform.position += Vector3.down * enemy.MovementSpeed * Time.deltaTime;
+            /*enemyGameObject.transform.position += Vector3.down * enemy.MovementSpeed * Time.deltaTime;
 
             if (enemyGameObject.transform.position.y <= enemy.Info.AttackRange)
+                enemy.CanAttack = true;*/
+            //enemyGameObject.transform.position -= Axes.Forward(enemy.MovementSpeed * Time.deltaTime);
+            enemy.transform.position += enemy.MoveDirection * enemy.MovementSpeed * Time.deltaTime;
+
+            if (enemyGameObject.transform.position.Depth() <= enemy.Info.AttackRange)
                 enemy.CanAttack = true;
+
         }
 
         private void HandleGridPosition(GameObject enemy, Enemy enemyComponent)
@@ -100,7 +149,42 @@ namespace Assets.Scripts.WaveSystem
             GridManager.Instance.RemoveEnemy(enemyComponent, enemyComponent.LastGridPos);
             GridManager.Instance.AddEnemy(enemyComponent);
             enemyComponent.LastGridPos = currentGridPos;
+
+            if (TrapPoolManager.Instance.hasAnyTrapActive)
+            {
+                Trap trap = TrapPoolManager.Instance.GetTrapAtCell(currentGridPos);
+                if (trap != null)
+                    StartCoroutine(TriggerTrapCoroutine(trap, enemyComponent));
+            }
         }
+
+        private IEnumerator TriggerTrapCoroutine(Trap trap, Enemy enemyComponent)
+        {
+            if (trap.delay > 0f)
+                yield return new WaitForSeconds(trap.delay);
+
+            if (trap.radius <= 0f)
+            {
+                // Single target
+                trap.Trigger(enemyComponent);
+
+            }
+            else
+            {
+                // AOE
+                var enemies = GridManager.Instance.GetEnemiesInRange(
+                    GridManager.Instance.GetWorldPosition(trap.cell, trap.worldY),
+                    Mathf.CeilToInt(trap.radius));
+                Vector3 trapWorldPos = GridManager.Instance.GetWorldPosition(trap.cell, trap.worldY);
+
+                foreach (var e in enemies)
+                {
+                    if (e != null && Vector3.Distance(e.transform.position, trapWorldPos) <= trap.radius)
+                        trap.Trigger(e);
+                }
+            }
+        }
+
 
         private void TryAttack(Enemy enemy)
         {

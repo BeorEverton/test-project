@@ -7,25 +7,22 @@ namespace Assets.Scripts.Turrets
 {
     public class MachineGunTurret : BaseTurret
     {
-        private Recoil _recoil;
+        
 
         protected override void Start()
         {
             base.Start();
-            _recoil = GetComponent<Recoil>();
         }
 
         protected override void Update()
         {
             base.Update();
-            _recoil.ApplyBarrelRecoil();
         }
 
         protected override void Shoot()
         {
             base.Shoot();
 
-            _recoil.AddRecoil();
 
             float finalDamage = RuntimeStats.Damage;
             bool isCritical = IsCriticalHit();

@@ -76,10 +76,15 @@ namespace Assets.Scripts.Systems
         private bool IsValidSavedStats(PlayerBaseStatsInstance stats) => stats is { MaxHealth: > 0 };
 
         public void InitializeGame(bool startTime = false, bool usePermanentStats = false)
-        {            
-            if (usePermanentStats && _permanentStats != null)
+        {
+            // Prefer session stats if available, unless explicitly told to use permanent ones
+            if (!usePermanentStats && SavedStats != null && IsValidSavedStats(SavedStats))
             {
-                Stats = CloneStats(_permanentStats);                            
+                Stats = SavedStats;   // <- this was missing
+            }
+            else if (usePermanentStats && _permanentStats != null)
+            {
+                Stats = CloneStats(_permanentStats);
             }
 
             _currentHealth = Stats.MaxHealth;
@@ -89,8 +94,9 @@ namespace Assets.Scripts.Systems
             OnHealthChanged?.Invoke(_currentHealth, Stats.MaxHealth);
 
             if (startTime)
-                Time.timeScale = UIManager.Instance.timeSpeedOnDeath; // Resume the game only used in case of death
+                Time.timeScale = UIManager.Instance.timeSpeedOnDeath;
         }
+
 
         public void TakeDamage(float amount)
         {
@@ -120,16 +126,7 @@ namespace Assets.Scripts.Systems
             }
             else
                 UIManager.Instance.ShowDeathCountdown();
-
-            // Analytics event for player death
-            AnalyticsManager.Instance.SendCustomEvent("PlayerDeath", new Dictionary<string, string>()
-            {
-                { "WaveOfDeath", WaveManager.Instance.GetCurrentWaveIndex().ToString() },
-                { "DeathNumber", StatsManager.Instance.MissionsFailed.ToString() },
-                { "MaxHealth", MaxHealth.ToString() },
-                { "RegenAmount", Stats.RegenAmount.ToString() },
-                { "RegenDelay", Stats.RegenInterval.ToString() }
-            });
+                        
         }
 
         public void Heal(float amount)

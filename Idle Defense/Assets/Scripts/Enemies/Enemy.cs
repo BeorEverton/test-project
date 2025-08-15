@@ -1,15 +1,15 @@
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
-using Assets.Scripts.WaveSystem;
-using DamageNumbersPro;
-using System;
-using UnityEngine;
-using Random = UnityEngine.Random;
-using DG.Tweening;
-using System.Collections.Generic;
-using System.Collections;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
+using Assets.Scripts.WaveSystem;
+using DamageNumbersPro;
+using DG.Tweening;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Enemies
 {
@@ -55,16 +55,22 @@ namespace Assets.Scripts.Enemies
         // Laser targeting
         private float _baseMovementSpeed;
 
+        // For Damage effects
+        public bool tookCriticalHit = false;
+
 #if UNITY_EDITOR //To display coinDrop and damage in the inspector debug mode
         private ulong _coinDropAmount;
         private float _damage;
 #endif
-                
+
         // For visuals
         private Vector3 _bodyOriginalLocalPos;
         [SerializeField] private Transform _muzzleFlashPoint;
         [SerializeField] private SpriteRenderer _muzzleFlashRenderer;
         [SerializeField] private List<Sprite> _muzzleFlashSprites;
+
+        // Movement
+        public Vector3 MoveDirection;
 
 
         private void Awake()
@@ -72,7 +78,6 @@ namespace Assets.Scripts.Enemies
             if (_body != null)
                 _bodyOriginalLocalPos = _body.localPosition;
         }
-
 
         private void Start()
         {
@@ -100,16 +105,20 @@ namespace Assets.Scripts.Enemies
         {
             CurrentHealth -= amount;
 
+            isCritical = tookCriticalHit;
+
             if (SettingsManager.Instance.AllowPopups)
             {
                 if (damageNumberCritical && isCritical)
-                    damageNumberCritical.Spawn(transform.position, UIManager.AbbreviateNumber(amount, false,true));
+                    damageNumberCritical.Spawn(transform.position, UIManager.AbbreviateNumber(amount, false, true));
                 else if (damageNumber)
                     damageNumber.Spawn(transform.position, UIManager.AbbreviateNumber(amount, false, true));
             }
 
             OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
             StatsManager.Instance.TotalDamage += amount;
+
+            tookCriticalHit = false; // Reset critical hit state
 
             CheckIfDead();
         }
@@ -145,7 +154,7 @@ namespace Assets.Scripts.Enemies
 
         private void TriggerBossExplosion()
         {
-            
+
             float radius = _isMiniBoss ? 3f : 5f;
             float explosionDamage = MaxHealth * 0.2f;
 
@@ -158,7 +167,7 @@ namespace Assets.Scripts.Enemies
                 float distance = Vector3.Distance(e.transform.position, transform.position);
                 if (distance <= radius)
                 {
-                    e.TakeDamage(explosionDamage);                    
+                    e.TakeDamage(explosionDamage);
                 }
             }
 
@@ -306,7 +315,7 @@ namespace Assets.Scripts.Enemies
 
                 Sequence seq = DOTween.Sequence();
                 seq.Append(_body.DOLocalMove(windUp, 0.08f).SetEase(Ease.InOutSine))
-                   .Append(_body.DOLocalMove(impact, 0.06f).SetEase(Ease.InQuad))                   
+                   .Append(_body.DOLocalMove(impact, 0.06f).SetEase(Ease.InQuad))
                    .Append(_body.DOLocalMove(start, 0.1f).SetEase(Ease.OutBack));
             }
 
@@ -343,6 +352,26 @@ namespace Assets.Scripts.Enemies
 
             _body.DOKill(); // cancel any tweens immediately
             _body.localPosition = _bodyOriginalLocalPos; // snap back to original position
+        }
+
+        /// <summary>
+        /// Direct calling it may remove and then kill the enemy by a different turret
+        /// </summary>
+        /// <param name="evt"></param>
+        public void DelayRemoveDeathEvent(EventHandler<OnDeathEventArgs> evt)
+        {
+            // Delay the removal of the death event to ensure it doesn't interfere with ongoing death effects
+            StartCoroutine(DelayRemoveDeathEventCoroutine(evt));
+        }
+
+        private IEnumerator DelayRemoveDeathEventCoroutine(EventHandler<OnDeathEventArgs> evt)
+        {
+            if (!IsAlive || OnDeath == null)
+            {
+                yield break; // No need to delay if already dead or no subscribers
+            }
+            yield return new WaitForSeconds(0.2f); // Adjust delay as needed
+            OnDeath -= evt;
         }
     }
 }

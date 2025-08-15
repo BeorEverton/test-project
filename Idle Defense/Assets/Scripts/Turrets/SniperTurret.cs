@@ -12,18 +12,15 @@ namespace Assets.Scripts.Turrets
         private readonly float _cellSize = 1f;
         private readonly float _bulletWidth = 0.1f;
 
-        private Recoil _recoil;
 
         protected override void Start()
         {
             base.Start();
-            _recoil = GetComponent<Recoil>();
         }
 
         protected override void Update()
         {
             base.Update();
-            _recoil.ApplyBarrelRecoil();
         }
 
         protected override void Shoot()
@@ -31,7 +28,6 @@ namespace Assets.Scripts.Turrets
             base.Shoot();
             _timeSinceLastShot = 0f;
 
-            _recoil.AddRecoil();
 
             float pierceDamageMultiplier = RuntimeStats.PierceDamageFalloff / 100f;
             float currentDamage = RuntimeStats.Damage;

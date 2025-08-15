@@ -8,14 +8,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Turrets
 {
-    public abstract class BaseTurret : MonoBehaviour
+    public class BaseTurret : MonoBehaviour
     {
         public EnemyTarget EnemyTargetChoice = EnemyTarget.First;
 
@@ -23,10 +21,12 @@ namespace Assets.Scripts.Turrets
         /// Reference to the TurretInfoSO that contains the base stats and info for this turret. DONT CHANGE AT RUNTIME!
         /// </summary>
         public TurretInfoSO _turretInfo;
-        public TurretStatsInstance RuntimeStats; // For session upgrades
+        [NonSerialized]
+        public TurretStatsInstance RuntimeStats; // For session upgrades        
+        [NonSerialized]
         public TurretStatsInstance PermanentStats;   // Saved base
 
-        [SerializeField] protected Transform _rotationPoint, _muzzleFlashPosition;
+        public Transform _rotationPoint, _muzzleFlashPosition;
         [SerializeField] protected List<Sprite> _muzzleFlashSprites;
         [SerializeField] protected string[] _shotSounds;
 
@@ -46,19 +46,21 @@ namespace Assets.Scripts.Turrets
         private float _aimSize = .3f;
 
         // Control the attack range based on the screen size
-        private float _screenLeft;
-        private float _screenRight;
-        private float _screenTop;
-        private float _screenBottom;
-
-        private int _lastScreenWidth;
-        private int _lastScreenHeight;
+        private ScreenBounds screenBounds;
 
         // How far from the top the enemy needs to be for the turrets to shoot
         private const float _topSpawnMargin = 1f;
-        private float _attackRange;
 
         public GameObject upgradePulseFX;
+
+        private Recoil _recoil;
+
+        // Interfaces
+        [SerializeField] private MonoBehaviour targetingPatternBehaviour;
+        private ITargetingPattern targetingPattern;
+        [NonSerialized] public DamageEffectHandler DamageEffects;
+        [NonSerialized] public BounceDamageEffect BounceDamageEffectRef;
+        [NonSerialized] public PierceDamageEffect PierceDamageEffectRef;
 
         private void OnDestroy() =>
             GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
@@ -72,7 +74,6 @@ namespace Assets.Scripts.Turrets
             UpdateTurretAppearance();
         }
 
-
         protected virtual void Start()
         {
             // If there are no saved permanent stats create a new fresh from the SO
@@ -83,8 +84,10 @@ namespace Assets.Scripts.Turrets
             GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
 
             UpdateTurretAppearance();
-        }
 
+            targetingPattern = targetingPatternBehaviour as ITargetingPattern;
+            InitializeEffects();
+        }
 
         /// <summary>Overwrite the whole stats, preserving level counts, called on load.</summary>
         public void SetPermanentStats(TurretStatsInstance stats)
@@ -94,12 +97,20 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void OnEnable()
         {
-            UpdateScreenBoundsIfNeeded();
-            if (RuntimeStats == null && PermanentStats != null)
+            if (RuntimeStats == null)
             {
-                RuntimeStats = CloneStatsWithoutLevels(PermanentStats); // New enable, if cleaned runtime, clone the permanent
-                Debug.Log("runtime stats was null, cloning from permanent stats on Enable on " + name);
+                if (PermanentStats != null && PermanentStats.TurretType == _turretInfo.TurretType)
+                {
+                    RuntimeStats = CloneStatsWithoutLevels(PermanentStats);
+                }
+                else
+                {
+                    // PermanentStats is null or wrong turret type → rebuild from SO
+                    PermanentStats = new TurretStatsInstance(_turretInfo);
+                    RuntimeStats = CloneStatsWithoutLevels(PermanentStats);
+                }
             }
+
             if (ReferenceEquals(PermanentStats, RuntimeStats))
             {
                 Debug.LogError($"{name}  PermanentStats and RuntimeStats are sharing the same reference! This will break upgrades.");
@@ -120,15 +131,28 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Attack()
         {
-            UpdateScreenBoundsIfNeeded();
+            /*if (Screen.width != screenBounds.Width || Screen.height != screenBounds.Height)
+            {
+                // Useful for the grid, here's probably the best place to update the screen bounds
+                screenBounds = GridManager.Instance.UpdateScreenBounds();
+                //UpdateAttackRange();
+            }*/
+
+            if (targetingPattern is TrapPattern trap && trap.randomPlacement)
+            {
+                if (_timeSinceLastShot >= _atkSpeed)
+                    Shoot(); // Fire even without a target
+
+                return; // Skip normal targeting logic
+            }
 
             // if goes out of range
             if (_targetEnemy != null)
             {
-                float ty = _targetEnemy.transform.position.y;
-                if (ty > _attackRange)
+                float ty = _targetEnemy.transform.position.Depth();
+                if (ty > RuntimeStats.Range)
                 {
-                    _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
+                    _targetEnemy.GetComponent<Enemy>().DelayRemoveDeathEvent(Enemy_OnDeath);
                     _targetEnemy = null;
                     _targetInRange = false;
                 }
@@ -148,7 +172,7 @@ namespace Assets.Scripts.Turrets
             if (_timeSinceLastShot < _atkSpeed)
                 return;
 
-            if (_targetInAim && _targetInRange && IsTargetVisibleOnScreen())
+            if (_targetInAim && _targetInRange)// && IsTargetVisibleOnScreen())
                 Shoot();
             else
                 TargetEnemy();
@@ -159,6 +183,17 @@ namespace Assets.Scripts.Turrets
             StartCoroutine(ShowMuzzleFlash());
             _currentShotSound = _shotSounds[Random.Range(0, _shotSounds.Length)];
             AudioManager.Instance.PlayWithVariation(_currentShotSound, 0.8f, 1f);
+
+            targetingPattern?.ExecuteAttack(this, RuntimeStats, _targetEnemy);
+
+            // Cache once; also find it if it's on a child
+            if (_recoil == null)
+                _recoil = GetComponentInChildren<Recoil>(true);
+
+            _recoil?.AddRecoil();
+
+
+            _timeSinceLastShot = 0f;
         }
 
         protected virtual void TargetEnemy()
@@ -170,20 +205,20 @@ namespace Assets.Scripts.Turrets
             _targetEnemy = EnemyTargetChoice switch
             {
                 EnemyTarget.First => enemiesAlive
-                    .OrderBy(enemy => enemy.transform.position.y)
-                    .FirstOrDefault(y => y.transform.position.y <= _attackRange),
+                    .OrderBy(enemy => enemy.transform.position.Depth())
+                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range),
 
                 EnemyTarget.Strongest => enemiesAlive
                     .OrderByDescending(enemy => enemy.GetComponent<Enemy>().MaxHealth)
-                    .FirstOrDefault(y => y.transform.position.y <= _attackRange),
+                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range),
 
                 EnemyTarget.Random => enemiesAlive
                     .OrderBy(_ => Random.value)
-                    .FirstOrDefault(y => y.transform.position.y <= _attackRange),
+                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range),
 
                 _ => enemiesAlive
-                    .OrderBy(enemy => enemy.transform.position.y)
-                    .FirstOrDefault(y => y.transform.position.y <= _attackRange)
+                    .OrderBy(enemy => enemy.transform.position.Depth())
+                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range)
             };
 
             if (_targetEnemy != null)
@@ -196,8 +231,8 @@ namespace Assets.Scripts.Turrets
                 return false;
 
             Vector3 pos = _targetEnemy.transform.position;
-            return pos.x >= _screenLeft && pos.x <= _screenRight &&
-                   pos.y >= _screenBottom && pos.y <= (_screenTop - _topSpawnMargin);
+            return pos.x >= screenBounds.Left&& pos.x <= screenBounds.Right &&
+                   pos.y >= screenBounds.Bottom && pos.y <= (screenBounds.Top- _topSpawnMargin);
         }
 
         protected virtual void Enemy_OnDeath(object sender, EventArgs _)
@@ -219,19 +254,59 @@ namespace Assets.Scripts.Turrets
 
             _targetInRange = true;
 
-            Vector3 direction = _targetEnemy.transform.position - _rotationPoint.position;
+            // Work in the parent's local space so the slot's 30° pitch stays intact.
+            Transform basis = _rotationPoint.parent != null ? _rotationPoint.parent : _rotationPoint;
 
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90;
+            Vector3 toTargetWorld = _targetEnemy.transform.position - _rotationPoint.position;
+            Vector3 toTargetLocal = basis.InverseTransformDirection(toTargetWorld);
 
-            Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
+            // Decide which plane and axis to use based on your configured Depth.
+            Vector3 depthWorld = Axes.Forward(1f);
+            bool depthIsZ = Mathf.Abs(depthWorld.z) > 0.5f;
+            bool depthIsY = !depthIsZ && Mathf.Abs(depthWorld.y) > 0.5f;
 
+            float targetAngle;
+            Quaternion targetLocal;
+
+            if (depthIsZ)
+            {
+                // Depth = Z  -> rotate around local Z, aim in local XY plane
+                toTargetLocal.z = 0f;
+                if (toTargetLocal.sqrMagnitude < 1e-6f) { _targetInAim = false; return; }
+
+                targetAngle = Mathf.Atan2(toTargetLocal.y, toTargetLocal.x) * Mathf.Rad2Deg - 90f;
+                targetLocal = Quaternion.Euler(0f, 0f, targetAngle);
+            }
+            else if (depthIsY)
+            {
+                // Depth = Y -> rotate around local Y, aim in local XZ plane
+                toTargetLocal.y = 0f;
+                if (toTargetLocal.sqrMagnitude < 1e-6f) { _targetInAim = false; return; }
+
+                // Standard yaw: +Z forward, +X right
+                targetAngle = Mathf.Atan2(toTargetLocal.x, toTargetLocal.z) * Mathf.Rad2Deg;
+                targetLocal = Quaternion.Euler(0f, targetAngle, 0f);
+            }
+            else
+            {
+                // Fallback: treat as Z-depth.
+                toTargetLocal.z = 0f;
+                if (toTargetLocal.sqrMagnitude < 1e-6f) { _targetInAim = false; return; }
+                targetAngle = Mathf.Atan2(toTargetLocal.y, toTargetLocal.x) * Mathf.Rad2Deg - 90f;
+                targetLocal = Quaternion.Euler(0f, 0f, targetAngle);
+            }
+
+            // Slerp strictly in LOCAL space; no world/local mixing.
             _rotationPoint.localRotation = Quaternion.Slerp(
-                _rotationPoint.rotation, targetRotation, RuntimeStats.RotationSpeed * bonusMultiplier * Time.deltaTime);
+                _rotationPoint.localRotation,
+                targetLocal,
+                RuntimeStats.RotationSpeed * bonusMultiplier * Time.deltaTime
+            );
 
-            IsAimingOnTarget(angle);
+            IsAimingOnTarget(targetLocal);
         }
 
-        protected virtual void IsAimingOnTarget(float targetAngle)
+        protected virtual void IsAimingOnTarget(Quaternion targetLocal)
         {
             if (_targetEnemy == null)
             {
@@ -239,11 +314,9 @@ namespace Assets.Scripts.Turrets
                 return;
             }
 
-            float currentAngle = _rotationPoint.localRotation.eulerAngles.z;
-
-            float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
-
-            _targetInAim = angleDifference <= RuntimeStats.AngleThreshold;
+            // Compare local rotations directly.
+            float diff = Quaternion.Angle(_rotationPoint.localRotation, targetLocal);
+            _targetInAim = diff <= RuntimeStats.AngleThreshold;
         }
 
         private IEnumerator ShowMuzzleFlash()
@@ -273,27 +346,11 @@ namespace Assets.Scripts.Turrets
         public bool IsUnlocked() => RuntimeStats.IsUnlocked;
         public void UnlockTurret() => RuntimeStats.IsUnlocked = true;
 
-        private void UpdateScreenBoundsIfNeeded()
-        {
-            if (Screen.width == _lastScreenWidth && Screen.height == _lastScreenHeight)
-                return;
-
-            Camera cam = Camera.main;
-            _screenLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
-            _screenRight = cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
-            _screenBottom = cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).y;
-            _screenTop = cam.ViewportToWorldPoint(new Vector3(0, 1, 0)).y;
-
-            _lastScreenWidth = Screen.width;
-            _lastScreenHeight = Screen.height;
-
-            UpdateAttackRange();
-        }
-
+        /*
         private void UpdateAttackRange()
         {
-            _attackRange = _screenTop - _topSpawnMargin;
-        }
+            _attackRange = screenBounds.Top - _topSpawnMargin;
+        }*/
 
         public void SetTarget(int index)
         {
@@ -420,17 +477,20 @@ namespace Assets.Scripts.Turrets
         }
 
         public static TurretStatsInstance CloneStatsWithoutLevels(TurretStatsInstance src)
-        {
+        {            
             return new TurretStatsInstance
             {
+                // Identity / base
                 IsUnlocked = src.IsUnlocked,
                 TurretType = src.TurretType,
 
+                // Base (do not touch at runtime)
                 BaseDamage = src.BaseDamage,
                 BaseFireRate = src.BaseFireRate,
                 BaseCritChance = src.BaseCritChance,
                 BaseCritDamage = src.BaseCritDamage,
 
+                // Core combat
                 Damage = src.Damage,
                 DamageLevel = 0,
                 DamageUpgradeAmount = src.DamageUpgradeAmount,
@@ -443,6 +503,22 @@ namespace Assets.Scripts.Turrets
                 FireRateUpgradeBaseCost = src.FireRateUpgradeBaseCost,
                 FireRateCostExponentialMultiplier = src.FireRateCostExponentialMultiplier,
 
+                // Aiming / reach
+                RotationSpeed = src.RotationSpeed,
+                RotationSpeedLevel = 0,
+                RotationSpeedUpgradeAmount = src.RotationSpeedUpgradeAmount,
+                RotationSpeedUpgradeBaseCost = src.RotationSpeedUpgradeBaseCost,
+                RotationSpeedCostExponentialMultiplier = src.RotationSpeedCostExponentialMultiplier,
+                AngleThreshold = src.AngleThreshold,
+
+                Range = src.Range,
+                RangeLevel = 0,
+                RangeUpgradeAmount = src.RangeUpgradeAmount,
+                RangeUpgradeBaseCost = src.RangeUpgradeBaseCost,
+                RangeCostExponentialMultiplier = src.RangeCostExponentialMultiplier,
+
+
+                // Crits
                 CriticalChance = src.CriticalChance,
                 CriticalChanceLevel = 0,
                 CriticalChanceUpgradeAmount = src.CriticalChanceUpgradeAmount,
@@ -455,6 +531,7 @@ namespace Assets.Scripts.Turrets
                 CriticalDamageMultiplierUpgradeBaseCost = src.CriticalDamageMultiplierUpgradeBaseCost,
                 CriticalDamageCostExponentialMultiplier = src.CriticalDamageCostExponentialMultiplier,
 
+                // AOE / splash
                 ExplosionRadius = src.ExplosionRadius,
                 ExplosionRadiusLevel = 0,
                 ExplosionRadiusUpgradeAmount = src.ExplosionRadiusUpgradeAmount,
@@ -465,6 +542,7 @@ namespace Assets.Scripts.Turrets
                 SplashDamageUpgradeAmount = src.SplashDamageUpgradeAmount,
                 SplashDamageUpgradeBaseCost = src.SplashDamageUpgradeBaseCost,
 
+                // Pierce / sniper
                 PierceChance = src.PierceChance,
                 PierceChanceLevel = 0,
                 PierceChanceUpgradeAmount = src.PierceChanceUpgradeAmount,
@@ -475,16 +553,19 @@ namespace Assets.Scripts.Turrets
                 PierceDamageFalloffUpgradeAmount = src.PierceDamageFalloffUpgradeAmount,
                 PierceDamageFalloffUpgradeBaseCost = src.PierceDamageFalloffUpgradeBaseCost,
 
+                // Shotgun / multi
                 PelletCount = src.PelletCount,
                 PelletCountLevel = 0,
                 PelletCountUpgradeAmount = src.PelletCountUpgradeAmount,
                 PelletCountUpgradeBaseCost = src.PelletCountUpgradeBaseCost,
 
+                // Distance falloff
                 DamageFalloffOverDistance = src.DamageFalloffOverDistance,
                 DamageFalloffOverDistanceLevel = 0,
                 DamageFalloffOverDistanceUpgradeAmount = src.DamageFalloffOverDistanceUpgradeAmount,
                 DamageFalloffOverDistanceUpgradeBaseCost = src.DamageFalloffOverDistanceUpgradeBaseCost,
 
+                // Utility effects
                 KnockbackStrength = src.KnockbackStrength,
                 KnockbackStrengthLevel = 0,
                 KnockbackStrengthUpgradeAmount = src.KnockbackStrengthUpgradeAmount,
@@ -501,14 +582,120 @@ namespace Assets.Scripts.Turrets
                 SlowEffectUpgradeAmount = src.SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost = src.SlowEffectUpgradeBaseCost,
 
-                RotationSpeed = src.RotationSpeed,
-                AngleThreshold = src.AngleThreshold
+                // Bounce pattern
+                BounceCount = src.BounceCount,
+                BounceCountLevel = 0,
+                BounceCountUpgradeAmount = src.BounceCountUpgradeAmount,
+                BounceCountUpgradeBaseCost = src.BounceCountUpgradeBaseCost,
+                BounceCountCostExponentialMultiplier = src.BounceCountCostExponentialMultiplier,
+
+                BounceRange = src.BounceRange,
+                BounceRangeLevel = 0,
+                BounceRangeUpgradeAmount = src.BounceRangeUpgradeAmount,
+                BounceRangeUpgradeBaseCost = src.BounceRangeUpgradeBaseCost,
+                BounceRangeCostExponentialMultiplier = src.BounceRangeCostExponentialMultiplier,
+
+                BounceDelay = src.BounceDelay,
+                BounceDelayLevel = 0,
+                BounceDelayUpgradeAmount = src.BounceDelayUpgradeAmount,
+                BounceDelayUpgradeBaseCost = src.BounceDelayUpgradeBaseCost,
+                BounceDelayCostExponentialMultiplier = src.BounceDelayCostExponentialMultiplier,
+
+                BounceDamagePct = src.BounceDamagePct,
+                BounceDamagePctLevel = 0,
+                BounceDamagePctUpgradeAmount = src.BounceDamagePctUpgradeAmount,
+                BounceDamagePctUpgradeBaseCost = src.BounceDamagePctUpgradeBaseCost,
+                BounceDamagePctCostExponentialMultiplier = src.BounceDamagePctCostExponentialMultiplier,
+
+                // Cone pattern
+                ConeAngle = src.ConeAngle,
+                ConeAngleLevel = 0,
+                ConeAngleUpgradeAmount = src.ConeAngleUpgradeAmount,
+                ConeAngleUpgradeBaseCost = src.ConeAngleUpgradeBaseCost,
+                ConeAngleCostExponentialMultiplier = src.ConeAngleCostExponentialMultiplier,
+
+                // Trap pattern
+                AheadDistance = src.AheadDistance,
+                AheadDistanceLevel = 0,
+                AheadDistanceUpgradeAmount = src.AheadDistanceUpgradeAmount,
+                AheadDistanceUpgradeBaseCost = src.AheadDistanceUpgradeBaseCost,
+                AheadDistanceCostExponentialMultiplier = src.AheadDistanceCostExponentialMultiplier,
+
+                TrapPrefab = src.TrapPrefab,
+
+                MaxTrapsActive = src.MaxTrapsActive,
+                MaxTrapsActiveLevel = 0,
+                MaxTrapsActiveUpgradeAmount = src.MaxTrapsActiveUpgradeAmount,
+                MaxTrapsActiveUpgradeBaseCost = src.MaxTrapsActiveUpgradeBaseCost,
+                MaxTrapsActiveCostExponentialMultiplier = src.MaxTrapsActiveCostExponentialMultiplier,
+
+                // Delayed AOE
+                ExplosionDelay = src.ExplosionDelay,
+                ExplosionDelayLevel = 0,
+                ExplosionDelayUpgradeAmount = src.ExplosionDelayUpgradeAmount,
+                ExplosionDelayUpgradeBaseCost = src.ExplosionDelayUpgradeBaseCost,
+                ExplosionDelayCostExponentialMultiplier = src.ExplosionDelayCostExponentialMultiplier,
+
+        
+                // flight and armor 
+                CanHitFlying = src.CanHitFlying,
+                ArmorPenetration = src.ArmorPenetration,
+                ArmorPenetrationLevel = 0,
+                ArmorPenetrationUpgradeAmount = src.ArmorPenetrationUpgradeAmount,
+                ArmorPenetrationUpgradeBaseCost = src.ArmorPenetrationUpgradeBaseCost,
+                ArmorPenetrationCostExponentialMultiplier = src.ArmorPenetrationCostExponentialMultiplier,
+
             };
         }
+
 
         public TurretStatsInstance GetUpgradeableStats(Currency currency)
         {
             return currency == Currency.BlackSteel ? PermanentStats : RuntimeStats;
+        }
+
+        private void InitializeEffects()
+        {
+            DamageEffects = new DamageEffectHandler();
+
+            if (RuntimeStats.Damage > 0 || RuntimeStats.DamageUpgradeAmount > 0)
+                DamageEffects.AddEffect(new FlatDamageEffect());
+
+            // Critical hits — either starts with crit chance or can gain via upgrades
+            if (RuntimeStats.CriticalChance > 0 || RuntimeStats.CriticalChanceUpgradeAmount > 0)
+                DamageEffects.AddEffect(new CriticalHitEffect());
+
+            // Knockback — include if upgradeable
+            if (RuntimeStats.KnockbackStrength > 0 || RuntimeStats.KnockbackStrengthUpgradeAmount > 0)
+                DamageEffects.AddEffect(new KnockbackEffect());
+
+            if (RuntimeStats.BounceCount > 0 || RuntimeStats.BounceCountUpgradeAmount > 0)
+            {
+                BounceDamageEffect bounceEffect = new BounceDamageEffect(RuntimeStats.BounceDamagePct);
+                BounceDamageEffectRef = bounceEffect;
+                DamageEffects.AddEffect(bounceEffect);
+            }
+
+            if (RuntimeStats.PercentBonusDamagePerSec > 0 || RuntimeStats.PercentBonusDamagePerSecUpgradeAmount > 0)
+            {
+                RampDamageOverTimeEffect rampEffect = new RampDamageOverTimeEffect();
+                DamageEffects.AddEffect(rampEffect);
+            }
+
+            if (RuntimeStats.SlowEffect > 0 || RuntimeStats.SlowEffectUpgradeAmount > 0)
+            {
+                DamageEffects.AddEffect(new SlowEffect());
+            }
+
+            if (RuntimeStats.PierceChance > 0 || RuntimeStats.PierceChanceUpgradeAmount > 0)
+            {
+                var pierceEffect = new PierceDamageEffect(RuntimeStats.PierceDamageFalloff);
+                DamageEffects.AddEffect(pierceEffect);
+                PierceDamageEffectRef = pierceEffect;
+            }
+
+
+            DamageEffects.DebugGetEffects();
         }
 
     }

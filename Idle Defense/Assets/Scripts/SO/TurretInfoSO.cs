@@ -6,10 +6,23 @@ namespace Assets.Scripts.SO
     public class TurretInfoSO : ScriptableObject
     {
         [Header("Base Turret")]
+        [Tooltip("If true, this turret can target flying enemies.")]
+        public bool CanHitFlying;
+
         [Tooltip("What type of turret is this?")]
         public TurretType TurretType;
         [Tooltip("Is the turret unlocked?")]
         public bool IsUnlocked;
+
+        [Tooltip("How fast the turretHead rotates towards the target")]
+        public float RotationSpeed;
+        public float RotationSpeedUpgradeAmount;
+        public float RotationSpeedUpgradeBaseCost;
+        public int RotationSpeedLevel;
+        public float RotationSpeedCostExponentialMultiplier;
+
+        [Tooltip("Angle threshold between target and turret before being able to shoot")]
+        public float AngleThreshold;
 
         [Tooltip("Amount of damage dealt per hit")]
         public float Damage;
@@ -29,12 +42,19 @@ namespace Assets.Scripts.SO
 
         [Tooltip("How far the turret shoots")]
         public float Range;
+        public float RangeUpgradeAmount;
+        public float RangeUpgradeBaseCost;
+        public int RangeLevel;
+        public float RangeCostExponentialMultiplier;
 
-        [Tooltip("How fast the turretHead rotates towards the target")]
-        public float RotationSpeed;
-
-        [Tooltip("Angle threshold between target and turret before being able to shoot")]
-        public float AngleThreshold;
+        [Header("Armor Penetration")]
+        [Tooltip("Percent of enemy armor ignored by this turret (0-100).")]
+        public float ArmorPenetration;
+        public int ArmorPenetrationLevel;
+        [Tooltip("Linear upgrade amount for Armor Penetration (percent).")]
+        public float ArmorPenetrationUpgradeAmount;
+        public float ArmorPenetrationUpgradeBaseCost;
+        public float ArmorPenetrationCostExponentialMultiplier;
 
         [Header("Machine Gun Turret")]
         [Tooltip("Chance for a critical attack in Percent")]
@@ -54,7 +74,7 @@ namespace Assets.Scripts.SO
         public float CriticalDamageCostExponentialMultiplier;
 
         [Header("Missile Launcher Turret")]
-        [Tooltip("Radius of the explosion")]
+        [Tooltip("Radius of the explosion, used by missile launcher, trap, multi target")]
         public float ExplosionRadius;
         public int ExplosionRadiusLevel;
         public float ExplosionRadiusUpgradeAmount;
@@ -84,7 +104,7 @@ namespace Assets.Scripts.SO
         public float PierceDamageFalloffCostExponentialMultiplier;
 
         [Header("Shotgun Turret")]
-        [Tooltip("Amount of pellets shot per shot")]
+        [Tooltip("Amount of pellets shot per shot, used by shotgun and multi target")]
         public int PelletCount;
         public int PelletCountLevel;
         public int PelletCountUpgradeAmount;
@@ -120,6 +140,69 @@ namespace Assets.Scripts.SO
         public float SlowEffectUpgradeBaseCost;
         public float SlowEffectCostExponentialMultiplier;
 
+        [Header("Bounce Pattern")]
+        [Tooltip("Number of times the projectile or effect can bounce to a new target")]
+        public int BounceCount;
+        public int BounceCountLevel;
+        public float BounceCountUpgradeAmount;
+        public float BounceCountUpgradeBaseCost;
+        public float BounceCountCostExponentialMultiplier;
+
+        [Tooltip("Maximum range in units for each bounce to find a new target")]
+        public float BounceRange;
+        public int BounceRangeLevel;
+        public float BounceRangeUpgradeAmount;
+        public float BounceRangeUpgradeBaseCost;
+        public float BounceRangeCostExponentialMultiplier;
+
+        [Tooltip("Delay in seconds between each bounce hit")]
+        public float BounceDelay;
+        public int BounceDelayLevel;
+        public float BounceDelayUpgradeAmount;
+        public float BounceDelayUpgradeBaseCost;
+        public float BounceDelayCostExponentialMultiplier;
+
+        [Tooltip("How much damage it loses per bounce - percentage")]
+        public float BounceDamagePct;
+        public int BounceDamagePctLevel;
+        public float BounceDamagePctUpgradeAmount;
+        public float BounceDamagePctUpgradeBaseCost;
+        public float BounceDamagePctCostExponentialMultiplier;
+
+        [Header("Cone AOE Pattern")]
+        [Tooltip("Angle in degrees for the cone attack area")]
+        public float ConeAngle;
+        public int ConeAngleLevel;
+        public float ConeAngleUpgradeAmount;
+        public float ConeAngleUpgradeBaseCost;
+        public float ConeAngleCostExponentialMultiplier;
+
+        [Header("Delayed AOE Pattern")]
+        [Tooltip("Delay in seconds before the explosion triggers")]
+        public float ExplosionDelay;
+        public int ExplosionDelayLevel;
+        public float ExplosionDelayUpgradeAmount;
+        public float ExplosionDelayUpgradeBaseCost;
+        public float ExplosionDelayCostExponentialMultiplier;
+
+        [Header("Trap Pattern")]
+        [Tooltip("Cells in front of the enemy to place trap when targeting them")]
+        public float AheadDistance;
+        public int AheadDistanceLevel;
+        public float AheadDistanceUpgradeAmount;
+        public float AheadDistanceUpgradeBaseCost;
+        public float AheadDistanceCostExponentialMultiplier;
+
+        [Tooltip("The prefab used for traps placed by this turret")]
+        public GameObject TrapPrefab;
+
+        [Tooltip("Maximum number of active traps this turret can have at once")]
+        public int MaxTrapsActive;
+        public int MaxTrapsActiveLevel;
+        public float MaxTrapsActiveUpgradeAmount;
+        public float MaxTrapsActiveUpgradeBaseCost;
+        public float MaxTrapsActiveCostExponentialMultiplier;
+
         private void OnValidate()
         {
             CriticalChance = Mathf.Clamp(CriticalChance, 0, 100);
@@ -132,6 +215,11 @@ namespace Assets.Scripts.SO
         Shotgun,
         Sniper,
         MissileLauncher,
-        Laser
+        Laser,
+        Bounce,
+        Cone,
+        Delayed,
+        Trap,
+        MultiSimultaneous
     }
 }

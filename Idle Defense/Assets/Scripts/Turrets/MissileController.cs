@@ -17,7 +17,7 @@ namespace Assets.Scripts.Turrets
         [SerializeField] private Transform _startPoint;
         [SerializeField] private SpriteRenderer _spriteRenderer;
         [SerializeField] private SpriteRenderer _thrustSpriteRenderer;
-        private List<Sprite> _thrustSprites;
+        private List<Sprite> _thrustSprites = new();
 
         private Transform _parent;
         private Vector3 _targetPosition;

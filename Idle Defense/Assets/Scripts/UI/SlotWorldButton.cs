@@ -166,7 +166,7 @@ namespace Assets.Scripts.UI
 
         private void RefreshSlot(int changed, TurretStatsInstance inst)
         {
-            Debug.Log("[SlotWorldButton] Refreshing slot " + changed);            
+            //Debug.Log("[SlotWorldButton] Refreshing slot " + changed);            
 
             if (changed != slotIndex)
                 return;
@@ -174,7 +174,7 @@ namespace Assets.Scripts.UI
             // Deactivate any existing object
             if (spawned != null)
             {
-                Debug.Log("[SlotWorldButton] Deactivating existing turret in slot " + slotIndex);
+                //Debug.Log("[SlotWorldButton] Deactivating existing turret in slot " + slotIndex);
                 spawned.gameObject.SetActive(false);
                 spawned.transform.SetParent(null);
             }
@@ -203,7 +203,7 @@ namespace Assets.Scripts.UI
                 GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
                 go = Instantiate(prefab);
                 var baseTurret = go.GetComponent<BaseTurret>();
-                Debug.Log("[SlotWorldButton] Instantiated new turret prefab for slot " + slotIndex);
+                //Debug.Log("[SlotWorldButton] Instantiated new turret prefab for slot " + slotIndex);
                 if (baseTurret != null)
                 {
                     baseTurret.PermanentStats = equippedTurret.Permanent;
@@ -216,13 +216,13 @@ namespace Assets.Scripts.UI
             }
 
             // Place the turret in the anchor
-            go.transform.position = barrelAnchor.position;
-            go.transform.rotation = Quaternion.identity;
-            go.transform.SetParent(barrelAnchor);
+            go.transform.SetParent(barrelAnchor, false);
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
             go.SetActive(true);
 
             spawned = go;
-            Debug.Log("[SlotWorldButton] Spawned turret in slot " + slotIndex);
+            //Debug.Log("[SlotWorldButton] Spawned turret in slot " + slotIndex);
 
             if (noTurretHint != null)
                 noTurretHint.SetActive(false);

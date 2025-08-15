@@ -84,7 +84,6 @@ namespace Assets.Scripts.Systems
                     eventData.Add(pair.Key, pair.Value);
                 }
 
-                AnalyticsManager.Instance.SendCustomEvent("SlotPurchased", eventData);
                 #endregion
 
             }

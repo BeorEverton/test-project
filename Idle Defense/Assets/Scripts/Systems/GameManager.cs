@@ -35,7 +35,7 @@ namespace Assets.Scripts.Systems
         // In game just means not paused. Game Over is the management phase
         public GameState CurrentGameState { get; private set; } = GameState.InGame;
         public event Action<GameState> OnGameStateChanged;
-
+                
         // Currency Management
         private readonly Dictionary<Currency, ulong> currencies = new();
         public ulong GetCurrency(Currency currency) => currencies[currency];
@@ -66,7 +66,7 @@ namespace Assets.Scripts.Systems
             Input = new PlayerInput();
             Input.Player.Click.performed += OnClickStarted;
             Input.Player.Click.canceled += OnClickReleased;
-            Input.Player.Enable();
+            Input.Player.Enable();            
         }
 
         private void OnDisable()
@@ -186,7 +186,6 @@ namespace Assets.Scripts.Systems
             UIManager.Instance.UpdateCurrency(currency, amount);
         }
 
-
         public void ResetGame()
         {
             foreach (Currency currency in Enum.GetValues(typeof(Currency)))
@@ -220,8 +219,11 @@ namespace Assets.Scripts.Systems
             OnGameStateChanged?.Invoke(newState);
             UIManager.Instance.ToggleUpgradePanels(newState);
         }
+
+        
     }
 }
+
 
 public enum GameState
 {    

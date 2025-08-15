@@ -64,6 +64,7 @@ namespace Assets.Scripts.WaveSystem
         // to ensure we check for wave completion regularly
         private Coroutine _waveCompletionCheckCoroutine;
 
+        public static float spawnXSpread = 15f;
 
         private void Awake()
         {
@@ -209,15 +210,16 @@ namespace Assets.Scripts.WaveSystem
                 // Center the boss on screen instead of random spawn
                 if (enemy.IsBossInstance)
                 {
-                    Vector3 center = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 1f, 0));
-                    center.z = 0; // ensure Z is correct for 2D
-                    enemyObj.transform.position = center + new Vector3(0, 1f); // push slightly above the top edge
+                    enemyObj.transform.position = new Vector3(0f, 0f, 0f).WithDepth(EnemyConfig.EnemySpawnDepth);
                 }
                 else
                 {
                     enemyObj.transform.position = GetRandomSpawnPosition();
                 }
 
+                float targetX = Random.Range(-EnemyConfig.BaseXArea, EnemyConfig.BaseXArea);
+                Vector3 targetPos = new Vector3(targetX, 0f, 0f);
+                enemy.MoveDirection = (targetPos - enemyObj.transform.position).normalized;
                 enemyObj.SetActive(true);
 
                 EnemyLibraryManager.Instance.MarkAsDiscovered(enemy.Info.Name);
@@ -258,8 +260,9 @@ namespace Assets.Scripts.WaveSystem
         private Vector3 GetRandomSpawnPosition()
         {
             UpdateScreenBoundsIfNeeded();
-            float randomXPosition = Random.Range(_screenLeft, _screenRight);
-            return new Vector3(randomXPosition, _screenTop);
+            float randomXPosition = Random.Range(-spawnXSpread * 0.5f, spawnXSpread * 0.5f);
+//            Random.Range(_screenLeft, _screenRight);
+            return new Vector3(randomXPosition, 0f, EnemyConfig.EnemySpawnDepth);
         }
 
         private void Enemy_OnEnemyDeath(object sender, EventArgs e)

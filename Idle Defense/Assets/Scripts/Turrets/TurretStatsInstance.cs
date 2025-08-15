@@ -31,6 +31,10 @@ namespace Assets.Scripts.Turrets
         public float FireRateUpgradeBaseCost;
         public float FireRateCostExponentialMultiplier;
 
+        public float RotationSpeed;
+        public float AngleThreshold;
+        public float Range;
+
         public float CriticalChance;
         public int CriticalChanceLevel;
         public float CriticalChanceUpgradeAmount;
@@ -89,8 +93,84 @@ namespace Assets.Scripts.Turrets
         public float SlowEffectUpgradeAmount;
         public float SlowEffectUpgradeBaseCost;
 
-        public float RotationSpeed;
-        public float AngleThreshold;
+        // ===== Range (upgradeable) =====
+        public float RangeUpgradeAmount;
+        public float RangeUpgradeBaseCost;
+        public int RangeLevel;
+        public float RangeCostExponentialMultiplier;
+
+        // ===== Rotation Speed (upgradeable) =====
+        public float RotationSpeedUpgradeAmount;
+        public float RotationSpeedUpgradeBaseCost;
+        public int RotationSpeedLevel;
+        public float RotationSpeedCostExponentialMultiplier;
+
+        // ===== Can target flyers =====
+        public bool CanHitFlying;
+
+        // ===== Armor Penetration (upgradeable) =====
+        public float ArmorPenetration;                    // percent (0-100)
+        public int ArmorPenetrationLevel;
+        public float ArmorPenetrationUpgradeAmount;
+        public float ArmorPenetrationUpgradeBaseCost;
+        public float ArmorPenetrationCostExponentialMultiplier;
+
+        [Header("Bounce Pattern")]
+        public int BounceCount;
+        public int BounceCountLevel;
+        public float BounceCountUpgradeAmount;
+        public float BounceCountUpgradeBaseCost;
+        public float BounceCountCostExponentialMultiplier;
+
+        public float BounceRange;
+        public int BounceRangeLevel;
+        public float BounceRangeUpgradeAmount;
+        public float BounceRangeUpgradeBaseCost;
+        public float BounceRangeCostExponentialMultiplier;
+
+        public float BounceDelay;
+        public int BounceDelayLevel;
+        public float BounceDelayUpgradeAmount;
+        public float BounceDelayUpgradeBaseCost;
+        public float BounceDelayCostExponentialMultiplier;
+
+        public float BounceDamagePct;
+        public int BounceDamagePctLevel;
+        public float BounceDamagePctUpgradeAmount;
+        public float BounceDamagePctUpgradeBaseCost;
+        public float BounceDamagePctCostExponentialMultiplier;
+
+        [Header("Cone AOE Pattern")]
+        public float ConeAngle;
+        public int ConeAngleLevel;
+        public float ConeAngleUpgradeAmount;
+        public float ConeAngleUpgradeBaseCost;
+        public float ConeAngleCostExponentialMultiplier;
+
+        [Header("Trap Pattern")]
+        public float AheadDistance;
+        public int AheadDistanceLevel;
+        public float AheadDistanceUpgradeAmount;
+        public float AheadDistanceUpgradeBaseCost;
+        public float AheadDistanceCostExponentialMultiplier;
+
+        [Header("Trap Settings")]
+        public GameObject TrapPrefab;
+
+        public int MaxTrapsActive;
+        public int MaxTrapsActiveLevel;
+        public float MaxTrapsActiveUpgradeAmount;
+        public float MaxTrapsActiveUpgradeBaseCost;
+        public float MaxTrapsActiveCostExponentialMultiplier;
+
+
+        [Header("Delayed AOE Pattern")]
+        public float ExplosionDelay;
+        public int ExplosionDelayLevel;
+        public float ExplosionDelayUpgradeAmount;
+        public float ExplosionDelayUpgradeBaseCost;
+        public float ExplosionDelayCostExponentialMultiplier;
+
 
         public TurretStatsInstance(TurretInfoSO source)
         {
@@ -111,6 +191,10 @@ namespace Assets.Scripts.Turrets
             FireRateUpgradeAmount = source.FireRateUpgradeAmount;
             FireRateUpgradeBaseCost = source.FireRateUpgradeBaseCost;
             FireRateCostExponentialMultiplier = source.FireRateCostExponentialMultiplier;
+
+            RotationSpeed = source.RotationSpeed;
+            AngleThreshold = source.AngleThreshold;
+            Range = source.Range;
 
             CriticalChance = source.CriticalChance;
             CriticalChanceLevel = source.CriticalChanceLevel;
@@ -169,9 +253,84 @@ namespace Assets.Scripts.Turrets
             SlowEffectLevel = source.SlowEffectLevel;
             SlowEffectUpgradeAmount = source.SlowEffectUpgradeAmount;
             SlowEffectUpgradeBaseCost = source.SlowEffectUpgradeBaseCost;
+            
+            // Bounce Pattern
+            BounceCount = source.BounceCount;
+            BounceCountLevel = source.BounceCountLevel;
+            BounceCountUpgradeAmount = source.BounceCountUpgradeAmount;
+            BounceCountUpgradeBaseCost = source.BounceCountUpgradeBaseCost;
+            BounceCountCostExponentialMultiplier = source.BounceCountCostExponentialMultiplier;
 
-            RotationSpeed = source.RotationSpeed;
-            AngleThreshold = source.AngleThreshold;
+            BounceRange = source.BounceRange;
+            BounceRangeLevel = source.BounceRangeLevel;
+            BounceRangeUpgradeAmount = source.BounceRangeUpgradeAmount;
+            BounceRangeUpgradeBaseCost = source.BounceRangeUpgradeBaseCost;
+            BounceRangeCostExponentialMultiplier = source.BounceRangeCostExponentialMultiplier;
+
+            BounceDelay = source.BounceDelay;
+            BounceDelayLevel = source.BounceDelayLevel;
+            BounceDelayUpgradeAmount = source.BounceDelayUpgradeAmount;
+            BounceDelayUpgradeBaseCost = source.BounceDelayUpgradeBaseCost;
+            BounceDelayCostExponentialMultiplier = source.BounceDelayCostExponentialMultiplier;
+
+            BounceDamagePct = source.BounceDamagePct;
+            BounceDamagePctLevel = source.BounceDamagePctLevel;
+            BounceDamagePctUpgradeAmount = source.BounceDamagePctUpgradeAmount;
+            BounceDamagePctUpgradeBaseCost = source.BounceDamagePctUpgradeBaseCost;
+            BounceDamagePctCostExponentialMultiplier = source.BounceDamagePctCostExponentialMultiplier;
+
+            // Cone AOE Pattern
+            ConeAngle = source.ConeAngle;
+            ConeAngleLevel = source.ConeAngleLevel;
+            ConeAngleUpgradeAmount = source.ConeAngleUpgradeAmount;
+            ConeAngleUpgradeBaseCost = source.ConeAngleUpgradeBaseCost;
+            ConeAngleCostExponentialMultiplier = source.ConeAngleCostExponentialMultiplier;
+
+            // Trap Pattern
+            AheadDistance = source.AheadDistance;
+            AheadDistanceLevel = source.AheadDistanceLevel;
+            AheadDistanceUpgradeAmount = source.AheadDistanceUpgradeAmount;
+            AheadDistanceUpgradeBaseCost = source.AheadDistanceUpgradeBaseCost;
+            AheadDistanceCostExponentialMultiplier = source.AheadDistanceCostExponentialMultiplier;
+            // Trap Settings
+            TrapPrefab = source.TrapPrefab;
+
+            MaxTrapsActive = source.MaxTrapsActive;
+            MaxTrapsActiveLevel = source.MaxTrapsActiveLevel;
+            MaxTrapsActiveUpgradeAmount = source.MaxTrapsActiveUpgradeAmount;
+            MaxTrapsActiveUpgradeBaseCost = source.MaxTrapsActiveUpgradeBaseCost;
+            MaxTrapsActiveCostExponentialMultiplier = source.MaxTrapsActiveCostExponentialMultiplier;
+
+
+            // Delayed AOE Pattern
+            ExplosionDelay = source.ExplosionDelay;
+            ExplosionDelayLevel = source.ExplosionDelayLevel;
+            ExplosionDelayUpgradeAmount = source.ExplosionDelayUpgradeAmount;
+            ExplosionDelayUpgradeBaseCost = source.ExplosionDelayUpgradeBaseCost;
+            ExplosionDelayCostExponentialMultiplier = source.ExplosionDelayCostExponentialMultiplier;
+
+            // Range upgrades
+            RangeUpgradeAmount = source.RangeUpgradeAmount;
+            RangeUpgradeBaseCost = source.RangeUpgradeBaseCost;
+            RangeLevel = source.RangeLevel;
+            RangeCostExponentialMultiplier = source.RangeCostExponentialMultiplier;
+
+            // Rotation speed upgrades
+            RotationSpeedUpgradeAmount = source.RotationSpeedUpgradeAmount;
+            RotationSpeedUpgradeBaseCost = source.RotationSpeedUpgradeBaseCost;
+            RotationSpeedLevel = source.RotationSpeedLevel;
+            RotationSpeedCostExponentialMultiplier = source.RotationSpeedCostExponentialMultiplier;
+
+            // Targeting flag
+            CanHitFlying = source.CanHitFlying;
+
+            // Armor penetration
+            ArmorPenetration = source.ArmorPenetration;
+            ArmorPenetrationLevel = source.ArmorPenetrationLevel;
+            ArmorPenetrationUpgradeAmount = source.ArmorPenetrationUpgradeAmount;
+            ArmorPenetrationUpgradeBaseCost = source.ArmorPenetrationUpgradeBaseCost;
+            ArmorPenetrationCostExponentialMultiplier = source.ArmorPenetrationCostExponentialMultiplier;
+
         }
 
         public TurretStatsInstance() { }//Used to load from DTO
@@ -190,7 +349,27 @@ namespace Assets.Scripts.Turrets
                 + PelletCountLevel
                 + DamageFalloffOverDistanceLevel
                 + PercentBonusDamagePerSecLevel
-                + SlowEffectLevel);
+                + SlowEffectLevel
+                // Bounce Pattern
+                + BounceCountLevel
+                + BounceRangeLevel
+                + BounceDelayLevel
+                + BounceDamagePctLevel
+
+                // Cone AOE Pattern
+                + ConeAngleLevel
+
+                // Delayed AOE Pattern
+                + ExplosionDelayLevel
+
+                // Trap Pattern
+                + AheadDistanceLevel)
+                + MaxTrapsActiveLevel
+
+                + RangeLevel
+                + RotationSpeedLevel
+                + ArmorPenetrationLevel;
+
         }
     }
 }
