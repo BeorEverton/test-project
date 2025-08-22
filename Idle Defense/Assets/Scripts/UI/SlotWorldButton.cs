@@ -32,7 +32,7 @@ namespace Assets.Scripts.UI
         [SerializeField] private Transform canvasTransform;       // parent of upgrade panel
         [SerializeField] private Transform canvasTransformPermanent;       // parent of upgrade panel
         [SerializeField] private TurretUpgradePanelMapping[] panelMappings;
-        private GameObject activePanel;
+        [SerializeField] private GameObject activePanel;
         private TurretType? currentPanelTurretType;
         [SerializeField] private GameObject noTurretHint;
 
@@ -57,6 +57,8 @@ namespace Assets.Scripts.UI
         {
             TurretSlotManager.Instance.OnEquippedChanged += RefreshSlot;
             WaveManager.Instance.OnWaveStarted += OnWaveStart;
+
+
 
             RefreshSlot(slotIndex, TurretSlotManager.Instance.Get(slotIndex));
             UpdateOverlay();
@@ -115,50 +117,24 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-            TurretStatsInstance inst = TurretSlotManager.Instance.Get(slotIndex);
+            BaseTurret baseTurret = GetComponentInChildren<BaseTurret>();
+            
 
-            if (inst == null)
+            if (baseTurret == null)
             {
                 UIManager.Instance.OpenEquipPanel(slotIndex);
-                return;
-            }
-
-            // turret is equipped
-            Transform expectedParent = management ? canvasTransformPermanent : canvasTransform;
-
-            if (activePanel != null &&
-                currentPanelTurretType == inst.TurretType &&
-                activePanel.transform.parent == expectedParent)          // ← parent matches phase?
-            {
-                // Safe to reuse
-                activePanel.SetActive(true);
-                activePanel.GetComponent<TurretUpgradePanelUI>()
-                    .Open(slotIndex, GetComponentInChildren<BaseTurret>());
+                VFX.RangeOverlayManager.Instance.Hide();
             }
             else
             {
-                if (activePanel != null)
-                    Destroy(activePanel);                                 // discard wrong-phase panel
+                // turret is equipped
+                Transform expectedParent = management ? canvasTransformPermanent : canvasTransform;
 
-                GameObject panelPrefab = (from m in panelMappings
-                                          where m.type == inst.TurretType
-                                          select (management ? m.permanentPanelPrefab
-                                                             : m.panelPrefab)).FirstOrDefault();
+                VFX.RangeOverlayManager.Instance.ShowFor(baseTurret);
 
-                if (panelPrefab != null)
-                {
-                    activePanel = Instantiate(panelPrefab, expectedParent);
-                    currentPanelTurretType = inst.TurretType;
-
-                    activePanel.GetComponent<TurretUpgradePanelUI>()
-                               .Open(slotIndex, GetComponentInChildren<BaseTurret>());
-                }
-                else
-                {
-                    Debug.LogWarning($"No panel prefab assigned for {inst.TurretType}");
-                }
+                activePanel.GetComponent<TurretUpgradePanelUI>()
+                                    .Open(slotIndex, baseTurret);
             }
-
 
         }
 
@@ -233,6 +209,7 @@ namespace Assets.Scripts.UI
 
         private void UpdateColor()
         {
+            
             bool purchased = TurretSlotManager.Instance.Purchased(slotIndex);
             int curWave = WaveManager.Instance.GetCurrentWaveIndex();
             int needWave = TurretSlotManager.Instance.WaveRequirement(slotIndex);
@@ -248,7 +225,7 @@ namespace Assets.Scripts.UI
             }
 
             bool whiteNow = purchased || (slotIndex == nextLocked && curWave >= needWave);
-
+            
             SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
             if (sr != null)
                 sr.color = whiteNow ? Color.white : Color.black;

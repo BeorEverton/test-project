@@ -17,7 +17,7 @@ using Random = UnityEngine.Random;
 
 // for reference: [^\x00-\x7F]+
 
-
+/*
 namespace IdleDefense.Editor.Simulation
 {
     // ---------------------------------------------
@@ -1202,4 +1202,4 @@ namespace IdleDefense.Editor.Simulation
             return stats;
         }
     }
-}
+}*/

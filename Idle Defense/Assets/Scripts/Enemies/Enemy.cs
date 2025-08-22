@@ -49,6 +49,8 @@ namespace Assets.Scripts.Enemies
         public float MovementSpeed;
         public Vector2Int LastGridPos;
 
+        public float attackRange;
+
         [SerializeField] private DamageNumber damageNumber, damageNumberCritical;
         [SerializeField] private Transform _body;
 
@@ -204,6 +206,7 @@ namespace Assets.Scripts.Enemies
             CurrentHealth = MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
             SetRandomMovementSpeed();
+            SetRandomAttackRange();
             _muzzleFlashRenderer.enabled = false;
 
             // Apply boss visuals only after reset
@@ -285,6 +288,16 @@ namespace Assets.Scripts.Enemies
             _baseMovementSpeed = Random.Range(
                 _info.MovementSpeed - _info.MovementSpeedDifference,
                 _info.MovementSpeed + _info.MovementSpeedDifference
+            );
+
+            MovementSpeed = _baseMovementSpeed;
+        }
+
+        private void SetRandomAttackRange()
+        {
+            attackRange = Random.Range(
+                _info.AttackRange - _info.AttackRangeDifference,
+                _info.AttackRange + _info.AttackRange
             );
 
             MovementSpeed = _baseMovementSpeed;

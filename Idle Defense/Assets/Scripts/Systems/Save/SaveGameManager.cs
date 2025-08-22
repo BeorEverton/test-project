@@ -49,7 +49,7 @@ namespace Assets.Scripts.Systems.Save
 
             // Removed individual turret save calls — inventory handles it all now
             TurretInventoryDTO turretInventory = TurretInventoryManager.Instance.ExportToDTO();
-            Debug.Log($"[SAVE] Exported {turretInventory.Owned?.Count} owned turrets. " +
+            /*Debug.Log($"[SAVE] Exported {turretInventory.Owned?.Count} owned turrets. " +
                 $"Equipped: {turretInventory.EquippedIds?.Count} ids, {turretInventory.EquippedRuntimeStats?.Count} runtime stats.");
             for (int i = 0; i < turretInventory.EquippedIds.Count; i++)
             {
@@ -57,7 +57,7 @@ namespace Assets.Scripts.Systems.Save
                 {
                     Debug.Log($"[SAVE] Slot {i} equipped with turret ID: {turretInventory.EquippedIds[i]}");
                 }
-            }
+            }*/
 
             StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();            
 

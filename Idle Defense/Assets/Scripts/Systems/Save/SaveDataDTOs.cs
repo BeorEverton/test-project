@@ -134,9 +134,89 @@ namespace Assets.Scripts.Systems.Save
                 SlowEffectLevel = turret.SlowEffectLevel,
                 SlowEffectUpgradeAmount = turret.SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost = turret.SlowEffectUpgradeBaseCost,
-                RotationSpeed = turret.RotationSpeed,
                 AngleThreshold = turret.AngleThreshold,
-                Range = turret.Range
+
+                // RotationSpeed 
+                RotationSpeed = turret.RotationSpeed,
+                RotationSpeedUpgradeAmount = turret.RotationSpeedUpgradeAmount,
+                RotationSpeedUpgradeBaseCost = turret.RotationSpeedUpgradeBaseCost,
+                RotationSpeedLevel = turret.RotationSpeedLevel,
+                RotationSpeedCostExponentialMultiplier = turret.RotationSpeedCostExponentialMultiplier,
+
+                // Range 
+                Range = turret.Range,
+                RangeUpgradeAmount = turret.RangeUpgradeAmount,
+                RangeUpgradeBaseCost = turret.RangeUpgradeBaseCost,
+                RangeLevel = turret.RangeLevel,
+                RangeCostExponentialMultiplier = turret.RangeCostExponentialMultiplier,
+
+                // Armor Penetration
+                ArmorPenetration = turret.ArmorPenetration,
+                ArmorPenetrationLevel = turret.ArmorPenetrationLevel,
+                ArmorPenetrationUpgradeAmount = turret.ArmorPenetrationUpgradeAmount,
+                ArmorPenetrationUpgradeBaseCost = turret.ArmorPenetrationUpgradeBaseCost,
+                ArmorPenetrationCostExponentialMultiplier = turret.ArmorPenetrationCostExponentialMultiplier,
+
+                // Knockback
+                KnockbackStrength = turret.KnockbackStrength,
+                KnockbackStrengthLevel = turret.KnockbackStrengthLevel,
+                KnockbackStrengthUpgradeAmount = turret.KnockbackStrengthUpgradeAmount,
+                KnockbackStrengthUpgradeBaseCost = turret.KnockbackStrengthUpgradeBaseCost,
+                KnockbackStrengthCostExponentialMultiplier = turret.KnockbackStrengthCostExponentialMultiplier,
+
+                // Bounce
+                BounceCount = turret.BounceCount,
+                BounceCountLevel = turret.BounceCountLevel,
+                BounceCountUpgradeAmount = turret.BounceCountUpgradeAmount,
+                BounceCountUpgradeBaseCost = turret.BounceCountUpgradeBaseCost,
+                BounceCountCostExponentialMultiplier = turret.BounceCountCostExponentialMultiplier,
+
+                BounceRange = turret.BounceRange,
+                BounceRangeLevel = turret.BounceRangeLevel,
+                BounceRangeUpgradeAmount = turret.BounceRangeUpgradeAmount,
+                BounceRangeUpgradeBaseCost = turret.BounceRangeUpgradeBaseCost,
+                BounceRangeCostExponentialMultiplier = turret.BounceRangeCostExponentialMultiplier,
+
+                BounceDelay = turret.BounceDelay,
+                BounceDelayLevel = turret.BounceDelayLevel,
+                BounceDelayUpgradeAmount = turret.BounceDelayUpgradeAmount,
+                BounceDelayUpgradeBaseCost = turret.BounceDelayUpgradeBaseCost,
+                BounceDelayCostExponentialMultiplier = turret.BounceDelayCostExponentialMultiplier,
+
+                BounceDamagePct = turret.BounceDamagePct,
+                BounceDamagePctLevel = turret.BounceDamagePctLevel,
+                BounceDamagePctUpgradeAmount = turret.BounceDamagePctUpgradeAmount,
+                BounceDamagePctUpgradeBaseCost = turret.BounceDamagePctUpgradeBaseCost,
+                BounceDamagePctCostExponentialMultiplier = turret.BounceDamagePctCostExponentialMultiplier,
+
+                // Cone
+                ConeAngle = turret.ConeAngle,
+                ConeAngleLevel = turret.ConeAngleLevel,
+                ConeAngleUpgradeAmount = turret.ConeAngleUpgradeAmount,
+                ConeAngleUpgradeBaseCost = turret.ConeAngleUpgradeBaseCost,
+                ConeAngleCostExponentialMultiplier = turret.ConeAngleCostExponentialMultiplier,
+
+                // Explosion Delay
+                ExplosionDelay = turret.ExplosionDelay,
+                ExplosionDelayLevel = turret.ExplosionDelayLevel,
+                ExplosionDelayUpgradeAmount = turret.ExplosionDelayUpgradeAmount,
+                ExplosionDelayUpgradeBaseCost = turret.ExplosionDelayUpgradeBaseCost,
+                ExplosionDelayCostExponentialMultiplier = turret.ExplosionDelayCostExponentialMultiplier,
+
+                // Ahead Distance
+                AheadDistance = turret.AheadDistance,
+                AheadDistanceLevel = turret.AheadDistanceLevel,
+                AheadDistanceUpgradeAmount = turret.AheadDistanceUpgradeAmount,
+                AheadDistanceUpgradeBaseCost = turret.AheadDistanceUpgradeBaseCost,
+                AheadDistanceCostExponentialMultiplier = turret.AheadDistanceCostExponentialMultiplier,
+
+                // Max Traps
+                MaxTrapsActive = turret.MaxTrapsActive,
+                MaxTrapsActiveLevel = turret.MaxTrapsActiveLevel,
+                MaxTrapsActiveUpgradeAmount = turret.MaxTrapsActiveUpgradeAmount,
+                MaxTrapsActiveUpgradeBaseCost = turret.MaxTrapsActiveUpgradeBaseCost,
+                MaxTrapsActiveCostExponentialMultiplier = turret.MaxTrapsActiveCostExponentialMultiplier,
+                TrapPrefab = turret.TrapPrefab,
 
             };
         }

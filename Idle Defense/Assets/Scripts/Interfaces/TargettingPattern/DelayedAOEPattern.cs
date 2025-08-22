@@ -47,7 +47,14 @@ public class DelayedAOEPattern : MonoBehaviour, ITargetingPattern
                 if (enemy == null) continue;
                 if (Vector3.Distance(primaryTarget.transform.position, enemy.transform.position) <= radius)
                 {
-                    turret.DamageEffects.ApplyAll(enemy, stats);
+                    bool isPrimary = (primaryTarget != null && enemy.gameObject == primaryTarget);
+                    if (isPrimary)
+                        turret.DamageEffects.ApplyAll(enemy, stats);                 // flat
+                    else if (turret.SplashDamageEffectRef != null && stats.SplashDamage > 0f)
+                        turret.DamageEffects.ApplyAll(enemy, stats, turret.SplashDamageEffectRef); // total * pct
+                    else
+                        turret.DamageEffects.ApplyAll(enemy, stats);
+
                 }
             }
         }

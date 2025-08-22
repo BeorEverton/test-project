@@ -174,6 +174,8 @@ namespace Assets.Scripts.Turrets
 
         public TurretStatsInstance(TurretInfoSO source)
         {
+            TurretType = source.TurretType;
+
             IsUnlocked = source.IsUnlocked;
             BaseDamage = source.Damage;
             BaseFireRate = source.FireRate;
@@ -309,7 +311,7 @@ namespace Assets.Scripts.Turrets
             ExplosionDelayUpgradeBaseCost = source.ExplosionDelayUpgradeBaseCost;
             ExplosionDelayCostExponentialMultiplier = source.ExplosionDelayCostExponentialMultiplier;
 
-            // Range upgrades
+            // Range upgrades            
             RangeUpgradeAmount = source.RangeUpgradeAmount;
             RangeUpgradeBaseCost = source.RangeUpgradeBaseCost;
             RangeLevel = source.RangeLevel;

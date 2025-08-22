@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 453318364404216867}
   - component: {fileID: 9222164340652277574}
   - component: {fileID: 204799748867370076}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Cost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 6652269226420430021}
   - component: {fileID: 4329958115945395956}
   - component: {fileID: 8206486773645976968}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -279,7 +279,7 @@ GameObject:
   - component: {fileID: 6124873323142939963}
   - component: {fileID: 6756409412481742082}
   - component: {fileID: 7430523827139435912}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Equip Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -294,7 +294,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2061560351760453124}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -302,7 +302,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0}
   m_SizeDelta: {x: -0.7859, y: -0.7859}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6756409412481742082
@@ -415,7 +415,7 @@ GameObject:
   - component: {fileID: 81728421324308200}
   - component: {fileID: 6616641873673051004}
   - component: {fileID: 6137551969717973836}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Lock Icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -490,7 +490,7 @@ GameObject:
   - component: {fileID: 2230666709944020414}
   - component: {fileID: 8764028187446075867}
   - component: {fileID: 6605327726122925316}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Locked Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -627,7 +627,7 @@ GameObject:
   - component: {fileID: 4427340952950828930}
   - component: {fileID: 3210017934637943342}
   - component: {fileID: 7595235633674879040}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -800,22 +800,24 @@ MonoBehaviour:
   priceText: {fileID: 204799748867370076}
   buyButton: {fileID: 8206486773645976968}
   canvasTransform: {fileID: 0}
+  canvasTransformPermanent: {fileID: 0}
   panelMappings:
   - type: 0
-    panelPrefab: {fileID: 8067192607548314933, guid: 2d9a3924886dfc943acc01fb8037d0f4, type: 3}
+    panelPrefab: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
     permanentPanelPrefab: {fileID: 6982961914679172046, guid: 2d0a945b9eba00f4a9e94854aadf4b77, type: 3}
   - type: 1
-    panelPrefab: {fileID: 9155839608586447288, guid: c75d06c738ab2d54fa61a55924f23526, type: 3}
+    panelPrefab: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
     permanentPanelPrefab: {fileID: 63253891473890323, guid: bb7056d5a1ae1544c8ae083eda0d29d2, type: 3}
   - type: 2
-    panelPrefab: {fileID: 3395132060358560681, guid: 6d6cd26e78a400243a47593659f3bd95, type: 3}
+    panelPrefab: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
     permanentPanelPrefab: {fileID: 7473415041029487852, guid: 599ff2de73c41e947b13e7aa1171f89d, type: 3}
   - type: 3
-    panelPrefab: {fileID: 8663520026316799697, guid: 5c3110d4ea03f7443a1a7da8bd773667, type: 3}
+    panelPrefab: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
     permanentPanelPrefab: {fileID: 5542162961615621364, guid: f6db172c622192042b21f6b9830aca3d, type: 3}
   - type: 4
-    panelPrefab: {fileID: 666337654803448104, guid: 730bed7d8e77c284e827658195043bea, type: 3}
+    panelPrefab: {fileID: 4924410548890895198, guid: 6f06d69a92698104fa7fc85e5f99b9d4, type: 3}
     permanentPanelPrefab: {fileID: 6483721681174389008, guid: a8085f8e1227ab64b934b588fde5a797, type: 3}
+  activePanel: {fileID: 0}
   noTurretHint: {fileID: 2061560351760453124}
 --- !u!1 &5085831194824907857
 GameObject:
@@ -829,7 +831,7 @@ GameObject:
   - component: {fileID: 529461517890864092}
   - component: {fileID: 2122718656675001394}
   - component: {fileID: 7931064277395301325}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -933,7 +935,7 @@ GameObject:
   - component: {fileID: 3014375813100639458}
   - component: {fileID: 2194932122188360620}
   - component: {fileID: 5278860646851680644}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Locked Overlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}

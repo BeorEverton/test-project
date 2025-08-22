@@ -19,6 +19,12 @@ namespace Assets.Scripts.UI
             _slotIndex = slotIndex;
             _baseTurret = baseTurret;
 
+            if (!baseTurret)
+            {
+                Debug.LogError($"[TurretUpgradePanelUI] Cannot open panel for slot {slotIndex} because base turret is null.");
+                return;
+            }
+
             Currency cur = GameManager.Instance.CurrentGameState == GameState.Management
                 ? Currency.BlackSteel
                 : Currency.Scraps;
@@ -71,7 +77,7 @@ namespace Assets.Scripts.UI
 
         private void OnClickUnequip()
         {
-            Debug.Log($"[TurretUpgradePanelUI] Unequipping turret in slot {_slotIndex}.");
+            //Debug.Log($"[TurretUpgradePanelUI] Unequipping turret in slot {_slotIndex}.");
             TurretSlotManager.Instance.Unequip(_slotIndex);
             Close();
         }

@@ -55,7 +55,7 @@ namespace Assets.Scripts.Systems
             }
             if (pendingPurchased != null)
             {
-                TurretSlotManager.Instance.ImportPurchasedFlags(pendingPurchased);
+                //TurretSlotManager.Instance.ImportPurchasedFlags(pendingPurchased);
                 pendingPurchased = null;
             }
             if (pendingRuntimeStats != null)
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Systems
             if (!unlockedTypes.Contains(TurretType.MachineGun))
                 return;
 
-            TurretInfoSO baseSO = turretLibrary.GetInfo(TurretType.MachineGun);
+            TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(TurretType.MachineGun);
             TurretStatsInstance inst = new(baseSO)
             {
                 TurretType = TurretType.MachineGun,
@@ -121,12 +121,12 @@ namespace Assets.Scripts.Systems
 
             ulong cost = GetCost(type, countOwned);
 
-            if (!GameManager.Instance.TrySpendCurrency(Currency.BlackSteel, cost))
+            if (!GameManager.Instance.TrySpendCurrency(Currency.Scraps, cost))
                 return false;
 
 
             // create runtime copy from the original SO
-            TurretInfoSO baseSO = turretLibrary.GetInfo(type);
+            TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(type);
             TurretStatsInstance inst = new(baseSO)
             {
                 TurretType = type,
@@ -148,13 +148,13 @@ namespace Assets.Scripts.Systems
             return entry.FirstCopyCost * (ulong)Mathf.Pow(2, Mathf.Max(0, currentOwned - 1));
         }
 
-        public GameObject GetPrefab(TurretType t) => turretLibrary.GetPrefab(t);
+        public GameObject GetPrefab(TurretType t) => TurretLibrary.Instance.GetPrefab(t);
 
-        public TurretInfoSO GetInfoSO(TurretType type) => turretLibrary.GetInfo(type);
+        public TurretInfoSO GetInfoSO(TurretType type) => TurretLibrary.Instance.GetInfo(type);
 
         public (Currency currency, ulong cost) GetCostAndCurrency(TurretType type, int owned)
         {
-            Currency currency = Currency.BlackSteel;
+            Currency currency = Currency.Scraps;
             ulong cost = GetCost(type, owned); 
 
             return (currency, cost);
@@ -187,21 +187,24 @@ namespace Assets.Scripts.Systems
 
             if (TurretSlotManager.Instance != null)
             {
-                //  Skip this entirely if full turrets are present
-                if (dto.EquippedTurrets == null || dto.EquippedTurrets.Count == 0)
-                    TurretSlotManager.Instance.ImportEquipped(dto.EquippedIds);
 
                 if (dto.EquippedTurrets != null && dto.EquippedTurrets.Count > 0)
                 {
+                    // Full data path wins; nothing else needed.
                     TurretSlotManager.Instance.ImportEquippedTurrets(dto.EquippedTurrets);
+                    RebindOwnedToEquipped();
                 }
                 else
                 {
+                    // Legacy/lightweight path: first rebuild pairs from IDs, then optionally
+                    // overlay runtime numbers.
+                    TurretSlotManager.Instance.ImportEquipped(dto.EquippedIds);
                     TurretSlotManager.Instance.ImportRuntimeStats(dto.EquippedRuntimeStats);
                 }
 
-                TurretSlotManager.Instance.ImportPurchasedFlags(dto.SlotPurchased);
+                //TurretSlotManager.Instance.ImportPurchasedFlags(dto.SlotPurchased);
             }
+
         }
 
 
@@ -256,6 +259,48 @@ namespace Assets.Scripts.Systems
                     Destroy(obj.gameObject);
             }
         }
+
+        
+        public void RebindOwnedToEquipped()
+        {
+            // Make Owned hold the *same objects* used in the slots.
+            var equippedPermanents = TurretSlotManager.Instance.GetEquippedPermanents().ToList();
+            if (equippedPermanents.Count == 0) return;
+
+            // Track which Owned entries we've already paired so we don't replace the same one twice.
+            var consumedOwnedIndexes = new HashSet<int>();
+
+            foreach (var perm in equippedPermanents)
+            {
+                // If Owned already contains this exact object, nothing to do.
+                int idx = owned.IndexOf(perm);
+                if (idx >= 0)
+                {
+                    consumedOwnedIndexes.Add(idx);
+                    continue;
+                }
+
+                // Find a matching slot in Owned by Type (first unused one).
+                idx = owned.FindIndex(i =>
+                    i != null &&
+                    i.TurretType == perm.TurretType &&
+                    !consumedOwnedIndexes.Contains(owned.IndexOf(i)));
+
+                if (idx >= 0)
+                {
+                    owned[idx] = perm;                 // swap in the equipped permanent instance
+                    consumedOwnedIndexes.Add(idx);
+                }
+                else
+                {
+                    // If none found (edge case), append so counts stay correct.
+                    owned.Add(perm);
+                }
+            }
+
+            OnInventoryChanged?.Invoke();
+        }
+
 
     }
 }

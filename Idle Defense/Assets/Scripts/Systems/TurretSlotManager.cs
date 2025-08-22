@@ -24,11 +24,11 @@ namespace Assets.Scripts.Systems
 
         private readonly SlotUnlock[] slotInfo =
         {
-            new SlotUnlock(  1,     0),      // wave, cost
-            new SlotUnlock( 20,  5000),
-            new SlotUnlock( 50, 20000),
-            new SlotUnlock(120, 50000),
-            new SlotUnlock(300,250000)
+            new SlotUnlock(-1,0), // wave, cost
+            new SlotUnlock(-1,0),
+            new SlotUnlock(-1,0),
+            new SlotUnlock(-1,0),
+            new SlotUnlock(-1,0)
         };
 
         [Serializable]
@@ -44,7 +44,7 @@ namespace Assets.Scripts.Systems
         // public helpers 
         public int WaveRequirement(int slot) => slotInfo[slot].wave;
         public ulong BuyCost(int slot) => slotInfo[slot].cost;
-        public bool Purchased(int slot) => slotInfo[slot].purchased;
+        public bool Purchased(int slot) => true;// slotInfo[slot].purchased; CHANGED TO NOT HAVE SLOTS LOCKED AT START
         public TurretStatsInstance Get(int slot) => equipped[slot];
 
         private void Awake() { if (Instance == null) Instance = this; else Destroy(gameObject); }
@@ -52,6 +52,11 @@ namespace Assets.Scripts.Systems
         private void Start()
         {
             GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
+            for (int i = 0; i < slotInfo.Length; i++)
+                slotInfo[i].purchased = true;
+
+            OnSlotUnlocked?.Invoke();
+
         }
 
         public bool IsUnlocked(int slot) => Purchased(slot) && WaveManager.Instance.GetCurrentWaveIndex() >= slotInfo[slot].wave;
@@ -111,6 +116,7 @@ namespace Assets.Scripts.Systems
             // Clone to separate Permanent and Runtime
             var permanentClone = inst;
             var runtimeClone = BaseTurret.CloneStatsWithoutLevels(permanentClone);
+            runtimeClone.TurretType = permanentClone.TurretType;
 
             _equippedTurrets[slot] = new EquippedTurret
             {
@@ -141,10 +147,27 @@ namespace Assets.Scripts.Systems
 
         public void Unequip(int slot)
         {
+            VFX.RangeOverlayManager.Instance.Hide();
+
+            // If we still think something is equipped here, clean it up
+            if (_equippedTurrets.TryGetValue(slot, out var et) && et != null)
+            {
+                // Break the instance-GameObject association for both stats objects
+                TurretInventoryManager.Instance.UnregisterTurretInstance(et.Runtime);
+                TurretInventoryManager.Instance.UnregisterTurretInstance(et.Permanent);
+
+                _equippedTurrets.Remove(slot);
+            }
+
+            _runtimeTempStats.Remove(slot);
             equipped[slot] = null;
-            SaveGameManager.Instance.SaveGame();
+
             OnEquippedChanged?.Invoke(slot, null);
+
+            // Save AFTER state is fully consistent
+            SaveGameManager.Instance.SaveGame();
         }
+
 
         public bool IsAnyTurretEquipped() => equipped.Any(t => t != null);
 
@@ -165,17 +188,13 @@ namespace Assets.Scripts.Systems
         public List<TurretStatsInstance> ExportRuntimeStats()
         {
             var list = new List<TurretStatsInstance>(5);
-            foreach (var inst in equipped)
-                list.Add(inst);
-
-            for (int i = list.Count; i < 5; i++)
-            {
-                Debug.Log("slot " + i + " is turret " + list[i].TurretType + " damage is " + list[i].Damage);
-            }                
-
+            for (int i = 0; i < equipped.Length; i++)
+                list.Add(equipped[i]);
             return list;
         }
 
+
+        // CALLED ON THE TURRET INVENTORY MANAGER TO LOAD SLOTS PURCHASED -> CHANGED BEHAVIOUR TO START WITH ALL PURCHASED
         public void ImportPurchasedFlags(List<bool> flags)
         {
             for (int i = 0; i < flags.Count && i < slotInfo.Length; i++)
@@ -186,18 +205,71 @@ namespace Assets.Scripts.Systems
 
         public event Action OnSlotUnlocked;
 
-        public List<int> ExportEquipped() => equipped.Select(inst => inst == null ? -1 : TurretInventoryManager.Instance.Owned.IndexOf(inst)).ToList();
+        // Export indices of the *permanent* instances inside Owned.        
+        public List<int> ExportEquipped()
+        {
+            var owned = TurretInventoryManager.Instance.Owned;
+            var result = new List<int>(5);
 
-        // TurretSlotManager.cs   – put it under GetPurchasedFlags()
+            for (int i = 0; i < 5; i++)
+            {
+                if (equipped[i] != null &&
+                    _equippedTurrets.TryGetValue(i, out var et) &&
+                    et?.Permanent != null)
+                {
+                    result.Add(owned.IndexOf(et.Permanent));
+                }
+                else
+                {
+                    result.Add(-1);
+                }
+            }
+            return result;
+        }
 
+
+        // Convenience: enumerate permanent instances currently equipped (null filtered).
+        public IEnumerable<TurretStatsInstance> GetEquippedPermanents()
+        {
+            foreach (var kv in _equippedTurrets)
+                if (kv.Value?.Permanent != null)
+                    yield return kv.Value.Permanent;
+        }
         public void ImportEquipped(List<int> ids)
         {
-            for (int i = 0; i < ids.Count && i < equipped.Length; i++)
+            var owned = TurretInventoryManager.Instance.Owned;
+
+            for (int i = 0; i < equipped.Length; i++)
             {
-                equipped[i] = (ids[i] >= 0 && ids[i] < TurretInventoryManager.Instance.Owned.Count)
-                              ? TurretInventoryManager.Instance.Owned[ids[i]]
-                              : null;
-                OnEquippedChanged?.Invoke(i, equipped[i]);   // refresh visuals
+                TurretStatsInstance runtime = null;
+
+                if (ids != null && i < ids.Count)
+                {
+                    int id = ids[i];
+                    if (id >= 0 && id < owned.Count)
+                    {
+                        var permanent = owned[id];
+                        runtime = BaseTurret.CloneStatsWithoutLevels(permanent);
+                        runtime.TurretType = permanent.TurretType; // keep type consistent
+
+                        _equippedTurrets[i] = new EquippedTurret
+                        {
+                            Permanent = permanent,
+                            Runtime = runtime
+                        };
+
+
+                        _runtimeTempStats[i] = runtime;
+                    }
+                    else
+                    {
+                        _equippedTurrets.Remove(i);
+                        _runtimeTempStats.Remove(i);
+                    }
+                }
+
+                equipped[i] = runtime;
+                OnEquippedChanged?.Invoke(i, runtime);
             }
         }
 
@@ -208,10 +280,17 @@ namespace Assets.Scripts.Systems
             for (int i = 0; i < stats.Count && i < equipped.Length; i++)
             {
                 if (stats[i] == null) continue;
-                equipped[i] = stats[i];
-                _runtimeTempStats[i] = stats[i];     // mark as runtime copy
-                OnEquippedChanged?.Invoke(i, stats[i]);
-                Debug.Log($"Importing runtime stats for slot {i}: {stats[i].TurretType} with damage {stats[i].Damage}");
+                var incoming = stats[i];
+
+                // If the loaded runtime has a default/invalid type, pull from the Permanent mapping
+                if ((int)incoming.TurretType == 0 && _equippedTurrets.TryGetValue(i, out var et) && et?.Permanent != null)
+                    incoming.TurretType = et.Permanent.TurretType;
+
+                equipped[i] = incoming;
+                _runtimeTempStats[i] = incoming;
+
+                OnEquippedChanged?.Invoke(i, incoming);
+
             }
         }
 
@@ -263,7 +342,7 @@ namespace Assets.Scripts.Systems
 
                 var dto = new EquippedTurretDTO
                 {
-                    Type = inst.TurretType,
+                    Type = baseTurret.PermanentStats != null ? baseTurret.PermanentStats.TurretType : inst.TurretType,
                     SlotIndex = i,
                     PermanentStats = SaveDataDTOs.CreateTurretInfoDTO(baseTurret.PermanentStats),
                     RuntimeStats = SaveDataDTOs.CreateTurretInfoDTO(baseTurret.RuntimeStats),
@@ -291,6 +370,10 @@ namespace Assets.Scripts.Systems
             {
                 var permanentStats = LoadDataDTOs.CreateTurretStatsInstance(dto.PermanentStats, dto.PermanentBase);
                 var runtimeStats = LoadDataDTOs.CreateTurretStatsInstance(dto.RuntimeStats, dto.RuntimeBase);
+
+                // Force type on both in case the deserializer didn't set it.
+                permanentStats.TurretType = dto.Type;
+                runtimeStats.TurretType = dto.Type;
 
                 // Reuse Equip logic (this will trigger OnEquippedChanged)
                 _equippedTurrets[dto.SlotIndex] = new EquippedTurret

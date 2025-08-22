@@ -3,7 +3,7 @@ using System.IO;
 using UnityEditor;
 
 namespace IdleDefense.Editor.Simulation
-{
+{/*
     static class CsvExporter
     {
         const string Folder = "Assets/SimResults";
@@ -67,5 +67,5 @@ namespace IdleDefense.Editor.Simulation
             }
         }
 
-    }
+    }*/
 }

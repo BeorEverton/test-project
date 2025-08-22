@@ -21,9 +21,9 @@ namespace Assets.Scripts.Turrets
         /// Reference to the TurretInfoSO that contains the base stats and info for this turret. DONT CHANGE AT RUNTIME!
         /// </summary>
         public TurretInfoSO _turretInfo;
-        [NonSerialized]
+        //[NonSerialized]
         public TurretStatsInstance RuntimeStats; // For session upgrades        
-        [NonSerialized]
+        //[NonSerialized]
         public TurretStatsInstance PermanentStats;   // Saved base
 
         public Transform _rotationPoint, _muzzleFlashPosition;
@@ -61,6 +61,7 @@ namespace Assets.Scripts.Turrets
         [NonSerialized] public DamageEffectHandler DamageEffects;
         [NonSerialized] public BounceDamageEffect BounceDamageEffectRef;
         [NonSerialized] public PierceDamageEffect PierceDamageEffectRef;
+        [NonSerialized] public SplashDamageEffect SplashDamageEffectRef;
 
         private void OnDestroy() =>
             GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
@@ -183,6 +184,9 @@ namespace Assets.Scripts.Turrets
             StartCoroutine(ShowMuzzleFlash());
             _currentShotSound = _shotSounds[Random.Range(0, _shotSounds.Length)];
             AudioManager.Instance.PlayWithVariation(_currentShotSound, 0.8f, 1f);
+
+            if (targetingPattern is PiercingLinePattern plp)
+                plp.startPos = _muzzleFlashPosition.position;
 
             targetingPattern?.ExecuteAttack(this, RuntimeStats, _targetEnemy);
 
@@ -648,7 +652,6 @@ namespace Assets.Scripts.Turrets
             };
         }
 
-
         public TurretStatsInstance GetUpgradeableStats(Currency currency)
         {
             return currency == Currency.BlackSteel ? PermanentStats : RuntimeStats;
@@ -694,8 +697,11 @@ namespace Assets.Scripts.Turrets
                 PierceDamageEffectRef = pierceEffect;
             }
 
+            if (RuntimeStats.SplashDamage > 0 || RuntimeStats.SplashDamageUpgradeAmount > 0)
+                SplashDamageEffectRef = new SplashDamageEffect();
 
-            DamageEffects.DebugGetEffects();
+
+            //DamageEffects.DebugGetEffects();
         }
 
     }

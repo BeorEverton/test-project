@@ -11,23 +11,60 @@ public class DamageEffectHandler
 
     public void ApplyAll(Enemy enemy, TurretStatsInstance stats)
     {
+        ApplyAllInternal(enemy, stats, stats.Damage, null);
+    }
+
+    /// <summary>
+    /// Apply all registered effects starting from an override base damage.
+    /// </summary>
+    public void ApplyAll(Enemy enemy, TurretStatsInstance stats, float baseDamageOverride)
+    {
+        ApplyAllInternal(enemy, stats, baseDamageOverride, null);
+    }
+
+    /// <summary>
+    /// Apply all registered effects, then apply any extra one-shot effects (e.g., splash).
+    /// </summary>
+    public void ApplyAll(Enemy enemy, TurretStatsInstance stats, params IDamageEffect[] extraEffects)
+    {
+        ApplyAllInternal(enemy, stats, stats.Damage, extraEffects);
+    }
+
+    /// <summary>
+    /// Apply with both base override and extra effects if needed.
+    /// </summary>
+    public void ApplyAll(Enemy enemy, TurretStatsInstance stats, float baseDamageOverride, params IDamageEffect[] extraEffects)
+    {
+        ApplyAllInternal(enemy, stats, baseDamageOverride, extraEffects);
+    }
+
+    private void ApplyAllInternal(Enemy enemy, TurretStatsInstance stats, float startingDamage, IDamageEffect[] extraEffects)
+    {
         if (enemy == null) return;
 
-        float totalDamage = stats.Damage;
+        float totalDamage = startingDamage;
 
-        // Let each effect modify the damage
+        // Global, always-on effects
         foreach (var effect in _effects)
-        {
             totalDamage = effect.ModifyDamage(totalDamage, stats, enemy);
+
+        // Per-hit, one-shot effects (e.g., Splash for non-primary targets)
+        if (extraEffects != null)
+        {
+            for (int i = 0; i < extraEffects.Length; i++)
+            {
+                if (extraEffects[i] == null) continue;
+                totalDamage = extraEffects[i].ModifyDamage(totalDamage, stats, enemy);
+            }
         }
 
-        // Apply the combined damage once
         if (totalDamage > 0)
         {
             enemy.TakeDamage(totalDamage);
             StatsManager.Instance.AddTurretDamage(stats.TurretType, totalDamage);
         }
     }
+
 
     public void DebugGetEffects()
     {

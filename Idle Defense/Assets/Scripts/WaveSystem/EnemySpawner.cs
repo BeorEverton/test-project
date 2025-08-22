@@ -218,9 +218,6 @@ namespace Assets.Scripts.WaveSystem
                 }
 
                 float targetX = Random.Range(-EnemyConfig.BaseXArea, EnemyConfig.BaseXArea);
-                Vector3 targetPos = new Vector3(targetX, 0f, 0f);
-                enemy.MoveDirection = (targetPos - enemyObj.transform.position).normalized;
-                enemyObj.SetActive(true);
 
                 EnemyLibraryManager.Instance.MarkAsDiscovered(enemy.Info.Name);
 
@@ -229,7 +226,12 @@ namespace Assets.Scripts.WaveSystem
                     AudioManager.Instance.StopAllMusics();
                     AudioManager.Instance.PlayMusic("Boss");
                     backgroundMaterial.color = new Color(0.3f, 0, 0);
+                    targetX = 0;
                 }
+
+                Vector3 targetPos = new Vector3(targetX, 0f, 0f);
+                enemy.MoveDirection = (targetPos - enemyObj.transform.position).normalized;
+                enemyObj.SetActive(true);
 
                 enemy.OnDeath += Enemy_OnEnemyDeath;
                 EnemiesAlive.Add(enemyObj);
@@ -261,7 +263,7 @@ namespace Assets.Scripts.WaveSystem
         {
             UpdateScreenBoundsIfNeeded();
             float randomXPosition = Random.Range(-spawnXSpread * 0.5f, spawnXSpread * 0.5f);
-//            Random.Range(_screenLeft, _screenRight);
+
             return new Vector3(randomXPosition, 0f, EnemyConfig.EnemySpawnDepth);
         }
 
@@ -350,6 +352,68 @@ namespace Assets.Scripts.WaveSystem
             }
         }
 
+
+        #region Wave stop and manual advance
+        /// <summary>
+        /// Stop spawning, suppress completion checks, and despawn every active enemy.
+        /// Used by WaveManager to skip mid-wave without playing death FX or awarding drops.
+        /// </summary>
+        public void AbortWaveAndDespawnAll()
+        {
+            // stop any ongoing spawning/check loops
+            _canSpawnEnemies = false;
+            if (_spawnEnemiesCoroutine != null) { StopCoroutine(_spawnEnemiesCoroutine); _spawnEnemiesCoroutine = null; }
+            if (_waveCompletionCheckCoroutine != null) { StopCoroutine(_waveCompletionCheckCoroutine); _waveCompletionCheckCoroutine = null; }
+
+            // prevent OnWaveCompleted from firing while we clear the field
+            _suppressWaveComplete = true;
+
+            DespawnAllActiveEnemies();
+
+            // allow normal completion checks again
+            _suppressWaveComplete = false;
+        }
+
+        /// <summary>
+        /// Return all alive enemies to the pool instantly (no FX), clear wave buffers,
+        /// and restore presentation (music/background) if a boss was present.
+        /// </summary>
+        public void DespawnAllActiveEnemies()
+        {
+            bool hadBoss = false;
+
+            // copy to avoid modifying while iterating
+            foreach (var enemyObj in EnemiesAlive.ToList())
+            {
+                if (enemyObj == null) { continue; }
+
+                var enemy = enemyObj.GetComponent<Enemy>();
+                if (enemy == null) { continue; }
+
+                // detach death callback; do NOT trigger death sequence or rewards
+                enemy.OnDeath -= Enemy_OnEnemyDeath;
+
+                if (enemy.IsBossInstance) { hadBoss = true; enemy.IsBossInstance = false; }
+
+                // return to pool immediately
+                _objectPool.ReturnObject(enemy.Info.Name, enemyObj);
+                EnemiesAlive.Remove(enemyObj);
+            }
+
+            // clear any pre-created-but-not-spawned entries for this wave
+            _enemiesCurrentWave.Clear();
+            _waveSpawned = false;
+
+            // restore presentation
+            if (hadBoss)
+            {
+                AudioManager.Instance.PlayMusic("Main");
+            }
+            backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
+        }
+
+
+        #endregion
 
     }
 }

@@ -44,11 +44,28 @@ public class Trap
 
             foreach (var e in enemies)
             {
-                if (e != null && Vector3.Distance(e.transform.position, trapWorldPosition) <= radius)
+                if (e == null) continue;
+                if (Vector3.Distance(e.transform.position, trapWorldPosition) > radius) continue;
+
+                bool isPrimary = (e == triggeringEnemy);
+
+                if (isPrimary)
                 {
+                    // Full flat damage to the one that triggered the trap
+                    ownerTurret.DamageEffects.ApplyAll(e, ownerTurret.RuntimeStats);
+                }
+                else if (ownerTurret.SplashDamageEffectRef != null && ownerTurret.RuntimeStats.SplashDamage > 0f)
+                {
+                    // Splash damage (percentage of total)
+                    ownerTurret.DamageEffects.ApplyAll(e, ownerTurret.RuntimeStats, ownerTurret.SplashDamageEffectRef);
+                }
+                else
+                {
+                    // Fallback: apply full damage if splash not configured
                     ownerTurret.DamageEffects.ApplyAll(e, ownerTurret.RuntimeStats);
                 }
             }
+
         }
 
         TrapPoolManager.Instance.DisableTrap(this);

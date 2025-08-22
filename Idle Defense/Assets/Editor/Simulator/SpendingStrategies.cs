@@ -6,7 +6,7 @@ using Assets.Scripts.Turrets;
 using Assets.Scripts.Systems;  // for TurretType
 
 namespace IdleDefense.Editor.Simulation
-{
+{/*
     public enum SpendingMode { Cheapest, Random, MostEffective }
 
     public interface ISpendingStrategy
@@ -337,5 +337,5 @@ namespace IdleDefense.Editor.Simulation
         }
 
 
-    }
+    }*/
 }

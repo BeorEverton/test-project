@@ -92,7 +92,7 @@ namespace Assets.Scripts.WaveSystem
                 else
                 {
                     // Within attack range
-                    if (enemyComponent.transform.position.Depth() <= enemyComponent.Info.AttackRange)
+                    if (enemyComponent.transform.position.Depth() <= enemyComponent.attackRange)
                     {
                         // Check for trap in current cell
                         if (TrapPoolManager.Instance.hasAnyTrapActive)
@@ -127,14 +127,10 @@ namespace Assets.Scripts.WaveSystem
         private void MoveEnemy(Enemy enemy)
         {
             GameObject enemyGameObject = enemy.gameObject;
-            /*enemyGameObject.transform.position += Vector3.down * enemy.MovementSpeed * Time.deltaTime;
 
-            if (enemyGameObject.transform.position.y <= enemy.Info.AttackRange)
-                enemy.CanAttack = true;*/
-            //enemyGameObject.transform.position -= Axes.Forward(enemy.MovementSpeed * Time.deltaTime);
             enemy.transform.position += enemy.MoveDirection * enemy.MovementSpeed * Time.deltaTime;
 
-            if (enemyGameObject.transform.position.Depth() <= enemy.Info.AttackRange)
+            if (enemyGameObject.transform.position.Depth() <= enemy.attackRange)
                 enemy.CanAttack = true;
 
         }

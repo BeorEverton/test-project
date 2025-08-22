@@ -44,6 +44,9 @@ namespace Assets.Scripts.UI
         private int rollbackWaveIndex;
         public float timeSpeedOnDeath;
 
+        [Header("Wave System")]
+        [SerializeField] private GameObject advanceWaveButton;
+
         private int activeSlot; // for the equipment
 
         private int _enemyCount;
@@ -209,7 +212,6 @@ namespace Assets.Scripts.UI
             };
         }
 
-
         public static string FormatTime(TimeSpan time)
         {
             if (time.TotalSeconds < 60)
@@ -242,7 +244,6 @@ namespace Assets.Scripts.UI
             panel.GetComponent<EquipPanelUI>().Open(slot);
         }
 
-
         public void ShowToast(string msg, float time = 1.5f)
         {
             if (toast == null)
@@ -261,6 +262,7 @@ namespace Assets.Scripts.UI
 
         public void DeactivateRightPanels()
         {
+            VFX.RangeOverlayManager.Instance.Hide();
             foreach (GameObject panel in rightPanels)
             {
                 panel.SetActive(false);
@@ -280,7 +282,9 @@ namespace Assets.Scripts.UI
 
             // Calculate and store rollback wave
             int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
-            rollbackWaveIndex = Mathf.Max(1, currentWave - 2); // clamp to wave 1
+            rollbackWaveIndex = Mathf.Max(1, currentWave - 1); // clamp to wave 1
+
+            advanceWaveButton.SetActive(true);
 
             countdownText.text = $"Restarting from Zone {rollbackWaveIndex} in {Mathf.CeilToInt(seconds)}...";
             immediateRestartButton.onClick.RemoveAllListeners();
@@ -331,6 +335,12 @@ namespace Assets.Scripts.UI
             WaveManager.Instance.LoadWave(rollbackWaveIndex);
             WaveManager.Instance.ForceRestartWave();
             PlayerBaseManager.Instance.InitializeGame(true);
+        }
+
+        public void AdvanceToNextWave()
+        {
+            WaveManager.Instance.JumpToNextWaveNow();
+            advanceWaveButton.SetActive(false);
         }
 
         public void StopOnDeath()

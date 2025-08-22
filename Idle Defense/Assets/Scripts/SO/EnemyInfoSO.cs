@@ -33,6 +33,8 @@ namespace Assets.Scripts.SO
         public float Damage;
         [Tooltip("Attack range for the enemy, before attacking the player")]
         public float AttackRange;
+        [Tooltip("The amount the movementspeed can differ from MovementSpeed")]
+        public float AttackRangeDifference = .1f;
         [Tooltip("Attacks per second. - 0.5 makes the enemy attack once every two second")]
         public float AttackSpeed;
     }

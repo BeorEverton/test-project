@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace IdleDefense.Editor.Simulation
-{
+{/*
     public class SimulationRunnerWindow : EditorWindow
     {
         private float minutes = 10f;
@@ -31,5 +31,5 @@ namespace IdleDefense.Editor.Simulation
                 Debug.Log($" Simulation done ({iterations} runs) - Assets/SimResults/results.csv");
             }
         }
-    }
+    }*/
 }

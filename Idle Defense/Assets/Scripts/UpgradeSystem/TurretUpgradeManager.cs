@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Systems.Audio;
+using Assets.Scripts.Systems.Save;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.UI;
 using Assets.Scripts.UpgradeSystem;
@@ -18,11 +19,13 @@ namespace Assets.Scripts.Systems
         [SerializeField] private float exponentialPower = 1.15f;
 
         [Header("Max/Min stats")]
+        [SerializeField] private float maxRange = 50f;
+        [SerializeField] private float maxRotationSpeed = 20f;
         [SerializeField] private float maxCriticalChance= 90f;
         [SerializeField] private int maxBounce = 100;
         [SerializeField] private float maxBounceRange = 50f;
         [SerializeField] private float minBounceDelay = 0.05f;
-        [SerializeField] private float minBounceDamageReduction = 0f;
+        [SerializeField] private float maxBounceDmgPct = 100f;
         [SerializeField] private float maxConeAngle = 120f;
         [SerializeField] private float minExplosionDelay = 0.2f;
         [SerializeField] private float maxTrapAheadDistance = 10f;
@@ -45,15 +48,27 @@ namespace Assets.Scripts.Systems
                 [TurretUpgradeType.Damage] = new()
                 {
                     GetCurrentValue = t => t.Damage,
+
+                    // Always apply upgrades step-by-step with a minimum of +1 damage per step.
                     UpgradeTurret = (t, a) =>
                     {
-                        t.DamageLevel += a;
-                        t.Damage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, t.DamageLevel);
+                        for (int i = 0; i < a; i++)
+                        {
+                            // Target damage if we took ONE more level
+                            float targetAfterOne = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, t.DamageLevel + 1);
 
-                        /* previous damage scaling logic
-                        t.DamageLevel += a;
-                        float increment = t.BaseDamage * (Mathf.Pow(t.DamageUpgradeAmount, a) - 1f) + a;
-                        t.Damage += increment;*/
+                            // Commit at least +1 per purchase
+                            int stepInc = Mathf.Max(1, Mathf.RoundToInt(targetAfterOne - t.Damage));
+
+                            t.Damage += stepInc;
+                            t.DamageLevel += 1;
+
+                            if (t.Damage >= float.MaxValue)
+                            {
+                                t.Damage = float.MaxValue;
+                                break;
+                            }
+                        }
                     },
 
                     GetLevel = t => t.DamageLevel,
@@ -62,30 +77,40 @@ namespace Assets.Scripts.Systems
                     GetUpgradeAmount = t => t.DamageUpgradeAmount,
                     GetCostMultiplier = t => t.DamageCostExponentialMultiplier,
                     GetMaxValue = t => float.MaxValue,
-                    GetMinValue = t => 0f,
+                    GetMinValue = t => 1f,
                     GetCost = (t, a, c) => GetExponentialCost(t, TurretUpgradeType.Damage, a),
-                    //GetAmount = t => GetMaxAmount(t.DamageUpgradeBaseCost, t.DamageCostExponentialMultiplier, t.DamageLevel),
+
+                    // Display mirrors the exact per-step logic so UI == applied result.
                     GetDisplayStrings = (t, a) =>
                     {
-                        float currentDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, t.DamageLevel);
-                        float newDamage = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, t.DamageLevel + a);
-                        float bonus = newDamage - currentDamage;
+                        float startDamage = t.Damage;
+                        int startLevel = t.DamageLevel;
 
-                        /*previous damage scaling logic
-                        float bonus = t.BaseDamage * (Mathf.Pow(t.DamageUpgradeAmount, a) - 1f) + a;
-                        float currentDamage = t.Damage;*/
+                        float simDamage = startDamage;
+                        int simLevel = startLevel;
+
+                        for (int i = 0; i < a; i++)
+                        {
+                            float targetAfterOne = t.BaseDamage * Mathf.Pow(t.DamageUpgradeAmount, simLevel + 1);
+                            int stepInc = Mathf.Max(1, Mathf.RoundToInt(targetAfterOne - simDamage));
+                            simDamage += stepInc;
+                            simLevel += 1;
+                        }
+
+                        int totalBonus = Mathf.Max(1, Mathf.RoundToInt(simDamage - startDamage));
 
                         GetExponentialCost(t, TurretUpgradeType.Damage, a, out float cost, out int amount);
+                        cost = Mathf.Max(cost, 1f);
 
                         return (
-                            UIManager.AbbreviateNumber(currentDamage),
-                            $"+{UIManager.AbbreviateNumber(bonus)}",
+                            UIManager.AbbreviateNumber(startDamage),
+                            $"+{UIManager.AbbreviateNumber(totalBonus)}",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
                     }
-
                 },
+
                 [TurretUpgradeType.FireRate] = new()
                 {
                     GetCurrentValue = t => t.FireRate,
@@ -112,6 +137,70 @@ namespace Assets.Scripts.Systems
                         return (
                             $"{currentFireRate:F2}/s",
                             $"+{bonusFireRate:F2}/s",
+                            $"{UIManager.AbbreviateNumber(cost)}",
+                            $"{amount}X"
+                        );
+                    }
+                },
+                [TurretUpgradeType.Range] = new()
+                {
+                    GetCurrentValue = t => t.Range,
+                    UpgradeTurret = (t, a) =>
+                    {
+                        t.RangeLevel += a;
+                        t.Range += (t.RangeUpgradeAmount * a);
+                        t.Range = Mathf.Min(t.Range, maxRange);
+                    },       
+
+                    GetLevel = t => t.RangeLevel,
+                    GetBaseStat = t => t.Range,
+                    GetBaseCost = t => t.RangeUpgradeBaseCost,
+                    GetUpgradeAmount = t => t.RangeUpgradeAmount,
+                    GetCostMultiplier = t => t.RangeCostExponentialMultiplier,
+                    GetMaxValue = t => maxRange,
+                    GetMinValue = t => 0f,
+                    GetCost = (t, a, c) => GetExponentialCost(t, TurretUpgradeType.Range, a),
+                    GetDisplayStrings = (t, a) =>
+                    {
+                        float current = t.Range;
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.Range);
+                        GetExponentialCost(t, TurretUpgradeType.Range, a, out float cost, out int amount);
+
+                        return (
+                            $"{current:F1}",
+                            $"+{bonus:F1}",
+                            $"{UIManager.AbbreviateNumber(cost)}",
+                            $"{amount}X"
+                        );
+                    }
+                },
+                [TurretUpgradeType.RotationSpeed] = new()
+                {
+                    GetCurrentValue = t => t.RotationSpeed,
+                    UpgradeTurret = (t, a) =>
+                    {
+                        t.RotationSpeedLevel += a;
+                        t.RotationSpeed += (t.RotationSpeedUpgradeAmount * a);
+                        t.RotationSpeed = Mathf.Min(t.RotationSpeed, maxRotationSpeed);
+                    },
+
+                    GetLevel = t => t.RotationSpeedLevel,
+                    GetBaseStat = t => t.RotationSpeed,
+                    GetBaseCost = t => t.RotationSpeedUpgradeBaseCost,
+                    GetUpgradeAmount = t => t.RotationSpeedUpgradeAmount,
+                    GetCostMultiplier = t => t.RotationSpeedCostExponentialMultiplier,
+                    GetMaxValue = t => maxRotationSpeed,
+                    GetMinValue = t => 0f,
+                    GetCost = (t, a, c) => GetExponentialCost(t, TurretUpgradeType.RotationSpeed, a),
+                    GetDisplayStrings = (t, a) =>
+                    {
+                        float current = t.RotationSpeed;
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.RotationSpeed);
+                        GetExponentialCost(t, TurretUpgradeType.RotationSpeed, a, out float cost, out int amount);
+
+                        return (
+                            $"{current:F1}",
+                            $"+{bonus:F1}",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
@@ -244,8 +333,8 @@ namespace Assets.Scripts.Systems
                         GetHybridCost(t, TurretUpgradeType.SplashDamage, a, out float cost, out int amount);
 
                         return (
-                            UIManager.AbbreviateNumber(current),
-                            $"+{UIManager.AbbreviateNumber(bonus)}",
+                            UIManager.AbbreviateNumber((current * 100), true) + "%",
+                            $"+{UIManager.AbbreviateNumber((bonus * 100), true) + "%"}",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
@@ -594,16 +683,16 @@ namespace Assets.Scripts.Systems
                     UpgradeTurret = (t, a) =>
                     {
                         t.BounceDamagePctLevel += a;
-                        t.BounceDamagePct -= (t.BounceDamagePctUpgradeAmount * a);
-                        t.BounceDamagePct = Mathf.Max(t.BounceDamagePct, minBounceDamageReduction); // cannot be negative
+                        t.BounceDamagePct += (t.BounceDamagePctUpgradeAmount * a);
+                        t.BounceDamagePct = Mathf.Min(t.BounceDamagePct, maxBounceDmgPct); 
                     },
                     GetLevel = t => t.BounceDamagePctLevel,
                     GetBaseStat = t => t.BounceDamagePct,
                     GetBaseCost = t => t.BounceDamagePctUpgradeBaseCost,
                     GetUpgradeAmount = t => t.BounceDamagePctUpgradeAmount,
                     GetCostMultiplier = t => t.BounceDamagePctCostExponentialMultiplier,
-                    GetMaxValue = t => float.MaxValue,
-                    GetMinValue = t => minBounceDamageReduction,
+                    GetMaxValue = t => maxBounceDmgPct,
+                    GetMinValue = t => 0f,
                     GetCost = (t, a, c) => GetExponentialCost(t, TurretUpgradeType.BounceDamagePct, a, c),
                     GetDisplayStrings = (t, a) =>
                     {
@@ -611,12 +700,12 @@ namespace Assets.Scripts.Systems
                         float bonus = GetBonusAmount(t, TurretUpgradeType.BounceDamagePct);
                         GetExponentialCost(t, TurretUpgradeType.BounceDamagePct, a, out float cost, out int amount);
 
-                        if (current <= minBounceDamageReduction)
-                            return ($"{current:F1}%", "Min", "", "0X");
+                        if (current >= maxBounceDmgPct)
+                            return ($"{current:F1}%", "Max", "", "0X");
 
                         return (
                             $"{current:F1}%",
-                            $"-{bonus:F1}%",
+                            $"{bonus:F1}%",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
@@ -833,6 +922,9 @@ namespace Assets.Scripts.Systems
                 OnAnyTurretUpgraded?.Invoke();
                 AnimateBuyButtonClick(button.GetComponent<RectTransform>());
             }
+
+            SaveGameManager.Instance.SaveGame();
+
         }
 
         public void UpgradePermanentTurretStat(
@@ -864,6 +956,8 @@ namespace Assets.Scripts.Systems
                 UpdateUpgradeDisplay(stats, type, button);
                 AnimateBuyButtonClick(button.GetComponent<RectTransform>());
             }
+
+            SaveGameManager.Instance.SaveGame();
         }
 
 
@@ -900,15 +994,6 @@ namespace Assets.Scripts.Systems
             int amount = 0;
             float totalCost = 0f;
             ulong money = GameManager.Instance.GetCurrency(currencyUsed);
-
-            //while (true)
-            //{
-            //    float cost = baseCost * Mathf.Pow(multiplier, currentLevel + amount);
-            //    if (Mathf.Floor(totalCost + cost) > money)
-            //        break;
-            //    totalCost += cost;
-            //    amount++;
-            //}
 
             return amount;
         }
@@ -953,17 +1038,28 @@ namespace Assets.Scripts.Systems
             if (step <= 0f)
                 return 0;
 
+
             int capSteps;
+            bool hasUpperBound = up.GetMaxValue != null && max < float.MaxValue;
+            bool hasLowerBound = up.GetMinValue != null && min > float.MinValue;
+
             if (!isDecreasing)
             {
-                if (float.IsInfinity(max)) return desiredAmount;
-                capSteps = Mathf.Max(0, Mathf.FloorToInt((max - current) / step));
+                if (!hasUpperBound) return desiredAmount; // no cap
+                double stepsD = Math.Floor(((double)max - (double)current) / (double)step + 1e-9);
+                if (stepsD < 0) stepsD = 0;
+                if (stepsD > int.MaxValue) stepsD = int.MaxValue;
+                capSteps = (int)stepsD;
             }
             else
             {
-                if (float.IsNegativeInfinity(min)) return desiredAmount;
-                capSteps = Mathf.Max(0, Mathf.FloorToInt((current - min) / step));
+                if (!hasLowerBound) return desiredAmount; // no cap
+                double stepsD = Math.Floor(((double)current - (double)min) / (double)step + 1e-9);
+                if (stepsD < 0) stepsD = 0;
+                if (stepsD > int.MaxValue) stepsD = int.MaxValue;
+                capSteps = (int)stepsD;
             }
+
 
             return Mathf.Min(desiredAmount, capSteps);
         }
@@ -1020,6 +1116,7 @@ namespace Assets.Scripts.Systems
             {
                 cost = 0f;
                 outAmount = 0;
+                Debug.LogError($"TurretUpgradeManager: Upgrade type {type} not found.");
                 return;
             }
 
@@ -1031,9 +1128,7 @@ namespace Assets.Scripts.Systems
             outAmount = (inAmount == 9999)
                 ? (moneyBound == 0 ? 1 : moneyBound)
                 : inAmount;
-
             outAmount = CapAmountByStatLimit(stats, type, outAmount);
-
             cost = (outAmount > 0)
                 ? Mathf.Floor(RecursiveExponentialCost(baseCost, multiplier, level, outAmount))
                 : 0f;
@@ -1180,6 +1275,9 @@ namespace Assets.Scripts.Systems
             int amount = MultipleBuyOption.Instance.GetBuyAmount();
 
             (string value, string bonus, string cost, string count) = upgrade.GetDisplayStrings(turret, amount);
+
+            
+
             button.UpdateStats(value, bonus, cost, count);
         }
 
@@ -1192,11 +1290,13 @@ namespace Assets.Scripts.Systems
                 var type = kvp.Key;
                 var up = kvp.Value;
 
+
                 // Must exist and have a usable step
                 if (up.GetUpgradeAmount == null || up.GetCurrentValue == null)
                     continue;
 
                 float step = Mathf.Abs(up.GetUpgradeAmount(stats));
+                
                 if (step <= 0f) continue;
 
                 float cur = up.GetCurrentValue(stats);
@@ -1222,7 +1322,6 @@ namespace Assets.Scripts.Systems
                     hasHeadroom = cur + step <= max - 1e-6f;
                 else
                     hasHeadroom = cur - step >= min + 1e-6f;
-
                 if (hasHeadroom)
                     list.Add(type);
             }

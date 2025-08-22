@@ -2,6 +2,7 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.WaveSystem;
 using System.Linq;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,7 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI costText;      // “$10k”
         //[SerializeField] private TextMeshProUGUI lockText;      // “Wave 30”
         [SerializeField] private TextMeshProUGUI dpsText;
+        [SerializeField] private TextMeshProUGUI turretName;
         [SerializeField] private Image lockIcon;
         [SerializeField] private Button buyButton;
 
@@ -24,6 +26,8 @@ namespace Assets.Scripts.UI
         {
             buyButton.onClick.AddListener(TryBuy);
             GameManager.Instance.OnCurrencyChanged += HandleCurrencyChanged;
+
+            turretName.SetText(ToSpacedString(turretType).ToUpper());
 
             TurretInventoryManager.Instance.OnInventoryChanged += Refresh;
             WaveManager.Instance.OnWaveStarted += (_, __) => Refresh();
@@ -132,9 +136,12 @@ namespace Assets.Scripts.UI
         {
             TurretInfoSO info = TurretInventoryManager.Instance.GetInfoSO(turretType);
             float dps = TurretStatsCalculator.CalculateDPS(info);
-            dpsText.text = info.TurretType == TurretType.Laser
-                ? $">{dps:F1} DPS"
-                : $"{dps:F1} DPS";
+            string dpsPrefix = "";
+            if (info.TurretType == TurretType.ObsidianLens || info.TurretType == TurretType.VaporJetTurret)
+            {
+                dpsPrefix = ">";
+            }
+            dpsText.text = dpsPrefix + $"{dps:F1} DPS";
         }
 
         private void TryBuy()
@@ -150,5 +157,12 @@ namespace Assets.Scripts.UI
             // Refresh only if relevant, or always for now
             Refresh();
         }
+
+        private string ToSpacedString(TurretType type)
+        {
+            // Split PascalCase into words with spaces
+            return Regex.Replace(type.ToString(), "(\\B[A-Z])", " $1");
+        }
+
     }
 }

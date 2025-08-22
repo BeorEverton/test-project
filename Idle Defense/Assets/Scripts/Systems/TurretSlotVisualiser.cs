@@ -1,3 +1,4 @@
+using Assets.Scripts.SO;
 using Assets.Scripts.Turrets;
 using System.Linq;
 using UnityEngine;
@@ -64,7 +65,7 @@ namespace Assets.Scripts.Systems
             }
 
             // If not found, instantiate new and register it
-            GameObject prefab = library.GetPrefab(inst.TurretType);
+            GameObject prefab = TurretLibrary.Instance.GetPrefab(inst.TurretType);
             GameObject go = Instantiate(prefab, slotAnchors[slot].position, Quaternion.identity, slotAnchors[slot]);
 
             // Make sure the turret is tracked

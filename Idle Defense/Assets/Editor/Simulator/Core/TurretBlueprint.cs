@@ -6,7 +6,7 @@ using UnityEngine; // TurretType
 namespace IdleDefense.Editor.Simulation
 {
     public readonly struct TurretBlueprint
-    {
+    {/*
         // ---------------------
         // Base stats
         // ---------------------
@@ -1109,7 +1109,7 @@ namespace IdleDefense.Editor.Simulation
                 SplashDamageLevel, PierceChanceLevel, PierceDamageFalloffLevel, PelletCountLevel, KnockbackStrengthLevel, DamageFalloffOverDistanceLevel,
                 PercentBonusDamagePerSecLevel, SlowEffectLevel+1
             );
-        }
+        }*/
 
 
 

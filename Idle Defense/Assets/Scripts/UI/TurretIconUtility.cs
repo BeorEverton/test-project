@@ -21,7 +21,7 @@ namespace Assets.Scripts.UI
             if (set == null || set.Length == 0)
                 return null;
 
-            int lv = TotalLevel(stats);
+            int lv = stats.TotalLevel();
             int idx = lv >= Thresholds[2] ? 3 :
                       lv >= Thresholds[1] ? 2 :
                       lv >= Thresholds[0] ? 1 : 0;
@@ -29,13 +29,5 @@ namespace Assets.Scripts.UI
             return idx < set.Length ? set[idx] : set[^1];
         }
 
-        private static int TotalLevel(TurretStatsInstance s) =>
-            Mathf.FloorToInt(
-                  s.DamageLevel + s.FireRateLevel + s.CriticalChanceLevel
-                + s.CriticalDamageMultiplierLevel + s.ExplosionRadiusLevel
-                + s.SplashDamageLevel + s.PierceChanceLevel
-                + s.PierceDamageFalloffLevel + s.PelletCountLevel
-                + s.DamageFalloffOverDistanceLevel
-                + s.PercentBonusDamagePerSecLevel + s.SlowEffectLevel);
     }
 }

@@ -33,6 +33,8 @@ namespace Assets.Scripts.WaveSystem
         private bool _waveCompleted = false;
         private bool _waveLost = false;
 
+        private bool _autoAdvanceEnabled = true;     // when false, player must click to start the next wave
+
         private void Awake()
         {
             if (Instance == null)
@@ -70,12 +72,14 @@ namespace Assets.Scripts.WaveSystem
             _waveLost = true;
             GameRunning = false;
             StopAllCoroutines();
+
+            _autoAdvanceEnabled = false;
         }
 
         private IEnumerator StartWaveRoutine()
         {
             while (GameRunning)
-            {
+            {                
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
                     WaveNumber = _currentWave
@@ -102,19 +106,21 @@ namespace Assets.Scripts.WaveSystem
                     Debug.LogError(e.Message);
                 }
 
-                yield return new WaitUntil(() => _waveCompleted || _waveLost);
-
-                if (_waveCompleted)
-                {
-                    _currentWave++;
-                    
-                    StatsManager.Instance.TotalZonesSecured++;
-                    StatsManager.Instance.MaxZone = _currentWave;
-                }
-
                 AudioManager.Instance.Play("New Wave");
 
                 SaveGameManager.Instance.SaveGame(); //Save game at the start of each round
+
+                yield return new WaitUntil(() => _waveCompleted || _waveLost);
+
+                if (_waveCompleted)
+                {                    
+                    if (_autoAdvanceEnabled)
+                    {
+                        _currentWave++;
+                        StatsManager.Instance.TotalZonesSecured++;
+                        StatsManager.Instance.MaxZone = _currentWave;                        
+                    }
+                }
 
                 _waveCompleted = false;
                 _waveLost = false;
@@ -254,5 +260,39 @@ namespace Assets.Scripts.WaveSystem
             StartCoroutine(StartWaveRoutine());
         }
 
+        #region Stop wave progression
+        /// <summary>
+        /// Abort the current wave, return all active enemies to the pool,
+        /// and mark the wave as completed so the loop advances immediately.
+        /// </summary>
+        public void JumpToNextWaveNow()
+        {
+            if (_enemySpawner != null)
+            {
+                _enemySpawner.AbortWaveAndDespawnAll();
+            }
+            // Force an advance at wave end, but keep whatever mode we’re in
+            _autoAdvanceEnabled = true;
+            _waveCompleted = true;
+        }
+
+
+        public void AbortWaveAndDespawnAll()
+        {
+            StopAllCoroutines();              // stop spawning
+            _enemySpawner.DespawnAllActiveEnemies();        // loop active list and return to pool
+        }
+
+        /// <summary>Called by the UI “Advance” button when manual gating is active.</summary>
+
+
+        /// <summary>Optional UI toggle for auto-advance (e.g., a settings checkbox).</summary>
+        public void SetAutoAdvanceEnabled(bool enabled)
+        {
+            _autoAdvanceEnabled = enabled;
+        }
+        public bool IsAutoAdvanceEnabled() => _autoAdvanceEnabled;
+
+        #endregion
     }
 }

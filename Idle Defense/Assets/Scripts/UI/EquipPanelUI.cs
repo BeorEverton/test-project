@@ -30,37 +30,32 @@ namespace Assets.Scripts.UI
             foreach (Transform c in listParent)
                 Destroy(c.gameObject);
 
-            HashSet<int> equippedIds = TurretSlotManager.Instance.ExportEquipped()
-                .Where(id => id >= 0)
-                .ToHashSet();
+            // Use permanent references – the only canonical "owned" instances.
+            var owned = TurretInventoryManager.Instance.Owned;
+            var equippedSet = TurretSlotManager.Instance.GetEquippedPermanents().ToHashSet();
 
-            List<TurretStatsInstance> owned = TurretInventoryManager.Instance.Owned;
-
-            for (int i = 0; i < owned.Count; i++)
+            foreach (var inst in owned)
             {
-                if (equippedIds.Contains(i))
-                    continue;          // skip already equipped
-
-                TurretStatsInstance inst = owned[i];
+                if (equippedSet.Contains(inst))
+                    continue; // already equipped somewhere
 
                 // Spawn card prefab
                 EquipItemButton card = Instantiate(itemPrefab, listParent);
                 EquipItemButton btn = card.GetComponent<EquipItemButton>();
 
-                // Pick icon that matches this turret's current level
                 Sprite icon = TurretIconUtility.GetIcon(inst);
 
-                // Hook the button
                 btn.Init(
                     inst,
-                    () =>                                     // onClick
+                    () =>
                     {
                         if (TurretSlotManager.Instance.Equip(targetSlot, inst))
-                            Close();                          // close panel on success
+                            Close();
                     },
                     icon
                 );
             }
         }
+
     }
 }
