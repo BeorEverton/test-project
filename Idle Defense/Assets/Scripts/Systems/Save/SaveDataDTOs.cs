@@ -666,7 +666,9 @@ public class TurretInfoDTO
 [Serializable]
 public class TurretInventoryDTO
 {
-    public List<TurretStatsInstance> Owned;
+    public List<TurretStatsInstance> OwnedPermanent;
+    public List<TurretStatsInstance> OwnedRuntime;
+    public List<TurretType> OwnedTypes;
     public List<int> EquippedIds;          // -1  = runtime copy
     public List<TurretStatsInstance> EquippedRuntimeStats;   
     public List<EquippedTurretDTO> EquippedTurrets;
@@ -683,6 +685,7 @@ public class EquippedTurretDTO
     public TurretBaseInfoDTO PermanentBase;
     public TurretBaseInfoDTO RuntimeBase;
     public int SlotIndex;
+    public int OwnedIndex;
 }
 
 

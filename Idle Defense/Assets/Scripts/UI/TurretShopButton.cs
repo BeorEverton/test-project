@@ -22,6 +22,7 @@ namespace Assets.Scripts.UI
         [SerializeField] private Image lockIcon;
         [SerializeField] private Button buyButton;
 
+
         private void Start()
         {
             buyButton.onClick.AddListener(TryBuy);
@@ -51,7 +52,7 @@ namespace Assets.Scripts.UI
         private void Refresh()
         {
             TurretInventoryManager inv = TurretInventoryManager.Instance;
-            int owned = inv.Owned.Count(t => t.TurretType == turretType);
+            int owned = inv.Owned.Count(o => o.TurretType == turretType);
 
             if (owned >= 5)
             {

@@ -16,7 +16,7 @@ namespace Assets.Scripts.Systems.Save
             PlayerPrefs.SetString(SaveKey, json);
             PlayerPrefs.Save();
 
-            Debug.Log($"Game save to PlayerPrefs");
+            
         }
 
         public static GameData LoadGameDataFromFile()

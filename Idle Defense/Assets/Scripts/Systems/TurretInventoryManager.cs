@@ -14,11 +14,19 @@ namespace Assets.Scripts.Systems
         public static TurretInventoryManager Instance { get; private set; }
 
         [SerializeField] private TurretUnlockTableSO unlockTable;
-        public List<TurretStatsInstance> owned = new();
         public readonly HashSet<TurretType> unlockedTypes = new();
         [SerializeField] private TurretLibrarySO turretLibrary;   // assign the new asset
 
-        public List<TurretStatsInstance> Owned => owned;
+        public List<OwnedTurret> owned = new();
+        public List<OwnedTurret> Owned => owned;
+
+        [System.Serializable]
+        public class OwnedTurret
+        {
+            public TurretType TurretType;
+            public TurretStatsInstance Permanent;
+            public TurretStatsInstance Runtime;
+        }
 
         private List<int> pendingEquipped;
         private List<bool> pendingPurchased;
@@ -69,24 +77,30 @@ namespace Assets.Scripts.Systems
         private void EnsureStarterTurret()
         {
             if (owned.Count > 0)
-                return;                     // already got one (load)
+                return;
 
             TryUnlockByWave(0);
-
             if (!unlockedTypes.Contains(TurretType.MachineGun))
                 return;
 
             TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(TurretType.MachineGun);
-            TurretStatsInstance inst = new(baseSO)
+            var permanent = new TurretStatsInstance(baseSO)
             {
                 TurretType = TurretType.MachineGun,
                 IsUnlocked = true
             };
-            owned.Add(inst);
-            // Prevent auto-equipping to slot 0 by default
-            pendingEquipped = new List<int> { -1, -1, -1, -1, -1 };
+            var runtime = BaseTurret.CloneStatsWithoutLevels(permanent);
+            owned.Add(new OwnedTurret
+            {
+                TurretType = TurretType.MachineGun,
+                Permanent = permanent,
+                Runtime = runtime
+            });
 
+            // Do not force-equip by default
+            pendingEquipped = new List<int> { -1, -1, -1, -1, -1 };
         }
+
 
         private void OnDestroy()
         {
@@ -113,34 +127,33 @@ namespace Assets.Scripts.Systems
 
         public bool TryPurchase(TurretType type)
         {
-            //if (!unlockedTypes.Contains(type)) return false; Used only with the wave requirement
-
             int countOwned = owned.Count(t => t.TurretType == type);
-            if (countOwned >= 5)
-                return false;
+            if (countOwned >= 5) return false;
 
             ulong cost = GetCost(type, countOwned);
-
             if (!GameManager.Instance.TrySpendCurrency(Currency.Scraps, cost))
                 return false;
 
-
-            // create runtime copy from the original SO
             TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(type);
-            TurretStatsInstance inst = new(baseSO)
+            var permanent = new TurretStatsInstance(baseSO)
             {
                 TurretType = type,
-                /* this flag MUST be true otherwise BaseTurret.Start()
-               will clone the stats and you’ll lose all later upgrades */
                 IsUnlocked = true
             };
-            owned.Add(inst);
+            var runtime = BaseTurret.CloneStatsWithoutLevels(permanent);
+
+            owned.Add(new OwnedTurret
+            {
+                TurretType = type,
+                Permanent = permanent,
+                Runtime = runtime
+            });
 
             OnInventoryChanged?.Invoke();
             SaveGameManager.Instance.SaveGame();
-
             return true;
         }
+
 
         public ulong GetCost(TurretType type, int currentOwned)
         {
@@ -165,47 +178,70 @@ namespace Assets.Scripts.Systems
 
         public TurretInventoryDTO ExportToDTO()
         {
+            // Persist both Permanent and Runtime for every owned turret.
+            // NOTE: Requires TurretInventoryDTO to have matching fields for OwnedPermanent/OwnedRuntime
+            // (or a composite DTO per owned entry). If your DTOs differ, mirror this split there.
             return new TurretInventoryDTO
             {
-                Owned = owned,
+                OwnedPermanent = owned.Select(o => o.Permanent).ToList(),
+                OwnedRuntime = owned.Select(o => o.Runtime).ToList(),
+                OwnedTypes = owned.Select(o => o.TurretType).ToList(),
+
                 EquippedIds = TurretSlotManager.Instance.ExportEquipped(),
                 EquippedRuntimeStats = TurretSlotManager.Instance.ExportRuntimeStats(),
-                EquippedTurrets = TurretSlotManager.Instance.ExportEquippedTurrets(), 
+                EquippedTurrets = TurretSlotManager.Instance.ExportEquippedTurrets(),
                 UnlockedTypes = unlockedTypes.ToList(),
                 SlotPurchased = TurretSlotManager.Instance.GetPurchasedFlags()
             };
-
         }
+
 
         public void ImportFromDTO(TurretInventoryDTO dto)
         {
             owned.Clear();
-            owned.AddRange(dto.Owned ?? new List<TurretStatsInstance>());
+
+            // Rebuild owned pairs from save
+            var perm = dto.OwnedPermanent ?? new List<TurretStatsInstance>();
+            var run = dto.OwnedRuntime ?? new List<TurretStatsInstance>();
+            var types = dto.OwnedTypes ?? new List<TurretType>();
+
+            int n = Mathf.Max(perm.Count, Mathf.Max(run.Count, types.Count));
+            for (int i = 0; i < n; i++)
+            {
+                var p = i < perm.Count ? perm[i] : null;
+                var r = i < run.Count ? run[i] : null;
+
+                // If runtime missing, derive once from permanent; otherwise keep saved runtime.
+                if (p != null && (r == null || r.TurretType != p.TurretType))
+                    r = BaseTurret.CloneStatsWithoutLevels(p);
+
+                var t = (i < types.Count) ? types[i] : (p != null ? p.TurretType : (r != null ? r.TurretType : TurretType.MachineGun));
+
+                if (p != null) p.TurretType = t;
+                if (r != null) r.TurretType = t;
+
+                if (p != null || r != null)
+                    owned.Add(new OwnedTurret { TurretType = t, Permanent = p, Runtime = r });
+            }
 
             unlockedTypes.Clear();
             unlockedTypes.UnionWith(dto.UnlockedTypes ?? new List<TurretType>());
 
             if (TurretSlotManager.Instance != null)
             {
-
                 if (dto.EquippedTurrets != null && dto.EquippedTurrets.Count > 0)
                 {
-                    // Full data path wins; nothing else needed.
+                    // Full path still supported
                     TurretSlotManager.Instance.ImportEquippedTurrets(dto.EquippedTurrets);
-                    RebindOwnedToEquipped();
                 }
                 else
                 {
-                    // Legacy/lightweight path: first rebuild pairs from IDs, then optionally
-                    // overlay runtime numbers.
                     TurretSlotManager.Instance.ImportEquipped(dto.EquippedIds);
                     TurretSlotManager.Instance.ImportRuntimeStats(dto.EquippedRuntimeStats);
                 }
-
-                //TurretSlotManager.Instance.ImportPurchasedFlags(dto.SlotPurchased);
             }
-
         }
+
 
 
         // Used to deactivate and activate object logic to replace destroy and instantiate
@@ -259,48 +295,8 @@ namespace Assets.Scripts.Systems
                     Destroy(obj.gameObject);
             }
         }
-
         
-        public void RebindOwnedToEquipped()
-        {
-            // Make Owned hold the *same objects* used in the slots.
-            var equippedPermanents = TurretSlotManager.Instance.GetEquippedPermanents().ToList();
-            if (equippedPermanents.Count == 0) return;
-
-            // Track which Owned entries we've already paired so we don't replace the same one twice.
-            var consumedOwnedIndexes = new HashSet<int>();
-
-            foreach (var perm in equippedPermanents)
-            {
-                // If Owned already contains this exact object, nothing to do.
-                int idx = owned.IndexOf(perm);
-                if (idx >= 0)
-                {
-                    consumedOwnedIndexes.Add(idx);
-                    continue;
-                }
-
-                // Find a matching slot in Owned by Type (first unused one).
-                idx = owned.FindIndex(i =>
-                    i != null &&
-                    i.TurretType == perm.TurretType &&
-                    !consumedOwnedIndexes.Contains(owned.IndexOf(i)));
-
-                if (idx >= 0)
-                {
-                    owned[idx] = perm;                 // swap in the equipped permanent instance
-                    consumedOwnedIndexes.Add(idx);
-                }
-                else
-                {
-                    // If none found (edge case), append so counts stay correct.
-                    owned.Add(perm);
-                }
-            }
-
-            OnInventoryChanged?.Invoke();
-        }
-
+        
 
     }
 }
