@@ -110,7 +110,6 @@ namespace Assets.Scripts.Systems
                         );
                     }
                 },
-
                 [TurretUpgradeType.FireRate] = new()
                 {
                     GetCurrentValue = t => t.FireRate,
@@ -701,11 +700,11 @@ namespace Assets.Scripts.Systems
                         GetExponentialCost(t, TurretUpgradeType.BounceDamagePct, a, out float cost, out int amount);
 
                         if (current >= maxBounceDmgPct)
-                            return ($"{current:F1}%", "Max", "", "0X");
+                            return ($"{current*100}%", "Max", "", "0X");
 
                         return (
-                            $"{current:F1}%",
-                            $"{bonus:F1}%",
+                            $"{current*100}%",
+                            $"{bonus*100}%",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );

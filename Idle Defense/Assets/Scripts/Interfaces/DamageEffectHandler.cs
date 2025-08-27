@@ -38,7 +38,12 @@ public class DamageEffectHandler
         ApplyAllInternal(enemy, stats, baseDamageOverride, extraEffects);
     }
 
-    private void ApplyAllInternal(Enemy enemy, TurretStatsInstance stats, float startingDamage, IDamageEffect[] extraEffects)
+    public void ApplyAll_NoBounce(Enemy enemy, TurretStatsInstance stats, float baseDamageOverride)
+    {
+        ApplyAllInternal(enemy, stats, baseDamageOverride, null, true);
+    }
+
+    private void ApplyAllInternal(Enemy enemy, TurretStatsInstance stats, float startingDamage, IDamageEffect[] extraEffects, bool skipBounce = false)
     {
         if (enemy == null) return;
 
@@ -46,7 +51,12 @@ public class DamageEffectHandler
 
         // Global, always-on effects
         foreach (var effect in _effects)
+        {
+            if (skipBounce && effect != null && effect.GetType().Name == "BounceDamageEffect")
+                continue;
+
             totalDamage = effect.ModifyDamage(totalDamage, stats, enemy);
+        }
 
         // Per-hit, one-shot effects (e.g., Splash for non-primary targets)
         if (extraEffects != null)

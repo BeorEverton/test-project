@@ -80,13 +80,40 @@ namespace Assets.Scripts.UI
 
         public void OnSlotClicked()
         {
-            UIManager.Instance.DeactivateRightPanels();
-            /*TabSelectorButton[] allTabs = FindObjectsByType<TabSelectorButton>(FindObjectsSortMode.None);
-            foreach (var tab in allTabs)
+            // Intercept Gunner equip flow first
+            if (GunnerEquipFlow.Instance != null && GunnerEquipFlow.Instance.IsAwaitingSlotSelection)
             {
-                tab.Deselect();
-            }*/
+                string gunnerId = GunnerEquipFlow.Instance.SelectedGunnerId;
 
+                // Optional: prevent equip on locked slot (you can allow it if you prefer)
+                if (!TurretSlotManager.Instance.Purchased(slotIndex))
+                {
+                    //UIManager.Instance.Toast("Unlock this slot before equipping a gunner.");
+                    GunnerEquipFlow.Instance.CancelSelection();
+                    return;
+                }
+
+                // Equip and attach visual
+                bool ok = GunnerManager.Instance.EquipToSlot(gunnerId, slotIndex, barrelAnchor);
+                if (!ok)
+                {
+                    //UIManager.Instance.Toast("Cannot equip this gunner here.");
+                    GunnerEquipFlow.Instance.CancelSelection();
+                    return;
+                }
+
+                // Done
+                //UIManager.Instance.Toast("Gunner equipped!");
+                GunnerEquipFlow.Instance.CompleteSelection();
+
+                // Refresh overlay/panel states if needed
+                UpdateOverlay();
+                UpdateColor();
+                return;
+            }
+
+            UIManager.Instance.DeactivateRightPanels();
+            
             AudioManager.Instance.Play("Click");
 
             // Skip first children because it's the title
@@ -173,12 +200,13 @@ namespace Assets.Scripts.UI
 
             // Try to reuse the GameObject if it already exists
             GameObject go = TurretInventoryManager.Instance.GetGameObjectForInstance(equippedTurret.Runtime);
+            BaseTurret baseTurret = new BaseTurret();
             if (go == null)
             {
                 // Fallback: instantiate and register
                 GameObject prefab = TurretInventoryManager.Instance.GetPrefab(inst.TurretType);
                 go = Instantiate(prefab);
-                var baseTurret = go.GetComponent<BaseTurret>();
+                baseTurret = go.GetComponent<BaseTurret>();
                 //Debug.Log("[SlotWorldButton] Instantiated new turret prefab for slot " + slotIndex);
                 if (baseTurret != null)
                 {
@@ -191,13 +219,24 @@ namespace Assets.Scripts.UI
                 }
             }
 
+            baseTurret = go.GetComponent<BaseTurret>();
             // Place the turret in the anchor
             go.transform.SetParent(barrelAnchor, false);
             go.transform.localPosition = Vector3.zero;
             go.transform.localRotation = Quaternion.identity;
-            go.SetActive(true);
+
+            // Tell the turret which slot it lives in (so it can query Gunner bonuses)            
+            if (baseTurret != null) 
+            { 
+                baseTurret.BindToGunnerManager(slotIndex);
+                baseTurret.SlotIndex = slotIndex;
+            } 
+
+            // Attach gunner visual above the turret, if a gunner is equipped for this slot
+            GunnerManager.Instance.AttachEquippedGunnerVisual(slotIndex, barrelAnchor);
 
             spawned = go;
+            go.SetActive(true);
             //Debug.Log("[SlotWorldButton] Spawned turret in slot " + slotIndex);
 
             if (noTurretHint != null)

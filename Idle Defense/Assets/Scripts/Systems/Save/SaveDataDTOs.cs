@@ -711,3 +711,32 @@ public class StatsDTO
     public double MissileLauncherDamage;
     public double LaserDamage;
 }
+
+[Serializable]
+public class GunnerRuntimeDTO
+{
+    public string Id;
+    public float CurHP;
+    public float MaxHP;
+    public int Level;
+    public float Xp;
+    public int Points;
+    public int[] Unlocked;       // enum ints
+    public bool OnQuest;
+    public long QuestEnd;
+    public int EquippedSlot;     // -1 if not equipped
+}
+
+[Serializable]
+public class GunnerInventoryDTO
+{
+    public List<GunnerRuntimeDTO> Runtimes = new();
+    public List<SlotGunnerDTO> SlotMap = new(); // slot -> gunner id
+}
+
+[Serializable]
+public class SlotGunnerDTO
+{
+    public int SlotIndex;
+    public string GunnerId;
+}

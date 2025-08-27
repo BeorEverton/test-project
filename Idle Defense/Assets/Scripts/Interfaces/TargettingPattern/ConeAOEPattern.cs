@@ -14,25 +14,46 @@ public class ConeAOEPattern : MonoBehaviour, ITargetingPattern
         coneAngle = stats.ConeAngle;
         range = stats.Range;
 
-        // Direction is from the rotation point forward (turret head direction)
-        Vector3 forward = turret._rotationPoint.up;
+        // Use the muzzle as geometric origin to match visuals and fix lateral offset
+        Vector3 origin =
+            turret._muzzleFlashPosition ? turret._muzzleFlashPosition.position
+            : (turret._rotationPoint ? turret._rotationPoint.position : turret.transform.position);
 
-        // Get all enemies within attack range
-        List<Enemy> enemies = GridManager.Instance.GetEnemiesInRange(
-            turret.transform.position, Mathf.CeilToInt(range));
+        // Axis = current aim toward target (fallback to turret head's up, projected to XZ)
+        Vector3 axis = primaryTarget
+            ? (primaryTarget.transform.position - origin)
+            : (turret._rotationPoint ? turret._rotationPoint.TransformDirection(Vector3.up) : turret.transform.up);
+
+        // Work in XZ (depth Z): project and normalize
+        axis.y = 0f;
+        if (axis.sqrMagnitude < 1e-6f) axis = Vector3.forward; // depth fallback
+        axis.Normalize();
+
+        float halfRad = 0.5f * coneAngle * Mathf.Deg2Rad;
+        float cosHalf = Mathf.Cos(halfRad);
+
+        // IMPORTANT: Grid query expects a cell radius. Convert world range -> grid cells.
+        // (_cellSize is public; GetEnemiesInRange enumerates around a grid center in cells.)
+        int gridRange = Mathf.CeilToInt(range / Mathf.Max(0.0001f, GridManager.Instance._cellSize));
+        List<Enemy> enemies = GridManager.Instance.GetEnemiesInRange(origin, gridRange);  // center at muzzle
+                                                                                          // Do NOT do a second Euclidean range check here — it truncates the cone prematurely.
 
         foreach (var enemy in enemies)
         {
-            if (enemy == null) continue;
+            if (!enemy) continue;
 
-            Vector3 dirToEnemy = (enemy.transform.position - turret._rotationPoint.position).normalized;
+            Vector3 to = enemy.transform.position - origin;
+            to.y = 0f; // XZ plane
+            if (to.sqrMagnitude < 1e-6f) continue;
+            to.Normalize();
 
-            if (Vector3.Angle(forward, dirToEnemy) <= coneAngle * 0.5f)
-            {
+            // inside cone if dot >= cos(halfAngle)
+            if (Vector3.Dot(axis, to) >= cosHalf)
                 turret.DamageEffects?.ApplyAll(enemy, stats);
-            }
         }
     }
+
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
@@ -40,33 +61,36 @@ public class ConeAOEPattern : MonoBehaviour, ITargetingPattern
         if (!(GetComponent<BaseTurret>() is BaseTurret turret)) return;
 
         // Center of cone = turret head (_rotationPoint)
-        Vector3 origin = turret._rotationPoint.position;
-        Vector3 forward = turret._rotationPoint.up;
+        Vector3 origin = turret._rotationPoint ? turret._rotationPoint.position : turret.transform.position;
 
-        // Draw cone boundaries
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.35f); // orange semi-transparent
-        float halfAngle = coneAngle * 0.5f;
+        // Use same axis as ExecuteAttack (fallback to turret head's up)
+        Vector3 axis = turret._rotationPoint ? turret._rotationPoint.TransformDirection(Vector3.up) : turret.transform.up;
+        axis.y = 0f; if (axis.sqrMagnitude < 1e-6f) axis = Vector3.forward; axis.Normalize();
 
-        Quaternion leftRot = Quaternion.AngleAxis(-halfAngle, Vector3.forward);
-        Quaternion rightRot = Quaternion.AngleAxis(halfAngle, Vector3.forward);
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.35f);
+        float half = coneAngle * 0.5f;
 
-        Vector3 leftDir = leftRot * forward;
-        Vector3 rightDir = rightRot * forward;
+        // Rotate in XZ plane -> around world Y
+        Quaternion leftRot = Quaternion.AngleAxis(-half, Vector3.up);
+        Quaternion rightRot = Quaternion.AngleAxis(half, Vector3.up);
+
+        Vector3 leftDir = leftRot * axis;
+        Vector3 rightDir = rightRot * axis;
 
         Gizmos.DrawRay(origin, leftDir * range);
         Gizmos.DrawRay(origin, rightDir * range);
 
-        // Draw arc lines to visualize cone fill
+        // Arc
         int segments = 20;
-        Vector3 lastPoint = origin + leftDir * range;
+        Vector3 last = origin + leftDir * range;
         for (int i = 1; i <= segments; i++)
         {
             float t = i / (float)segments;
-            Quaternion segRot = Quaternion.AngleAxis(-halfAngle + coneAngle * t, Vector3.forward);
-            Vector3 segDir = segRot * forward;
-            Vector3 nextPoint = origin + segDir * range;
-            Gizmos.DrawLine(lastPoint, nextPoint);
-            lastPoint = nextPoint;
+            Quaternion segRot = Quaternion.AngleAxis(-half + coneAngle * t, Vector3.up);
+            Vector3 segDir = segRot * axis;
+            Vector3 next = origin + segDir * range;
+            Gizmos.DrawLine(last, next);
+            last = next;
         }
     }
 #endif

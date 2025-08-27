@@ -30,11 +30,11 @@ namespace Assets.Scripts.Systems
         private void Start()
         {
             // Define speed steps based on platform
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
             speedOptions = new List<float> { 1f, 1.5f, 2f, 3f, 5f, 10f };
-#else
-            speedOptions = new List<float> { 1f, 1.5f, 2f };
-#endif
+//#else
+            //speedOptions = new List<float> { 1f, 1.5f, 2f };
+//#endif
 
             speedToggleButton.onClick.AddListener(AdvanceGameSpeed);
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;

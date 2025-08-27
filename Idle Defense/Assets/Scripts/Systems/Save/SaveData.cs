@@ -13,15 +13,16 @@ namespace Assets.Scripts.Systems.Save
         public StatsDTO StatsDTO;
         public TurretInventoryDTO TurretInventory;
         
-
         public List<string> DiscoveredEnemyNames;
+
+        public GunnerInventoryDTO GunnerInventory;
 
         public GameData(GameDataDTO gameData,
             PlayerInfoDTO playerInfo,
-            PlayerInfoDTO permanentPlayerInfo,
-            
+            PlayerInfoDTO permanentPlayerInfo,            
             StatsDTO statsDTO,
-            TurretInventoryDTO turretInventory
+            TurretInventoryDTO turretInventory,
+            GunnerInventoryDTO gunnerInventory
             )
         {
             GameDataDTO = gameData;
@@ -30,7 +31,8 @@ namespace Assets.Scripts.Systems.Save
             
             StatsDTO = statsDTO;           
             TurretInventory = turretInventory;
-            
+
+            GunnerInventory = gunnerInventory;
         }
     }
 }

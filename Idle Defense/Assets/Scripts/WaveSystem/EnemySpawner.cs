@@ -233,6 +233,10 @@ namespace Assets.Scripts.WaveSystem
                 enemy.MoveDirection = (targetPos - enemyObj.transform.position).normalized;
                 enemyObj.SetActive(true);
 
+                // Gunner XP
+                GunnerManager.Instance.OnEnemySpawned(enemy);
+
+
                 enemy.OnDeath += Enemy_OnEnemyDeath;
                 EnemiesAlive.Add(enemyObj);
 

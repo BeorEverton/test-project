@@ -26,9 +26,9 @@ Transform:
   m_GameObject: {fileID: 7074193589947550270}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.037, z: 0}
+  m_LocalPosition: {x: 0, y: 0.846, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4368504409853304574}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
@@ -95,6 +95,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1002190610426663448, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.353
+      objectReference: {fileID: 0}
     - target: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Name
       value: Machine Gun Turret
@@ -145,7 +149,35 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4550722404459009523, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.069
+      value: 2.856
+      objectReference: {fileID: 0}
+    - target: {fileID: 4550722404459009523, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4550722404459009523, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4550722404459009523, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 6032650112412094451, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -7068553724952606805, guid: ff9c7f35851f09f4c91e112653092e30, type: 3}
+    - target: {fileID: 6032650112412094451, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6032650112412094451, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6032650112412094451, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6800362798849118830, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalScale.x
@@ -153,6 +185,30 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6800362798849118830, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7734495413450262141, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 7734495413450262141, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 7734495413450262141, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 7734495413450262141, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7734495413450262141, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.014
+      objectReference: {fileID: 0}
+    - target: {fileID: 7734495413450262141, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8162027663542616318, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
@@ -253,7 +309,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.4066668, y: 1.9}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -278,6 +334,250 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnemyTargetChoice: 0
   _turretInfo: {fileID: 11400000, guid: d382a866b82a96449b631cb2dc2ef75a, type: 2}
+  RuntimeStats:
+    IsUnlocked: 0
+    TurretType: 0
+    BaseDamage: 0
+    BaseFireRate: 0
+    BaseCritChance: 0
+    BaseCritDamage: 0
+    Damage: 0
+    DamageLevel: 0
+    DamageUpgradeAmount: 0
+    DamageUpgradeBaseCost: 0
+    DamageCostExponentialMultiplier: 0
+    FireRate: 0
+    FireRateLevel: 0
+    FireRateUpgradeAmount: 0
+    FireRateUpgradeBaseCost: 0
+    FireRateCostExponentialMultiplier: 0
+    RotationSpeed: 0
+    AngleThreshold: 0
+    Range: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalChanceUpgradeAmount: 0
+    CriticalChanceUpgradeBaseCost: 0
+    CriticalChanceCostExponentialMultiplier: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    CriticalDamageMultiplierUpgradeAmount: 0
+    CriticalDamageMultiplierUpgradeBaseCost: 0
+    CriticalDamageCostExponentialMultiplier: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    ExplosionRadiusUpgradeAmount: 0
+    ExplosionRadiusUpgradeBaseCost: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    SplashDamageUpgradeAmount: 0
+    SplashDamageUpgradeBaseCost: 0
+    PierceChance: 0
+    PierceChanceLevel: 0
+    PierceChanceUpgradeAmount: 0
+    PierceChanceUpgradeBaseCost: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PierceDamageFalloffUpgradeAmount: 0
+    PierceDamageFalloffUpgradeBaseCost: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    PelletCountUpgradeAmount: 0
+    PelletCountUpgradeBaseCost: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    DamageFalloffOverDistanceUpgradeAmount: 0
+    DamageFalloffOverDistanceUpgradeBaseCost: 0
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
+    PercentBonusDamagePerSec: 0
+    PercentBonusDamagePerSecLevel: 0
+    PercentBonusDamagePerSecUpgradeAmount: 0
+    PercentBonusDamagePerSecUpgradeBaseCost: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
+    SlowEffectUpgradeAmount: 0
+    SlowEffectUpgradeBaseCost: 0
+    RangeUpgradeAmount: 0
+    RangeUpgradeBaseCost: 0
+    RangeLevel: 0
+    RangeCostExponentialMultiplier: 0
+    RotationSpeedUpgradeAmount: 0
+    RotationSpeedUpgradeBaseCost: 0
+    RotationSpeedLevel: 0
+    RotationSpeedCostExponentialMultiplier: 0
+    CanHitFlying: 0
+    ArmorPenetration: 0
+    ArmorPenetrationLevel: 0
+    ArmorPenetrationUpgradeAmount: 0
+    ArmorPenetrationUpgradeBaseCost: 0
+    ArmorPenetrationCostExponentialMultiplier: 0
+    BounceCount: 0
+    BounceCountLevel: 0
+    BounceCountUpgradeAmount: 0
+    BounceCountUpgradeBaseCost: 0
+    BounceCountCostExponentialMultiplier: 0
+    BounceRange: 0
+    BounceRangeLevel: 0
+    BounceRangeUpgradeAmount: 0
+    BounceRangeUpgradeBaseCost: 0
+    BounceRangeCostExponentialMultiplier: 0
+    BounceDelay: 0
+    BounceDelayLevel: 0
+    BounceDelayUpgradeAmount: 0
+    BounceDelayUpgradeBaseCost: 0
+    BounceDelayCostExponentialMultiplier: 0
+    BounceDamagePct: 0
+    BounceDamagePctLevel: 0
+    BounceDamagePctUpgradeAmount: 0
+    BounceDamagePctUpgradeBaseCost: 0
+    BounceDamagePctCostExponentialMultiplier: 0
+    ConeAngle: 0
+    ConeAngleLevel: 0
+    ConeAngleUpgradeAmount: 0
+    ConeAngleUpgradeBaseCost: 0
+    ConeAngleCostExponentialMultiplier: 0
+    AheadDistance: 0
+    AheadDistanceLevel: 0
+    AheadDistanceUpgradeAmount: 0
+    AheadDistanceUpgradeBaseCost: 0
+    AheadDistanceCostExponentialMultiplier: 0
+    TrapPrefab: {fileID: 0}
+    MaxTrapsActive: 0
+    MaxTrapsActiveLevel: 0
+    MaxTrapsActiveUpgradeAmount: 0
+    MaxTrapsActiveUpgradeBaseCost: 0
+    MaxTrapsActiveCostExponentialMultiplier: 0
+    ExplosionDelay: 0
+    ExplosionDelayLevel: 0
+    ExplosionDelayUpgradeAmount: 0
+    ExplosionDelayUpgradeBaseCost: 0
+    ExplosionDelayCostExponentialMultiplier: 0
+  PermanentStats:
+    IsUnlocked: 0
+    TurretType: 0
+    BaseDamage: 0
+    BaseFireRate: 0
+    BaseCritChance: 0
+    BaseCritDamage: 0
+    Damage: 0
+    DamageLevel: 0
+    DamageUpgradeAmount: 0
+    DamageUpgradeBaseCost: 0
+    DamageCostExponentialMultiplier: 0
+    FireRate: 0
+    FireRateLevel: 0
+    FireRateUpgradeAmount: 0
+    FireRateUpgradeBaseCost: 0
+    FireRateCostExponentialMultiplier: 0
+    RotationSpeed: 0
+    AngleThreshold: 0
+    Range: 0
+    CriticalChance: 0
+    CriticalChanceLevel: 0
+    CriticalChanceUpgradeAmount: 0
+    CriticalChanceUpgradeBaseCost: 0
+    CriticalChanceCostExponentialMultiplier: 0
+    CriticalDamageMultiplier: 0
+    CriticalDamageMultiplierLevel: 0
+    CriticalDamageMultiplierUpgradeAmount: 0
+    CriticalDamageMultiplierUpgradeBaseCost: 0
+    CriticalDamageCostExponentialMultiplier: 0
+    ExplosionRadius: 0
+    ExplosionRadiusLevel: 0
+    ExplosionRadiusUpgradeAmount: 0
+    ExplosionRadiusUpgradeBaseCost: 0
+    SplashDamage: 0
+    SplashDamageLevel: 0
+    SplashDamageUpgradeAmount: 0
+    SplashDamageUpgradeBaseCost: 0
+    PierceChance: 0
+    PierceChanceLevel: 0
+    PierceChanceUpgradeAmount: 0
+    PierceChanceUpgradeBaseCost: 0
+    PierceDamageFalloff: 0
+    PierceDamageFalloffLevel: 0
+    PierceDamageFalloffUpgradeAmount: 0
+    PierceDamageFalloffUpgradeBaseCost: 0
+    PelletCount: 0
+    PelletCountLevel: 0
+    PelletCountUpgradeAmount: 0
+    PelletCountUpgradeBaseCost: 0
+    DamageFalloffOverDistance: 0
+    DamageFalloffOverDistanceLevel: 0
+    DamageFalloffOverDistanceUpgradeAmount: 0
+    DamageFalloffOverDistanceUpgradeBaseCost: 0
+    KnockbackStrength: 0
+    KnockbackStrengthLevel: 0
+    KnockbackStrengthUpgradeAmount: 0
+    KnockbackStrengthUpgradeBaseCost: 0
+    KnockbackStrengthCostExponentialMultiplier: 0
+    PercentBonusDamagePerSec: 0
+    PercentBonusDamagePerSecLevel: 0
+    PercentBonusDamagePerSecUpgradeAmount: 0
+    PercentBonusDamagePerSecUpgradeBaseCost: 0
+    SlowEffect: 0
+    SlowEffectLevel: 0
+    SlowEffectUpgradeAmount: 0
+    SlowEffectUpgradeBaseCost: 0
+    RangeUpgradeAmount: 0
+    RangeUpgradeBaseCost: 0
+    RangeLevel: 0
+    RangeCostExponentialMultiplier: 0
+    RotationSpeedUpgradeAmount: 0
+    RotationSpeedUpgradeBaseCost: 0
+    RotationSpeedLevel: 0
+    RotationSpeedCostExponentialMultiplier: 0
+    CanHitFlying: 0
+    ArmorPenetration: 0
+    ArmorPenetrationLevel: 0
+    ArmorPenetrationUpgradeAmount: 0
+    ArmorPenetrationUpgradeBaseCost: 0
+    ArmorPenetrationCostExponentialMultiplier: 0
+    BounceCount: 0
+    BounceCountLevel: 0
+    BounceCountUpgradeAmount: 0
+    BounceCountUpgradeBaseCost: 0
+    BounceCountCostExponentialMultiplier: 0
+    BounceRange: 0
+    BounceRangeLevel: 0
+    BounceRangeUpgradeAmount: 0
+    BounceRangeUpgradeBaseCost: 0
+    BounceRangeCostExponentialMultiplier: 0
+    BounceDelay: 0
+    BounceDelayLevel: 0
+    BounceDelayUpgradeAmount: 0
+    BounceDelayUpgradeBaseCost: 0
+    BounceDelayCostExponentialMultiplier: 0
+    BounceDamagePct: 0
+    BounceDamagePctLevel: 0
+    BounceDamagePctUpgradeAmount: 0
+    BounceDamagePctUpgradeBaseCost: 0
+    BounceDamagePctCostExponentialMultiplier: 0
+    ConeAngle: 0
+    ConeAngleLevel: 0
+    ConeAngleUpgradeAmount: 0
+    ConeAngleUpgradeBaseCost: 0
+    ConeAngleCostExponentialMultiplier: 0
+    AheadDistance: 0
+    AheadDistanceLevel: 0
+    AheadDistanceUpgradeAmount: 0
+    AheadDistanceUpgradeBaseCost: 0
+    AheadDistanceCostExponentialMultiplier: 0
+    TrapPrefab: {fileID: 0}
+    MaxTrapsActive: 0
+    MaxTrapsActiveLevel: 0
+    MaxTrapsActiveUpgradeAmount: 0
+    MaxTrapsActiveUpgradeBaseCost: 0
+    MaxTrapsActiveCostExponentialMultiplier: 0
+    ExplosionDelay: 0
+    ExplosionDelayLevel: 0
+    ExplosionDelayUpgradeAmount: 0
+    ExplosionDelayUpgradeBaseCost: 0
+    ExplosionDelayCostExponentialMultiplier: 0
   _rotationPoint: {fileID: 8005088409562439304}
   _muzzleFlashPosition: {fileID: 6762400686590564707}
   _muzzleFlashSprites:

@@ -66,13 +66,16 @@ namespace Assets.Scripts.Systems.Save
                 .Select(e => e.info.Name)
                 .ToList();
 
+            var gunnerInventory = GunnerManager.Instance.ExportToDTO();
+
             GameData gameData = new(
                 gameDataDTO,
                 sessionStatsDTO,
                 permanentStatsDTO,
                 
                 statsDTO,
-                turretInventory
+                turretInventory,
+                gunnerInventory
                 );
 
             gameData.DiscoveredEnemyNames = discoveredEnemies;
@@ -107,6 +110,8 @@ namespace Assets.Scripts.Systems.Save
             StatsManager.Instance.LoadStats(gameData.StatsDTO);
 
             TurretInventoryManager.Instance.ImportFromDTO(gameData.TurretInventory);
+
+            GunnerManager.Instance.ImportFromDTO(gameData.GunnerInventory);    
 
             SettingsManager.Instance.SetMusicVolume(gameData.GameDataDTO.MusicVolume);
             SettingsManager.Instance.SetSFXVolume(gameData.GameDataDTO.SFXVolume);

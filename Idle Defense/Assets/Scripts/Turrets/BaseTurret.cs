@@ -55,6 +55,14 @@ namespace Assets.Scripts.Turrets
 
         private Recoil _recoil;
 
+        // Gunner variables
+        [NonSerialized] public int SlotIndex = -1;            // set by SlotWorldButton on spawn
+        private TurretStatsInstance _effectiveScratch;        // reused buffer (turret + gunner)                                                              
+        private int _effectsSignature = -1; // Tracks which effects are active
+        private bool _boundToGunnerEvents = false;
+
+
+
         // Interfaces
         [SerializeField] private MonoBehaviour targetingPatternBehaviour;
         private ITargetingPattern targetingPattern;
@@ -123,6 +131,10 @@ namespace Assets.Scripts.Turrets
             // Get spd & dmg bonus from GameManager and calculate effective fire rate
             _bonusSpdMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
 
+            // Apply gunner bonuses to a scratch copy of the stats
+            if (_effectiveScratch == null) _effectiveScratch = new TurretStatsInstance();
+                GunnerManager.Instance.ApplyTo(RuntimeStats, SlotIndex, _effectiveScratch);
+
             // Calculate attack speed and damage
             _atkSpeed = (1 / RuntimeStats.FireRate) / _bonusSpdMultiplier;
 
@@ -151,7 +163,7 @@ namespace Assets.Scripts.Turrets
             if (_targetEnemy != null)
             {
                 float ty = _targetEnemy.transform.position.Depth();
-                if (ty > RuntimeStats.Range)
+                if (ty > _effectiveScratch.Range)
                 {
                     _targetEnemy.GetComponent<Enemy>().DelayRemoveDeathEvent(Enemy_OnDeath);
                     _targetEnemy = null;
@@ -188,7 +200,7 @@ namespace Assets.Scripts.Turrets
             if (targetingPattern is PiercingLinePattern plp)
                 plp.startPos = _muzzleFlashPosition.position;
 
-            targetingPattern?.ExecuteAttack(this, RuntimeStats, _targetEnemy);
+            targetingPattern?.ExecuteAttack(this, _effectiveScratch, _targetEnemy);
 
             // Cache once; also find it if it's on a child
             if (_recoil == null)
@@ -206,24 +218,27 @@ namespace Assets.Scripts.Turrets
                 _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
 
             List<GameObject> enemiesAlive = EnemySpawner.Instance.EnemiesAlive;
+            float maxDepth = _effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range;
+
             _targetEnemy = EnemyTargetChoice switch
             {
                 EnemyTarget.First => enemiesAlive
                     .OrderBy(enemy => enemy.transform.position.Depth())
-                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range),
+                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth),
 
                 EnemyTarget.Strongest => enemiesAlive
                     .OrderByDescending(enemy => enemy.GetComponent<Enemy>().MaxHealth)
-                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range),
+                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth),
 
                 EnemyTarget.Random => enemiesAlive
                     .OrderBy(_ => Random.value)
-                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range),
+                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth),
 
                 _ => enemiesAlive
                     .OrderBy(enemy => enemy.transform.position.Depth())
-                    .FirstOrDefault(y => y.transform.position.Depth() <= RuntimeStats.Range)
+                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth)
             };
+
 
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath += Enemy_OnDeath;
@@ -329,7 +344,11 @@ namespace Assets.Scripts.Turrets
                 yield break;
 
             Sprite randomMuzzleFlash = _muzzleFlashSprites[Random.Range(0, _muzzleFlashSprites.Count)];
-            _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = randomMuzzleFlash;
+
+            SpriteRenderer spriteRenderer = _muzzleFlashPosition.GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null)
+                yield break;
+            else spriteRenderer.sprite = randomMuzzleFlash;
 
             yield return new WaitForSeconds(0.03f);
             _muzzleFlashPosition.GetComponent<SpriteRenderer>().sprite = null;
@@ -659,50 +678,113 @@ namespace Assets.Scripts.Turrets
 
         private void InitializeEffects()
         {
+            // Build once from current RuntimeStats; next frames will compare and rebuild from _effectiveScratch if needed.
+            RebuildEffectsFromStats(RuntimeStats);
+        }
+
+        private void RebuildEffectsFromStats(TurretStatsInstance stats)
+        {
             DamageEffects = new DamageEffectHandler();
 
-            if (RuntimeStats.Damage > 0 || RuntimeStats.DamageUpgradeAmount > 0)
-                DamageEffects.AddEffect(new FlatDamageEffect());
+            // Baseline
+            if (stats.Damage > 0 || stats.DamageUpgradeAmount > 0)
+                DamageEffects.AddEffect(new FlatDamageEffect()); // :contentReference[oaicite:5]{index=5}
 
-            // Critical hits — either starts with crit chance or can gain via upgrades
-            if (RuntimeStats.CriticalChance > 0 || RuntimeStats.CriticalChanceUpgradeAmount > 0)
-                DamageEffects.AddEffect(new CriticalHitEffect());
+            // Crit
+            if (stats.CriticalChance > 0 || stats.CriticalChanceUpgradeAmount > 0)
+                DamageEffects.AddEffect(new CriticalHitEffect()); // :contentReference[oaicite:6]{index=6}
 
-            // Knockback — include if upgradeable
-            if (RuntimeStats.KnockbackStrength > 0 || RuntimeStats.KnockbackStrengthUpgradeAmount > 0)
-                DamageEffects.AddEffect(new KnockbackEffect());
+            // Knockback
+            if (stats.KnockbackStrength > 0 || stats.KnockbackStrengthUpgradeAmount > 0)
+                DamageEffects.AddEffect(new KnockbackEffect()); // :contentReference[oaicite:7]{index=7}
 
-            if (RuntimeStats.BounceCount > 0 || RuntimeStats.BounceCountUpgradeAmount > 0)
+            // Bounce chain damage
+            if (stats.BounceCount > 0 || stats.BounceCountUpgradeAmount > 0)
             {
-                BounceDamageEffect bounceEffect = new BounceDamageEffect(RuntimeStats.BounceDamagePct);
+                var bounceEffect = new BounceDamageEffect(stats.BounceDamagePct);
                 BounceDamageEffectRef = bounceEffect;
-                DamageEffects.AddEffect(bounceEffect);
+                DamageEffects.AddEffect(bounceEffect); // :contentReference[oaicite:8]{index=8}
             }
 
-            if (RuntimeStats.PercentBonusDamagePerSec > 0 || RuntimeStats.PercentBonusDamagePerSecUpgradeAmount > 0)
-            {
-                RampDamageOverTimeEffect rampEffect = new RampDamageOverTimeEffect();
-                DamageEffects.AddEffect(rampEffect);
-            }
+            // Damage ramp (DoT-like ramp over time on target)
+            if (stats.PercentBonusDamagePerSec > 0 || stats.PercentBonusDamagePerSecUpgradeAmount > 0)
+                DamageEffects.AddEffect(new RampDamageOverTimeEffect()); // :contentReference[oaicite:9]{index=9}
 
-            if (RuntimeStats.SlowEffect > 0 || RuntimeStats.SlowEffectUpgradeAmount > 0)
-            {
-                DamageEffects.AddEffect(new SlowEffect());
-            }
+            // Slow
+            if (stats.SlowEffect > 0 || stats.SlowEffectUpgradeAmount > 0)
+                DamageEffects.AddEffect(new SlowEffect()); // :contentReference[oaicite:10]{index=10}
 
-            if (RuntimeStats.PierceChance > 0 || RuntimeStats.PierceChanceUpgradeAmount > 0)
+            // Pierce
+            if (stats.PierceChance > 0 || stats.PierceChanceUpgradeAmount > 0)
             {
-                var pierceEffect = new PierceDamageEffect(RuntimeStats.PierceDamageFalloff);
+                var pierceEffect = new PierceDamageEffect(stats.PierceDamageFalloff);
                 DamageEffects.AddEffect(pierceEffect);
-                PierceDamageEffectRef = pierceEffect;
+                PierceDamageEffectRef = pierceEffect; // :contentReference[oaicite:11]{index=11}
             }
 
-            if (RuntimeStats.SplashDamage > 0 || RuntimeStats.SplashDamageUpgradeAmount > 0)
-                SplashDamageEffectRef = new SplashDamageEffect();
+            // Splash (secondary targets)
+            if (stats.SplashDamage > 0 || stats.SplashDamageUpgradeAmount > 0)
+                SplashDamageEffectRef = new SplashDamageEffect(); // :contentReference[oaicite:12]{index=12}
 
-
-            //DamageEffects.DebugGetEffects();
+            _effectsSignature = ComputeEffectsSignature(stats);
         }
+
+        private int ComputeEffectsSignature(TurretStatsInstance s)
+        {
+            int sig = 0;
+            if (s.Damage > 0 || s.DamageUpgradeAmount > 0) sig |= 1 << 0;
+            if (s.CriticalChance > 0 || s.CriticalChanceUpgradeAmount > 0) sig |= 1 << 1;
+            if (s.KnockbackStrength > 0 || s.KnockbackStrengthUpgradeAmount > 0) sig |= 1 << 2;
+            if (s.BounceCount > 0 || s.BounceCountUpgradeAmount > 0) sig |= 1 << 3;
+            if (s.PercentBonusDamagePerSec > 0 || s.PercentBonusDamagePerSecUpgradeAmount > 0) sig |= 1 << 4;
+            if (s.SlowEffect > 0 || s.SlowEffectUpgradeAmount > 0) sig |= 1 << 5;
+            if (s.PierceChance > 0 || s.PierceChanceUpgradeAmount > 0) sig |= 1 << 6;
+            if (s.SplashDamage > 0 || s.SplashDamageUpgradeAmount > 0) sig |= 1 << 7;
+            return sig;
+        }
+
+        #region GUNNER BINDING
+        public void BindToGunnerManager(int slotIndex)
+        {
+            SlotIndex = slotIndex;
+            if (!_boundToGunnerEvents && GunnerManager.Instance != null)
+            {
+                GunnerManager.Instance.OnSlotGunnerChanged += HandleGunnerSlotChanged;
+                GunnerManager.Instance.OnSlotGunnerStatsChanged += HandleGunnerSlotChanged;
+                _boundToGunnerEvents = true;
+            }
+            RecomputeEffectiveFromGunner(); // initial build
+        }
+
+        private void OnDisable()
+        {
+            if (_boundToGunnerEvents && GunnerManager.Instance != null)
+            {
+                GunnerManager.Instance.OnSlotGunnerChanged -= HandleGunnerSlotChanged;
+                GunnerManager.Instance.OnSlotGunnerStatsChanged -= HandleGunnerSlotChanged;
+                _boundToGunnerEvents = false;
+            }
+        }
+
+        // Event callback
+        private void HandleGunnerSlotChanged(int changedSlot)
+        {
+            if (changedSlot != SlotIndex) return;
+            RecomputeEffectiveFromGunner();
+        }
+
+        private void RecomputeEffectiveFromGunner()
+        {
+            if (_effectiveScratch == null) _effectiveScratch = new TurretStatsInstance();
+            // Merge turret + current gunner into scratch
+            GunnerManager.Instance.ApplyTo(RuntimeStats, SlotIndex, _effectiveScratch);
+
+            // Rebuild damage effects from the effective stats (adds/removes Slow/Knockback/etc.)
+            RebuildEffectsFromStats(_effectiveScratch);
+        }
+
+
+        #endregion
 
     }
 

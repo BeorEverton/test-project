@@ -25,27 +25,38 @@ public class BouncePattern : MonoBehaviour, ITargetingPattern
     {
         var hitTargets = new List<Enemy>();
         var currentTarget = primaryTarget.GetComponent<Enemy>();
+
+        // 1 primary hit + N extra bounces
+        int totalHits = Mathf.Max(1, stats.BounceCount + 1);
+                
         float currentDamage = stats.Damage;
 
-        for (int i = 0; i < bounceCount && currentTarget != null; i++)
+        for (int i = 0; i < totalHits && currentTarget != null; i++)
         {
-            // Hit current target
+            // compute damage for this hop:
+            //  - i == 0: full damage
+            //  - i > 0 : previous * pct, clamped to >= 1
+            if (i > 0)
+                currentDamage = Mathf.Max(1f, currentDamage * stats.BounceDamagePct);
 
+            // optional: keep bounce index for VFX/telemetry
             if (turret.BounceDamageEffectRef != null)
                 turret.BounceDamageEffectRef.SetBounceIndex(i);
 
-            turret.DamageEffects?.ApplyAll(currentTarget, stats);
+            // Apply all effects but skip any internal "bounce scaler"
+            turret.DamageEffects?.ApplyAll_NoBounce(currentTarget, stats, currentDamage);
             hitTargets.Add(currentTarget);
 
-            // Find the closest unhit enemy within range
+            // find next closest unhit enemy inside bounce range
             Enemy nextTarget = FindClosestUnhitEnemy(currentTarget.transform.position, hitTargets);
             currentTarget = nextTarget;
 
-            // Wait before next bounce if there is another target
+            // pacing
             if (currentTarget != null && bounceDelay > 0f)
                 yield return new WaitForSeconds(bounceDelay);
         }
     }
+
 
     private Enemy FindClosestUnhitEnemy(Vector3 fromPosition, List<Enemy> excludeList)
     {
