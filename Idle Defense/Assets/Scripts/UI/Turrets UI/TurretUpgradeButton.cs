@@ -34,6 +34,9 @@ namespace Assets.Scripts.UI
         private Vector3 originalScale;
         private Color originalColor;
 
+        // For gunners 
+        private static TurretStatsInstance _scratch; // shared buffer to avoid GC
+
         public void SetUpgradeType(TurretUpgradeType type)
         {
             _upgradeType = type;
@@ -126,9 +129,13 @@ namespace Assets.Scripts.UI
 
         public void UpdateDisplayFromType()
         {
-            if (_upgradeManager == null)
-                return;
+            if (_upgradeManager == null) return;
+
+            // Let the manager compute cost/bonus from the true upgradeable container
             _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
+
+            // Then replace the visible number with the effective (base + gunner)
+            ReplaceWithEffectiveValue();
         }
 
         public void OnClick()
@@ -140,8 +147,11 @@ namespace Assets.Scripts.UI
                 _upgradeManager.UpgradePermanentTurretStat(
                     _baseTurret, _upgradeType, this, _upgradeAmount);   // edits PermanentStats
             else
+            {
                 _upgradeManager.UpgradeTurretStat(
                     _turret, _upgradeType, this, _upgradeAmount, currencyType);
+                _baseTurret.RecomputeEffectiveFromGunner();
+            }
         }
 
 
@@ -162,6 +172,10 @@ namespace Assets.Scripts.UI
             _statUpgradeAmount.SetText(upgradeAmount);
             _statUpgradeCost.SetText(UIManager.GetCurrencyIcon(currencyType) + " " + upgradeCost);
             _statUpgradeCount.SetText(count);
+
+            // Get gunner stats
+            ReplaceWithEffectiveValue();
+
         }
 
         private string GetDisplayNameForUpgrade(TurretUpgradeType type)
@@ -179,7 +193,9 @@ namespace Assets.Scripts.UI
         public void UpdateDisplay()
         {
             _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
+            ReplaceWithEffectiveValue();
         }
+
 
         public void UpdateInteractableState()
         {
@@ -217,5 +233,95 @@ namespace Assets.Scripts.UI
             // Restore color
             _button.GetComponent<Image>().DOColor(originalColor, 0.1f).SetUpdate(true);
         }
+
+        #region Gunner Support        
+
+        private void ReplaceWithEffectiveValue()
+        {
+            if (_baseTurret == null) return;
+
+            _scratch ??= new TurretStatsInstance();
+            // build effective = base + gunner
+            GunnerManager.Instance.ApplyTo(_baseTurret.RuntimeStats, _baseTurret.SlotIndex, _scratch);
+
+            // add prestige (display-only; does not touch _turret or any manager calcs)
+            if (PrestigeManager.Instance != null)
+                PrestigeManager.Instance.ApplyToTurretStats(_scratch);
+
+            // pick the matching stat from the effective sheet
+            float v = GetEffectiveForType(_upgradeType, _scratch);
+            string s = FormatForType(_upgradeType, v);
+
+            // replace the number the manager wrote (cost/bonus stay untouched)
+            _statValue.SetText(s);
+        }
+
+        private static float GetEffectiveForType(TurretUpgradeType t, TurretStatsInstance s)
+        {
+            switch (t)
+            {
+                case TurretUpgradeType.Damage: return s.Damage;
+                case TurretUpgradeType.FireRate: return s.FireRate;
+                case TurretUpgradeType.Range: return s.Range;
+                case TurretUpgradeType.RotationSpeed: return s.RotationSpeed;
+
+                case TurretUpgradeType.CriticalChance: return s.CriticalChance;
+                case TurretUpgradeType.CriticalDamageMultiplier: return s.CriticalDamageMultiplier;
+
+                case TurretUpgradeType.ExplosionRadius: return s.ExplosionRadius;
+                case TurretUpgradeType.SplashDamage: return s.SplashDamage;
+                case TurretUpgradeType.PierceChance: return s.PierceChance;
+                case TurretUpgradeType.PierceDamageFalloff: return s.PierceDamageFalloff;
+
+                case TurretUpgradeType.PelletCount: return s.PelletCount;
+                case TurretUpgradeType.DamageFalloffOverDistance: return s.DamageFalloffOverDistance;
+
+                case TurretUpgradeType.KnockbackStrength: return s.KnockbackStrength;
+                case TurretUpgradeType.PercentBonusDamagePerSec: return s.PercentBonusDamagePerSec;
+                case TurretUpgradeType.SlowEffect: return s.SlowEffect;
+
+                case TurretUpgradeType.BounceCount: return s.BounceCount;
+                case TurretUpgradeType.BounceRange: return s.BounceRange;
+                case TurretUpgradeType.BounceDelay: return s.BounceDelay;
+                case TurretUpgradeType.BounceDamagePct: return s.BounceDamagePct;
+
+                case TurretUpgradeType.ConeAngle: return s.ConeAngle;
+                case TurretUpgradeType.ExplosionDelay: return s.ExplosionDelay;
+
+                case TurretUpgradeType.AheadDistance: return s.AheadDistance;
+                case TurretUpgradeType.MaxTrapsActive: return s.MaxTrapsActive;
+
+                case TurretUpgradeType.ArmorPenetration: return s.ArmorPenetration;
+
+                default: return float.NaN;
+            }
+        }
+
+        private static string FormatForType(TurretUpgradeType t, float v)
+        {
+            switch (t)
+            {
+                case TurretUpgradeType.FireRate: return $"{v:F2}/s";
+                case TurretUpgradeType.Range: return $"{v:F1}";
+                case TurretUpgradeType.RotationSpeed: return $"{v:F1}";
+                case TurretUpgradeType.CriticalChance: return $"{(int)v}%";
+                case TurretUpgradeType.CriticalDamageMultiplier: return $"{(int)v}%";
+                case TurretUpgradeType.SplashDamage: return UIManager.AbbreviateNumber(v * 100f, true) + "%";
+                case TurretUpgradeType.PierceChance: return $"{v:F1}%";
+                case TurretUpgradeType.PierceDamageFalloff: return $"{v:F1}%";
+                case TurretUpgradeType.DamageFalloffOverDistance: return $"{v:F1}%";
+                case TurretUpgradeType.BounceDelay: return $"{v:F2}s";
+                case TurretUpgradeType.BounceDamagePct: return $"{v * 100f}%";
+                case TurretUpgradeType.ConeAngle: return $"{v:F1}°";
+                case TurretUpgradeType.ExplosionDelay: return $"{v:F2}s";
+                case TurretUpgradeType.SlowEffect: return $"{v:F1}%";
+                case TurretUpgradeType.PercentBonusDamagePerSec: return $"{v:F1}%";
+                case TurretUpgradeType.ArmorPenetration: return $"{v:F1}%";
+                default: return UIManager.AbbreviateNumber(v);
+            }
+        }
+
+
+        #endregion
     }
 }

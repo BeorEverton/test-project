@@ -1,4 +1,4 @@
-using Assets.Scripts.Enemies;
+﻿using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
 using System;
 using System.Collections;
@@ -12,6 +12,14 @@ namespace Assets.Scripts.WaveSystem
         private bool _gameRunning;
 
         private readonly List<GameObject> _pendingRemovals = new List<GameObject>();
+
+        // Advanced movement
+        // Start steering after this progress from spawn depth to bottom (0.5 = midpoint)
+        [SerializeField, Range(0f, 1f)] private float steerStartProgress = 0.50f;
+        // Where steering reaches full strength (ease-in between start and full)
+        [SerializeField, Range(0f, 1f)] private float steerFullProgress = 0.9f;
+        // Fraction of forward speed used for sideways drift while steering
+        [SerializeField] private float lateralSpeedMultiplier = 0.30f;
 
         private void Start()
         {
@@ -122,18 +130,65 @@ namespace Assets.Scripts.WaveSystem
                 _pendingRemovals.Clear();
             }
         }
-
-
         private void MoveEnemy(Enemy enemy)
         {
-            GameObject enemyGameObject = enemy.gameObject;
+            var pos = enemy.transform.position;
+            float depthNow = pos.Depth();
 
-            enemy.transform.position += enemy.MoveDirection * enemy.MovementSpeed * Time.deltaTime;
+            // Attack gate doubles as the "do not change lateral anymore" threshold
+            bool atBottom = depthNow <= enemy.attackRange;
 
-            if (enemyGameObject.transform.position.Depth() <= enemy.attackRange)
+            // 0..1 progress from spawn depth to bottom (based on EnemyConfig.EnemySpawnDepth)
+            float prog = DepthProgress(depthNow);
+
+            if (prog < steerStartProgress)
+            {
+                // BEFORE MIDPOINT: follow the original spawn path, but ONLY on depth.
+                enemy.transform.position += enemy.MoveDirection * enemy.MovementSpeed * Time.deltaTime;
+            }
+            else
+            {
+                // AFTER MIDPOINT:
+                if (!atBottom)
+                {
+                    // If a gunner is alive, drift toward the nearest gunner X; else keep original diagonal path.
+                    int slot = GunnerManager.Instance.GetNearestAliveSlotByX(pos.x);
+                    bool hasGunner = slot >= 0;
+
+                    if (hasGunner)
+                    {
+                        // Smoothly ramp lateral strength from start -> full as we approach bottom
+                        float t = Mathf.InverseLerp(steerStartProgress, steerFullProgress, prog);
+                        float weight = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t));
+
+                        float targetX = GunnerManager.Instance.GetSlotAnchorX(slot);
+                        targetX += StableOffsetForEnemy(enemy, 1.3f); // stable per-enemy offset, no jitter
+
+                        float stepX = Mathf.Max(0.001f, enemy.MovementSpeed * lateralSpeedMultiplier * weight) * Time.deltaTime;
+                        pos.x = Mathf.MoveTowards(pos.x, targetX, stepX);
+
+                        // Keep forward speed consistent with the spawn path timing
+                        Vector3 forwardOnly = new Vector3(0f, enemy.MoveDirection.y, enemy.MoveDirection.z);
+                        enemy.transform.position = pos + forwardOnly * enemy.MovementSpeed * Time.deltaTime;
+                    }
+                    else
+                    {
+                        // No gunners alive: continue on the original spawn path (includes its random bottom-X)
+                        enemy.transform.position += enemy.MoveDirection * enemy.MovementSpeed * Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    // Already at bottom zone: keep the spawn path; do not change lateral intent
+                    enemy.transform.position += enemy.MoveDirection * enemy.MovementSpeed * Time.deltaTime;
+                }
+            }
+
+            if (enemy.gameObject.transform.position.Depth() <= enemy.attackRange)
                 enemy.CanAttack = true;
-
         }
+
+
 
         private void HandleGridPosition(GameObject enemy, Enemy enemyComponent)
         {
@@ -181,7 +236,6 @@ namespace Assets.Scripts.WaveSystem
             }
         }
 
-
         private void TryAttack(Enemy enemy)
         {
             if (enemy.KnockbackTime > 0f)
@@ -192,7 +246,10 @@ namespace Assets.Scripts.WaveSystem
                 return;
 
             enemy.AnimateAttack();
-            Attack(enemy.Info.Damage);
+            //Attack(enemy.Info.Damage);
+            bool hitGunner = GunnerManager.Instance.TryApplyDamageForEnemy(enemy, enemy.Info.Damage);
+            if (!hitGunner)
+                Debug.Log("All gunners are dead, ignoring attack");
 
             enemy.TimeSinceLastAttack = 0f;
         }
@@ -201,5 +258,25 @@ namespace Assets.Scripts.WaveSystem
         {
             PlayerBaseManager.Instance.TakeDamage(damage);
         }
+
+        // Progress helper: 0 at spawn depth, 1 at bottom. Uses EnemyConfig.EnemySpawnDepth.
+        private static float DepthProgress(float currentDepth)
+        {
+            return Mathf.Clamp01(1f - (currentDepth / Mathf.Max(0.001f, EnemyConfig.EnemySpawnDepth)));
+        }
+
+        // Deterministic pseudo-random in [-range, +range] based on the instance id 
+        private static float StableOffsetForEnemy(Enemy e, float range)
+        {
+            // LCG hash on the instance id → [0,1)
+            unchecked
+            {
+                uint h = (uint)e.GetInstanceID();
+                h = h * 1664525u + 1013904223u;
+                float t = (h & 0x00FFFFFF) / 16777216f; // 0..1 (24-bit mantissa)
+                return (t * 2f - 1f) * range;           // map to [-range, +range]
+            }
+        }
+
     }
 }

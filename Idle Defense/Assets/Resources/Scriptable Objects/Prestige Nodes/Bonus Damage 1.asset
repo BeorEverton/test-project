@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 077cc73e000aa434d946d397acc7b3d4, type: 3}
+  m_Name: Bonus Damage 1
+  m_EditorClassIdentifier: 
+  NodeId: dmg_1
+  DisplayName: Damage
+  Description: Raises Damage
+  Icon: {fileID: 21300000, guid: f50d5117f889a46ca8065d0265e01dc1, type: 3}
+  AnchoredPosition: {x: 0, y: 0}
+  BranchId: 1
+  RequiresAny:
+  - dmg_0
+  RequiresAll:
+  - dmg_0
+  MinPrestigeLevel: 0
+  CrimsonCost: 1
+  GlobalDamagePct: 3
+  GlobalFireRatePct: 0
+  GlobalCritChancePct: 0
+  GlobalCritDamagePct: 0
+  GlobalPierceChancePct: 0
+  RangePct: 0
+  RotationSpeedPct: 0
+  ExplosionRadiusPct: 0
+  SplashDamagePct: 0
+  PierceDamageFalloffPct: 0
+  PelletCountPct: 0
+  DamageFalloffOverDistancePct: 0
+  PercentBonusDamagePerSecPct: 0
+  SlowEffectPct: 0
+  KnockbackStrengthPct: 0
+  BounceCountPct: 0
+  BounceRangePct: 0
+  BounceDelayPct: 0
+  BounceDamagePctPct: 0
+  ConeAnglePct: 0
+  ExplosionDelayPct: 0
+  AheadDistancePct: 0
+  MaxTrapsActivePct: 0
+  ArmorPenetrationPct: 0
+  ScrapsGainPct: 0
+  BlackSteelGainPct: 0
+  EnemyHealthPct: 0
+  EnemyCountPct: 0
+  SpeedMultiplierCapBonus: 0
+  DamageMultiplierCapBonus: 0
+  UnlockLimitBreaks: 
+  UnlockGunnerIds: []
+  UnlockTurretTypes: 
+  AllUpgradeCostPct: 0
+  PerUpgradeTypeDiscounts: []
+  OnResetGrantCrimson: 0

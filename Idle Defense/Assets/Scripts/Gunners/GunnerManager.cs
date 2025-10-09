@@ -1,10 +1,14 @@
 ﻿using Assets.Scripts.Enemies;
+using Assets.Scripts.Systems;
+using Assets.Scripts.Systems.Save;
 using Assets.Scripts.Turrets;
+using Assets.Scripts.UI;
+using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.Systems.Save;
 using UnityEngine;
+using static Assets.Scripts.Enemies.Enemy;
 
 public class GunnerManager : MonoBehaviour
 {
@@ -23,9 +27,23 @@ public class GunnerManager : MonoBehaviour
     // cache: GunnerId -> spawned visual (under turret)
     private readonly Dictionary<string, GameObject> visuals = new();
 
-    public event System.Action<int> OnSlotGunnerChanged;
-    public event System.Action<int> OnSlotGunnerStatsChanged;
+    // slot -> turret anchor (used to get world X of the gunner)
+    private readonly Dictionary<int, Transform> slotAnchors = new();
 
+    // bars by gunner id
+    private readonly Dictionary<string, DualPhaseBarUI> healthBarByGunner = new();
+    private readonly Dictionary<string, DualPhaseBarUI> limitBarByGunner = new();
+    private readonly Dictionary<string, GunnerBillboardBinding> billboardByGunner = new();
+
+
+    // Optional: event if all equipped gunners die (hook your wave fail here if desired)
+    public event Action OnAllEquippedGunnersDead;
+
+    public event Action<int> OnSlotGunnerChanged;
+    public event Action<int> OnSlotGunnerStatsChanged;
+
+    // Helpers for the Limit Break
+    public GunnerSO GetSO(string gunnerId) => allGunners.Find(g => g.GunnerId == gunnerId);
 
     private void Awake()
     {
@@ -47,6 +65,25 @@ public class GunnerManager : MonoBehaviour
         foreach (var rt in runtimes.Values)
             rt.IsAvailableNow();
     }
+
+    private void Start()
+    {
+        if (WaveManager.Instance != null)
+            WaveManager.Instance.OnWaveStarted += Wave_OnWaveStarted;
+    }
+
+    private void OnDisable()
+    {
+        if (WaveManager.Instance != null)
+            WaveManager.Instance.OnWaveStarted -= Wave_OnWaveStarted;
+    }
+
+    private void Wave_OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs e)
+    {        
+        // Heal all gunners at the start of each wave
+        HealAllGunners(resetLimitBreak: false);
+    }
+
 
     /* ===================== EQUIP / UNEQUIP ===================== */
 
@@ -74,7 +111,8 @@ public class GunnerManager : MonoBehaviour
         slotToGunner[slotIndex] = gunnerId;
         rt.EquippedSlot = slotIndex;
 
-        AttachEquippedGunnerVisual_Internal(gunnerId, turretAnchor);
+        AttachEquippedGunnerVisual_Internal(gunnerId, turretAnchor, slotIndex);
+
         NotifyTurretOfChange(slotIndex);
 
         Save();
@@ -91,11 +129,16 @@ public class GunnerManager : MonoBehaviour
             rt.EquippedSlot = -1;
 
         // destroy visual
+        // destroy visual + forget bars/anchor
         if (visuals.TryGetValue(gunnerId, out var go) && go != null)
         {
             Destroy(go);
             visuals.Remove(gunnerId);
         }
+        healthBarByGunner.Remove(gunnerId);
+        limitBarByGunner.Remove(gunnerId);
+        slotAnchors.Remove(slotIndex);
+        billboardByGunner.Remove(gunnerId);
 
         NotifyTurretOfChange(slotIndex);
         Save();
@@ -113,14 +156,19 @@ public class GunnerManager : MonoBehaviour
     {
         var id = GetEquippedGunnerId(slotIndex);
         if (string.IsNullOrEmpty(id)) return;
-        AttachEquippedGunnerVisual_Internal(id, turretAnchor);
+        AttachEquippedGunnerVisual_Internal(id, turretAnchor, slotIndex);
+
     }
 
-    private void AttachEquippedGunnerVisual_Internal(string gunnerId, Transform turretAnchor)
+    private void AttachEquippedGunnerVisual_Internal(string gunnerId, Transform turretAnchor, int slotIndex)
     {
         if (turretAnchor == null) return;
         var so = allGunners.FirstOrDefault(g => g.GunnerId == gunnerId);
         if (so == null) return;
+
+        var lbIcon = GetSkillIcon(so);
+
+        slotAnchors[slotIndex] = turretAnchor;
 
         if (visuals.TryGetValue(gunnerId, out var existing) && existing != null)
         {
@@ -128,6 +176,16 @@ public class GunnerManager : MonoBehaviour
             existing.transform.localPosition = onTurretLocalOffset;
             existing.SetActive(true);
             ApplySprite(existing, so.OnTurretSprite);
+
+            // Rebind bars if present on this instance
+            var binding = existing.GetComponent<GunnerBillboardBinding>();
+            if (binding != null && runtimes.TryGetValue(gunnerId, out var rt0))
+            {
+                binding.InitializeFromRuntime(rt0, lbIcon);
+                if (binding.HealthBar) healthBarByGunner[gunnerId] = binding.HealthBar;
+                if (binding.LimitBreakBar) limitBarByGunner[gunnerId] = binding.LimitBreakBar;
+                billboardByGunner[gunnerId] = binding;
+            }
             return;
         }
 
@@ -139,6 +197,16 @@ public class GunnerManager : MonoBehaviour
         var sr = card.GetComponent<SpriteRenderer>();
         if (sr == null) sr = card.AddComponent<SpriteRenderer>();
         sr.sprite = so.OnTurretSprite;
+
+        // Bars binding (optional)
+        var bindingNew = card.GetComponent<GunnerBillboardBinding>();
+        if (bindingNew != null && runtimes.TryGetValue(gunnerId, out var rt))
+        {
+            bindingNew.InitializeFromRuntime(rt, lbIcon);
+            if (bindingNew.HealthBar) healthBarByGunner[gunnerId] = bindingNew.HealthBar;
+            if (bindingNew.LimitBreakBar) limitBarByGunner[gunnerId] = bindingNew.LimitBreakBar;
+            billboardByGunner[gunnerId] = bindingNew;
+        }
 
         visuals[gunnerId] = card;
     }
@@ -169,6 +237,26 @@ public class GunnerManager : MonoBehaviour
         }
         Save();
     }
+
+    // New: grant XP only to currently equipped gunners (unique per slot)
+    public void GrantXpToEquipped(float xp)
+    {
+        var given = new HashSet<string>();
+        foreach (var kv in slotToGunner)
+        {
+            var gid = kv.Value;
+            if (!given.Add(gid)) continue; // a gunner can’t be in two slots, but guard anyway
+
+            if (!runtimes.TryGetValue(gid, out var rt)) continue;
+            var so = allGunners.FirstOrDefault(g => g.GunnerId == gid);
+            if (so == null) continue;
+
+            rt.CurrentXp += Mathf.Max(0, xp);
+            TryLevelUp(so, rt);
+        }
+        Save();
+    }
+
 
     private void TryLevelUp(GunnerSO so, GunnerRuntime rt)
     {
@@ -220,31 +308,59 @@ public class GunnerManager : MonoBehaviour
 
     /* ===================== EFFECTIVE STATS ===================== */
 
+    public void NotifySlotStatsChanged(int slotIndex)
+    {
+        if (slotIndex < 0) return;
+        OnSlotGunnerStatsChanged?.Invoke(slotIndex);
+    }
+
     public GunnerBonus ComputeBonusForSlot(int slotIndex)
     {
         var bonus = new GunnerBonus();
         if (!slotToGunner.TryGetValue(slotIndex, out var id)) return bonus;
         if (!runtimes.TryGetValue(id, out var rt)) return bonus;
+        if (rt.IsDead || rt.IsOnQuest) return bonus;
 
         var so = allGunners.FirstOrDefault(g => g.GunnerId == id);
         if (so == null) return bonus;
 
-        // base → only if unlocked
-        if (rt.Unlocked.Contains(GunnerStatKey.Damage)) bonus.Damage += so.BaseDamage;
-        if (rt.Unlocked.Contains(GunnerStatKey.FireRate)) bonus.FireRate += so.BaseFireRate;
-        if (rt.Unlocked.Contains(GunnerStatKey.Range)) bonus.Range += so.BaseRange;
-        if (rt.Unlocked.Contains(GunnerStatKey.PercentBonusDamagePerSec)) bonus.PercentBonusDamagePerSec += so.BasePercentBonusDamagePerSec;
-        if (rt.Unlocked.Contains(GunnerStatKey.SlowEffect)) bonus.SlowEffect += so.BaseSlowEffect;
+        // Use upgraded values from GunnerUpgradeManager (base + growth)
+        // Use upgraded values if the manager exists; otherwise fall back to zeros to avoid NRE
+        var up = GunnerUpgradeManager.Instance;
+        float Get(GunnerStatKey k) => (up != null) ? up.GetEffectiveStatValue(so, rt, k) : 0f;
 
-        if (rt.Unlocked.Contains(GunnerStatKey.CriticalChance)) bonus.CriticalChance += so.BaseCriticalChance;
-        if (rt.Unlocked.Contains(GunnerStatKey.CriticalDamageMultiplier)) bonus.CriticalDamageMultiplier += so.BaseCriticalDamage;
-        if (rt.Unlocked.Contains(GunnerStatKey.KnockbackStrength)) bonus.KnockbackStrength += so.BaseKnockback;
-        if (rt.Unlocked.Contains(GunnerStatKey.SplashDamage)) bonus.SplashDamage += so.BaseSplash;
-        if (rt.Unlocked.Contains(GunnerStatKey.PierceChance)) bonus.PierceChance += so.BasePierceChance;
-        if (rt.Unlocked.Contains(GunnerStatKey.PierceDamageFalloff)) bonus.PierceDamageFalloff += so.BasePierceFalloff;
-        if (rt.Unlocked.Contains(GunnerStatKey.ArmorPenetration)) bonus.ArmorPenetration += so.BaseArmorPenetration;
+        float dmg = Get(GunnerStatKey.Damage);
+        float fr = Get(GunnerStatKey.FireRate);
+        float rng = Get(GunnerStatKey.Range);
+        float ramp = Get(GunnerStatKey.PercentBonusDamagePerSec);
+        float slow = Get(GunnerStatKey.SlowEffect);
+        float cc = Get(GunnerStatKey.CriticalChance);
+        float cd = Get(GunnerStatKey.CriticalDamageMultiplier);
+        float kb = Get(GunnerStatKey.KnockbackStrength);
+        float sp = Get(GunnerStatKey.SplashDamage);
+        float pc = Get(GunnerStatKey.PierceChance);
+        float pf = Get(GunnerStatKey.PierceDamageFalloff);
+        float ap = Get(GunnerStatKey.ArmorPenetration);
+
+        // Only contribute stats that are unlocked for this gunner
+        bool Unl(GunnerStatKey k) => rt.Unlocked != null && rt.Unlocked.Contains(k);
+
+        // assign into bonus (additive to turret)
+        if (Unl(GunnerStatKey.Damage)) bonus.Damage += dmg;
+        if (Unl(GunnerStatKey.FireRate)) bonus.FireRate += fr;
+        if (Unl(GunnerStatKey.Range)) bonus.Range += rng;
+        if (Unl(GunnerStatKey.PercentBonusDamagePerSec)) bonus.PercentBonusDamagePerSec += ramp;
+        if (Unl(GunnerStatKey.SlowEffect)) bonus.SlowEffect += slow;
+        if (Unl(GunnerStatKey.CriticalChance)) bonus.CriticalChance += cc;
+        if (Unl(GunnerStatKey.CriticalDamageMultiplier)) bonus.CriticalDamageMultiplier += cd;
+        if (Unl(GunnerStatKey.KnockbackStrength)) bonus.KnockbackStrength += kb;
+        if (Unl(GunnerStatKey.SplashDamage)) bonus.SplashDamage += sp;
+        if (Unl(GunnerStatKey.PierceChance)) bonus.PierceChance += pc;
+        if (Unl(GunnerStatKey.PierceDamageFalloff)) bonus.PierceDamageFalloff += pf;
+        if (Unl(GunnerStatKey.ArmorPenetration)) bonus.ArmorPenetration += ap;
 
         return bonus;
+
     }
 
     /* Convenience used by BaseTurret */
@@ -257,10 +373,13 @@ public class GunnerManager : MonoBehaviour
         if (!slotToGunner.TryGetValue(slotIndex, out var gunnerId) || !runtimes.ContainsKey(gunnerId))
             return;
 
+        if (runtimes[gunnerId].IsDead)
+            return; // dead gunners give no bonuses
+
         // 2) add bonuses
         var b = ComputeBonusForSlot(slotIndex);
         intoScratch.Damage += b.Damage;
-        intoScratch.FireRate += b.FireRate;
+        intoScratch.FireRate += b.FireRate;        
         intoScratch.Range += b.Range;
         intoScratch.PercentBonusDamagePerSec += b.PercentBonusDamagePerSec;
         intoScratch.SlowEffect += b.SlowEffect;
@@ -313,7 +432,7 @@ public class GunnerManager : MonoBehaviour
 
     public void OnEnemyKilled(float xpReward = 1f)
     {
-        GrantXpToAll(xpReward);
+        GrantXpToEquipped(xpReward);
     }
 
     public void OnEnemySpawned(Enemy enemy)
@@ -323,7 +442,162 @@ public class GunnerManager : MonoBehaviour
 
     private void HandleEnemyDeathForXp(object sender, System.EventArgs e)
     {
-        OnEnemyKilled(1f);
+        if (e is OnDeathEventArgs death)
+            OnEnemyKilled(death.XPDropAmount);
+    }
+
+    /* ===================== ENEMY HELPER ===================== */
+    public bool ApplyDamageOnSlot(int slotIndex, float damage)
+    {
+        if (!slotToGunner.TryGetValue(slotIndex, out var gid)) return false;
+        if (!runtimes.TryGetValue(gid, out var rt)) return false;
+        if (rt.IsDead) return false;
+
+        bool diedNow = rt.TakeDamage(damage, out float actual);
+
+        // Tell the equipped turret (for this slot) to rebuild its effective stats immediately
+        OnSlotGunnerStatsChanged?.Invoke(slotIndex);
+
+        // Update bars if we have them
+        if (healthBarByGunner.TryGetValue(gid, out var hb) && hb != null)
+            hb.SetValue(rt.CurrentHealth);
+
+        if (limitBarByGunner.TryGetValue(gid, out var lb) && lb != null)
+        {
+            // ensure max is correct in case MaxHealth changed elsewhere
+            lb.SetMax(rt.LimitBreakMax);
+            lb.SetValue(rt.LimitBreakCurrent);
+        }
+
+        // Also notify the billboard so it can toggle the Limit Break button/glow
+        if (billboardByGunner.TryGetValue(gid, out var bb) && bb != null)
+        {
+            bb.RefreshLimitBreak(rt.LimitBreakCurrent);
+        }
+
+        // If all equipped are dead, signal once (consumer can fail wave)
+        bool anyAlive = false;
+        foreach (var kvp in slotToGunner)
+        {
+            var g = kvp.Value;
+            if (runtimes.TryGetValue(g, out var rtx) && !rtx.IsDead) { anyAlive = true; break; }
+        }
+        if (!anyAlive) OnAllEquippedGunnersDead?.Invoke();
+
+        Save(); // persist HP changes with your central save
+        return true;
+    }
+
+    public bool TryApplyDamageForEnemy(Enemy enemy, float damage)
+    {
+        if (enemy == null) return false;
+
+        // choose nearest alive target by X at the moment of attack
+        int slot = GetNearestAliveSlotByX(enemy.transform.position.x);
+        if (slot < 0) return false;
+
+        return ApplyDamageOnSlot(slot, damage);
+    }
+
+
+    public int GetNearestAliveSlotByX(float worldX)
+    {
+        int bestSlot = -1;
+        float bestDist = float.MaxValue;
+
+        foreach (var kvp in slotToGunner)
+        {
+            int slot = kvp.Key;
+            string gid = kvp.Value;
+
+            if (!runtimes.TryGetValue(gid, out var rt) || rt.IsDead) continue;
+            if (!slotAnchors.TryGetValue(slot, out var anchor) || anchor == null) continue;
+
+            float dx = Mathf.Abs(anchor.position.x - worldX);
+            if (dx < bestDist)
+            {
+                bestDist = dx;
+                bestSlot = slot;
+            }
+        }
+        return bestSlot;
+    }
+
+    public float GetSlotAnchorX(int slotIndex)
+    {
+        return slotAnchors.TryGetValue(slotIndex, out var t) && t != null ? t.position.x : 0f;
+    }
+
+    /* ===================== HEAL / LIMIT BREAK ===================== */
+    /// <summary>
+    /// Heal all gunners to full HP. Optionally reset Limit Break gauge.
+    /// Updates billboard bars for equipped gunners. No save here; WaveManager saves after starting the wave.
+    /// </summary>
+    public void HealAllGunners(bool resetLimitBreak = false)
+    {
+        // Heal every known gunner (equipped or not)
+        foreach (var kv in runtimes)
+        {
+            var rt = kv.Value;
+            rt.Heal(rt.MaxHealth);            
+            if (resetLimitBreak) rt.ResetLimitBreak();
+        }
+
+        // Refresh bars only for equipped (those have billboards)
+        foreach (var map in slotToGunner)
+        {
+            string gid = map.Value;
+            if (!runtimes.TryGetValue(gid, out var rt)) continue;
+
+            if (healthBarByGunner.TryGetValue(gid, out var hb) && hb != null)
+            {
+                hb.SetMax(rt.MaxHealth);
+                hb.SetValue(rt.CurrentHealth);
+            }
+            if (limitBarByGunner.TryGetValue(gid, out var lb) && lb != null)
+            {
+                lb.SetMax(rt.LimitBreakMax);
+                lb.SetValue(rt.LimitBreakCurrent);
+            }
+        }
+
+        // Ping turrets so they re-merge (important if a dead gunner was just healed)
+        if (OnSlotGunnerStatsChanged != null)
+        {
+            foreach (var s in slotToGunner.Keys)
+                OnSlotGunnerStatsChanged.Invoke(s);
+        }
+    }
+
+    // Delegate to the new manager
+    public bool TryActivateLimitBreak(string gunnerId)
+    {
+        return LimitBreakManager.Instance != null
+            ? LimitBreakManager.Instance.TryActivate(gunnerId)
+            : false;
+    }
+
+    public void NotifyLimitBreakChanged(string gunnerId)
+    {
+        if (!runtimes.TryGetValue(gunnerId, out var rt)) return;
+        if (limitBarByGunner.TryGetValue(gunnerId, out var lb) && lb) { lb.SetMax(rt.LimitBreakMax); lb.SetValue(rt.LimitBreakCurrent); }
+        if (billboardByGunner.TryGetValue(gunnerId, out var bb) && bb) { bb.RefreshLimitBreak(rt.LimitBreakCurrent); }
+    }
+
+    public LimitBreakSkillSO ResolveLimitBreakFor(GunnerSO so)
+    {
+        // Delegate to registry for a single source of truth
+        return (LimitBreakManager.Instance != null)
+            ? LimitBreakManager.Instance.ResolveFor(so)
+            : so?.LimitBreakSkill;
+    }
+
+    public static Sprite GetSkillIcon(GunnerSO so)
+    {
+        if (so == null) return null;
+        return (LimitBreakManager.Instance != null)
+            ? LimitBreakManager.Instance.GetIconFor(so)
+            : (so.LimitBreakSkill != null ? so.LimitBreakSkill.Icon : null);
     }
 
     /* ===================== SAVE / LOAD ===================== */
@@ -336,11 +610,22 @@ public class GunnerManager : MonoBehaviour
     public GunnerInventoryDTO ExportToDTO()
     {
         var dto = new GunnerInventoryDTO();
-
+                
         // runtimes
         foreach (var kvp in runtimes)
         {
             var rt = kvp.Value;
+
+            // NEW: flatten UpgradeLevels into arrays
+            int upCount = rt.UpgradeLevels?.Count ?? 0;
+            int[] upKeys = new int[upCount];
+            int[] upLvls = new int[upCount];
+            for (int i = 0; i < upCount; i++)
+            {
+                upKeys[i] = (int)rt.UpgradeLevels[i].Key;
+                upLvls[i] = rt.UpgradeLevels[i].Level;
+            }
+
             dto.Runtimes.Add(new GunnerRuntimeDTO
             {
                 Id = kvp.Key,
@@ -350,11 +635,17 @@ public class GunnerManager : MonoBehaviour
                 Xp = rt.CurrentXp,
                 Points = rt.UnspentSkillPoints,
                 Unlocked = rt.Unlocked.Select(u => (int)u).ToArray(),
+
+                // NEW
+                UpKeys = upKeys,
+                UpLevels = upLvls,
+
                 OnQuest = rt.IsOnQuest,
                 QuestEnd = rt.QuestEndUnixTime,
                 EquippedSlot = rt.EquippedSlot
             });
         }
+
 
         // slot map
         foreach (var kvp in slotToGunner)
@@ -387,6 +678,33 @@ public class GunnerManager : MonoBehaviour
             rt.IsOnQuest = r.OnQuest;
             rt.QuestEndUnixTime = r.QuestEnd;
             rt.EquippedSlot = r.EquippedSlot;
+
+            // rebuild per-stat upgrade levels
+            rt.UpgradeLevels.Clear();
+            if (r.UpKeys != null && r.UpLevels != null)
+            {
+                int n = Mathf.Min(r.UpKeys.Length, r.UpLevels.Length);
+                for (int i = 0; i < n; i++)
+                {
+                    rt.UpgradeLevels.Add(new GunnerRuntime.GunnerStatLevel
+                    {
+                        Key = (GunnerStatKey)r.UpKeys[i],
+                        Level = r.UpLevels[i]
+                    });
+                }
+            }
+
+            Transform attachAnchor = null;
+            foreach (var slot in FindObjectsByType<SlotWorldButton>(FindObjectsSortMode.None))
+            {
+                if (slot.slotIndex == rt.EquippedSlot)
+                {
+                    attachAnchor = slot.barrelAnchor;
+                    break;
+                }
+            }
+            AttachEquippedGunnerVisual_Internal(rt.GunnerId, attachAnchor, rt.EquippedSlot);
+
         }
 
         slotToGunner.Clear();

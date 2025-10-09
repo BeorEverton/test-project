@@ -21,6 +21,7 @@ namespace Assets.Scripts.Enemies
         public class OnDeathEventArgs : EventArgs
         {
             public ulong CoinDropAmount;
+            public float XPDropAmount;
         }
 
         [SerializeField] private EnemyInfoSO _info;
@@ -150,8 +151,24 @@ namespace Assets.Scripts.Enemies
 
             OnDeath?.Invoke(this, new OnDeathEventArgs
             {
-                CoinDropAmount = _info.CoinDropAmount
+                CoinDropAmount = _info.CoinDropAmount,
+                XPDropAmount = CalculateXpFrom(_info)
             });
+        }
+
+        private float CalculateXpFrom(EnemyInfoSO info)
+        {
+            float xp = 1f
+                     + info.MaxHealth * 0.1f
+                     + info.MovementSpeed
+                     + info.Damage * 0.5f
+                     + info.AttackRange
+                     + info.AttackSpeed;
+
+            if (IsBossInstance)
+                xp *= 2f;
+
+            return xp;
         }
 
         private void TriggerBossExplosion()

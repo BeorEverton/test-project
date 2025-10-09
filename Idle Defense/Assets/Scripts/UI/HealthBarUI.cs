@@ -24,7 +24,7 @@ namespace Assets.Scripts.UI
             PlayerBaseManager.Instance.OnHealthChanged += OnHealthChanged;
             SetMaxHealth(PlayerBaseManager.Instance.MaxHealth);
             SetHealth(PlayerBaseManager.Instance.CurrentHealth);
-            _healthText.SetText(UIManager.AbbreviateNumber(PlayerBaseManager.Instance.CurrentHealth) + "/" + UIManager.AbbreviateNumber(PlayerBaseManager.Instance.MaxHealth));
+            _healthText?.SetText(UIManager.AbbreviateNumber(PlayerBaseManager.Instance.CurrentHealth) + "/" + UIManager.AbbreviateNumber(PlayerBaseManager.Instance.MaxHealth));
         }
 
         private void OnDestroy()
@@ -42,7 +42,7 @@ namespace Assets.Scripts.UI
             }
 
             SetHealth(current);
-            _healthText.SetText(UIManager.AbbreviateNumber(current) + "/" + UIManager.AbbreviateNumber(max));
+            _healthText?.SetText(UIManager.AbbreviateNumber(current) + "/" + UIManager.AbbreviateNumber(max));
         }
 
         public void SetMaxHealth(float max)

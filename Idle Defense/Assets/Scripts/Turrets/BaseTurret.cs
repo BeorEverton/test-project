@@ -61,8 +61,6 @@ namespace Assets.Scripts.Turrets
         private int _effectsSignature = -1; // Tracks which effects are active
         private bool _boundToGunnerEvents = false;
 
-
-
         // Interfaces
         [SerializeField] private MonoBehaviour targetingPatternBehaviour;
         private ITargetingPattern targetingPattern;
@@ -128,15 +126,14 @@ namespace Assets.Scripts.Turrets
 
         protected virtual void Update()
         {
-            // Get spd & dmg bonus from GameManager and calculate effective fire rate
-            _bonusSpdMultiplier = 1f + GameManager.Instance.spdBonus / 100f;
+            // Get click speed bonus and fire-rate LB multiplier from LimitBreakManager
+            float clickPct = (LimitBreakManager.Instance != null) ? LimitBreakManager.Instance.ClickSpeedBonusPct : 0f;
+            float lbFRMult = (LimitBreakManager.Instance != null) ? LimitBreakManager.Instance.FireRateMultiplier : 1f;
 
-            // Apply gunner bonuses to a scratch copy of the stats
-            if (_effectiveScratch == null) _effectiveScratch = new TurretStatsInstance();
-                GunnerManager.Instance.ApplyTo(RuntimeStats, SlotIndex, _effectiveScratch);
+            _bonusSpdMultiplier = 1f + clickPct / 100f;
 
-            // Calculate attack speed and damage
-            _atkSpeed = (1 / RuntimeStats.FireRate) / _bonusSpdMultiplier;
+            // Final fire interval = base interval / (click multiplier * LB multiplier)
+            _atkSpeed = (1f / RuntimeStats.FireRate) / (_bonusSpdMultiplier * lbFRMult);
 
             _timeSinceLastShot += Time.deltaTime;
             Attack();
@@ -672,7 +669,7 @@ namespace Assets.Scripts.Turrets
         }
 
         public TurretStatsInstance GetUpgradeableStats(Currency currency)
-        {
+        {         
             return currency == Currency.BlackSteel ? PermanentStats : RuntimeStats;
         }
 
@@ -688,43 +685,46 @@ namespace Assets.Scripts.Turrets
 
             // Baseline
             if (stats.Damage > 0 || stats.DamageUpgradeAmount > 0)
-                DamageEffects.AddEffect(new FlatDamageEffect()); // :contentReference[oaicite:5]{index=5}
+                DamageEffects.AddEffect(new FlatDamageEffect()); 
 
             // Crit
             if (stats.CriticalChance > 0 || stats.CriticalChanceUpgradeAmount > 0)
-                DamageEffects.AddEffect(new CriticalHitEffect()); // :contentReference[oaicite:6]{index=6}
+                DamageEffects.AddEffect(new CriticalHitEffect()); 
 
             // Knockback
             if (stats.KnockbackStrength > 0 || stats.KnockbackStrengthUpgradeAmount > 0)
-                DamageEffects.AddEffect(new KnockbackEffect()); // :contentReference[oaicite:7]{index=7}
+                DamageEffects.AddEffect(new KnockbackEffect()); 
 
             // Bounce chain damage
             if (stats.BounceCount > 0 || stats.BounceCountUpgradeAmount > 0)
             {
                 var bounceEffect = new BounceDamageEffect(stats.BounceDamagePct);
                 BounceDamageEffectRef = bounceEffect;
-                DamageEffects.AddEffect(bounceEffect); // :contentReference[oaicite:8]{index=8}
+                DamageEffects.AddEffect(bounceEffect); 
             }
 
             // Damage ramp (DoT-like ramp over time on target)
             if (stats.PercentBonusDamagePerSec > 0 || stats.PercentBonusDamagePerSecUpgradeAmount > 0)
-                DamageEffects.AddEffect(new RampDamageOverTimeEffect()); // :contentReference[oaicite:9]{index=9}
+                DamageEffects.AddEffect(new RampDamageOverTimeEffect());
 
             // Slow
             if (stats.SlowEffect > 0 || stats.SlowEffectUpgradeAmount > 0)
-                DamageEffects.AddEffect(new SlowEffect()); // :contentReference[oaicite:10]{index=10}
+                DamageEffects.AddEffect(new SlowEffect()); 
 
             // Pierce
             if (stats.PierceChance > 0 || stats.PierceChanceUpgradeAmount > 0)
             {
                 var pierceEffect = new PierceDamageEffect(stats.PierceDamageFalloff);
                 DamageEffects.AddEffect(pierceEffect);
-                PierceDamageEffectRef = pierceEffect; // :contentReference[oaicite:11]{index=11}
+                PierceDamageEffectRef = pierceEffect; 
             }
 
             // Splash (secondary targets)
             if (stats.SplashDamage > 0 || stats.SplashDamageUpgradeAmount > 0)
-                SplashDamageEffectRef = new SplashDamageEffect(); // :contentReference[oaicite:12]{index=12}
+                SplashDamageEffectRef = new SplashDamageEffect(); 
+
+            // Always-on final multiplier from LimitBreakManager (LB damage + click damage %)
+            DamageEffects.AddEffect(new LimitBreakDamageEffect());
 
             _effectsSignature = ComputeEffectsSignature(stats);
         }
@@ -773,16 +773,20 @@ namespace Assets.Scripts.Turrets
             RecomputeEffectiveFromGunner();
         }
 
-        private void RecomputeEffectiveFromGunner()
+        // Made public to call from upgrade manager in case gunner is dead
+        public void RecomputeEffectiveFromGunner()
         {
             if (_effectiveScratch == null) _effectiveScratch = new TurretStatsInstance();
             // Merge turret + current gunner into scratch
             GunnerManager.Instance.ApplyTo(RuntimeStats, SlotIndex, _effectiveScratch);
 
+            // Prestige global bonuses (damage, fire rate, crits, pierce, etc.)
+            if (PrestigeManager.Instance != null)
+                PrestigeManager.Instance.ApplyToTurretStats(_effectiveScratch);
+
             // Rebuild damage effects from the effective stats (adds/removes Slow/Knockback/etc.)
             RebuildEffectsFromStats(_effectiveScratch);
         }
-
 
         #endregion
 

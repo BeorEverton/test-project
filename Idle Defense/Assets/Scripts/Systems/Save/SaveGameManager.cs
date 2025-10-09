@@ -68,6 +68,8 @@ namespace Assets.Scripts.Systems.Save
 
             var gunnerInventory = GunnerManager.Instance.ExportToDTO();
 
+            var prestigeDTO = SaveDataDTOs.CreatePrestigeDTO();
+
             GameData gameData = new(
                 gameDataDTO,
                 sessionStatsDTO,
@@ -75,7 +77,8 @@ namespace Assets.Scripts.Systems.Save
                 
                 statsDTO,
                 turretInventory,
-                gunnerInventory
+                gunnerInventory,
+                prestigeDTO
                 );
 
             gameData.DiscoveredEnemyNames = discoveredEnemies;
@@ -134,6 +137,20 @@ namespace Assets.Scripts.Systems.Save
                     EnemyLibraryManager.Instance.MarkAsDiscovered(enemyName, true);
                 }
             }
+
+            if (gameData.Prestige != null)
+            {
+                if (PrestigeManager.Instance != null)
+                {
+                    // Load prestige first so discounts/unlocks are ready
+                    PrestigeManager.Instance.ImportDTO(gameData.Prestige);
+                }
+                else
+                {
+                    Debug.LogWarning("[SaveGameManager] Prestige data found but no PrestigeManager in scene.");
+                }
+            }
+
         }
 
         public void DeleteSave()

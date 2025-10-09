@@ -16,13 +16,13 @@ MonoBehaviour:
   DisplayName: Gerhard Sturmhardt
   IdleSprite: {fileID: 21300000, guid: c274e02c2a7ba4ca28e2668def36b52b, type: 3}
   RunSprite: {fileID: 0}
-  OnTurretSprite: {fileID: 21300000, guid: 90ad77f86d3f340988ade060dbf09fac, type: 3}
+  OnTurretSprite: {fileID: 21300000, guid: b4341a0c02d078c46b6197a29c8045ad, type: 3}
   IdlePhrases: []
   BaseHealth: 50
   BaseDamage: 50
   BaseFireRate: 0
   BaseRange: 0
-  BasePercentBonusDamagePerSec: 0
+  BaseDamagePerSecPctBonus: 0
   BaseSlowEffect: 0
   BaseCriticalChance: 0
   BaseCriticalDamage: 0
@@ -31,23 +31,60 @@ MonoBehaviour:
   BasePierceChance: 0
   BasePierceFalloff: 0
   BaseArmorPenetration: 0
+  LimitBreakSkill: {fileID: 11400000, guid: 4b17f2e0a5f341d4493d521d4270e1b9, type: 2}
   XpCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 1
-      value: 10
+      time: 0
+      value: 0
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 50
-      value: 1000
-      inSlope: 20.204082
+      time: 10
+      value: 10000
+      inSlope: 0
       outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 20
+      value: 50000
+      inSlope: 1629.9622
+      outSlope: 1629.9622
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 50
+      value: 100000
+      inSlope: 2112.7786
+      outSlope: 2112.7786
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 100
+      value: 500000
+      inSlope: 2001.0317
+      outSlope: 2001.0317
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1000
+      value: 1e+9
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -57,4 +94,74 @@ MonoBehaviour:
     m_RotationOrder: 4
   SkillPointsPerLevel: 1
   StartingUnlocked: 0000000001000000
-  LevelUnlocks: []
+  LevelUnlocks:
+  - Level: 5
+    Unlocks: 02000000
+  - Level: 10
+    Unlocks: 0600000007000000
+  UpgradeRules:
+  - Stat: 0
+    Mode: 0
+    AmountPerLevel: 5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 1
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 2
+    Mode: 0
+    AmountPerLevel: 0.05
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 3
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 4
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 5
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 6
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 7
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 8
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 9
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 10
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 11
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 12
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100

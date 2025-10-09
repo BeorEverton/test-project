@@ -15,8 +15,9 @@ namespace Assets.Scripts.UI
     {
         /* ----------- slot setup --------------------------------- */
         [Header("Slot setup")]
-        [SerializeField] private int slotIndex;      // 0..4
-        [SerializeField] private Transform barrelAnchor;   // prefab spawn point
+        // made public for GunnerManager fetch on load
+        public int slotIndex;      // 0..4
+        public Transform barrelAnchor;   // prefab spawn point
         [SerializeField] private GameObject visibilityWrapper;
 
 

@@ -14,6 +14,9 @@ namespace Assets.Scripts.UI
         private int _slotIndex;
         private BaseTurret _baseTurret;
 
+        // For gunners
+        private bool _subscribed;
+
         public void Open(int slotIndex, BaseTurret baseTurret)
         {
             _slotIndex = slotIndex;
@@ -67,7 +70,6 @@ namespace Assets.Scripts.UI
             }
         }
 
-
         public void Close() => gameObject.SetActive(false);
 
         private void Start()
@@ -81,5 +83,51 @@ namespace Assets.Scripts.UI
             TurretSlotManager.Instance.Unequip(_slotIndex);
             Close();
         }
+
+        #region gunners        
+
+        private void OnEnable()
+        {
+            if (!_subscribed && GunnerManager.Instance != null)
+            {
+                GunnerManager.Instance.OnSlotGunnerChanged += HandleGunnerChanged;
+                GunnerManager.Instance.OnSlotGunnerStatsChanged += HandleGunnerChanged;
+                _subscribed = true;
+            }
+            if (PrestigeManager.Instance != null)
+                PrestigeManager.Instance.OnPrestigeChanged += HandlePrestigeChanged;
+
+        }
+
+        private void OnDisable()
+        {
+            if (_subscribed && GunnerManager.Instance != null)
+            {
+                GunnerManager.Instance.OnSlotGunnerChanged -= HandleGunnerChanged;
+                GunnerManager.Instance.OnSlotGunnerStatsChanged -= HandleGunnerChanged;
+                _subscribed = false;
+            }
+            if (PrestigeManager.Instance != null)
+                PrestigeManager.Instance.OnPrestigeChanged -= HandlePrestigeChanged;
+
+        }
+
+        private void HandleGunnerChanged(int slot)
+        {
+            if (slot != _slotIndex) return;
+            var buttons = contentRoot.GetComponentsInChildren<TurretUpgradeButton>(true);
+            for (int i = 0; i < buttons.Length; i++)
+                buttons[i].UpdateDisplayFromType();
+        }
+
+        #endregion
+
+        private void HandlePrestigeChanged()
+        {
+            var buttons = contentRoot.GetComponentsInChildren<TurretUpgradeButton>(true);
+            for (int i = 0; i < buttons.Length; i++)
+                buttons[i].UpdateDisplayFromType();
+        }
+
     }
 }

@@ -64,7 +64,7 @@ namespace Assets.Scripts.WaveSystem
         // to ensure we check for wave completion regularly
         private Coroutine _waveCompletionCheckCoroutine;
 
-        public static float spawnXSpread = 15f;
+        public static float spawnXSpread = 22f;
 
         private void Awake()
         {
@@ -266,7 +266,7 @@ namespace Assets.Scripts.WaveSystem
         private Vector3 GetRandomSpawnPosition()
         {
             UpdateScreenBoundsIfNeeded();
-            float randomXPosition = Random.Range(-spawnXSpread * 0.5f, spawnXSpread * 0.5f);
+            float randomXPosition = Random.Range(-spawnXSpread, spawnXSpread);
 
             return new Vector3(randomXPosition, 0f, EnemyConfig.EnemySpawnDepth);
         }

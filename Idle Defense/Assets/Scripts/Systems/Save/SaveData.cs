@@ -17,12 +17,15 @@ namespace Assets.Scripts.Systems.Save
 
         public GunnerInventoryDTO GunnerInventory;
 
+        public PrestigeDTO Prestige;
+
         public GameData(GameDataDTO gameData,
             PlayerInfoDTO playerInfo,
             PlayerInfoDTO permanentPlayerInfo,            
             StatsDTO statsDTO,
             TurretInventoryDTO turretInventory,
-            GunnerInventoryDTO gunnerInventory
+            GunnerInventoryDTO gunnerInventory,
+            PrestigeDTO prestige
             )
         {
             GameDataDTO = gameData;
@@ -33,6 +36,8 @@ namespace Assets.Scripts.Systems.Save
             TurretInventory = turretInventory;
 
             GunnerInventory = gunnerInventory;
+
+            Prestige = prestige;
         }
     }
 }

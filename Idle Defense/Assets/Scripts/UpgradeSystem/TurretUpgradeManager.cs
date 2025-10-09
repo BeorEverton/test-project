@@ -1087,6 +1087,12 @@ namespace Assets.Scripts.Systems
             cost = (outAmount > 0)
                 ? Mathf.Floor(RecursiveHybridCost(baseCost, level, outAmount))
                 : 0f;
+
+            // Apply prestige discount
+            if (PrestigeManager.Instance != null)
+                cost *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
+
+            cost = Mathf.Max(1f, cost);
         }
 
         private float GetHybridCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount, Currency currencyUsed = Currency.Scraps)
@@ -1104,9 +1110,14 @@ namespace Assets.Scripts.Systems
 
             maxAmount = CapAmountByStatLimit(stats, type, maxAmount);
 
-            return (maxAmount > 0)
+            float c = (maxAmount > 0)
                 ? Mathf.Floor(RecursiveHybridCost(baseCost, level, maxAmount))
                 : 0f;
+
+            if (PrestigeManager.Instance != null)
+                c *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
+
+            return Mathf.Max(1f, c);
         }
 
         private void GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount, out float cost, out int outAmount, Currency currencyUsed = Currency.Scraps)
@@ -1131,6 +1142,11 @@ namespace Assets.Scripts.Systems
             cost = (outAmount > 0)
                 ? Mathf.Floor(RecursiveExponentialCost(baseCost, multiplier, level, outAmount))
                 : 0f;
+
+            if (PrestigeManager.Instance != null)
+                cost *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
+
+            cost = Mathf.Max(1f, cost);
         }
 
         private float GetExponentialCost(TurretStatsInstance stats, TurretUpgradeType type, int inAmount, Currency currencyUsed = Currency.Scraps)
@@ -1148,9 +1164,14 @@ namespace Assets.Scripts.Systems
 
             maxAmount = CapAmountByStatLimit(stats, type, maxAmount);
 
-            return (maxAmount > 0)
+            float c = (maxAmount > 0)
                 ? Mathf.Floor(RecursiveExponentialCost(baseCost, multiplier, level, maxAmount))
                 : 0f;
+
+            if (PrestigeManager.Instance != null)
+                c *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
+
+            return Mathf.Max(1f, c);
         }
 
 

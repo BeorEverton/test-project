@@ -221,6 +221,15 @@ namespace Assets.Scripts.Systems.Save
             };
         }
 
+        public static PrestigeDTO CreatePrestigeDTO()
+        {
+            if (PrestigeManager.Instance == null)
+                return new PrestigeDTO { PrestigeLevel = 0, CrimsonCore = 0, OwnedNodeIds = new List<string>() };
+
+            return PrestigeManager.Instance.ExportDTO();
+        }
+
+
         public static StatsDTO CreateStatsDTO()
         {
             return new StatsDTO
@@ -721,11 +730,17 @@ public class GunnerRuntimeDTO
     public int Level;
     public float Xp;
     public int Points;
-    public int[] Unlocked;       // enum ints
+    public int[] Unlocked;        // enum ints
+
+    // serialized per-stat upgrade levels (parallel arrays)
+    public int[] UpKeys;          // enum ints (GunnerStatKey)
+    public int[] UpLevels;        // level for each key (same index as UpKeys)
+
     public bool OnQuest;
     public long QuestEnd;
-    public int EquippedSlot;     // -1 if not equipped
+    public int EquippedSlot;      // -1 if not equipped
 }
+
 
 [Serializable]
 public class GunnerInventoryDTO
@@ -739,4 +754,12 @@ public class SlotGunnerDTO
 {
     public int SlotIndex;
     public string GunnerId;
+}
+
+[Serializable]
+public class PrestigeDTO
+{
+    public int PrestigeLevel;
+    public int CrimsonCore;
+    public List<string> OwnedNodeIds;
 }

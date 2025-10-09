@@ -1,6 +1,5 @@
 ﻿using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
-using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections;
@@ -25,10 +24,14 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI _blackSteelText;
         [SerializeField] private TextMeshProUGUI _crimsonCoreText;
 
-        [Header("Speed click")]
-        [SerializeField] private Slider _spdBonusSlider;
-        [SerializeField] private Image _decreaseDelayFill;
-        private Coroutine _delayFillRoutine;
+        [Header("Limit Break Slider")]
+        [Header("Limit Break (Multiple)")]
+        [SerializeField] private Transform _lbBarsParent;         // assign a horizontal/vertical layout group
+        [SerializeField] private LimitBreakBarUI _lbBarPrefab;    // drag the prefab here
+
+        // Active bars by session id
+        private readonly System.Collections.Generic.Dictionary<string, LimitBreakBarUI> _lbBars
+            = new System.Collections.Generic.Dictionary<string, LimitBreakBarUI>();
 
         [Header("Equip Management")]
         [SerializeField] private GameObject equipPanel;   
@@ -60,6 +63,9 @@ namespace Assets.Scripts.UI
         private const string ICON_BLACKSTEEL = "§";  // U+00A7
         private const string ICON_CRIMSONCORE = "Ø"; // U+00D8
 
+        private LBFocus _lbFocus = LBFocus.None;
+
+        #region MONOBEHAVIOUR
 
         private void Awake()
         {
@@ -77,6 +83,24 @@ namespace Assets.Scripts.UI
             GameManager.Instance.OnCurrencyChanged += UpdateCurrency;
         }
 
+        // Subscribe to the new timer tick
+        private void OnEnable()
+        {
+            LimitBreakManager.OnLBSessionStarted += HandleLBSessionStarted;
+            LimitBreakManager.OnLBSessionTick += HandleLBSessionTick;
+            LimitBreakManager.OnLBSessionEnded += HandleLBSessionEnded;
+
+        }
+
+        private void OnDisable()
+        {
+            LimitBreakManager.OnLBSessionStarted -= HandleLBSessionStarted;
+            LimitBreakManager.OnLBSessionTick -= HandleLBSessionTick;
+            LimitBreakManager.OnLBSessionEnded -= HandleLBSessionEnded;
+        }
+
+        #endregion
+
         private void OnEnemyDeath(object sender, EventArgs _)
         {
             _enemyCount--;
@@ -92,46 +116,6 @@ namespace Assets.Scripts.UI
         {
             _enemyCount = args.EnemyCount;
             _enemies.text = $"Enemies\n{_enemyCount}";
-        }
-
-        public void UpdateSpdBonus(float value)
-        {
-            _spdBonusSlider.value = value;
-            _spdBonus.text = "Spd + " + value.ToString("F0") + "%";
-
-            //UpdateBonusColor(_spdBonus, value);
-        }
-
-        public void StartDelayFill(float delayDuration)
-        {
-            if (_delayFillRoutine != null)
-                StopCoroutine(_delayFillRoutine);
-
-            _decreaseDelayFill.fillAmount = 1f;
-            _decreaseDelayFill.gameObject.SetActive(true);
-
-            _delayFillRoutine = StartCoroutine(DelayFillRoutine(delayDuration));
-        }
-
-        private IEnumerator DelayFillRoutine(float duration)
-        {
-            float t = 0f;
-            while (t < duration)
-            {
-                t += Time.deltaTime;
-                _decreaseDelayFill.fillAmount = 1f - (t / duration);
-                yield return null;
-            }
-
-            _decreaseDelayFill.fillAmount = 0f;
-            _decreaseDelayFill.gameObject.SetActive(false);
-            _delayFillRoutine = null;
-        }
-
-        public void UpdateDmgBonus(float value)
-        {
-            _dmgBonus.text = "Dmg +\n" + value.ToString("F0") + "%";
-            UpdateBonusColor(_dmgBonus, value);
         }
 
         /// <summary>
@@ -397,6 +381,50 @@ namespace Assets.Scripts.UI
 
         }
 
+        #region Limit Break UI Methods        
+        private void HandleLBSessionStarted(LBSessionInfo info)
+        {
+            if (_lbBarPrefab == null || _lbBarsParent == null) return;
 
+            // If already exists (edge case), replace
+            if (_lbBars.TryGetValue(info.SessionId, out var existing))
+            {
+                Destroy(existing.gameObject);
+                _lbBars.Remove(info.SessionId);
+            }
+
+            var bar = Instantiate(_lbBarPrefab, _lbBarsParent);
+            bar.Init(info.SessionId, info.DisplayName, info.Icon, info.MaxClickCap, info.BaselinePct);
+            _lbBars[info.SessionId] = bar;
+        }
+
+        private void HandleLBSessionTick(string sessionId, float rawPct, float remaining, float total)
+        {
+            if (_lbBars.TryGetValue(sessionId, out var bar))
+            {
+                bar.UpdateValue(rawPct);
+                bar.UpdateTimer(remaining, total);
+
+                // Optional: adjust the numeric label prefix per effect type if you carry it in DisplayName
+                // Example prefixes:
+                string prefix = "LB +";
+                if (bar != null && !string.IsNullOrEmpty(bar.name))
+                {
+                    if (bar.name.ToLower().Contains("dmg") || bar.name.ToLower().Contains("damage")) prefix = "Dmg +";
+                    else if (bar.name.ToLower().Contains("spd") || bar.name.ToLower().Contains("fire")) prefix = "Spd +";
+                }
+                bar.UpdateLabelNumeric(prefix, rawPct);
+            }
+        }
+
+        private void HandleLBSessionEnded(string sessionId)
+        {
+            if (_lbBars.TryGetValue(sessionId, out var bar))
+            {
+                Destroy(bar.gameObject);
+                _lbBars.Remove(sessionId);
+            }
+        }
+        #endregion
     }
 }
