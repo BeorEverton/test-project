@@ -84,6 +84,11 @@ public class GunnerRuntime
         // Fill limit break by the exact damage amount (clamped to cap)
         LimitBreakCurrent = Mathf.Min(LimitBreakCurrent + actualDamage, LimitBreakMax);
 
+        if (CurrentHealth <= 0f)
+        {
+            ResetLimitBreak();
+        }
+
         return CurrentHealth <= 0f;
     }
 

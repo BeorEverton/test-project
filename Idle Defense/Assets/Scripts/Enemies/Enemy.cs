@@ -139,12 +139,22 @@ namespace Assets.Scripts.Enemies
             {
                 TriggerBossExplosion();
                 StatsManager.Instance.BossesKilled++;
-                GameManager.Instance.AddCurrency(Currency.BlackSteel, (ulong)MathF.Round(_info.CoinDropAmount / 2));
+                {
+                    ulong baseAmount = (ulong)Mathf.RoundToInt(_info.CoinDropAmount / 2f);
+                    float mult = PrestigeManager.Instance != null ? PrestigeManager.Instance.GetBlackSteelGainMultiplier() : 1f;
+                    ulong boosted = baseAmount == 0 ? 0 : (ulong)Mathf.Max(1, Mathf.RoundToInt(baseAmount * mult));
+                    GameManager.Instance.AddCurrency(Currency.BlackSteel, boosted);
+                }
             }
             // Has 1/1000 chance to drop black steel
             else if (Random.Range(0, 1000) == 0)
             {
-                GameManager.Instance.AddCurrency(Currency.BlackSteel, (ulong)MathF.Round(_info.CoinDropAmount / 5));
+                {
+                    ulong baseAmount = (ulong)Mathf.RoundToInt(_info.CoinDropAmount / 5f);
+                    float mult = PrestigeManager.Instance != null ? PrestigeManager.Instance.GetBlackSteelGainMultiplier() : 1f;
+                    ulong boosted = baseAmount == 0 ? 0 : (ulong)Mathf.Max(1, Mathf.RoundToInt(baseAmount * mult));
+                    GameManager.Instance.AddCurrency(Currency.BlackSteel, boosted);
+                }
             }
 
             DebrisPool.Instance.Play(transform.position);

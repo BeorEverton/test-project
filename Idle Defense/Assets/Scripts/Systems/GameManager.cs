@@ -88,7 +88,7 @@ namespace Assets.Scripts.Systems
 
             currencies[currency] = amount;
 
-            UIManager.Instance.UpdateCurrency(currency, amount);
+            OnCurrencyChanged?.Invoke(currency, amount);
         }
 
         public void ResetGame()

@@ -20,6 +20,12 @@ namespace Assets.Scripts.Systems
         public List<OwnedTurret> owned = new();
         public List<OwnedTurret> Owned => owned;
 
+        private TurretUnlockTableSO.Entry GetEntry(TurretType t)
+            => unlockTable.Entries.First(e => e.Type == t);
+
+        public bool RequiresPrestigeUnlock(TurretType t)
+            => GetEntry(t).RequirePrestigeUnlock;
+
         [System.Serializable]
         public class OwnedTurret
         {
@@ -43,7 +49,18 @@ namespace Assets.Scripts.Systems
 
         public event Action OnInventoryChanged;   // UI will subscribe
 
-        public bool IsTurretTypeUnlocked(TurretType t) => unlockedTypes.Contains(t);
+        public bool IsTurretTypeUnlocked(TurretType t)
+        {
+            // Unlocked by wave?
+            if (unlockedTypes.Contains(t)) return true;
+
+            // Unlocked by prestige node?
+            var pm = PrestigeManager.Instance;
+            if (pm != null && RequiresPrestigeUnlock(t))
+                return pm.IsTurretUnlocked(t);
+
+            return false;
+        }
 
         private void Awake()
         {
@@ -73,7 +90,6 @@ namespace Assets.Scripts.Systems
             }
 
         }
-
         private void EnsureStarterTurret()
         {
             if (owned.Count > 0)
@@ -100,8 +116,6 @@ namespace Assets.Scripts.Systems
             // Do not force-equip by default
             pendingEquipped = new List<int> { -1, -1, -1, -1, -1 };
         }
-
-
         private void OnDestroy()
         {
             if (WaveManager.Instance != null)
@@ -116,10 +130,14 @@ namespace Assets.Scripts.Systems
         public bool TryUnlockByWave(int currentWave)
         {
             bool changed = false;
-            foreach (TurretUnlockTableSO.Entry e in unlockTable.Entries
-                         .Where(e => currentWave >= e.WaveToUnlock && unlockedTypes
-                             .Add(e.Type)))
-                changed = true;
+            foreach (TurretUnlockTableSO.Entry e in unlockTable.Entries)
+            {
+                // Skip prestige-gated turrets here: they will unlock via PrestigeManager
+                if (e.RequirePrestigeUnlock) continue;
+
+                if (currentWave >= e.WaveToUnlock && unlockedTypes.Add(e.Type))
+                    changed = true;
+            }
 
             OnInventoryChanged?.Invoke();
             return changed;
@@ -154,7 +172,6 @@ namespace Assets.Scripts.Systems
             return true;
         }
 
-
         public ulong GetCost(TurretType type, int currentOwned)
         {
             TurretUnlockTableSO.Entry entry = unlockTable.Entries.First(e => e.Type == type);
@@ -172,7 +189,6 @@ namespace Assets.Scripts.Systems
 
             return (currency, cost);
         }
-
 
         // ---------- save / load ----------
 
@@ -194,7 +210,6 @@ namespace Assets.Scripts.Systems
                 SlotPurchased = TurretSlotManager.Instance.GetPurchasedFlags()
             };
         }
-
 
         public void ImportFromDTO(TurretInventoryDTO dto)
         {
@@ -242,8 +257,6 @@ namespace Assets.Scripts.Systems
             }
         }
 
-
-
         // Used to deactivate and activate object logic to replace destroy and instantiate
 
         public GameObject GetGameObjectForInstance(TurretStatsInstance stats)
@@ -262,7 +275,6 @@ namespace Assets.Scripts.Systems
             else
                 instanceToGO[stats] = go;
         }
-
 
         public void UnregisterTurretInstance(TurretStatsInstance stats)
         {
@@ -295,8 +307,64 @@ namespace Assets.Scripts.Systems
                     Destroy(obj.gameObject);
             }
         }
-        
-        
 
+        // Used on the prestige manager when a turret is unlocked
+        public void NotifyExternalUnlocksChanged()
+        {
+            OnInventoryChanged?.Invoke();
+        }
+
+        // PRESTIGE RESET
+        /// <summary>
+        /// Reset turrets for prestige. If wipeOwnership = true, clears all owned turrets
+        /// and wave/prestige unlocks. If only wipeUpgrades = true, keeps ownership but
+        /// rebuilds Permanent/Runtime pairs from their base SOs (removing upgrade levels).
+        /// </summary>
+        public void ResetAll(bool wipeOwnership, bool wipeUpgrades)
+        {
+            if (wipeOwnership)
+            {
+                owned.Clear();
+                unlockedTypes.Clear();
+                OnInventoryChanged?.Invoke();
+                EnsureStarterTurret(); // After clearing, ensure at least starter turret
+                SaveGameManager.Instance.SaveGame();
+                return;
+            }
+
+            if (wipeUpgrades)
+            {
+                for (int i = 0; i < owned.Count; i++)
+                {
+                    TurretType type = owned[i].TurretType;
+                    TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(type);
+
+                    var permanent = new TurretStatsInstance(baseSO)
+                    {
+                        TurretType = type,
+                        IsUnlocked = true
+                    };
+                    var runtime = BaseTurret.CloneStatsWithoutLevels(permanent);
+
+                    owned[i].Permanent = permanent;
+                    owned[i].Runtime = runtime;
+                }
+
+                OnInventoryChanged?.Invoke();
+                SaveGameManager.Instance.SaveGame();
+            }
+        }
+
+        /// <summary>Returns the owned starter turret item, or null if not found.</summary>
+        /// <summary>
+        /// Returns the first owned turret of the given type, or null if none.
+        /// </summary>
+        public TurretStatsInstance GetOwnedByType(TurretType type)
+        {
+            for (int i = 0; i < owned.Count; i++)
+                if (owned[i].TurretType == type)
+                    return owned[i].Runtime;
+            return null;
+        }
     }
 }

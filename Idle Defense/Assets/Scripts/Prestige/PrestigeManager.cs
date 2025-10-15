@@ -1,6 +1,8 @@
 using Assets.Scripts.SO; // for TurretType etc.
+using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
 using Assets.Scripts.Turrets;
+using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +16,82 @@ public class PrestigeManager : MonoBehaviour
     [SerializeField] private PrestigeTreeSO activeTree;
     [SerializeField] private bool grantUnlocksOnLoad = true;
 
+    [Header("Prestige Unlock Rule")]
+    [Tooltip("Player can prestige once CURRENT wave number >= this value.")]
+    [SerializeField] private int minWaveToPrestige = 10;
+
+    // Cached eligibility (updated when WaveManager reports a new wave)
+    private bool canPrestigeNow;
+
+    /// <summary>Minimum wave (1-based) required to unlock prestige.</summary>
+    public int GetMinWaveToPrestige() => minWaveToPrestige;
+
+    /// <summary>True if current wave meets the unlock rule.</summary>
+    public bool CanPrestigeNow() => canPrestigeNow;
+
+    /// <summary>Raised when eligibility flips (e.g., crossing the unlock wave).</summary>
+    public event System.Action<bool, int, int> OnPrestigeEligibilityChanged;
+
+    [Header("Prestige Reset Config")]
+    [Tooltip("Reset: remove all turrets from inventory and clear wave-unlocked types.")]
+    [SerializeField] private bool resetAllTurrets = true;
+
+    [Tooltip("Reset: remove all gunners from ownership.")]
+    [SerializeField] private bool resetAllGunners = true;
+
+    [Tooltip("Reset: wipe ALL turret upgrades (owned ones rebuilt from base SO).")]
+    [SerializeField] private bool resetTurretUpgrades = true;
+
+    [Tooltip("Reset: wipe ALL gunner per-stat upgrades and learned stat unlocks.")]
+    [SerializeField] private bool resetGunnerUpgrades = true;
+
+    [Tooltip("Reset: gunner LEVEL/XP/skill points (independent from per-stat upgrades).")]
+    [SerializeField] private bool resetGunnerLevels = true;
+
+    [Tooltip("Reset: set Scraps to 0. (Uses reflection if your GameManager lacks SetCurrency.)")]
+    [SerializeField] private bool resetScraps = true;
+
+    [Tooltip("Reset: set Black Steel to 0. (Uses reflection if your GameManager lacks SetCurrency.)")]
+    [SerializeField] private bool resetBlackSteel = false;
+
+    [Tooltip("Which wave to restart from after prestige. Wave 0 = first wave.")]
+    [SerializeField] private int restartAtWaveIndex = 0;
+
+    [Header("Crimson Core Rewards")]
+    [Tooltip("Flat Crimson Core awarded on prestige regardless of progress.")]
+    [SerializeField] private int flatCrimsonOnPrestige = 0;
+
+    [Tooltip("Crimson per cleared wave beyond RestartAtWaveIndex. Example: 1 = +1 CC per wave.")]
+    [SerializeField] private float crimsonPerWave = 1f;
+
+    [Serializable]
+    public struct WaveMilestone
+    {
+        public int WaveIndex;   // inclusive threshold
+        public int BonusCrimson;
+    }
+
+    [Tooltip("Optional milestone bonuses (granted if best wave >= threshold).")]
+    [SerializeField] private List<WaveMilestone> milestoneBonuses = new List<WaveMilestone>();
+
+    [Tooltip("Optional cap for Crimson from waves (0 = no cap).")]
+    [SerializeField] private int crimsonFromWavesCap = 0;
+
     [Header("State")]
     [SerializeField] private int prestigeLevel;        // optional: times reset/ascended
     [SerializeField] private int crimsonCore;          // currency
     [SerializeField] private List<string> ownedNodes = new();   // NodeIds purchased
+    
+    [Header("Prestige UI Helper")]
+    public bool ResetTurretsOwnership => resetAllTurrets;
+    public bool ResetTurretsUpgrades => resetTurretUpgrades;
+    public bool ResetGunnersOwnership => resetAllGunners;
+    public bool ResetGunnersUpgrades => resetGunnerUpgrades;
+    public bool ResetGunnerLevels => resetGunnerLevels;
+    public bool ResetScraps => resetScraps;
+    public bool ResetBlackSteel => resetBlackSteel;
+    public int RestartWaveIndexForUI() => restartAtWaveIndex + 1; // 1-based for players
+
 
     // ------------ DEBUG ------------
     [Header("Debug")]
@@ -63,6 +137,28 @@ public class PrestigeManager : MonoBehaviour
             ApplyUnlocksToGame();
     }
 
+    private void OnEnable()
+    {
+        // Initialize eligibility in case we enter mid-run
+        int cur = WaveManager.Instance ? WaveManager.Instance.GetCurrentWaveIndex() : 0;
+        canPrestigeNow = cur >= minWaveToPrestige;
+
+        // Optional: also subscribe to be robust even if WM forgets to call us
+        if (WaveManager.Instance)
+            WaveManager.Instance.OnWaveStarted += HandleWaveStartedEvent;
+    }
+
+    private void OnDisable()
+    {
+        if (WaveManager.Instance)
+            WaveManager.Instance.OnWaveStarted -= HandleWaveStartedEvent;
+    }
+
+    private void HandleWaveStartedEvent(object sender, WaveManager.OnWaveStartedEventArgs e)
+    {
+        NotifyWaveStarted(e.WaveNumber);
+    }
+
 
     /* ===================== PUBLIC API ===================== */
 
@@ -100,6 +196,8 @@ public class PrestigeManager : MonoBehaviour
 
     public bool TryBuy(string nodeId)
     {
+        Debug.Log($"[Prestige] Attempting to buy node '{nodeId}'...");
+        Debug.Log($"[Prestige] Current Crimson: {crimsonCore}, Prestige Level: {prestigeLevel}, Can Buy?: {CanBuy(nodeId, out _)}");
         if (!CanBuy(nodeId, out _)) return false;
 
         var node = Resolve(nodeId);
@@ -136,18 +234,152 @@ public class PrestigeManager : MonoBehaviour
     public float GetScrapsGainMultiplier() => 1f + sum.scrapsGainPct / 100f;
     public float GetBlackSteelGainMultiplier() => 1f + sum.blackSteelGainPct / 100f;
 
-    // Called by your “Reset/Ascend” flow
-    public void PerformPrestigeReset(int grantCrimson)
+
+    /* ===================== ACTUAL PRESTIGE RESET ===================== */
+
+    /// <summary>
+    /// Perform the actual prestige:
+    /// 1) Compute Crimson reward and add it.
+    /// 2) Increment prestige level.
+    /// 3) Reset systems according to toggles.
+    /// 4) Ask the game to restart from the configured wave.
+    /// </summary>
+    [ContextMenu("DEBUG/Perform Prestige Now")]
+    public void PerformPrestigeNow()
     {
+        int grantCrimson = PreviewCrimsonForPrestige();
         prestigeLevel++;
         crimsonCore += Mathf.Max(0, grantCrimson);
 
-        // Keep owned nodes by design (true prestige), or wipe if you want seasonal ladders.
-        // Here we KEEP nodes (permanent progression).
+        // ---- resets ----
+        if (resetAllTurrets || resetTurretUpgrades)
+            TryResetTurrets(resetAllTurrets, resetTurretUpgrades);
+
+        if (resetAllGunners || resetGunnerUpgrades || resetGunnerLevels)
+            TryResetGunners(resetAllGunners, resetGunnerUpgrades, resetGunnerLevels);
+
+        if (resetScraps || resetBlackSteel)
+            TryResetCurrencies(resetScraps, resetBlackSteel);
+
+        if (PlayerBaseManager.Instance != null)
+        {
+            // Reset base permanent upgrades if desired. (You can refine later.)
+            // Using the built-in reset to base stats + visuals.
+            PlayerBaseManager.Instance.ResetPlayerBase();
+            PlayerBaseManager.Instance.InitializeGame(usePermanentStats: true);
+        }
+
+        // Keep prestige nodes (permanent meta). If you ever want seasonal wipe, clear owned here.
 
         Save();
         OnPrestigeChanged?.Invoke();
+
+        // ---- restart run ----
+        RequestRestartAtWave(restartAtWaveIndex);
     }
+
+    /// <summary>
+    /// Emits a restart request. WaveManager (or a bootstrapper) should subscribe and handle the transition.
+    /// </summary>
+    public event Action<int> OnRequestRestartRun;
+
+    private void RequestRestartAtWave(int waveIndex0Based)
+    {
+        // Drive WaveManager directly (and still fire our event for any listeners)
+        OnRequestRestartRun?.Invoke(Mathf.Max(0, waveIndex0Based));
+
+        var wm = WaveManager.Instance;
+        if (wm == null) return;
+
+        // WaveManager is 1-based externally; convert our 0-based index to a wave number
+        int targetWaveNumber = Mathf.Max(1, waveIndex0Based + 1);
+
+        // Reset internal state and (re)start at the requested wave
+        wm.ResetWave();                 // clears dict, resets flags
+        wm.LoadWave(targetWaveNumber);  // sets the new _currentWave
+        wm.ForceRestartWave();          // starts spawning loop again
+    }
+
+    /// <summary>
+    /// Computes how much Crimson the player would receive if they prestige now,
+    /// using current wave and (optionally) best-cleared wave if you track it.
+    /// </summary>
+    public int PreviewCrimsonForPrestige(int? currentWaveOverride = null, int? bestWaveOverride = null)
+    {
+        int current = currentWaveOverride ?? (WaveManager.Instance != null ? WaveManager.Instance.GetCurrentWaveIndex() : 0);
+        int best = bestWaveOverride ?? current;
+
+        int wavesClearedBeyondRestart = Mathf.Max(0, best - restartAtWaveIndex);
+        float fromWaves = wavesClearedBeyondRestart * crimsonPerWave;
+
+        if (crimsonFromWavesCap > 0)
+            fromWaves = Mathf.Min(fromWaves, crimsonFromWavesCap);
+
+        int bonus = 0;
+        if (milestoneBonuses != null)
+        {
+            for (int i = 0; i < milestoneBonuses.Count; i++)
+                if (best >= milestoneBonuses[i].WaveIndex) bonus += milestoneBonuses[i].BonusCrimson;
+        }
+
+        int total = flatCrimsonOnPrestige + Mathf.RoundToInt(fromWaves) + bonus;
+        return Mathf.Max(0, total);
+    }
+
+    /// <summary>
+    /// A short string you can show in a tooltip on the prestige button.
+    /// </summary>
+    public string GetPrestigeTooltipPreview()
+    {
+        int best = WaveManager.Instance != null ? WaveManager.Instance.GetCurrentWaveIndex() : 0;
+        int cc = PreviewCrimsonForPrestige(bestWaveOverride: best);
+
+        return $"Prestige now to earn +{cc} Crimson Core.\n" +
+               $"Restarts at Wave {restartAtWaveIndex + 1}.";
+    }
+
+    private void TryResetTurrets(bool wipeOwnership, bool wipeUpgrades)
+    {
+        var inv = TurretInventoryManager.Instance;
+        if (inv == null) return;
+
+        inv.ResetAll(wipeOwnership, wipeUpgrades);
+
+        // Also unequip everything so slots start clean
+        var slots = Assets.Scripts.Systems.TurretSlotManager.Instance;
+        if (slots != null) slots.UnequipAll();
+    }
+
+    private void TryResetGunners(bool wipeOwnership, bool wipeUpgrades, bool resetLevels)
+    {
+        var gm = GunnerManager.Instance;
+        if (gm == null) return;
+
+        gm.ResetAll(wipeOwnership, wipeUpgrades, resetLevels);
+    }
+
+    /// <summary>
+    /// Resets Scraps/Black Steel to zero. Uses reflection in case your GameManager
+    /// has no SetCurrency API (keeps this file decoupled).
+    /// </summary>
+    private void TryResetCurrencies(bool resetScrapsFlag, bool resetSteelFlag)
+    {
+        var game = GameManager.Instance;
+        if (game == null) return;
+
+        var t = game.GetType();
+        var mi = t.GetMethod("SetCurrency", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+
+        if (mi != null)
+        {
+            if (resetScrapsFlag) mi.Invoke(game, new object[] { Currency.Scraps, (ulong)0 });
+            if (resetSteelFlag) mi.Invoke(game, new object[] { Currency.BlackSteel, (ulong)0 });
+            return;
+        }
+
+        Debug.LogWarning("[Prestige] GameManager.SetCurrency not found. Implement it or attach a listener to PrestigeManager.OnPrestigeChanged to zero currencies.");
+    }
+
 
     /* ===================== APPLY HOOKS ===================== */
 
@@ -211,11 +443,16 @@ public class PrestigeManager : MonoBehaviour
     }
 
     // 2) Enemy scaling: call this when computing per-wave HP/spawn
-    public void ApplyToEnemyGeneratedStats(ref float maxHealth, ref int count)
+    public float GetEnemyHealthMultiplier()
     {
-        maxHealth *= (1f + sum.enemyHealthPct / 100f);
-        float c = count * (1f + sum.enemyCountPct / 100f);
-        count = Mathf.Max(1, Mathf.RoundToInt(c));
+        // negative percentages will reduce health, but never below 0
+        return Mathf.Max(0f, 1f + sum.enemyHealthPct / 100f);
+    }
+
+    public float GetEnemyCountMultiplier()
+    {
+        // negative percentages will reduce count, but keep at least 1 enemy later
+        return Mathf.Max(0f, 1f + sum.enemyCountPct / 100f);
     }
 
     // 3) Speed cap: add to your existing speed-up feature limit (UI gated elsewhere)
@@ -232,6 +469,20 @@ public class PrestigeManager : MonoBehaviour
 
         float mult = 1f - (totalPct / 100f);
         return Mathf.Clamp(mult, 0.05f, 1f);
+    }
+
+    /// <summary>
+    /// Called by WaveManager (or by our own subscription) when a new wave starts.
+    /// Updates internal eligibility and notifies listeners if it changed.
+    /// </summary>
+    public void NotifyWaveStarted(int currentWaveNumber)
+    {
+        bool newState = currentWaveNumber >= minWaveToPrestige;
+        if (newState != canPrestigeNow)
+        {
+            canPrestigeNow = newState;
+            OnPrestigeEligibilityChanged?.Invoke(canPrestigeNow, currentWaveNumber, minWaveToPrestige);
+        }
     }
 
     /* ===================== INTERNAL ===================== */
@@ -327,10 +578,12 @@ public class PrestigeManager : MonoBehaviour
 
     private void ApplyUnlocksToGame()
     {
-        // Example:
-        // - Turrets: you likely read unlocks from your table; here we provide a query so your unlock gate can consult us.
-        // - Gunners: GunnerManager can call PrestigeManager.Instance.IsGunnerUnlocked(gid) for gates.
-        // - Limit Breaks: LimitBreakManager can call IsLimitBreakUnlocked.
+        //Nudge systems that draw from prestige unlocks to refresh their UI / state.
+        if (Assets.Scripts.Systems.TurretInventoryManager.Instance != null)
+            Assets.Scripts.Systems.TurretInventoryManager.Instance.NotifyExternalUnlocksChanged();
+
+        if (GunnerManager.Instance != null)
+            GunnerManager.Instance.NotifyExternalUnlocksChanged();
     }
 
     /* ===================== SAVE (stub) ===================== */

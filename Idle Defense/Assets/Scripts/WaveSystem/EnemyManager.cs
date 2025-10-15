@@ -248,8 +248,8 @@ namespace Assets.Scripts.WaveSystem
             enemy.AnimateAttack();
             //Attack(enemy.Info.Damage);
             bool hitGunner = GunnerManager.Instance.TryApplyDamageForEnemy(enemy, enemy.Info.Damage);
-            if (!hitGunner)
-                Debug.Log("All gunners are dead, ignoring attack");
+            //if (!hitGunner)
+              //  Debug.Log("All gunners are dead, ignoring attack");
 
             enemy.TimeSinceLastAttack = 0f;
         }

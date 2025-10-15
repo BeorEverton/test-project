@@ -15,9 +15,18 @@ public class GunnerManager : MonoBehaviour
     public static GunnerManager Instance { get; private set; }
 
     [Header("Authoring")]
-    [SerializeField] private List<GunnerSO> allGunners = new List<GunnerSO>();
+    [SerializeField] private GunnerUnlockTableSO unlockTable;
+
+    // Built from unlockTable at runtime for fast access
+    private readonly List<GunnerSO> allGunners = new();
+    private readonly Dictionary<string, GunnerSO> soById = new();
+
     [SerializeField] private GameObject gunnerBillboardPrefab; // simple SpriteRenderer child
     [SerializeField] private Vector3 onTurretLocalOffset = new Vector3(0f, 0.6f, 0f);
+
+    [Header("Starter")]
+    [SerializeField, Tooltip("Preferred starter gunner kept across prestiges (drag a GunnerSO here or set once via code).")]
+    private GunnerSO preferredStarterGunner;
 
     // Player state
     private readonly Dictionary<string, GunnerRuntime> runtimes = new();
@@ -35,15 +44,20 @@ public class GunnerManager : MonoBehaviour
     private readonly Dictionary<string, DualPhaseBarUI> limitBarByGunner = new();
     private readonly Dictionary<string, GunnerBillboardBinding> billboardByGunner = new();
 
+    // Ownership (first copy)
+    private readonly HashSet<string> ownedGunners = new();
 
-    // Optional: event if all equipped gunners die (hook your wave fail here if desired)
+    // External listeners (UI, etc.)
+    public event System.Action OnRosterChanged;
+
+    // event if all equipped gunners die like OnWaveFailed
     public event Action OnAllEquippedGunnersDead;
 
     public event Action<int> OnSlotGunnerChanged;
     public event Action<int> OnSlotGunnerStatsChanged;
 
     // Helpers for the Limit Break
-    public GunnerSO GetSO(string gunnerId) => allGunners.Find(g => g.GunnerId == gunnerId);
+    public GunnerSO GetSO(string gunnerId) => (soById.TryGetValue(gunnerId, out var so) ? so : null);
 
     private void Awake()
     {
@@ -52,11 +66,29 @@ public class GunnerManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         // Init or load
-        foreach (var so in allGunners)
+        // Build registry from unlock table so authoring is centralized
+        allGunners.Clear();
+        soById.Clear();
+
+        if (unlockTable != null)
         {
-            if (!runtimes.ContainsKey(so.GunnerId))
-                runtimes[so.GunnerId] = new GunnerRuntime(so);
-        }        
+            foreach (var e in unlockTable.Entries)
+            {
+                if (!e.Gunner) continue;
+                var so = e.Gunner;
+                if (soById.ContainsKey(so.GunnerId)) continue; // avoid dupes
+
+                soById[so.GunnerId] = so;
+                allGunners.Add(so);
+
+                if (!runtimes.ContainsKey(so.GunnerId))
+                    runtimes[so.GunnerId] = new GunnerRuntime(so);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[GunnerManager] No unlock table assigned; manager will be empty.");
+        }
     }
 
     private void Update()
@@ -84,6 +116,17 @@ public class GunnerManager : MonoBehaviour
         HealAllGunners(resetLimitBreak: false);
     }
 
+    /* ===================== NEW GAME ===================== */
+
+    /// <summary>Change the preferred starter gunner at runtime (e.g., from a selection UI).</summary>
+    public void SetPreferredStarter(GunnerSO so)
+    {
+        preferredStarterGunner = so;
+        if (so != null && !IsOwned(so.GunnerId))
+            ownedGunners.Add(so.GunnerId); // allow immediate use in the current run if you want
+        Save();
+        OnRosterChanged?.Invoke();
+    }
 
     /* ===================== EQUIP / UNEQUIP ===================== */
 
@@ -224,6 +267,73 @@ public class GunnerManager : MonoBehaviour
         // you can find the BaseTurret and nudge it to rebuild effects if needed.
         // For now, turrets will query bonuses every Update and stay correct.
     }
+
+    /* ===================== BUY / UNLOCK ===================== */
+    private bool TryGetEntry(string id, out GunnerUnlockTableSO.Entry e)
+    {
+        if (unlockTable != null && unlockTable.TryGet(id, out e))
+            return true;
+
+        e = default;
+        return false;
+    }
+
+    public bool RequiresPrestigeUnlock(string id)
+        => TryGetEntry(id, out var e) && e.RequirePrestigeUnlock;
+
+    public bool IsOwned(string id) => ownedGunners.Contains(id);
+    public ulong GetFirstCopyCost(string id)
+    {
+        return TryGetEntry(id, out var e) ? e.unlockCost : 0UL;
+    }
+
+    public  Currency GetPurchaseCurrency(string id)
+    {
+        if (TryGetEntry(id, out var e)) return e.unlockCurrency;
+        return Currency.Scraps; // safe default
+    }
+
+    public bool TryPurchaseGunner(string id)
+    {
+        if (IsOwned(id)) return false;                 // already own
+        if (!IsPurchasableNow(id)) return false;       // wave/prestige gates
+
+        ulong cost = GetFirstCopyCost(id);
+        if (cost > 0)
+        {
+            var currency = GetPurchaseCurrency(id);
+            if (!GameManager.Instance.TrySpendCurrency(currency, cost))
+                return false;
+        }
+
+        ownedGunners.Add(id);
+        Save();
+        OnRosterChanged?.Invoke();
+        return true;
+    }
+
+
+    public bool IsPurchasableNow(string id)
+    {
+        if (!TryGetEntry(id, out var e)) return true; // default permissive
+
+        // wave gate
+        int curWave = WaveManager.Instance != null ? WaveManager.Instance.GetCurrentWaveIndex() : 0;
+        if (curWave < e.WaveToUnlock) return false;
+
+        // prestige gate
+        if (e.RequirePrestigeUnlock && (PrestigeManager.Instance == null || !PrestigeManager.Instance.IsGunnerUnlocked(id)))
+            return false;
+
+        return true;
+    }
+
+
+    public void NotifyExternalUnlocksChanged()
+    {
+        OnRosterChanged?.Invoke();
+    }
+
 
     /* ===================== XP / LEVEL ===================== */
 
@@ -714,5 +824,189 @@ public class GunnerManager : MonoBehaviour
             slotToGunner[s.SlotIndex] = s.GunnerId;
         }
     }
+
+    /* ===================== PRESTIGE RESET ===================== */
+    /// <summary>
+    /// Reset gunners for prestige. If wipeOwnership = true, removes ownership
+    /// and unequips everyone. If only wipeUpgrades = true, keeps ownership but
+    /// resets level, points, learned stats and per-stat upgrade levels.
+    /// </summary>
+    public void ResetAll(bool wipeOwnership, bool wipeUpgrades, bool resetLevels)
+    {
+        DebugDumpAll("PRE");
+
+        // Always unequip visuals/slots first
+        var slots = new List<int>(slotToGunner.Keys);
+        for (int i = 0; i < slots.Count; i++)
+            UnequipFromSlot(slots[i]);
+
+        if (wipeOwnership)
+        {
+            Debug.Log("[GunnerReset] WipeOwnership=TRUE -> clearing owned set; resetting runtimes; keeping preferred starter (if any).");
+
+            ownedGunners.Clear();
+
+            // Reset EVERY runtime to a fresh baseline so no old levels/stats leak through
+            foreach (var kv in runtimes)
+                ResetRuntimeToFresh(kv.Key, kv.Value);
+
+            // Keep preferred starter and auto-equip to slot 0 (fresh runtime)
+            if (preferredStarterGunner != null)
+            {
+                var pid = preferredStarterGunner.GunnerId;
+                ownedGunners.Add(pid);
+
+                if (!runtimes.TryGetValue(pid, out var rt))
+                {
+                    rt = new GunnerRuntime(preferredStarterGunner);
+                    runtimes[pid] = rt;
+                }
+                ResetRuntimeToFresh(pid, rt);
+
+                EquipToFirstFreeSlot(pid, preferSlotIndex: 0);
+                Debug.Log($"[GunnerReset] Kept preferred starter: {pid} (fresh stats) and auto-equipped.");
+            }
+
+            Save();
+            OnRosterChanged?.Invoke();
+            DebugDumpAll("POST (wipe ownership)");
+            return;
+        }
+
+
+        Debug.Log($"[GunnerReset] Applying resets: resetLevels={resetLevels}, wipeUpgrades={wipeUpgrades}");
+
+        foreach (var kv in runtimes)
+        {
+            string gid = kv.Key;
+            var rt = kv.Value;
+
+            DebugDumpRuntime("BEFORE", gid, rt);
+
+            if (resetLevels)
+            {
+                rt.Level = 1;
+                rt.CurrentXp = 0f;
+                rt.UnspentSkillPoints = 0;
+
+                // Revert to StartingUnlocked only (remove level-milestone unlocks)
+                var so = GetSO(gid);
+                if (so != null)
+                    rt.Unlocked = new HashSet<GunnerStatKey>(so.StartingUnlocked);
+            }
+
+            if (wipeUpgrades)
+            {
+                // Wipe per-stat investment completely
+                rt.UpgradeLevels?.Clear();
+
+                // Optional: if wiping upgrades should also wipe *all* unlocks (not just level-based), keep this line:
+                // rt.Unlocked?.Clear();
+                // Otherwise we rely on the resetLevels step to rebuild Unlocked to StartingUnlocked when requested.
+            }
+
+            // Always recompute derived HP from current state (after any changes above)
+            RecomputeDerivedStats(gid, rt);
+
+            // Clear any ongoing quest state on prestige
+            rt.IsOnQuest = false;
+            rt.QuestEndUnixTime = 0;
+
+            DebugDumpRuntime("AFTER", gid, rt);
+        }
+
+        Save();
+        OnRosterChanged?.Invoke();
+        DebugDumpAll("POST");
+    }
+    /// <summary>Computes base value for a stat using level 0 upgrades.</summary>
+    private float GetEffectiveStatValueForReset(string gunnerId, GunnerStatKey key)
+    {
+        var so = GetSO(gunnerId);
+        if (so == null) return 0f;
+        return GunnerUpgradeManager.Instance != null
+            ? GunnerUpgradeManager.Instance.GetEffectiveStatValueAtLevel(so, key, 0)
+            : 0f;
+    }
+
+    /// <summary>Equip the given gunner to the preferred slot (0 by default).
+    /// If the anchor dictionary is empty (common right after resets), we rebuild it
+    /// from SlotWorldButton in the scene. If still missing, we set the mapping now
+    /// and defer the visual attach until anchors are available.</summary>
+    public void EquipToFirstFreeSlot(string gunnerId, int preferSlotIndex = 0)
+    {
+        if (string.IsNullOrEmpty(gunnerId)) return;
+
+        // Resolve anchor safely
+        if (!slotAnchors.TryGetValue(preferSlotIndex, out var slotBarrel) || slotBarrel == null)
+        {
+            var slots = FindObjectsByType<SlotWorldButton>(FindObjectsSortMode.None);
+            for (int i = 0; i < slots.Length; i++)
+                slotAnchors[slots[i].slotIndex] = slots[i].barrelAnchor;
+
+            slotBarrel = slotAnchors.TryGetValue(preferSlotIndex, out var t) ? t : null;
+        }
+
+        if (slotBarrel == null)
+        {
+            Debug.LogWarning($"[GunnerManager] No anchor for slot {preferSlotIndex}. Deferring visual; mapping only.");
+            // set slot mapping now so gameplay continues
+            slotToGunner[preferSlotIndex] = gunnerId;
+            if (runtimes.TryGetValue(gunnerId, out var rt)) rt.EquippedSlot = preferSlotIndex;
+            OnSlotGunnerChanged?.Invoke(preferSlotIndex);
+            return;
+        }
+
+        if (!EquipToSlot(gunnerId, preferSlotIndex, slotBarrel))
+            Debug.LogWarning($"[GunnerManager] Could not equip gunner {gunnerId} to preferred slot {preferSlotIndex} (anchor ok).");
+    }
+
+
+    /// <summary>Recompute derived runtime stats from current UpgradeLevels/unlocks.</summary>
+    private void RecomputeDerivedStats(string gunnerId, GunnerRuntime rt)
+    {
+        // Health is the only one we persist directly on the runtime (others are merged into turrets on demand).
+        rt.MaxHealth = GetEffectiveStatValueForReset(gunnerId, GunnerStatKey.Health);
+        rt.MaxHealth = Mathf.Max(1f, rt.MaxHealth);
+        rt.CurrentHealth = Mathf.Min(rt.CurrentHealth, rt.MaxHealth);
+    }
+
+    /// <summary>Hard reset a runtime to a fresh state based on its SO.</summary>
+    private void ResetRuntimeToFresh(string gid, GunnerRuntime rt)
+    {
+        var so = GetSO(gid);
+        rt.Level = 1;
+        rt.CurrentXp = 0f;
+        rt.UnspentSkillPoints = 0;
+        rt.Unlocked = (so != null)
+            ? new HashSet<GunnerStatKey>(so.StartingUnlocked)
+            : new HashSet<GunnerStatKey>();
+        rt.UpgradeLevels?.Clear();
+        rt.IsOnQuest = false;
+        rt.QuestEndUnixTime = 0;
+        RecomputeDerivedStats(gid, rt);
+        Debug.Log($"[GunnerReset] Fresh runtime applied -> id={gid} Lvl={rt.Level} HP={rt.MaxHealth} Unlocked={rt.Unlocked.Count} Upgrades={rt.UpgradeLevels.Count}");
+    }
+
+
+    #region DEBUG
+    private void DebugDumpRuntime(string title, string gid, GunnerRuntime rt)
+    {
+        var upCount = rt.UpgradeLevels?.Count ?? 0;
+        var unCount = rt.Unlocked?.Count ?? 0;
+        Debug.Log($"[GunnerReset] {title} id={gid} " +
+                  $"Lvl={rt.Level} XP={rt.CurrentXp} Pts={rt.UnspentSkillPoints} " +
+                  $"MaxHP={rt.MaxHealth} CurHP={rt.CurrentHealth} " +
+                  $"Upgrades={upCount} Unlocked={unCount} " +
+                  $"Quest={(rt.IsOnQuest ? "Y" : "N")} Slot={rt.EquippedSlot}");
+    }
+
+    private void DebugDumpAll(string title)
+    {
+        Debug.Log($"[GunnerReset] ---- {title} ---- runtimes={runtimes.Count} owned={ownedGunners.Count}");
+        foreach (var kv in runtimes)
+            DebugDumpRuntime(title, kv.Key, kv.Value);
+    }
+    #endregion
 
 }

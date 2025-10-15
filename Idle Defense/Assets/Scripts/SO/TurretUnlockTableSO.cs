@@ -20,6 +20,9 @@ public class TurretUnlockTableSO : ScriptableObject
         public TurretType Type;
         public int WaveToUnlock;     // 0 == unlocked from start
         public ulong FirstCopyCost;    // 0 == free first copy
+
+        [Tooltip("If true, this turret is locked until a Prestige node unlocks it (see PrestigeNodeSO.UnlockTurretTypes).")]
+        public bool RequirePrestigeUnlock;
     }
 
 #if UNITY_EDITOR

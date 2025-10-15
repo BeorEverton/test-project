@@ -25,6 +25,11 @@ public class PrestigeNodeView : MonoBehaviour
     private static readonly Color NearBlack = new Color(0.06f, 0.06f, 0.06f, 1f);
     private const float FadeAlpha = 0.45f;
 
+    private void OnEnable()
+    {
+        if (NodeSO != null) Init(NodeSO);
+    }
+
     public void Init(PrestigeNodeSO node)
     {
         NodeSO = node;
@@ -45,36 +50,64 @@ public class PrestigeNodeView : MonoBehaviour
         var pm = PrestigeManager.Instance;
         if (pm == null || NodeSO == null) return;
 
+        // Ensure NodeId is set even if Init() wasn't called
+        if (string.IsNullOrEmpty(NodeId)) NodeId = NodeSO.NodeId;
+
         bool owned = pm.Owns(NodeId);
-        bool prereqsMet = ComputePrereqsMet(pm, NodeSO);  // ignores currency on purpose
-        PrestigeNodeVisualState state = owned
+        bool prereqsMet = ComputePrereqsMet(pm, NodeSO); // ignores currency on purpose
+
+        var state = owned
             ? PrestigeNodeVisualState.Unlocked
             : (prereqsMet ? PrestigeNodeVisualState.Available : PrestigeNodeVisualState.LockedUnavailable);
 
-        // apply colors
         ApplyState(state);
 
-        // cost text (optional)
         if (costText != null)
-        {
-            if (owned)
-            {
-                costText.text = "Owned";
-            }
-            else
-            {
-                costText.text = NodeSO.CrimsonCost.ToString();
-            }
-        }
+            costText.text = owned ? "Owned" : NodeSO.CrimsonCost.ToString();
 
-        // button interactability: allow click only if CanBuy is actually true (cost/prereqs both ok)
         if (button != null)
         {
-            string r;
-            bool canBuy = pm.CanBuy(NodeId, out r);
-            button.interactable = canBuy;
+            // Hide the button entirely once owned so it cannot be bought twice
+            button.gameObject.SetActive(!owned);
+
+            // When visible, only allow click if CanBuy (cost + prereqs) is satisfied
+            if (!owned)
+            {
+                string reason;
+                bool canBuy = pm.CanBuy(NodeId, out reason);
+                button.interactable = canBuy;
+            }
         }
     }
+
+    private void OnClickBuy()
+    {
+        Debug.Log($"PrestigeNodeView: OnClickBuy {NodeId}");
+        var pm = PrestigeManager.Instance;
+        if (pm == null) return;
+
+        // Fallback safety: ensure NodeId is valid
+        if (string.IsNullOrEmpty(NodeId) && NodeSO != null)
+            NodeId = NodeSO.NodeId;
+
+        Debug.Log($"Trying to purchase now {NodeId}");
+        // Try the purchase; PrestigeManager handles prereqs/cost/unlock/save
+        if (pm.TryBuy(NodeId))
+        {
+            // Immediately lock the UI so the player can’t buy twice
+            if (button != null) button.gameObject.SetActive(false);
+
+            // Update visuals right away (don’t rely solely on external listeners)
+            RefreshVisual();
+            // pm.TryBuy() already calls OnPrestigeChanged and Save()
+        }
+        else
+        {
+            // optional: show feedback for failure here
+            // e.g., shake highlight or briefly tint the icon red
+        }
+    }
+
 
     private void ApplyState(PrestigeNodeVisualState state)
     {
@@ -97,21 +130,6 @@ public class PrestigeNodeView : MonoBehaviour
 
         if (highlight != null)
             highlight.SetActive(state == PrestigeNodeVisualState.Available);
-    }
-
-    private void OnClickBuy()
-    {
-        var pm = PrestigeManager.Instance;
-        if (pm == null) return;
-
-        if (pm.TryBuy(NodeId))
-        {
-            // purchase succeeded -> visuals will be refreshed by the TreeUI listening to OnPrestigeChanged
-        }
-        else
-        {
-            // optional: flash error
-        }
     }
 
     private static bool ComputePrereqsMet(PrestigeManager pm, PrestigeNodeSO node)

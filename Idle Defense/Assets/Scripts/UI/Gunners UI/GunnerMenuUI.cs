@@ -49,8 +49,23 @@ public class GunnerMenuUI : MonoBehaviour
 
     private void OnGunnerClicked(string gunnerId)
     {
+        var gm = GunnerManager.Instance;
+        if (gm == null) return;
+
+        // If not owned but purchasable - try buy first
+        if (!gm.IsOwned(gunnerId))
+        {
+            if (gm.IsPurchasableNow(gunnerId) && gm.TryPurchaseGunner(gunnerId))
+            {
+                BuildList(); // refresh to show as owned
+                return;
+            }
+            // Not purchasable (probably prestige lock)
+            return;
+        }
+
+        // Owned - begin equip flow as before
         GunnerEquipFlow.Instance.BeginSelectSlot(gunnerId);
-        // Optionally close this panel now, or leave it open so they can cancel.
-        // gameObject.SetActive(false);
     }
+
 }

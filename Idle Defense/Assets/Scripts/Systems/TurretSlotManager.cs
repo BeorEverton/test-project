@@ -153,6 +153,28 @@ namespace Assets.Scripts.Systems
             SaveGameManager.Instance.SaveGame();
         }
 
+        /// <summary>
+        /// Unequips everything. If autoEquipStarter is true, equips the starter
+        /// (MachineGun) into slot 0 so the run starts immediately.
+        /// </summary>
+        public void UnequipAll(bool autoEquipStarter = true)
+        {
+            for (int i = 0; i < equipped.Length; i++)
+                Unequip(i);
+
+            if (!autoEquipStarter) return;
+
+            var inv = Assets.Scripts.Systems.TurretInventoryManager.Instance;
+            if (inv == null) return;
+
+            // Ensure a starter exists (your ResetAll already calls EnsureStarterTurret)
+            var starter = inv.GetOwnedByType(TurretType.MachineGun);
+            if (starter == null) return;
+
+            // Slot 0 by default (change if you prefer another slot)
+            Equip(0, starter);
+        }
+
 
 
         public bool IsAnyTurretEquipped() => equipped.Any(t => t != null);

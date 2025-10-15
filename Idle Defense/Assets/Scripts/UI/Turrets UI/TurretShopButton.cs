@@ -32,6 +32,10 @@ namespace Assets.Scripts.UI
 
             TurretInventoryManager.Instance.OnInventoryChanged += Refresh;
             WaveManager.Instance.OnWaveStarted += (_, __) => Refresh();
+
+            if (PrestigeManager.Instance != null)
+                PrestigeManager.Instance.OnPrestigeChanged += Refresh;
+
             Refresh();
         }
 
@@ -41,12 +45,14 @@ namespace Assets.Scripts.UI
             if (GameManager.Instance != null)
                 GameManager.Instance.OnCurrencyChanged -= HandleCurrencyChanged;
 
-
             if (TurretInventoryManager.Instance != null)
                 TurretInventoryManager.Instance.OnInventoryChanged -= Refresh;
 
             if (WaveManager.Instance != null)
                 WaveManager.Instance.OnWaveStarted -= (_, __) => Refresh();
+
+            if (PrestigeManager.Instance != null)
+                PrestigeManager.Instance.OnPrestigeChanged -= Refresh;
         }
 
         private void Refresh()
@@ -57,33 +63,39 @@ namespace Assets.Scripts.UI
             if (owned >= 5)
             {
                 icon.color = Color.white;
-                //lockText.gameObject.SetActive(false);
                 lockIcon.gameObject.SetActive(false);
 
                 countText.text = $"x{owned}";
                 costText.text = "Max";
                 costText.color = Color.black;
                 buyButton.interactable = false;
-                dpsText.gameObject.SetActive(false); // Hide DPS text when maxed out
+                dpsText.gameObject.SetActive(false);
                 return;
             }
 
-            int curWave = WaveManager.Instance.GetCurrentWaveIndex();
-            bool ownsAny = owned > 0;
+            // Prestige gate check (only for first acquisition)
+            bool requiresPrestige = TurretInventoryManager.Instance.RequiresPrestigeUnlock(turretType);
+            bool prestigeUnlocked = PrestigeManager.Instance != null && PrestigeManager.Instance.IsTurretUnlocked(turretType);
 
-            if (ownsAny)
+            if (owned == 0 && requiresPrestige && !prestigeUnlocked)
             {
-                icon.color = Color.white;
-                //lockText.gameObject.SetActive(false);
-                lockIcon.gameObject.SetActive(false);
-            }
-            else
-            {
-                icon.color = Color.black;
-                //lockText.gameObject.SetActive(true);
+                // Locked by prestige tree
+                icon.color = Color.black;                // your locked visual
                 lockIcon.gameObject.SetActive(true);
-                // lockText.text = $"Not owned";
+
+                countText.text = "x0";
+                costText.text = "Unlock with Crimson Core";
+                costText.color = Color.red;
+
+                buyButton.interactable = false;
+                dpsText.gameObject.SetActive(false);     // optional: hide DPS when locked
+                return;
             }
+
+            // otherwise: normal flow (either already own at least one, or prestige gate passed)
+            icon.color = Color.white;                     // show as buyable
+            lockIcon.gameObject.SetActive(false);
+
 
             // Continue with normal pricing
             (Currency currency, ulong cost) = inv.GetCostAndCurrency(turretType, owned);

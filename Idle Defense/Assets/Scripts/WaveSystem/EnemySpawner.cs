@@ -92,7 +92,7 @@ namespace Assets.Scripts.WaveSystem
             await CheckIfBossWave(wave);
 
             _canSpawnEnemies = true;
-            _spawnEnemiesCoroutine = StartCoroutine(SpawnEnemies());
+            _spawnEnemiesCoroutine = StartCoroutine(SpawnEnemiesDelayed());
 
             _waveCompletionCheckCoroutine = StartCoroutine(PeriodicWaveCompletionCheck());
 
@@ -202,6 +202,12 @@ namespace Assets.Scripts.WaveSystem
             return enemy;
         }
 
+        private IEnumerator SpawnEnemiesDelayed()
+        {
+            yield return null; // wait 1 frame to ensure setup
+            yield return StartCoroutine(SpawnEnemies());
+        }
+
         private IEnumerator SpawnEnemies()
         {
             foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies).ToList())
@@ -277,10 +283,25 @@ namespace Assets.Scripts.WaveSystem
             {
                 StartCoroutine(HandleEnemyDeath(enemy));
 
+                // Apply prestige currency multiplier before notifying listeners
+                ulong baseAmount = enemy.Info.CoinDropAmount;
+                float mult = 1f;
+
+                var pm = PrestigeManager.Instance; 
+                if (pm != null)
+                {
+                    mult = (enemy.Info.CurrencyDropType == Currency.BlackSteel)
+                        ? pm.GetBlackSteelGainMultiplier()
+                        : pm.GetScrapsGainMultiplier();
+                }
+
+                // round and ensure at least 1 if there was any base drop
+                ulong boosted = baseAmount == 0 ? 0 : (ulong)Mathf.Max(1, Mathf.RoundToInt(baseAmount * mult));
+
                 OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
                 {
-                    CurrencyType = enemy.Info.CurrencyDropType, 
-                    Amount = enemy.Info.CoinDropAmount
+                    CurrencyType = enemy.Info.CurrencyDropType,
+                    Amount = boosted
                 });
             }
 

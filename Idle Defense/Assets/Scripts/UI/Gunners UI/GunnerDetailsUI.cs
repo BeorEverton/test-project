@@ -11,6 +11,10 @@ public class GunnerDetailsUI : MonoBehaviour
     public List<GunnerSO> roster;          // optional: can be fed by GunnerManager
     public int currentIndex;
 
+    [Header("Ordering")]
+    [SerializeField] private GunnerUnlockTableSO unlockTable;   // put your table here
+    [SerializeField] private bool useUnlockTableOrder = true;
+
     [Header("Top")]
     public TextMeshProUGUI gunnerNameText;
     public TextMeshProUGUI levelText;
@@ -28,9 +32,15 @@ public class GunnerDetailsUI : MonoBehaviour
     public TextMeshProUGUI limitDescText;
 
     [Header("Controls")]
-    public Button levelUpButton;           // enabled if rt.UnspentSkillPoints > 0
+    public TextMeshProUGUI equipText;
+    public Button levelUpButton;
     public Button equipButton;
     public Button unequipButton;
+
+    [Header("Purchase UI")]
+    [SerializeField] private TextMeshProUGUI buyPriceText; 
+    [SerializeField] private TextMeshProUGUI currencyIconText; 
+    [SerializeField] private GameObject currencyIconGO;     
 
     [Header("Stats List")]
     public Transform statListRoot;         // parent of rows
@@ -51,9 +61,29 @@ public class GunnerDetailsUI : MonoBehaviour
 
     private bool _isOpen = false;
 
+    // local working
+    private GunnerSO _so;
+    private GunnerRuntime _rt;
+
     public void Open(List<GunnerSO> list = null, int startIndex = 0)
     {
-        if (list != null) { roster = list; currentIndex = Mathf.Clamp(startIndex, 0, roster.Count - 1); }
+        panelRoot.SetActive(true);
+        // Seed list priority: explicit arg > existing roster > manager’s list (if exposed)
+        var seed = list ?? roster;
+
+        if (useUnlockTableOrder && unlockTable != null)
+            roster = BuildRosterFromUnlockTable(seed);
+        else
+            roster = seed ?? roster;
+
+        if (roster == null || roster.Count == 0)
+        {
+            Debug.LogWarning("GunnerDetailsUI.Open: roster is empty. Assign a list or the GunnerUnlockTable.");
+            return;
+        }
+
+        currentIndex = Mathf.Clamp(startIndex, 0, roster.Count - 1);
+
         WireListeners();
         SetVisible(true);
         BindByIndex(currentIndex);
@@ -85,8 +115,8 @@ public class GunnerDetailsUI : MonoBehaviour
     // internal wiring helpers
     private void WireListeners()
     {
-        if (prevButton) prevButton.onClick.AddListener(OnPrev);
-        if (nextButton) nextButton.onClick.AddListener(OnNext);
+        if (prevButton) prevButton.onClick.AddListener(OnClickPrev);
+        if (nextButton) nextButton.onClick.AddListener(OnClickNext);
         if (levelUpButton) levelUpButton.onClick.AddListener(OnClickOpenUpgrades);
         if (equipButton) equipButton.onClick.AddListener(OnEquip);
         if (unequipButton) unequipButton.onClick.AddListener(OnUnequip);
@@ -94,11 +124,17 @@ public class GunnerDetailsUI : MonoBehaviour
 
     private void UnwireListeners()
     {
-        if (prevButton) prevButton.onClick.RemoveListener(OnPrev);
-        if (nextButton) nextButton.onClick.RemoveListener(OnNext);
+        if (prevButton) prevButton.onClick.RemoveListener(OnClickPrev);
+        if (nextButton) nextButton.onClick.RemoveListener(OnClickNext);
         if (levelUpButton) levelUpButton.onClick.RemoveListener(OnClickOpenUpgrades);
         if (equipButton) equipButton.onClick.RemoveListener(OnEquip);
         if (unequipButton) unequipButton.onClick.RemoveListener(OnUnequip);
+    }
+
+    private void HandleExternalChange()
+    {
+        // Rebind current gunner so the panel flips from Locked → Buy → Equip states when needed
+        if (_so != null) Bind(_so);
     }
 
     private void SetVisible(bool show)
@@ -117,10 +153,40 @@ public class GunnerDetailsUI : MonoBehaviour
         }
     }
 
+    private List<GunnerSO> BuildRosterFromUnlockTable(List<GunnerSO> seed)
+    {
+        var ordered = new List<GunnerSO>();
+        var seen = new HashSet<string>();
 
-    // local working
-    private GunnerSO _so;
-    private GunnerRuntime _rt;
+        // Try to resolve SOs by id in table order
+        if (unlockTable != null)
+        {
+            foreach (var e in unlockTable.Entries)
+            {
+                GunnerSO so = null;
+
+                // Prefer manager lookup (fast), else from the seed list
+                if (GunnerManager.Instance != null)
+                    so = GunnerManager.Instance.GetSO(e.GunnerId);
+
+                if (so == null && seed != null)
+                    so = seed.Find(x => x != null && x.GunnerId == e.GunnerId);
+
+                if (so != null && seen.Add(so.GunnerId))
+                    ordered.Add(so);
+            }
+        }
+
+        // Append any seed gunners not present in the table (keeps things robust)
+        if (seed != null)
+        {
+            foreach (var so in seed)
+                if (so != null && seen.Add(so.GunnerId))
+                    ordered.Add(so);
+        }
+
+        return ordered;
+    }
 
     // PUBLIC API -------------------------------------------------------------
 
@@ -138,7 +204,6 @@ public class GunnerDetailsUI : MonoBehaviour
         _rt = (GunnerManager.Instance != null)
             ? GunnerManager.Instance.GetRuntime(so.GunnerId)
             : null; // guard for null instance (editor preview etc.)
-
 
         // Top
         if (gunnerNameText) gunnerNameText.text = so.DisplayName;
@@ -187,14 +252,12 @@ public class GunnerDetailsUI : MonoBehaviour
             if (limitDescText) limitDescText.text = "Limit Break: none";
         }
 
-
-
-
         // Points + controls
         int points = (_rt != null) ? _rt.UnspentSkillPoints : 0;
         if (pointsText) pointsText.text = points + "" + (points == 1 ? "" : "");
         if (levelUpButton) levelUpButton.gameObject.SetActive(false); // replaced by per-row '+'
-        UpdateEquipButtons();
+        
+        UpdatePurchaseAndEquipUI();
 
         // Stats list
         RebuildStatsList();
@@ -203,6 +266,21 @@ public class GunnerDetailsUI : MonoBehaviour
         if (prevButton) prevButton.interactable = roster != null && roster.Count > 1;
         if (nextButton) nextButton.interactable = roster != null && roster.Count > 1;
     }
+
+    public void OnClickPrev()
+    {
+        if (roster == null || roster.Count == 0) return;
+        currentIndex = (currentIndex - 1 + roster.Count) % roster.Count;
+        BindByIndex(currentIndex);
+    }
+
+    public void OnClickNext()
+    {
+        if (roster == null || roster.Count == 0) return;
+        currentIndex = (currentIndex + 1) % roster.Count;
+        BindByIndex(currentIndex);
+    }
+
 
     // INTERNAL ---------------------------------------------------------------
 
@@ -370,6 +448,54 @@ public class GunnerDetailsUI : MonoBehaviour
         }
     }
 
+    private void UpdatePurchaseAndEquipUI()
+    {
+        var gm = GunnerManager.Instance;
+        bool owned = gm != null && _so != null && gm.IsOwned(_so.GunnerId);
+
+        // Default: hide price UI
+        if (buyPriceText) buyPriceText.text = "";
+        if (currencyIconGO) currencyIconGO.SetActive(false);
+        if (currencyIconText) currencyIconText.gameObject.SetActive(false);
+
+        // Prestige lock check (only matters if not owned yet)
+        if (!owned)
+        {
+            bool requiresPrestige = gm != null && gm.RequiresPrestigeUnlock(_so.GunnerId);
+            bool prestigeUnlocked = PrestigeManager.Instance != null && PrestigeManager.Instance.IsGunnerUnlocked(_so.GunnerId);
+
+            if (requiresPrestige && !prestigeUnlocked)
+            {
+                // Locked by prestige — disable buy/equip, show lock label
+                if (equipText) equipText.text = "Locked (Prestige)";
+                if (equipButton) { equipButton.gameObject.SetActive(true); equipButton.interactable = false; }
+                if (unequipButton) unequipButton.gameObject.SetActive(false);
+                return;
+            }
+            else if (equipText)
+                equipText.text = "Equip";
+
+            // Purchasable: show price + icon, enable the "equip" button to act as Buy
+            ulong cost = gm != null ? gm.GetFirstCopyCost(_so.GunnerId) : 0UL;
+            if (buyPriceText) buyPriceText.text = cost > 0 ? cost.ToString("N0") : "Free";
+            if (currencyIconGO) currencyIconGO.SetActive(cost > 0);
+            if (currencyIconText)
+            {
+                currencyIconText.gameObject.SetActive(cost > 0);
+                currencyIconText.SetText(UIManager.GetCurrencyIcon(gm.GetPurchaseCurrency(_so.GunnerId)));
+            }
+
+            if (equipButton) { equipButton.gameObject.SetActive(true); equipButton.interactable = true; }
+            if (unequipButton) unequipButton.gameObject.SetActive(false);
+            return;
+        }
+        else if (equipText)
+            equipText.text = "Equip";
+
+        // Owned - behave like normal equip/unequip buttons
+        UpdateEquipButtons();
+    }
+
 
     // Helpers to adapt to your assets/meta -----------------------------------
 
@@ -389,7 +515,7 @@ public class GunnerDetailsUI : MonoBehaviour
             case GunnerStatKey.PierceDamageFalloff: return "Pierce Falloff";
             case GunnerStatKey.PercentBonusDamagePerSec: return "Damage Ramp";
             case GunnerStatKey.ArmorPenetration: return "Armor Penetration";
-            case GunnerStatKey.Health: return "HP";
+            case GunnerStatKey.Health: return "Health";
             default: return key.ToString();
         }
     }
@@ -442,11 +568,31 @@ public class GunnerDetailsUI : MonoBehaviour
         // GunnerUpgradePanel.Instance.Open(_so, _rt);
     }
 
+    // If not owned yet, clicking acts as "Buy"
     private void OnEquip()
     {
+        Debug.Log("GunnerDetailsUI: Equip clicked for " + (_so != null ? _so.GunnerId : "null SO"));
         if (_so == null || GunnerManager.Instance == null) return;
 
-        _rt = GunnerManager.Instance.GetRuntime(_so.GunnerId);
+        var gm = GunnerManager.Instance;
+        
+        if (!gm.IsOwned(_so.GunnerId))
+        {
+            Debug.Log("GunnerDetailsUI: Attempting purchase of " + _so.GunnerId);
+            if (gm.IsPurchasableNow(_so.GunnerId) && gm.TryPurchaseGunner(_so.GunnerId))
+            {
+                // Refresh runtime/state and switch UI to equip mode
+                _rt = gm.GetRuntime(_so.GunnerId);
+                Bind(_so);
+                equipText.text = "Equip"; // switch from Buy to Equip
+                equipButton.gameObject.SetActive(true);
+                unequipButton.gameObject.SetActive(false);
+                Debug.Log("GunnerDetailsUI: Purchase successful for " + _so.GunnerId);
+            }
+            return;
+        }
+
+        _rt = gm.GetRuntime(_so.GunnerId);
         if (_rt != null && _rt.EquippedSlot >= 0)
         {
             UpdateEquipButtons();
@@ -454,10 +600,9 @@ public class GunnerDetailsUI : MonoBehaviour
             return;
         }
 
-        // Tell the global flow we’re selecting a slot for this gunner
+        // Begin slot selection as usual
         GunnerEquipFlow.Instance?.BeginSelectSlot(_so.GunnerId);
 
-        // Show the cursor ghost (make sure this object lives on an overlay canvas, not under the panel)
         if (cursorGhost)
         {
             var sprite = _so.OnTurretSprite ? _so.OnTurretSprite : _so.IdleSprite;

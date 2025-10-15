@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 077cc73e000aa434d946d397acc7b3d4, type: 3}
+  m_Name: Unlock Gunner Test
+  m_EditorClassIdentifier: 
+  NodeId: rustopher
+  DisplayName: Unlock gunner1
+  Description: Reduces cost
+  Icon: {fileID: 21300000, guid: 90ad77f86d3f340988ade060dbf09fac, type: 3}
+  AnchoredPosition: {x: -330, y: -165}
+  BranchId: 3
+  RequiresAny: []
+  RequiresAll: []
+  MinPrestigeLevel: 0
+  CrimsonCost: 1
+  GlobalDamagePct: 0
+  GlobalFireRatePct: 0
+  GlobalCritChancePct: 0
+  GlobalCritDamagePct: 0
+  GlobalPierceChancePct: 0
+  RangePct: 0
+  RotationSpeedPct: 0
+  ExplosionRadiusPct: 0
+  SplashDamagePct: 0
+  PierceDamageFalloffPct: 0
+  PelletCountPct: 0
+  DamageFalloffOverDistancePct: 0
+  PercentBonusDamagePerSecPct: 0
+  SlowEffectPct: 0
+  KnockbackStrengthPct: 0
+  BounceCountPct: 0
+  BounceRangePct: 0
+  BounceDelayPct: 0
+  BounceDamagePctPct: 0
+  ConeAnglePct: 0
+  ExplosionDelayPct: 0
+  AheadDistancePct: 0
+  MaxTrapsActivePct: 0
+  ArmorPenetrationPct: 0
+  ScrapsGainPct: 0
+  BlackSteelGainPct: 0
+  EnemyHealthPct: 0
+  EnemyCountPct: 0
+  SpeedMultiplierCapBonus: 0
+  DamageMultiplierCapBonus: 0
+  UnlockLimitBreaks: 
+  UnlockGunnerIds:
+  - test
+  UnlockTurretTypes: 
+  AllUpgradeCostPct: 0
+  PerUpgradeTypeDiscounts: []
+  OnResetGrantCrimson: 0

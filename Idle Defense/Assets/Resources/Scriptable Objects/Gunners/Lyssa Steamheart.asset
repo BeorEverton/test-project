@@ -1,0 +1,167 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2befe85aa3a74b44998715041c867c7e, type: 3}
+  m_Name: Lyssa Steamheart
+  m_EditorClassIdentifier: 
+  GunnerId: lyssa
+  DisplayName: Lyssa Steamheart
+  IdleSprite: {fileID: 21300000, guid: f0bbee4261dff4cb7bcae5c218b4e05f, type: 3}
+  RunSprite: {fileID: 0}
+  OnTurretSprite: {fileID: 21300000, guid: 1d103d1cdfeba4b409fda53bd4de6786, type: 3}
+  IdlePhrases: []
+  BaseHealth: 20
+  BaseDamage: 35
+  BaseFireRate: 0
+  BaseRange: 0
+  BaseDamagePerSecPctBonus: 0
+  BaseSlowEffect: 0
+  BaseCriticalChance: 0
+  BaseCriticalDamage: 0
+  BaseKnockback: 0
+  BaseSplash: 0
+  BasePierceChance: 0
+  BasePierceFalloff: 0
+  BaseArmorPenetration: 0
+  LimitBreakSkill: {fileID: 11400000, guid: 4b17f2e0a5f341d4493d521d4270e1b9, type: 2}
+  XpCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 10
+      value: 10000
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 20
+      value: 50000
+      inSlope: 1629.9622
+      outSlope: 1629.9622
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 50
+      value: 100000
+      inSlope: 2112.7786
+      outSlope: 2112.7786
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 100
+      value: 500000
+      inSlope: 2001.0317
+      outSlope: 2001.0317
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1000
+      value: 1e+9
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  SkillPointsPerLevel: 1
+  StartingUnlocked: 0000000001000000
+  LevelUnlocks:
+  - Level: 5
+    Unlocks: 03000000
+  - Level: 10
+    Unlocks: 0200000008000000
+  UpgradeRules:
+  - Stat: 0
+    Mode: 0
+    AmountPerLevel: 5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 1
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 2
+    Mode: 0
+    AmountPerLevel: 0.05
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 3
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 4
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 5
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 6
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 7
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 8
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 9
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 10
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 11
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 12
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100

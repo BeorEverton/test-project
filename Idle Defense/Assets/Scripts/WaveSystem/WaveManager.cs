@@ -85,6 +85,10 @@ namespace Assets.Scripts.WaveSystem
                     WaveNumber = _currentWave
                 });
 
+                // Tell PrestigeManager a new wave began so it can update eligibility
+                if (PrestigeManager.Instance != null)
+                    PrestigeManager.Instance.NotifyWaveStarted(_currentWave);
+
                 while (_maxWaves < _currentWave + 10) //Generate new waves when only 10 left
                 {
                     GenerateWaves(startWaveNumber: _maxWaves + 1, amountToGenerate: 25);
@@ -129,14 +133,23 @@ namespace Assets.Scripts.WaveSystem
 
         private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry, int waveNumber)
         {
+            int baseCount = baseEntry.NumberOfEnemies + waveNumber;
+
+            var pm = PrestigeManager.Instance;
+            if (pm != null)
+            {
+                float countMul = pm.GetEnemyCountMultiplier();
+                baseCount = Mathf.Max(1, Mathf.RoundToInt(baseCount * countMul));
+            }
+
             return new EnemyWaveEntry
             {
                 EnemyPrefab = baseEntry.EnemyPrefab,
-                NumberOfEnemies = baseEntry.NumberOfEnemies + waveNumber
+                NumberOfEnemies = baseCount
             };
+
         }
 
-        // NEW METHOD WITH PLATEAUED SCALING
         private EnemyInfoSO CloneEnemyInfoWithScale(Enemy enemy, int waveIndex)
         {
             EnemyInfoSO clonedInfo = Instantiate(enemy.Info);
@@ -152,6 +165,13 @@ namespace Assets.Scripts.WaveSystem
             float wavePower = Mathf.Pow(plateauBaseWave > 0 ? plateauBaseWave : 1f, 1.3f);
 
             clonedInfo.MaxHealth = baseHealth * wavePower * spikeMultiplier * plateauMultiplier;
+
+            // Apply prestige enemy health multiplier (single place)
+            var pm = PrestigeManager.Instance;
+            if (pm != null)
+            {
+                clonedInfo.MaxHealth *= pm.GetEnemyHealthMultiplier();
+            }
 
             // --- Damage Scaling (mild exponential) ---
             clonedInfo.Damage += clonedInfo.Damage * (bossIndex * 0.2f); // 20% more per 10 waves
@@ -294,5 +314,6 @@ namespace Assets.Scripts.WaveSystem
         public bool IsAutoAdvanceEnabled() => _autoAdvanceEnabled;
 
         #endregion
+
     }
 }

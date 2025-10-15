@@ -107,14 +107,14 @@ namespace Assets.Scripts.Systems.Save
                 GameManager.Instance.LoadCurrency(entry.Currency, entry.Amount);
             }
 
-            WaveManager.Instance.LoadWave(gameData.GameDataDTO.WaveNumber);
-            GameTutorialManager.Instance.LoadGame(gameData.GameDataDTO.TutorialStep);
+            WaveManager.Instance?.LoadWave(gameData.GameDataDTO.WaveNumber);
+            GameTutorialManager.Instance?.LoadGame(gameData.GameDataDTO.TutorialStep);
 
-            StatsManager.Instance.LoadStats(gameData.StatsDTO);
+            StatsManager.Instance?.LoadStats(gameData.StatsDTO);
 
-            TurretInventoryManager.Instance.ImportFromDTO(gameData.TurretInventory);
+            TurretInventoryManager.Instance?.ImportFromDTO(gameData.TurretInventory);
 
-            GunnerManager.Instance.ImportFromDTO(gameData.GunnerInventory);    
+            GunnerManager.Instance?.ImportFromDTO(gameData.GunnerInventory);    
 
             SettingsManager.Instance.SetMusicVolume(gameData.GameDataDTO.MusicVolume);
             SettingsManager.Instance.SetSFXVolume(gameData.GameDataDTO.SFXVolume);

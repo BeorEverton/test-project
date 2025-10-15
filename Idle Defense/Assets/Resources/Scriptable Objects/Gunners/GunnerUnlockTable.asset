@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eed2d6401ebd334592d07186c1e18e9, type: 3}
+  m_Name: GunnerUnlockTable
+  m_EditorClassIdentifier: 
+  Entries:
+  - Gunner: {fileID: 11400000, guid: f9d04fb61667cbc489ef6c6002e1bf99, type: 2}
+    GunnerId: gerhard
+    WaveToUnlock: 0
+    unlockCost: 0
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: a699f5c68e18698419cf3515021ff095, type: 2}
+    GunnerId: lyssa
+    WaveToUnlock: 0
+    unlockCost: 20
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 083f4088afa8b3548a036dc90f677f6e, type: 2}
+    GunnerId: jordan
+    WaveToUnlock: 0
+    unlockCost: 20
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: a3005ea37dee3e14697e4420a78d99bf, type: 2}
+    GunnerId: rustopher
+    WaveToUnlock: 0
+    unlockCost: 100
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 1

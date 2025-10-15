@@ -19,11 +19,6 @@ namespace Assets.Scripts.UI
         [SerializeField] private GameObject permanentUpgradePanels;
         [SerializeField] private GameObject temporaryUpgradePanels;
 
-        [Header("Currency UI")]
-        [SerializeField] private TextMeshProUGUI _scraps;
-        [SerializeField] private TextMeshProUGUI _blackSteelText;
-        [SerializeField] private TextMeshProUGUI _crimsonCoreText;
-
         [Header("Limit Break Slider")]
         [Header("Limit Break (Multiple)")]
         [SerializeField] private Transform _lbBarsParent;         // assign a horizontal/vertical layout group
@@ -80,7 +75,6 @@ namespace Assets.Scripts.UI
             EnemySpawner.Instance.OnWaveCreated += OnWaveCreated;
             EnemySpawner.Instance.OnEnemyDeath += OnEnemyDeath;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
-            GameManager.Instance.OnCurrencyChanged += UpdateCurrency;
         }
 
         // Subscribe to the new timer tick
@@ -125,22 +119,6 @@ namespace Assets.Scripts.UI
         {
             float t = Mathf.Clamp01(value / 200f);
             element.color = Color.Lerp(Color.black, Color.red, t);
-        }
-
-        public void UpdateCurrency(Currency type, ulong value)
-        {
-            switch (type)
-            {
-                case Currency.Scraps:
-                    _scraps.SetText(FormatCurrency(ICON_SCRAPS, value));
-                    break;
-                case Currency.BlackSteel:
-                    _blackSteelText.SetText(FormatCurrency(ICON_BLACKSTEEL, value));
-                    break;
-                case Currency.CrimsonCore:
-                    _crimsonCoreText.SetText(FormatCurrency(ICON_CRIMSONCORE, value));
-                    break;
-            }
         }
 
         private string FormatCurrency(string icon, ulong value)
