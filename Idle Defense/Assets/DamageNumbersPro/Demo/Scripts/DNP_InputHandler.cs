@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 #if ENABLE_INPUT_SYSTEM && DNP_NewInputSystem
 using UnityEngine.InputSystem;
@@ -12,7 +10,7 @@ namespace DamageNumbersPro.Demo
         //Directions:
         public static bool GetRight()
         {
-            if(Keyboard.current == null)
+            if (Keyboard.current == null)
             {
                 return false;
             }
@@ -143,7 +141,7 @@ namespace DamageNumbersPro.Demo
             }
             else
             {
-                return 100f * Mouse.current.delta.ReadValue() / (float) Screen.height;
+                return 100f * Mouse.current.delta.ReadValue() / (float)Screen.height;
             }
         }
         public static float GetMouseScroll()

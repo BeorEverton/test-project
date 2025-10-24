@@ -11,7 +11,6 @@
  */
 
 using UnityEngine;
-using DamageNumbersPro; //Include DamageNumbersPro Namespace     <-----     [REQUIRED]
 
 namespace DamageNumbersPro.Demo
 {
@@ -35,7 +34,7 @@ namespace DamageNumbersPro.Demo
             DamageNumber newPopup = popupPrefab.SpawnGUI(rectTarget, anchoredPosition, number); //Spawn DamageNumber     <-----     [REQUIRED]
 
             //You can do any change you want on the DamageNumber returned by the Spawn(...) function.
-            if(Random.value < 0.5f)
+            if (Random.value < 0.5f)
             {
                 newPopup.number *= 2;
             }

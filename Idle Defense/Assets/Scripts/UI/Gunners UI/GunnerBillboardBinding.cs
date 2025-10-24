@@ -1,5 +1,4 @@
 using Assets.Scripts.UI;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -45,7 +44,7 @@ public class GunnerBillboardBinding : MonoBehaviour
 
         RefreshLimitBreakUI();
     }
-        
+
     public void RefreshLimitBreak(float current)
     {
         if (_rt == null) return;

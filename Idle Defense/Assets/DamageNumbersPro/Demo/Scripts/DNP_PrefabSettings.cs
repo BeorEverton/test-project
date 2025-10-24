@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 
 namespace DamageNumbersPro.Demo
 {
@@ -21,12 +20,12 @@ namespace DamageNumbersPro.Demo
                 int randomIndex = Random.Range(0, texts.Count);
                 target.leftText = texts[randomIndex];
 
-                if(fonts != null && randomIndex < fonts.Count)
+                if (fonts != null && randomIndex < fonts.Count)
                 {
                     target.SetFontMaterial(fonts[randomIndex]);
                 }
 
-                if(texts.Count > 1)
+                if (texts.Count > 1)
                 {
                     target.enableNumber = false;
                 }

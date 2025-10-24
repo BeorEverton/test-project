@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DamageNumbersPro.Demo
 {
@@ -31,7 +29,7 @@ namespace DamageNumbersPro.Demo
             HandleShooting();
 
             //Escape:
-            if(DNP_InputHandler.GetEscape())
+            if (DNP_InputHandler.GetEscape())
             {
                 ShowMouse();
                 Invoke("ShowMouse", 0.1f);
@@ -50,7 +48,7 @@ namespace DamageNumbersPro.Demo
 
         void HideMouse()
         {
-            if(DNP_InputHandler.GetLeftHeld())
+            if (DNP_InputHandler.GetLeftHeld())
             {
                 Invoke("HideMouse", 0.1f);
             }
@@ -69,11 +67,12 @@ namespace DamageNumbersPro.Demo
         //Functions:
         void HandleShooting()
         {
-            if(DNP_InputHandler.GetLeftClick())
+            if (DNP_InputHandler.GetLeftClick())
             {
                 Shoot();
                 nextShotTime = Time.time + 0.3f;
-            } else if(DNP_InputHandler.GetRightHeld() && Time.time > nextShotTime)
+            }
+            else if (DNP_InputHandler.GetRightHeld() && Time.time > nextShotTime)
             {
                 Shoot();
                 nextShotTime = Time.time + 0.06f;
@@ -95,7 +94,7 @@ namespace DamageNumbersPro.Demo
         {
             if (Cursor.visible)
             {
-                if(!IsInvoking("HideMouse"))
+                if (!IsInvoking("HideMouse"))
                 {
                     Invoke("HideMouse", 0.1f);
                     lookTime = Time.time + 0.3f;
@@ -105,7 +104,7 @@ namespace DamageNumbersPro.Demo
 
             RaycastHit raycast;
 
-            if(Physics.Raycast(transform.position, transform.forward, out raycast, 100))
+            if (Physics.Raycast(transform.position, transform.forward, out raycast, 100))
             {
                 //Create Damage Number:
                 DNP_PrefabSettings settings = DNP_DemoManager.instance.GetSettings();
@@ -113,7 +112,7 @@ namespace DamageNumbersPro.Demo
 
 
                 float number = 1 + Mathf.Pow(Random.value, 2.2f) * settings.numberRange;
-                if(prefab.digitSettings.decimals == 0)
+                if (prefab.digitSettings.decimals == 0)
                 {
                     number = Mathf.Floor(number);
                 }
@@ -144,7 +143,7 @@ namespace DamageNumbersPro.Demo
 
                     if (target != null)
                     {
-                        if(newDamageNumber.spamGroup != "")
+                        if (newDamageNumber.spamGroup != "")
                         {
                             newDamageNumber.spamGroup += target.GetInstanceID();
                         }
@@ -204,13 +203,13 @@ namespace DamageNumbersPro.Demo
                 desiredDirection.y += -1;
             }
 
-            if(desiredDirection.magnitude > 0.1f)
+            if (desiredDirection.magnitude > 0.1f)
             {
                 desiredDirection.Normalize();
             }
 
             velocity = Vector3.Lerp(velocity, (desiredDirection.z * transform.forward + desiredDirection.x * transform.right + desiredDirection.y * Vector3.up) * 7f, Time.deltaTime * 6f);
-            
+
             Vector3 position = transform.position;
             Vector3 clampedPosition = new Vector3(Mathf.Clamp(position.x, -4f, 4f), Mathf.Clamp(position.y, 1f, 6f), Mathf.Clamp(position.z, -12f, 4f));
             position = Vector3.Lerp(position, clampedPosition, Time.deltaTime * 15f) + velocity * Time.deltaTime;

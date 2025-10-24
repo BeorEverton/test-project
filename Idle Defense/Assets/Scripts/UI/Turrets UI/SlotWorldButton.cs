@@ -4,7 +4,6 @@ using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
 using System.Collections;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -86,25 +85,34 @@ namespace Assets.Scripts.UI
             {
                 string gunnerId = GunnerEquipFlow.Instance.SelectedGunnerId;
 
-                // Optional: prevent equip on locked slot (you can allow it if you prefer)
+                // Block if slot not purchased
                 if (!TurretSlotManager.Instance.Purchased(slotIndex))
                 {
-                    //UIManager.Instance.Toast("Unlock this slot before equipping a gunner.");
                     GunnerEquipFlow.Instance.CancelSelection();
                     return;
                 }
 
-                // Equip and attach visual
+                // Only allow equipping onto slots that have a turret equipped.
+                bool hasTurret = TurretSlotManager.Instance.TryGetEquippedTurret(slotIndex, out var equippedTurret)
+                                 && equippedTurret != null;
+
+                if (!hasTurret)
+                {
+                    // Empty slot behavior:
+                    // First click on this empty slot does nothing (keeps selection),
+                    // second click on the same empty slot cancels selection.
+                    GunnerEquipFlow.Instance.HandleEmptySlotClick(slotIndex);
+                    return;
+                }
+
+                // At this point, slot has a turret. Equip (this will also replace any existing gunner on that slot).
                 bool ok = GunnerManager.Instance.EquipToSlot(gunnerId, slotIndex, barrelAnchor);
                 if (!ok)
                 {
-                    //UIManager.Instance.Toast("Cannot equip this gunner here.");
                     GunnerEquipFlow.Instance.CancelSelection();
                     return;
                 }
 
-                // Done
-                //UIManager.Instance.Toast("Gunner equipped!");
                 GunnerEquipFlow.Instance.CompleteSelection();
 
                 // Refresh overlay/panel states if needed
@@ -113,8 +121,9 @@ namespace Assets.Scripts.UI
                 return;
             }
 
+
             UIManager.Instance.DeactivateRightPanels();
-            
+
             AudioManager.Instance.Play("Click");
 
             // Skip first children because it's the title
@@ -146,7 +155,7 @@ namespace Assets.Scripts.UI
             }
 
             BaseTurret baseTurret = GetComponentInChildren<BaseTurret>();
-            
+
 
             if (baseTurret == null)
             {
@@ -188,6 +197,11 @@ namespace Assets.Scripts.UI
                 spawned = null;
                 if (noTurretHint != null)
                     noTurretHint.SetActive(true);
+
+                // INFORM GunnerManager: no turret present -> park any equipped gunner on this slot
+                if (GunnerManager.Instance != null)
+                    GunnerManager.Instance.NotifyTurretPresent(slotIndex, barrelAnchor, hasTurret: false);
+
                 UpdateOverlay();
                 return;
             }
@@ -227,21 +241,24 @@ namespace Assets.Scripts.UI
             go.transform.localRotation = Quaternion.identity;
 
             // Tell the turret which slot it lives in (so it can query Gunner bonuses)            
-            if (baseTurret != null) 
-            { 
+            if (baseTurret != null)
+            {
                 baseTurret.BindToGunnerManager(slotIndex);
                 baseTurret.SlotIndex = slotIndex;
-            } 
+            }
 
             // Attach gunner visual above the turret, if a gunner is equipped for this slot
             GunnerManager.Instance.AttachEquippedGunnerVisual(slotIndex, barrelAnchor);
 
             spawned = go;
             go.SetActive(true);
-            //Debug.Log("[SlotWorldButton] Spawned turret in slot " + slotIndex);
 
             if (noTurretHint != null)
                 noTurretHint.SetActive(false);
+
+            // INFORM GunnerManager: turret present (may auto-restore a parked gunner if available)
+            if (GunnerManager.Instance != null)
+                GunnerManager.Instance.NotifyTurretPresent(slotIndex, barrelAnchor, hasTurret: true);
 
             UpdateOverlay();
             UpdateColor();
@@ -249,7 +266,7 @@ namespace Assets.Scripts.UI
 
         private void UpdateColor()
         {
-            
+
             bool purchased = TurretSlotManager.Instance.Purchased(slotIndex);
             int curWave = WaveManager.Instance.GetCurrentWaveIndex();
             int needWave = TurretSlotManager.Instance.WaveRequirement(slotIndex);
@@ -265,7 +282,7 @@ namespace Assets.Scripts.UI
             }
 
             bool whiteNow = purchased || (slotIndex == nextLocked && curWave >= needWave);
-            
+
             SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
             if (sr != null)
                 sr.color = whiteNow ? Color.white : Color.black;

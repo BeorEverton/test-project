@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 #if ENABLE_INPUT_SYSTEM && DNP_NewInputSystem
 using UnityEngine.InputSystem;
@@ -44,7 +42,8 @@ namespace DamageNumbersPro.Demo
             Vector2 mousePosition = Vector2.zero;
 
 #if ENABLE_INPUT_SYSTEM && DNP_NewInputSystem
-            if (Mouse.current != null) {
+            if (Mouse.current != null)
+            {
                 mousePosition = Mouse.current.position.ReadValue();
             }
 #else
@@ -74,7 +73,7 @@ namespace DamageNumbersPro.Demo
             if (hit.collider != null)
             {
                 DNP_Target dnpTarget = hit.collider.GetComponent<DNP_Target>();
-                if(dnpTarget != null)
+                if (dnpTarget != null)
                 {
                     dnpTarget.Hit();
                 }

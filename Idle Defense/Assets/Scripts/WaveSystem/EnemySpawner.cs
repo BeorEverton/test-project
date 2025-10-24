@@ -8,10 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
-using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
@@ -172,6 +169,18 @@ namespace Assets.Scripts.WaveSystem
                 }
 
                 AudioManager.Instance.Play("Boss Appear");
+
+                // Chatter: boss appeared
+                if (GunnerManager.Instance != null)
+                {
+                    var equipped = GunnerManager.Instance.GetAllEquippedGunners();
+                    if (equipped != null && equipped.Count > 0)
+                    {
+                        var a = equipped[Random.Range(0, equipped.Count)];
+                        GunnerChatterSystem.TryTrigger(GunnerEvent.BossAppeared, a);
+                    }
+                }
+
                 bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
             }
             else backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f); // Roll back to the regular color if not boss wave
@@ -181,6 +190,7 @@ namespace Assets.Scripts.WaveSystem
 
         private Task CreateEnemiesFromEntry(EnemyWaveEntry entry)
         {
+
             for (int i = 0; i < entry.NumberOfEnemies; i++)
             {
                 string entryName = entry.EnemyPrefab.GetComponent<Enemy>().Info.Name;
@@ -211,7 +221,7 @@ namespace Assets.Scripts.WaveSystem
         private IEnumerator SpawnEnemies()
         {
             foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies).ToList())
-            {                
+            {
                 Enemy enemy = enemyObj.GetComponent<Enemy>();
                 // Center the boss on screen instead of random spawn
                 if (enemy.IsBossInstance)
@@ -281,13 +291,25 @@ namespace Assets.Scripts.WaveSystem
         {
             if (sender is Enemy enemy)
             {
+                // Chatter: boss killed (check flag BEFORE it's reset in HandleEnemyDeath)
+                if (enemy.IsBossInstance && GunnerManager.Instance != null)
+                {
+                    var eq = GunnerManager.Instance.GetAllEquippedGunners();
+                    if (eq != null && eq.Count > 0)
+                    {
+                        var a = eq[Random.Range(0, eq.Count)];
+                        // Let the first speak; quick reply is handled by the chatter system
+                        GunnerChatterSystem.TryTrigger(GunnerEvent.BossKilled, a);
+                    }
+                }
+
                 StartCoroutine(HandleEnemyDeath(enemy));
 
                 // Apply prestige currency multiplier before notifying listeners
                 ulong baseAmount = enemy.Info.CoinDropAmount;
                 float mult = 1f;
 
-                var pm = PrestigeManager.Instance; 
+                var pm = PrestigeManager.Instance;
                 if (pm != null)
                 {
                     mult = (enemy.Info.CurrencyDropType == Currency.BlackSteel)
@@ -330,7 +352,9 @@ namespace Assets.Scripts.WaveSystem
                 return;
 
             if (_waveSpawned && EnemiesAlive.Count <= 0)
+            {
                 OnWaveCompleted?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
@@ -346,7 +370,7 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator RestartWave()
         {
-            _canSpawnEnemies = false;            
+            _canSpawnEnemies = false;
 
             _suppressWaveComplete = true;
 

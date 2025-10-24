@@ -2,12 +2,9 @@ using Assets.Scripts.PlayerBase;
 using Assets.Scripts.SO;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.UI;
-using Assets.Scripts.WaveSystem;
 using DG.Tweening;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Systems
 {
@@ -126,7 +123,7 @@ namespace Assets.Scripts.Systems
             }
             else
                 UIManager.Instance.ShowDeathCountdown();
-                        
+
         }
 
         public void Heal(float amount)
@@ -260,7 +257,7 @@ namespace Assets.Scripts.Systems
             if (baseVisual == null) return;
 
             baseVisual.DOKill(); // cancel any ongoing tweens
-            
+
             Vector3 punchScale = new Vector3(
                 originalScale.x * 1.1f,
                 originalScale.y * 0.8f,
@@ -296,7 +293,7 @@ namespace Assets.Scripts.Systems
         public void SetPermanentStats(PlayerBaseStatsInstance stats)
         {
             _permanentStats = CloneStats(stats);
-            
+
         }
 
     }

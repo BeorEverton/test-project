@@ -21,7 +21,7 @@ namespace Assets.Scripts.Systems
         [Header("Max/Min stats")]
         [SerializeField] private float maxRange = 50f;
         [SerializeField] private float maxRotationSpeed = 20f;
-        [SerializeField] private float maxCriticalChance= 90f;
+        [SerializeField] private float maxCriticalChance = 90f;
         [SerializeField] private int maxBounce = 100;
         [SerializeField] private float maxBounceRange = 50f;
         [SerializeField] private float minBounceDelay = 0.05f;
@@ -149,7 +149,7 @@ namespace Assets.Scripts.Systems
                         t.RangeLevel += a;
                         t.Range += (t.RangeUpgradeAmount * a);
                         t.Range = Mathf.Min(t.Range, maxRange);
-                    },       
+                    },
 
                     GetLevel = t => t.RangeLevel,
                     GetBaseStat = t => t.Range,
@@ -683,7 +683,7 @@ namespace Assets.Scripts.Systems
                     {
                         t.BounceDamagePctLevel += a;
                         t.BounceDamagePct += (t.BounceDamagePctUpgradeAmount * a);
-                        t.BounceDamagePct = Mathf.Min(t.BounceDamagePct, maxBounceDmgPct); 
+                        t.BounceDamagePct = Mathf.Min(t.BounceDamagePct, maxBounceDmgPct);
                     },
                     GetLevel = t => t.BounceDamagePctLevel,
                     GetBaseStat = t => t.BounceDamagePct,
@@ -700,11 +700,11 @@ namespace Assets.Scripts.Systems
                         GetExponentialCost(t, TurretUpgradeType.BounceDamagePct, a, out float cost, out int amount);
 
                         if (current >= maxBounceDmgPct)
-                            return ($"{current*100}%", "Max", "", "0X");
+                            return ($"{current * 100}%", "Max", "", "0X");
 
                         return (
-                            $"{current*100}%",
-                            $"{bonus*100}%",
+                            $"{current * 100}%",
+                            $"{bonus * 100}%",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
@@ -968,7 +968,8 @@ namespace Assets.Scripts.Systems
             // Scale punch: 1 - 1.15 - 1
             button.DOScale(Vector3.one * 1.15f, 0.1f)
                 .SetEase(Ease.OutBack)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     button.DOScale(Vector3.one, 0.1f).SetEase(Ease.InOutSine);
                 });
         }
@@ -978,7 +979,7 @@ namespace Assets.Scripts.Systems
             return GameManager.Instance.TrySpendCurrency(currency, (ulong)cost);
         }
 
-        public float GetTurretUpgradeCost(TurretStatsInstance turret, TurretUpgradeType type, int amount,Currency currency = Currency.Scraps) =>
+        public float GetTurretUpgradeCost(TurretStatsInstance turret, TurretUpgradeType type, int amount, Currency currency = Currency.Scraps) =>
         !_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade)
             ? 0f
             : upgrade.GetCost(turret, amount, currency);
@@ -1296,7 +1297,7 @@ namespace Assets.Scripts.Systems
 
             (string value, string bonus, string cost, string count) = upgrade.GetDisplayStrings(turret, amount);
 
-            
+
 
             button.UpdateStats(value, bonus, cost, count);
         }
@@ -1316,7 +1317,7 @@ namespace Assets.Scripts.Systems
                     continue;
 
                 float step = Mathf.Abs(up.GetUpgradeAmount(stats));
-                
+
                 if (step <= 0f) continue;
 
                 float cur = up.GetCurrentValue(stats);

@@ -1,8 +1,8 @@
 #nullable enable
 using Assets.Scripts.PlayerBase;
 using Assets.Scripts.SO;
-using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
+using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,6 +16,7 @@ namespace Assets.Scripts.Systems.Save
             var dto = new GameDataDTO
             {
                 WaveNumber = waveNumber,
+                waveFailed = !WaveManager.Instance._autoAdvanceEnabled,
                 TutorialStep = GameTutorialManager.Instance != null ? GameTutorialManager.Instance._currentStep : 0,
                 MusicVolume = SettingsManager.Instance.MusicVolume,
                 SFXVolume = SettingsManager.Instance.SFXVolume,
@@ -388,17 +389,17 @@ namespace Assets.Scripts.Systems.Save
                 BounceDamagePctLevel = turret.BounceDamagePctLevel,
                 BounceDamagePctUpgradeAmount = turret.BounceDamagePctUpgradeAmount,
                 BounceDamagePctUpgradeBaseCost = turret.BounceDamagePctUpgradeBaseCost,
-                
+
                 ConeAngle = turret.ConeAngle,
                 ConeAngleLevel = turret.ConeAngleLevel,
                 ConeAngleUpgradeAmount = turret.ConeAngleUpgradeAmount,
                 ConeAngleUpgradeBaseCost = turret.ConeAngleUpgradeBaseCost,
-                
+
                 ExplosionDelay = turret.ExplosionDelay,
                 ExplosionDelayLevel = turret.ExplosionDelayLevel,
                 ExplosionDelayUpgradeAmount = turret.ExplosionDelayUpgradeAmount,
                 ExplosionDelayUpgradeBaseCost = turret.ExplosionDelayUpgradeBaseCost,
-                
+
                 AheadDistance = turret.AheadDistance,
                 AheadDistanceLevel = turret.AheadDistanceLevel,
                 AheadDistanceUpgradeAmount = turret.AheadDistanceUpgradeAmount,
@@ -420,6 +421,7 @@ public class GameDataDTO
     public ulong Money;
     public CurrencyEntry[] Currencies;
     public int TutorialStep;
+    public bool waveFailed;
 
     public float MusicVolume;
     public float SFXVolume;
@@ -679,7 +681,7 @@ public class TurretInventoryDTO
     public List<TurretStatsInstance> OwnedRuntime;
     public List<TurretType> OwnedTypes;
     public List<int> EquippedIds;          // -1  = runtime copy
-    public List<TurretStatsInstance> EquippedRuntimeStats;   
+    public List<TurretStatsInstance> EquippedRuntimeStats;
     public List<EquippedTurretDTO> EquippedTurrets;
     public List<TurretType> UnlockedTypes;
     public List<bool> SlotPurchased;
@@ -747,6 +749,7 @@ public class GunnerInventoryDTO
 {
     public List<GunnerRuntimeDTO> Runtimes = new();
     public List<SlotGunnerDTO> SlotMap = new(); // slot -> gunner id
+    public List<string> OwnedGunners = new();
 }
 
 [Serializable]

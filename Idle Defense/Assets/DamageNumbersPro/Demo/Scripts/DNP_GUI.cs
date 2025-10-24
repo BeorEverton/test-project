@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DamageNumbersPro.Demo
 {
@@ -66,7 +64,7 @@ namespace DamageNumbersPro.Demo
             DamageNumber newDamageNumber = prefab.Spawn(Vector3.zero, number);
             newDamageNumber.SetToMousePosition(rectParent, Camera.main);
 
-            if(rectParent != canvasRect)
+            if (rectParent != canvasRect)
             {
                 newDamageNumber.enableFollowing = true;
                 newDamageNumber.followedTarget = rectParent;

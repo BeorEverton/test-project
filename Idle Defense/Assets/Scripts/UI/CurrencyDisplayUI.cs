@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Systems;      // Currency, GameManager
-using Assets.Scripts.UI;           // UIManager (for icon & abbreviate)
 using TMPro;
 using UnityEngine;
 

@@ -1,6 +1,6 @@
-using UnityEngine;
-using UnityEditor;
 using TMPro;
+using UnityEditor;
+using UnityEngine;
 
 public class TextColorChangerEditor : EditorWindow
 {

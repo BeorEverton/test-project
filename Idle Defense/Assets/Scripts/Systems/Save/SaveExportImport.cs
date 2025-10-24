@@ -1,9 +1,9 @@
 // SaveExportImport.cs
+using Assets.Scripts.Systems.Save;
+using SFB; // StandaloneFileBrowser
 using System;
 using System.IO;
 using UnityEngine;
-using Assets.Scripts.Systems.Save;
-using SFB; // StandaloneFileBrowser
 
 public class SaveExportImport : MonoBehaviour
 {
@@ -115,7 +115,7 @@ public class SaveExportImport : MonoBehaviour
     }
 
     private void ReloadGame()
-    {   
+    {
         UnityEngine.SceneManagement.SceneManager.LoadScene(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         Time.timeScale = 1f;

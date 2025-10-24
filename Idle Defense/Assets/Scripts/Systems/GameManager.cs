@@ -4,9 +4,6 @@ using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 namespace Assets.Scripts.Systems
 {
@@ -18,7 +15,7 @@ namespace Assets.Scripts.Systems
         // In game just means not paused. Game Over is the management phase
         public GameState CurrentGameState { get; private set; } = GameState.InGame;
         public event Action<GameState> OnGameStateChanged;
-                
+
         // Currency Management
         private readonly Dictionary<Currency, ulong> currencies = new();
         public ulong GetCurrency(Currency currency) => currencies[currency];
@@ -31,7 +28,7 @@ namespace Assets.Scripts.Systems
                 Instance = this;
             else
                 Destroy(gameObject);
-                        
+
             foreach (Currency currency in Enum.GetValues(typeof(Currency)))
             {
                 currencies[currency] = 0;
@@ -127,7 +124,7 @@ namespace Assets.Scripts.Systems
 
 
 public enum GameState
-{    
+{
     InGame,
     Management
 }

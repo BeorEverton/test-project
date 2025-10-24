@@ -99,7 +99,7 @@ public class GunnerRuntime
         return CurrentHealth - before;
     }
 
-    public void ResetLimitBreak() => LimitBreakCurrent = 0f;        
+    public void ResetLimitBreak() => LimitBreakCurrent = 0f;
 
     public void AddUpgradeLevel(GunnerStatKey key, int delta)
     {

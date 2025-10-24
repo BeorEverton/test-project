@@ -1,8 +1,4 @@
 // Assets/Editor/Simulation/Core/Blueprints.cs
-using Assets.Scripts.SO;      // TurretInfoSO
-using Assets.Scripts.Turrets;
-using UnityEngine; // TurretType
-
 namespace IdleDefense.Editor.Simulation
 {
     public readonly struct TurretBlueprint

@@ -26,7 +26,7 @@ namespace Assets.Scripts.WaveSystem
             EnemySpawner.Instance.OnWaveStarted += OnWaveStarted;
             EnemySpawner.Instance.OnWaveCompleted += OnWaveStopped;
             PlayerBaseManager.Instance.OnWaveFailed += OnWaveStopped;
-            
+
         }
 
         private void OnDisable()
@@ -249,7 +249,7 @@ namespace Assets.Scripts.WaveSystem
             //Attack(enemy.Info.Damage);
             bool hitGunner = GunnerManager.Instance.TryApplyDamageForEnemy(enemy, enemy.Info.Damage);
             //if (!hitGunner)
-              //  Debug.Log("All gunners are dead, ignoring attack");
+            //  Debug.Log("All gunners are dead, ignoring attack");
 
             enemy.TimeSinceLastAttack = 0f;
         }

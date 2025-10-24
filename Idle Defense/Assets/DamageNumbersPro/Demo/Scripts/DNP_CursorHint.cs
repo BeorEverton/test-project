@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DamageNumbersPro.Demo
 {
@@ -15,10 +13,11 @@ namespace DamageNumbersPro.Demo
 
         void FixedUpdate()
         {
-            if(Cursor.visible)
+            if (Cursor.visible)
             {
                 cg.alpha = Mathf.Max(cg.alpha - Time.deltaTime * 2f, 0);
-            }else
+            }
+            else
             {
                 cg.alpha = Mathf.Min(cg.alpha + Time.deltaTime * 2f, 1);
             }

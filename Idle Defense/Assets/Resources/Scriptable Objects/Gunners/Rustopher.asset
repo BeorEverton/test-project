@@ -14,10 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GunnerId: rustopher
   DisplayName: Rustopher
+  Area: 2
+  Mood: 2
   IdleSprite: {fileID: 21300000, guid: f0bbee4261dff4cb7bcae5c218b4e05f, type: 3}
   RunSprite: {fileID: 0}
   OnTurretSprite: {fileID: 21300000, guid: b4341a0c02d078c46b6197a29c8045ad, type: 3}
   IdlePhrases: []
+  PraisePhrases: []
+  NegativePhrases: []
+  CombatChatPhrases: []
   BaseHealth: 2000
   BaseDamage: 500
   BaseFireRate: 0

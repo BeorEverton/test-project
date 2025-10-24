@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace DamageNumbersPro.Demo
@@ -33,14 +31,14 @@ namespace DamageNumbersPro.Demo
         {
             rect.anchoredPosition += new Vector2(0, currentSpeed * Time.fixedDeltaTime);
 
-            if(isBroken)
+            if (isBroken)
             {
                 currentSpeed = Mathf.Lerp(currentSpeed, 0, Time.fixedDeltaTime * 3f);
                 transform.localScale += Vector3.one * Time.fixedDeltaTime * 3f;
                 Color color = image.color;
                 color.a -= Time.fixedDeltaTime * 5f;
 
-                if(color.a <= 0)
+                if (color.a <= 0)
                 {
                     Destroy(gameObject);
                 }
@@ -50,7 +48,7 @@ namespace DamageNumbersPro.Demo
                 }
             }
 
-            if(rect.anchoredPosition.y < -270f)
+            if (rect.anchoredPosition.y < -270f)
             {
                 Destroy(gameObject);
             }

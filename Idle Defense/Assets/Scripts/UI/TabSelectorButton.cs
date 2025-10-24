@@ -91,7 +91,8 @@ public class TabSelectorButton : MonoBehaviour
         buttonTransform.DOScale(Vector3.one * 1.15f, 0.1f)
             .SetEase(Ease.OutBack)
             .SetUpdate(true)
-            .OnComplete(() => {
+            .OnComplete(() =>
+            {
                 buttonTransform.DOScale(Vector3.one, 0.1f)
                     .SetEase(Ease.InOutSine)
                     .SetUpdate(true);

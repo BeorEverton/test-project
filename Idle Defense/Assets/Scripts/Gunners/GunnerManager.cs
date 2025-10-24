@@ -56,6 +56,9 @@ public class GunnerManager : MonoBehaviour
     public event Action<int> OnSlotGunnerChanged;
     public event Action<int> OnSlotGunnerStatsChanged;
 
+    // slotIndex -> parked gunner id (slot has NO turret; gunner is hidden and available in UI)
+    private readonly Dictionary<int, string> parkedSlotToGunner = new();
+
     // Helpers for the Limit Break
     public GunnerSO GetSO(string gunnerId) => (soById.TryGetValue(gunnerId, out var so) ? so : null);
 
@@ -111,7 +114,7 @@ public class GunnerManager : MonoBehaviour
     }
 
     private void Wave_OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs e)
-    {        
+    {
         // Heal all gunners at the start of each wave
         HealAllGunners(resetLimitBreak: false);
     }
@@ -147,7 +150,10 @@ public class GunnerManager : MonoBehaviour
         if (slotToGunner.TryGetValue(slotIndex, out var existing))
             UnequipFromSlot(slotIndex);
 
-        // clear previous slot if any
+        // gunner may be parked somewhere: clear that mapping
+        ClearParkForGunner(gunnerId);
+
+        // clear previous active slot
         if (rt.EquippedSlot >= 0)
             slotToGunner.Remove(rt.EquippedSlot);
 
@@ -162,6 +168,7 @@ public class GunnerManager : MonoBehaviour
         OnSlotGunnerChanged?.Invoke(slotIndex);
         return true;
     }
+
 
     public void UnequipFromSlot(int slotIndex)
     {
@@ -268,6 +275,101 @@ public class GunnerManager : MonoBehaviour
         // For now, turrets will query bonuses every Update and stay correct.
     }
 
+    // Used for the chat system
+    /// <summary>
+    /// Returns a unique list of all currently equipped GunnerSOs.    
+    /// </summary>
+    public List<GunnerSO> GetAllEquippedGunners()
+    {
+        var list = new List<GunnerSO>();
+        foreach (var kv in slotToGunner)
+        {
+            var so = GetSO(kv.Value);
+            if (so != null && !list.Contains(so))
+                list.Add(so);
+        }
+        return list;
+    }
+
+    /// <summary>All gunners that are not equipped and available (i.e., not on a quest, not dead).</summary>
+    public List<GunnerSO> GetAllIdleGunners()
+    {
+        var list = new List<GunnerSO>();
+        foreach (var so in allGunners)
+        {
+            if (so == null) continue;
+            if (IsAvailable(so.GunnerId)) // already checks not equipped + IsAvailableNow()
+                list.Add(so);
+        }
+        return list;
+    }
+
+    // Used for the 'parked' gunner slots (no turret; just in UI)
+    /// <summary>Called by slot UI when a turret presence changes.</summary>
+    public void NotifyTurretPresent(int slotIndex, Transform turretAnchor, bool hasTurret)
+    {
+        if (hasTurret)
+        {
+            // Auto-restore parked gunner if still available and not equipped elsewhere
+            if (parkedSlotToGunner.TryGetValue(slotIndex, out var gid))
+            {
+                if (IsAvailable(gid))
+                {
+                    EquipToSlot(gid, slotIndex, turretAnchor);
+                }
+                parkedSlotToGunner.Remove(slotIndex);
+            }
+        }
+        else
+        {
+            // If a gunner is currently on this slot, park them
+            ParkGunnerFromSlot(slotIndex);
+        }
+    }
+
+    /// <summary>Move the currently equipped gunner on this slot into a hidden/parked state.</summary>
+    private void ParkGunnerFromSlot(int slotIndex)
+    {
+        if (!slotToGunner.TryGetValue(slotIndex, out var gunnerId)) return;
+
+        // remove from active mapping (so enemies cannot pick them)
+        slotToGunner.Remove(slotIndex);
+
+        // mark runtime as not equipped, so UI considers them free
+        if (runtimes.TryGetValue(gunnerId, out var rt))
+            rt.EquippedSlot = -1;
+
+        // remember who lived here
+        parkedSlotToGunner[slotIndex] = gunnerId;
+
+        // remove visual/bars/bindings (same cleanup as Unequip)
+        if (visuals.TryGetValue(gunnerId, out var go) && go != null)
+        {
+            Destroy(go);
+            visuals.Remove(gunnerId);
+        }
+        healthBarByGunner.Remove(gunnerId);
+        limitBarByGunner.Remove(gunnerId);
+        billboardByGunner.Remove(gunnerId);
+
+        Save();
+        OnSlotGunnerChanged?.Invoke(slotIndex);
+        OnRosterChanged?.Invoke();
+    }
+
+    /// <summary>Clear any parked mapping for this gunner (used when equipping them elsewhere).</summary>
+    private void ClearParkForGunner(string gunnerId)
+    {
+        int? foundSlot = null;
+        foreach (var kv in parkedSlotToGunner)
+        {
+            if (kv.Value == gunnerId) { foundSlot = kv.Key; break; }
+        }
+        if (foundSlot.HasValue) parkedSlotToGunner.Remove(foundSlot.Value);
+    }
+
+
+
     /* ===================== BUY / UNLOCK ===================== */
     private bool TryGetEntry(string id, out GunnerUnlockTableSO.Entry e)
     {
@@ -287,7 +389,7 @@ public class GunnerManager : MonoBehaviour
         return TryGetEntry(id, out var e) ? e.unlockCost : 0UL;
     }
 
-    public  Currency GetPurchaseCurrency(string id)
+    public Currency GetPurchaseCurrency(string id)
     {
         if (TryGetEntry(id, out var e)) return e.unlockCurrency;
         return Currency.Scraps; // safe default
@@ -312,7 +414,6 @@ public class GunnerManager : MonoBehaviour
         return true;
     }
 
-
     public bool IsPurchasableNow(string id)
     {
         if (!TryGetEntry(id, out var e)) return true; // default permissive
@@ -328,12 +429,10 @@ public class GunnerManager : MonoBehaviour
         return true;
     }
 
-
     public void NotifyExternalUnlocksChanged()
     {
         OnRosterChanged?.Invoke();
     }
-
 
     /* ===================== XP / LEVEL ===================== */
 
@@ -367,7 +466,6 @@ public class GunnerManager : MonoBehaviour
         Save();
     }
 
-
     private void TryLevelUp(GunnerSO so, GunnerRuntime rt)
     {
         bool leveled = false;
@@ -400,7 +498,6 @@ public class GunnerManager : MonoBehaviour
 
         }
     }
-
 
     /* ===================== QUESTS ===================== */
 
@@ -489,7 +586,7 @@ public class GunnerManager : MonoBehaviour
         // 2) add bonuses
         var b = ComputeBonusForSlot(slotIndex);
         intoScratch.Damage += b.Damage;
-        intoScratch.FireRate += b.FireRate;        
+        intoScratch.FireRate += b.FireRate;
         intoScratch.Range += b.Range;
         intoScratch.PercentBonusDamagePerSec += b.PercentBonusDamagePerSec;
         intoScratch.SlowEffect += b.SlowEffect;
@@ -649,7 +746,7 @@ public class GunnerManager : MonoBehaviour
         foreach (var kv in runtimes)
         {
             var rt = kv.Value;
-            rt.Heal(rt.MaxHealth);            
+            rt.Heal(rt.MaxHealth);
             if (resetLimitBreak) rt.ResetLimitBreak();
         }
 
@@ -720,7 +817,7 @@ public class GunnerManager : MonoBehaviour
     public GunnerInventoryDTO ExportToDTO()
     {
         var dto = new GunnerInventoryDTO();
-                
+
         // runtimes
         foreach (var kvp in runtimes)
         {
@@ -760,6 +857,8 @@ public class GunnerManager : MonoBehaviour
         // slot map
         foreach (var kvp in slotToGunner)
             dto.SlotMap.Add(new SlotGunnerDTO { SlotIndex = kvp.Key, GunnerId = kvp.Value });
+
+        dto.OwnedGunners.AddRange(ownedGunners);
 
         return dto;
     }
@@ -823,6 +922,17 @@ public class GunnerManager : MonoBehaviour
             var s = dto.SlotMap[i];
             slotToGunner[s.SlotIndex] = s.GunnerId;
         }
+
+        ownedGunners.Clear();
+        if (dto.OwnedGunners != null)
+        {
+            foreach (var id in dto.OwnedGunners)
+                ownedGunners.Add(id);
+        }
+
+        // Notify listeners that the equip map changed
+        OnSlotGunnerChanged?.Invoke(-1); // -1 = bulk refresh
+        OnRosterChanged?.Invoke();
     }
 
     /* ===================== PRESTIGE RESET ===================== */

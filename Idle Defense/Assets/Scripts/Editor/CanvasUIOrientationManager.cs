@@ -1,8 +1,7 @@
+using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
-using System;
-using System.Collections.Generic;
 
 public class CanvasUIOrientationManager : EditorWindow
 {

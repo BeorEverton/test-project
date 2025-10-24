@@ -1,25 +1,32 @@
-using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public enum PrestigeNodeVisualState
+public enum PrestigeNodeVisualState { LockedUnavailable, Available, Unlocked }
+
+public class PrestigeNodeView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    LockedUnavailable,  // near-black, not faded
-    Available,          // natural color, faded
-    Unlocked            // natural color, full alpha
-}
-
-public class PrestigeNodeView : MonoBehaviour
-{
-    [Header("Refs")]
-    public Image iconImage;         // assign in prefab: the icon
-    public Button button;           // assign in prefab
-    public TMP_Text costText;       // optional; can be null
-    public GameObject highlight;    // optional visual for �available�
-
-    [Header("Runtime")]
-    [HideInInspector] public string NodeId;
+    [Header("Main")]
     public PrestigeNodeSO NodeSO;
+    [HideInInspector] public string NodeId;
+
+    [Header("Icon & Cost")]
+    public Image iconImage;                // big node icon
+    public TMP_Text costText;              // “Owned” or numeric cost
+    public CanvasGroup costPillGroup;      // fades when locked/unbuyable
+
+    [Header("Quick Chips (max 2)")]
+    public Image chipAIcon;
+    public Image chipBIcon;
+    private GameIconManager iconLib;        // Game-wide icon manager
+
+    [Header("UX")]
+    public Button button;                  // opens tooltip (no direct buy!)
+    public GameObject highlight;           // e.g., glow when Available
+    public RectTransform tooltipAnchor;    // usually this rect
 
     // Visual config
     private static readonly Color NearBlack = new Color(0.06f, 0.06f, 0.06f, 1f);
@@ -35,14 +42,21 @@ public class PrestigeNodeView : MonoBehaviour
         NodeSO = node;
         NodeId = node.NodeId;
 
+        if (iconLib == null)
+            iconLib = GameIconManager.Instance;
+
+        if (tooltipAnchor == null) tooltipAnchor = transform as RectTransform;
         if (iconImage != null) iconImage.sprite = node.Icon;
-        RefreshVisual();
 
         if (button != null)
         {
             button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(OnClickBuy);
+            button.onClick.AddListener(OpenTooltip);    // no purchase here
+            button.gameObject.SetActive(true);
+            button.interactable = true;
         }
+
+        RefreshVisual();
     }
 
     public void RefreshVisual()
@@ -50,11 +64,10 @@ public class PrestigeNodeView : MonoBehaviour
         var pm = PrestigeManager.Instance;
         if (pm == null || NodeSO == null) return;
 
-        // Ensure NodeId is set even if Init() wasn't called
         if (string.IsNullOrEmpty(NodeId)) NodeId = NodeSO.NodeId;
 
         bool owned = pm.Owns(NodeId);
-        bool prereqsMet = ComputePrereqsMet(pm, NodeSO); // ignores currency on purpose
+        bool prereqsMet = ComputePrereqsMet(pm, NodeSO);
 
         var state = owned
             ? PrestigeNodeVisualState.Unlocked
@@ -62,86 +75,169 @@ public class PrestigeNodeView : MonoBehaviour
 
         ApplyState(state);
 
+        // Cost text & pill
         if (costText != null)
             costText.text = owned ? "Owned" : NodeSO.CrimsonCost.ToString();
 
-        if (button != null)
-        {
-            // Hide the button entirely once owned so it cannot be bought twice
-            button.gameObject.SetActive(!owned);
+        bool canBuy = !owned && pm.CanBuy(NodeId, out _);
+        if (costPillGroup != null)
+            costPillGroup.alpha = canBuy ? 1f : 0.45f; // fade cost when locked/unbuyable
 
-            // When visible, only allow click if CanBuy (cost + prereqs) is satisfied
-            if (!owned)
-            {
-                string reason;
-                bool canBuy = pm.CanBuy(NodeId, out reason);
-                button.interactable = canBuy;
-            }
-        }
+        // Quick chips (icons only, max 2)
+        RenderQuickChips(NodeSO);
     }
 
-    private void OnClickBuy()
+    // ---------- Quick chips ----------
+    private void RenderQuickChips(PrestigeNodeSO node)
     {
-        Debug.Log($"PrestigeNodeView: OnClickBuy {NodeId}");
-        var pm = PrestigeManager.Instance;
-        if (pm == null) return;
+        if (iconLib == null) return;
 
-        // Fallback safety: ensure NodeId is valid
-        if (string.IsNullOrEmpty(NodeId) && NodeSO != null)
-            NodeId = NodeSO.NodeId;
+        var keys = new List<(string key, float weight)>();
 
-        Debug.Log($"Trying to purchase now {NodeId}");
-        // Try the purchase; PrestigeManager handles prereqs/cost/unlock/save
-        if (pm.TryBuy(NodeId))
-        {
-            // Immediately lock the UI so the player can�t buy twice
-            if (button != null) button.gameObject.SetActive(false);
+        // Unlocks first (priority chips)
+        if (node.UnlockTurretTypes != null && node.UnlockTurretTypes.Count > 0) keys.Add(("unlock_turret", 999));
+        if (node.UnlockGunnerIds != null && node.UnlockGunnerIds.Count > 0) keys.Add(("unlock_gunner", 998));
+        if (node.UnlockLimitBreaks != null && node.UnlockLimitBreaks.Count > 0) keys.Add(("unlock_limitbreak", 997));
 
-            // Update visuals right away (don�t rely solely on external listeners)
-            RefreshVisual();
-            // pm.TryBuy() already calls OnPrestigeChanged and Save()
-        }
-        else
-        {
-            // optional: show feedback for failure here
-            // e.g., shake highlight or briefly tint the icon red
-        }
+        // Numeric effects (weight by |value|)
+        Add(keys, "damage", node.GlobalDamagePct);
+        Add(keys, "firerate", node.GlobalFireRatePct);
+        Add(keys, "crit_chance", node.GlobalCritChancePct);
+        Add(keys, "crit_damage", node.GlobalCritDamagePct);
+        Add(keys, "pierce_chance", node.GlobalPierceChancePct);
+        Add(keys, "range", node.RangePct);
+        Add(keys, "rotation", node.RotationSpeedPct);
+        Add(keys, "explo_radius", node.ExplosionRadiusPct);
+        Add(keys, "splash", node.SplashDamagePct);
+        Add(keys, "pierce_falloff", -node.PierceDamageFalloffPct);
+        Add(keys, "pellet", node.PelletCountPct);
+        Add(keys, "dist_falloff", -node.DamageFalloffOverDistancePct);
+        Add(keys, "bonus_dps", node.PercentBonusDamagePerSecPct);
+        Add(keys, "slow", node.SlowEffectPct);
+        Add(keys, "knockback", node.KnockbackStrengthPct);
+        Add(keys, "bounce_count", node.BounceCountPct);
+        Add(keys, "bounce_range", node.BounceRangePct);
+        Add(keys, "bounce_delay", -node.BounceDelayPct);
+        Add(keys, "bounce_loss", -node.BounceDamagePctPct);
+        Add(keys, "cone_angle", node.ConeAnglePct);
+        Add(keys, "explo_delay", -node.ExplosionDelayPct);
+        Add(keys, "ahead_dist", node.AheadDistancePct);
+        Add(keys, "max_traps", node.MaxTrapsActivePct);
+        Add(keys, "armorpen", node.ArmorPenetrationPct);
+
+        // Economy (show as stat icons, not currency icons)
+        Add(keys, GameIconKeys.ScrapsGainStat.Replace("stat.", ""), node.ScrapsGainPct);
+        Add(keys, GameIconKeys.BlackSteelGainStat.Replace("stat.", ""), node.BlackSteelGainPct);
+
+        // Enemy modifiers (reductions are beneficial → negative value becomes positive weight)
+        Add(keys, GameIconKeys.EnemyHealth.Replace("stat.", ""), -node.EnemyHealthPct);
+        Add(keys, GameIconKeys.EnemyCount.Replace("stat.", ""), -node.EnemyCountPct);
+
+        // Caps
+        Add(keys, GameIconKeys.SpeedCap.Replace("stat.", ""), node.SpeedMultiplierCapBonus);
+        Add(keys, GameIconKeys.DamageCap.Replace("stat.", ""), node.DamageMultiplierCapBonus);
+
+        // Upgrade cost reductions (global + per-type)
+        float largestDiscount = Mathf.Max(0f, node.AllUpgradeCostPct);
+        if (node.PerUpgradeTypeDiscounts != null)
+            for (int i = 0; i < node.PerUpgradeTypeDiscounts.Count; i++)
+                largestDiscount = Mathf.Max(largestDiscount, node.PerUpgradeTypeDiscounts[i].DiscountPct);
+
+        if (largestDiscount > 0.0001f)
+            Add(keys, GameIconKeys.UpgradeCostAll.Replace("stat.", ""), largestDiscount);
+
+        // ── choose two ───────────────────────────────────────────────────────────
+        var chosen = keys
+            .OrderByDescending(k => k.weight)
+            .Select(k => k.key)
+            .Distinct()
+            .Take(2)
+            .ToList();
+
+        // Resolve icons
+        SetIcon(chipAIcon, chosen.Count > 0 ? ResolveIcon(chosen[0]) : null);
+        SetIcon(chipBIcon, chosen.Count > 1 ? ResolveIcon(chosen[1]) : null);
+    }
+
+    // Helpers: keep your existing Add/SetIcon; add this resolver:
+    private Sprite ResolveIcon(string key)
+    {
+        // Unlocks live at root ("unlock.turret"), everything else is under "stat."
+        if (key.StartsWith("unlock_"))
+            return iconLib.Get(key.Replace('_', '.')); // "unlock_turret" → "unlock.turret"
+        return iconLib.Get("stat." + key);
     }
 
 
+    private static void Add(List<(string key, float weight)> list, string key, float v)
+    {
+        if (Mathf.Abs(v) > 0.0001f) list.Add((key, Mathf.Abs(v)));
+    }
+
+    private static void SetIcon(Image img, Sprite s)
+    {
+        if (!img) return;
+        img.sprite = s;
+        img.enabled = s != null;
+    }
+
+    // ---------- Tooltip wiring ----------
+    public void OnPointerEnter(PointerEventData e)
+    {
+        if (PrestigeTooltipUI.Instance != null && NodeSO != null)
+            PrestigeTooltipUI.Instance.Peek(NodeSO, tooltipAnchor);
+    }
+
+    public void OnPointerExit(PointerEventData e)
+    {
+        PrestigeTooltipUI.Instance?.TryHideTransient();
+    }
+
+    public void OnPointerClick(PointerEventData e) => OpenTooltip();
+
+    private void OpenTooltip()
+    {
+        if (PrestigeTooltipUI.Instance == null || NodeSO == null) return;
+
+        if (PrestigeTooltipUI.Instance.IsLocked && PrestigeTooltipUI.Instance.CurrentNodeId != NodeSO.NodeId)
+        {
+            PrestigeTooltipUI.Instance.Lock(NodeSO, tooltipAnchor);
+            return;
+        }
+        PrestigeTooltipUI.Instance.Lock(NodeSO, tooltipAnchor);
+    }
+
+    // ---------- Visual state ----------
     private void ApplyState(PrestigeNodeVisualState state)
     {
-        if (iconImage == null) return;
-
-        switch (state)
+        if (iconImage != null)
         {
-            case PrestigeNodeVisualState.LockedUnavailable:
-                iconImage.color = NearBlack;                 // near black, NOT faded
-                break;
-            case PrestigeNodeVisualState.Available:
-                iconImage.color = Color.white;               // natural color but faded via alpha
-                iconImage.canvasRenderer.SetAlpha(FadeAlpha);
-                break;
-            case PrestigeNodeVisualState.Unlocked:
-                iconImage.color = Color.white;               // natural, full alpha
-                iconImage.canvasRenderer.SetAlpha(1f);
-                break;
+            switch (state)
+            {
+                case PrestigeNodeVisualState.LockedUnavailable:
+                    iconImage.color = NearBlack;
+                    iconImage.canvasRenderer.SetAlpha(1f);
+                    break;
+                case PrestigeNodeVisualState.Available:
+                    iconImage.color = Color.white;
+                    iconImage.canvasRenderer.SetAlpha(FadeAlpha);
+                    break;
+                case PrestigeNodeVisualState.Unlocked:
+                    iconImage.color = Color.white;
+                    iconImage.canvasRenderer.SetAlpha(1f);
+                    break;
+            }
         }
-
         if (highlight != null)
             highlight.SetActive(state == PrestigeNodeVisualState.Available);
     }
 
     private static bool ComputePrereqsMet(PrestigeManager pm, PrestigeNodeSO node)
     {
-        // RequiresAll: all must be owned
         if (node.RequiresAll != null && node.RequiresAll.Count > 0)
-        {
             for (int i = 0; i < node.RequiresAll.Count; i++)
                 if (!pm.Owns(node.RequiresAll[i])) return false;
-        }
 
-        // RequiresAny: if there are entries, at least one must be owned
         if (node.RequiresAny != null && node.RequiresAny.Count > 0)
         {
             bool anyOwned = false;
@@ -149,24 +245,19 @@ public class PrestigeNodeView : MonoBehaviour
                 if (pm.Owns(node.RequiresAny[i])) { anyOwned = true; break; }
             if (!anyOwned) return false;
         }
-
         return true;
     }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // Ensure NodeId is set even in Edit mode
         if (NodeSO != null)
         {
             NodeId = NodeSO.NodeId;
             if (iconImage != null && NodeSO.Icon != null)
                 iconImage.sprite = NodeSO.Icon;
-            // Optional: keep the icon position in sync with the SO
-            // var rt = transform as RectTransform;
-            // if (rt != null) rt.anchoredPosition = NodeSO.AnchoredPosition;
         }
+        if (tooltipAnchor == null) tooltipAnchor = transform as RectTransform;
     }
 #endif
-
 }

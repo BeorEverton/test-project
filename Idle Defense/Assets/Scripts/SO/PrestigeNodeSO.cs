@@ -23,6 +23,16 @@ public class PrestigeNodeSO : ScriptableObject
     [Header("Cost")]
     public int CrimsonCost = 1;        // price in Crimson Core
 
+    [Header("Repeatable / Levels")]
+    [Tooltip("If true, this node can be purchased multiple times. Each level re-applies the same effect.")]
+    public bool Repeatable = false;
+
+    [Tooltip("Max allowed level when Repeatable is true. 0 = no cap (infinite).")]
+    public int MaxLevel = 0;
+
+    [Tooltip("Cost grows by this factor every time you upgrade. Default is x2.")]
+    public float CostGrowthMultiplier = 2f;
+
     [Header("Effects — Global Multipliers (additive in %)")]
     public float GlobalDamagePct;
     public float GlobalFireRatePct;

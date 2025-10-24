@@ -46,7 +46,7 @@ namespace Assets.Scripts.SO
         public float RangeUpgradeAmount;
         public float RangeUpgradeBaseCost;
         public int RangeLevel;
-        public float RangeCostExponentialMultiplier;        
+        public float RangeCostExponentialMultiplier;
 
         [Header("TARGETTING PATTERNS")]
 
@@ -71,7 +71,7 @@ namespace Assets.Scripts.SO
         public int ExplosionRadiusLevel;
         public float ExplosionRadiusUpgradeAmount;
         public float ExplosionRadiusUpgradeBaseCost;
-        public float ExplosionRadiusCostExponentialMultiplier;                
+        public float ExplosionRadiusCostExponentialMultiplier;
 
         [Header("Piercing Pattern")]
         [Tooltip("Chance for the bullet to pierce through an enemy")]
@@ -142,7 +142,7 @@ namespace Assets.Scripts.SO
         public int AheadDistanceLevel;
         public float AheadDistanceUpgradeAmount;
         public float AheadDistanceUpgradeBaseCost;
-        public float AheadDistanceCostExponentialMultiplier;        
+        public float AheadDistanceCostExponentialMultiplier;
 
         [Tooltip("Maximum number of active traps this turret can have at once")]
         public int MaxTrapsActive;

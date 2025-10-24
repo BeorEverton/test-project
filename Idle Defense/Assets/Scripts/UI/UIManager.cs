@@ -29,12 +29,12 @@ namespace Assets.Scripts.UI
             = new System.Collections.Generic.Dictionary<string, LimitBreakBarUI>();
 
         [Header("Equip Management")]
-        [SerializeField] private GameObject equipPanel;   
+        [SerializeField] private GameObject equipPanel;
         [SerializeField] private GameObject permanentEquipPanel;
         [SerializeField] private TextMeshProUGUI toast;   // 1-line overlay
         public GameObject wallUpgradePanel;
 
-        [Header("Death Screen")]        
+        [Header("Death Screen")]
         [SerializeField] private GameObject deathCountdownPanel, startGamePanel;
         [SerializeField] private TextMeshProUGUI countdownText;
         [SerializeField] private Button immediateRestartButton;
@@ -329,6 +329,16 @@ namespace Assets.Scripts.UI
             }
             GameManager.Instance.ChangeGameState(GameState.InGame); // Change game state to regular
         }
+
+        public void ShowManualAdvanceButton(bool show, bool persist = true)
+        {
+            if (persist)
+                SaveGameManager.Instance.SaveGame();
+
+            if (advanceWaveButton != null)
+                advanceWaveButton.SetActive(show);
+        }
+
         #endregion
 
         public void PauseGame(bool pause)

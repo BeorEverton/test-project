@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DamageNumbersPro.Demo
@@ -35,7 +34,7 @@ namespace DamageNumbersPro.Demo
 
         public void Hit()
         {
-            if(hitRoutine != null)
+            if (hitRoutine != null)
             {
                 StopCoroutine(hitRoutine);
             }
@@ -57,7 +56,7 @@ namespace DamageNumbersPro.Demo
         {
             float brightness = 1f;
 
-            while( brightness < 3f)
+            while (brightness < 3f)
             {
                 //Glow up.
                 brightness = Mathf.Min(3, Mathf.Lerp(brightness, 3 + 0.1f, Time.deltaTime * 20f));
@@ -66,7 +65,7 @@ namespace DamageNumbersPro.Demo
                 yield return null;
             }
 
-            while(brightness > defaultBrightness)
+            while (brightness > defaultBrightness)
             {
                 //Glow down.
                 brightness = Mathf.Max(defaultBrightness, Mathf.Lerp(brightness, defaultBrightness - 0.1f, Time.deltaTime * 10f));
@@ -82,13 +81,13 @@ namespace DamageNumbersPro.Demo
 
             float angle = 0f;
 
-            while(angle < 180f)
+            while (angle < 180f)
             {
                 angle = Mathf.Min(180, Mathf.Lerp(angle, 190f, Time.deltaTime * 7f));
                 transform.eulerAngles = new Vector3(angle, 0, 0);
                 yield return null;
 
-                if(angle > 150f)
+                if (angle > 150f)
                 {
                     flipping = false;
                 }

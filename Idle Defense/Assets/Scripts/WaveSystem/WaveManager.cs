@@ -3,12 +3,12 @@ using Assets.Scripts.SO;
 using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Systems.Save;
+using Assets.Scripts.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.WaveSystem
 {
@@ -32,8 +32,8 @@ namespace Assets.Scripts.WaveSystem
         private int _currentWave = 1; //Overall wave index
         private bool _waveCompleted = false;
         private bool _waveLost = false;
-
-        private bool _autoAdvanceEnabled = true;     // when false, player must click to start the next wave
+                
+        public bool _autoAdvanceEnabled = true;     // when false, player must click to start the next wave
 
         private void Awake()
         {
@@ -50,21 +50,34 @@ namespace Assets.Scripts.WaveSystem
             StartCoroutine(StartWaveRoutine());
 
             EnemySpawner.Instance.OnWaveCompleted += EnemySpawner_OnWaveCompleted;
-            PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
+            if (PlayerBaseManager.Instance != null)
+                PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
+
+            // When all equipped gunners die
+            if (GunnerManager.Instance != null)
+                GunnerManager.Instance.OnAllEquippedGunnersDead += HandleAllEquippedGunnersDead;
+
         }
 
         public int GetCurrentWaveIndex() => _currentWave;
         public Wave GetCurrentWave() => _waves[_currentWave];
 
         public void LoadWave(int waveNumber)
-        {            
-            
+        {
             _currentWave = Mathf.Clamp(waveNumber, 1, int.MaxValue);
         }
 
         private void EnemySpawner_OnWaveCompleted(object sender, EventArgs e)
         {
             _waveCompleted = true;
+
+            // Chatter: wave beaten (praise)
+            if (GunnerManager.Instance != null)
+            {
+                var eq = GunnerManager.Instance.GetAllEquippedGunners();
+                if (eq != null && eq.Count > 0)
+                    GunnerChatterSystem.TryTrigger(GunnerEvent.WaveEnd, eq[UnityEngine.Random.Range(0, eq.Count)], null, 1f);
+            }
         }
 
         private void PlayerBaseManager_OnWaveFailed(object sender, EventArgs e)
@@ -74,16 +87,32 @@ namespace Assets.Scripts.WaveSystem
             StopAllCoroutines();
 
             _autoAdvanceEnabled = false;
+
+            // Chatter: wave lost (negative)
+            if (GunnerManager.Instance != null)
+            {
+                var eq = GunnerManager.Instance.GetAllEquippedGunners();
+                if (eq != null && eq.Count > 0)
+                    GunnerChatterSystem.TryTrigger(GunnerEvent.NearlyDead, eq[UnityEngine.Random.Range(0, eq.Count)], null, 1f);
+            }
         }
 
         private IEnumerator StartWaveRoutine()
         {
             while (GameRunning)
-            {                
+            {
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
                     WaveNumber = _currentWave
                 });
+
+                // Gunner chatter at start of wave
+                if (GunnerManager.Instance != null)
+                {
+                    var eq = GunnerManager.Instance.GetAllEquippedGunners();
+                    if (eq != null && eq.Count > 0)
+                        GunnerChatterSystem.TryTrigger(GunnerEvent.WaveStart, eq[UnityEngine.Random.Range(0, eq.Count)]);
+                }
 
                 // Tell PrestigeManager a new wave began so it can update eligibility
                 if (PrestigeManager.Instance != null)
@@ -98,6 +127,7 @@ namespace Assets.Scripts.WaveSystem
                 {
                     if (_waves.TryGetValue(_currentWave, out Wave wave))
                     {
+
                         _enemySpawner.StartWave(wave);
                     }
                     else
@@ -117,12 +147,12 @@ namespace Assets.Scripts.WaveSystem
                 yield return new WaitUntil(() => _waveCompleted || _waveLost);
 
                 if (_waveCompleted)
-                {                    
+                {
                     if (_autoAdvanceEnabled)
                     {
                         _currentWave++;
                         StatsManager.Instance.TotalZonesSecured++;
-                        StatsManager.Instance.MaxZone = _currentWave;                        
+                        StatsManager.Instance.MaxZone = _currentWave;
                     }
                 }
 
@@ -275,7 +305,7 @@ namespace Assets.Scripts.WaveSystem
             StopAllCoroutines();
             _waveCompleted = false;
             _waveLost = false;
-            
+
             GameRunning = true;
             StartCoroutine(StartWaveRoutine());
         }
@@ -296,15 +326,19 @@ namespace Assets.Scripts.WaveSystem
             _waveCompleted = true;
         }
 
-
         public void AbortWaveAndDespawnAll()
         {
-            StopAllCoroutines();              // stop spawning
-            _enemySpawner.DespawnAllActiveEnemies();        // loop active list and return to pool
+            // Stop our own loops first
+            StopAllCoroutines();
+
+            if (_enemySpawner != null)
+                _enemySpawner.AbortWaveAndDespawnAll();
+
+            // Ensure local flags are clean
+            _waveCompleted = false;
+            _waveLost = false;
+            GameRunning = false;
         }
-
-        /// <summary>Called by the UI “Advance” button when manual gating is active.</summary>
-
 
         /// <summary>Optional UI toggle for auto-advance (e.g., a settings checkbox).</summary>
         public void SetAutoAdvanceEnabled(bool enabled)
@@ -312,6 +346,36 @@ namespace Assets.Scripts.WaveSystem
             _autoAdvanceEnabled = enabled;
         }
         public bool IsAutoAdvanceEnabled() => _autoAdvanceEnabled;
+
+        private void HandleAllEquippedGunnersDead()
+        {
+            var wave = GetCurrentWave();                 // Wave has boss/miniboss helpers
+            if (wave == null) return;
+
+            // Only for boss / mini-boss waves
+            if (!(wave.IsBossWave() || wave.IsMiniBossWave()))
+                return;                                  // ignore normal waves
+                                                         // (EnemySpawner also uses these helpers)
+                                                         // :contentReference[oaicite:6]{index=6}
+
+            // We want manual control for the next increment
+            _autoAdvanceEnabled = false;                 // finishing the rollback wave will NOT advance. :contentReference[oaicite:7]{index=7}
+
+            // Roll back exactly one wave (clamped to 1)
+            int prev = Mathf.Max(1, GetCurrentWaveIndex() - 1);  // :contentReference[oaicite:8]{index=8}
+
+            // Clear current wave immediately (no rewards/FX)
+            if (_enemySpawner != null)
+                _enemySpawner.AbortWaveAndDespawnAll();          // :contentReference[oaicite:9]{index=9}
+
+            LoadWave(prev);                                      // set wave index (clamped) :contentReference[oaicite:10]{index=10}
+            ForceRestartWave();                                  // restart loop cleanly        :contentReference[oaicite:11]{index=11}
+
+            // Reveal the manual-advance button
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowManualAdvanceButton(true); // method added below
+        }
+
 
         #endregion
 

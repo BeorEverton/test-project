@@ -1,8 +1,8 @@
+using Assets.Scripts.Turrets;
+using Assets.Scripts.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Assets.Scripts.Turrets;
-using Assets.Scripts.UI;
 
 public class EquipItemButton : MonoBehaviour
 {
@@ -91,5 +91,5 @@ public class EquipItemButton : MonoBehaviour
         return dmgPerProj * pellets * shotsPerSec;
     }
 
-    
+
 }

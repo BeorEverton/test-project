@@ -1,15 +1,14 @@
 ﻿#if UNITY_EDITOR
 
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
 using TMPro;
-using DamageNumbersPro;
-using UnityEngine.Rendering;
+using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.Rendering;
 
-namespace DamageNumbersPro.Internal {
+namespace DamageNumbersPro.Internal
+{
     public static class DNPEditorInternal
     {
         //Public:
@@ -24,7 +23,7 @@ namespace DamageNumbersPro.Internal {
         static Transform[] meshBs;
 
         //Presets:
-        static Dictionary<string,DNPPreset[]> allPresets;
+        static Dictionary<string, DNPPreset[]> allPresets;
 
         //GUI Resources:
         public static GUIStyle labelStyle;
@@ -73,7 +72,7 @@ namespace DamageNumbersPro.Internal {
             textMeshPros = new TextMeshPro[damageNumbers.Length];
             meshAs = new Transform[damageNumbers.Length];
             meshBs = new Transform[damageNumbers.Length];
-            if(isMesh)
+            if (isMesh)
             {
                 for (int n = 0; n < damageNumbers.Length; n++)
                 {
@@ -152,7 +151,7 @@ namespace DamageNumbersPro.Internal {
             {
                 //Banner:
                 EditorGUILayout.BeginVertical();
-                GUILayout.Label("", GUILayout.Height(100 + 0.38f * Mathf.Min(0,EditorGUIUtility.currentViewWidth - 430)));
+                GUILayout.Label("", GUILayout.Height(100 + 0.38f * Mathf.Min(0, EditorGUIUtility.currentViewWidth - 430)));
                 bannerRect = GUILayoutUtility.GetLastRect();
                 float ratio = (bannerRect.width / bannerRect.height) / 8f;
                 Rect clipRect = new Rect((1 - ratio) * 0.5f, 0, ratio, 1);
@@ -192,7 +191,7 @@ namespace DamageNumbersPro.Internal {
 
                 //Calculate Width for GUI Scaling:
                 float newWidth = GUILayoutUtility.GetLastRect().width;
-                if(newWidth > 50)
+                if (newWidth > 50)
                 {
                     currentWidth = newWidth;
                 }
@@ -214,18 +213,18 @@ namespace DamageNumbersPro.Internal {
             BoxRect(lastRect);
 
             string rotAndScaleText = "Rotation & Size";
-            if(currentWidth < 388)
+            if (currentWidth < 388)
             {
                 rotAndScaleText = "<size=11>Rotation & Size</size>";
 
-                if(currentWidth < 356)
+                if (currentWidth < 356)
                 {
                     rotAndScaleText = "<size=10>Rotation & Size</size>";
 
                     if (currentWidth < 324)
                     {
                         rotAndScaleText = "<size=9>Rotation & Size</size>";
-                        
+
                         if (currentWidth < 303)
                         {
                             rotAndScaleText = "<size=8>Rotation & Size</size>";
@@ -240,7 +239,7 @@ namespace DamageNumbersPro.Internal {
             }
 
             string spamText = "Spam Control";
-            if(currentWidth < 340)
+            if (currentWidth < 340)
             {
                 spamText = "<size=11>Spam Control</size>";
 
@@ -261,7 +260,7 @@ namespace DamageNumbersPro.Internal {
             }
 
             string performanceText = "Performance";
-            if(currentWidth < 336)
+            if (currentWidth < 336)
             {
                 performanceText = "<size=11>Performance</size>";
 
@@ -277,7 +276,7 @@ namespace DamageNumbersPro.Internal {
             }
 
             string movementText = "Movement";
-            if(currentWidth < 293)
+            if (currentWidth < 293)
             {
                 movementText = "<size=11>Movement</size>";
 
@@ -324,9 +323,9 @@ namespace DamageNumbersPro.Internal {
             EditorGUILayout.BeginVertical();
 
             GUI.color = new Color(1, 1, 1f, 0.75f);
-            if(currentWidth < 285)
+            if (currentWidth < 285)
             {
-                if(currentWidth < 265)
+                if (currentWidth < 265)
                 {
                     Label("<size=10><b>Thank you for using Damage Numbers Pro.</b></size>");
                 }
@@ -347,7 +346,7 @@ namespace DamageNumbersPro.Internal {
 
             //Link Shrinking:
             string docLink = "https://ekincantas.com/damage-numbers-pro/";
-            if(currentWidth < 420f)
+            if (currentWidth < 420f)
             {
                 docLink = "https://ekincantas.com/damage-numbers...";
 
@@ -359,7 +358,7 @@ namespace DamageNumbersPro.Internal {
                     {
                         docLink = "https://ekincantas.com/...";
 
-                        if(currentWidth < 293)
+                        if (currentWidth < 293)
                         {
                             docLink = "Open Link";
                         }
@@ -398,11 +397,11 @@ namespace DamageNumbersPro.Internal {
 
 
             string emailPrefix = "<b>Email:</b>";
-            if(currentWidth < 259)
+            if (currentWidth < 259)
             {
                 emailPrefix = "<size=11><b>Email:</b></size>";
 
-                if(currentWidth < 256)
+                if (currentWidth < 256)
                 {
                     emailPrefix = "<size=10><b>Email:</b></size>";
 
@@ -413,7 +412,7 @@ namespace DamageNumbersPro.Internal {
                 }
             }
 
-            EditorGUILayout.LabelField(emailPrefix, labelStyle, GUILayout.Width(100 + Mathf.Min(0,(currentWidth - 320))));
+            EditorGUILayout.LabelField(emailPrefix, labelStyle, GUILayout.Width(100 + Mathf.Min(0, (currentWidth - 320))));
             EditorGUILayout.SelectableLabel("<b>ekincantascontact@gmail.com</b>", linkStyle, GUILayout.Height(16));
             EditorGUILayout.EndHorizontal();
 
@@ -464,7 +463,7 @@ namespace DamageNumbersPro.Internal {
                 textMeshProTab = damageNumbers.Length + " TextMeshPros";
                 materialTab = "Materials";
             }
-            if(currentWidth < 266)
+            if (currentWidth < 266)
             {
                 textMeshProTab = "<size=11>" + textMeshProTab + "</size>";
             }
@@ -481,7 +480,7 @@ namespace DamageNumbersPro.Internal {
             tabRect.height = 25;
 
             //Draw Tab:
-            currentEditor = GUI.Toolbar(tabRect, currentEditor, new string[] { "Presets", materialTab , textMeshProTab });
+            currentEditor = GUI.Toolbar(tabRect, currentEditor, new string[] { "Presets", materialTab, textMeshProTab });
 
             //Box Tab Rect:
             tabRect.y += 23;
@@ -555,11 +554,11 @@ namespace DamageNumbersPro.Internal {
                         }
 
                         TextMeshProUGUI[] tmps = new TextMeshProUGUI[damageNumbers.Length];
-                        for(int i = 0; i < damageNumbers.Length; i++)
+                        for (int i = 0; i < damageNumbers.Length; i++)
                         {
                             TMP_Text tmpText = damageNumbers[i].GetTextMesh();
 
-                            if(tmpText.GetType() == typeof(TextMeshProUGUI))
+                            if (tmpText.GetType() == typeof(TextMeshProUGUI))
                             {
                                 tmps[i] = (TextMeshProUGUI)tmpText;
                             }
@@ -586,10 +585,10 @@ namespace DamageNumbersPro.Internal {
                         }
 
                         //Match both TMPs:
-                        foreach(DamageNumber dn in damageNumbers)
+                        foreach (DamageNumber dn in damageNumbers)
                         {
                             TMP_Text[] tmps = dn.GetTextMeshs();
-                            if(tmps.Length > 1)
+                            if (tmps.Length > 1)
                             {
                                 EditorUtility.CopySerialized(((TextMeshProUGUI)tmps[0]), ((TextMeshProUGUI)tmps[1]));
                             }
@@ -662,7 +661,7 @@ namespace DamageNumbersPro.Internal {
 
             DNPPreset[] presets = allPresets[category];
 
-            if(presets == null || presets.Length == 0)
+            if (presets == null || presets.Length == 0)
             {
                 GUI.color = new Color(1, 1, 1, 0.7f);
                 Label("Presets could not be loaded.");
@@ -672,11 +671,11 @@ namespace DamageNumbersPro.Internal {
             }
 
             int buttonsPerRow = 4;
-            if(EditorGUIUtility.currentViewWidth < 440)
+            if (EditorGUIUtility.currentViewWidth < 440)
             {
                 buttonsPerRow = 3;
 
-                if(EditorGUIUtility.currentViewWidth < 375)
+                if (EditorGUIUtility.currentViewWidth < 375)
                 {
                     buttonsPerRow = 2;
                 }
@@ -689,13 +688,13 @@ namespace DamageNumbersPro.Internal {
                 bool isApplied = true;
                 foreach (DamageNumber dn in damageNumbers)
                 {
-                    if(!preset.IsApplied(dn))
+                    if (!preset.IsApplied(dn))
                     {
                         isApplied = false;
                         break;
                     }
                 }
-                if(isApplied)
+                if (isApplied)
                 {
                     GUI.enabled = false;
                 }
@@ -704,7 +703,7 @@ namespace DamageNumbersPro.Internal {
                 currentCount++;
                 if (currentCount % buttonsPerRow == 1)
                 {
-                    if(currentCount > 1)
+                    if (currentCount > 1)
                     {
                         EditorGUILayout.EndHorizontal();
                     }
@@ -716,7 +715,7 @@ namespace DamageNumbersPro.Internal {
                 //Apply Button:
                 if (GUILayout.Button(preset.name))
                 {
-                    if(isMesh)
+                    if (isMesh)
                     {
                         Object[] undoObjects = new Object[damageNumbers.Length + textMeshPros.Length];
                         for (int i = 0; i < damageNumbers.Length; i++)
@@ -743,12 +742,12 @@ namespace DamageNumbersPro.Internal {
                         Undo.RecordObjects(undoObjects, "Applied the [" + preset.name + "] " + category + " Preset.");
                     }
 
-                    foreach(DamageNumber dn in damageNumbers)
+                    foreach (DamageNumber dn in damageNumbers)
                     {
                         preset.Apply(dn);
                     }
 
-                    foreach(DamageNumber dn in damageNumbers)
+                    foreach (DamageNumber dn in damageNumbers)
                     {
                         dn.UpdateText();
                     }
@@ -761,7 +760,7 @@ namespace DamageNumbersPro.Internal {
             GUI.enabled = false;
             GUI.color = new Color(0, 0, 0, 0);
             int modulo = currentCount % buttonsPerRow;
-            if(modulo > 0)
+            if (modulo > 0)
             {
                 for (int n = 0; n < buttonsPerRow - modulo; n++)
                 {
@@ -784,7 +783,7 @@ namespace DamageNumbersPro.Internal {
             //Check if structure is flawed.
             bool isStructureFlawed = false;
             bool isOutdated = false;
-            if(isMesh)
+            if (isMesh)
             {
                 for (int n = 0; n < damageNumbers.Length; n++)
                 {
@@ -831,7 +830,7 @@ namespace DamageNumbersPro.Internal {
                 GUI.color = new Color(1, 1, 0.8f);
                 if (GUILayout.Button(isOutdated ? "Upgrade Structure" : "Build Structure", GUILayout.Width(140)))
                 {
-                    if(isMesh)
+                    if (isMesh)
                     {
                         foreach (DamageNumber dn in damageNumbers)
                         {
@@ -927,7 +926,7 @@ namespace DamageNumbersPro.Internal {
             }
 
             //Add Rect Component:
-            if(go.GetComponent<RectTransform>() == null)
+            if (go.GetComponent<RectTransform>() == null)
             {
                 go.AddComponent<RectTransform>();
             }
@@ -1012,13 +1011,13 @@ namespace DamageNumbersPro.Internal {
                 }
                 tmp.gameObject.SetActive(false);
             }
-            
-            foreach(Transform meshA in meshAs)
+
+            foreach (Transform meshA in meshAs)
             {
-                for(int n = 0; n < meshA.childCount; n++)
+                for (int n = 0; n < meshA.childCount; n++)
                 {
                     Transform child = meshA.GetChild(n);
-                    if(child.GetComponent<MeshRenderer>() != null)
+                    if (child.GetComponent<MeshRenderer>() != null)
                     {
                         destroyedSomething = true;
                         DestroyOrDisable(child.gameObject);
@@ -1039,9 +1038,9 @@ namespace DamageNumbersPro.Internal {
                 }
             }
 
-            if(destroyedSomething)
+            if (destroyedSomething)
             {
-                foreach(DamageNumber dn in damageNumbers)
+                foreach (DamageNumber dn in damageNumbers)
                 {
                     dn.GetReferences();
                 }
@@ -1076,7 +1075,7 @@ namespace DamageNumbersPro.Internal {
         }
         static void PrepareStyles()
         {
-            if(generatedGUIStyles)
+            if (generatedGUIStyles)
             {
                 return;
             }
@@ -1113,9 +1112,9 @@ namespace DamageNumbersPro.Internal {
             whiteBoxStyle.hover.background = whiteBoxStyle.onHover.background = whiteBoxTexture;
 
             //Rich Everything:
-            for(int n = 0; n < GUI.skin.customStyles.Length; n++)
+            for (int n = 0; n < GUI.skin.customStyles.Length; n++)
             {
-                if(GUI.skin.customStyles[n] != null)
+                if (GUI.skin.customStyles[n] != null)
                 {
                     GUI.skin.customStyles[n].richText = true;
                 }
@@ -1201,7 +1200,7 @@ namespace DamageNumbersPro.Internal {
 
         public static string CheckmarkString(bool state)
         {
-            if(EditorGUIUtility.isProSkin)
+            if (EditorGUIUtility.isProSkin)
             {
                 return state ? "<size=15><b><color=#00FF00>✓</color></b></size>" : "<size=16><b><color=#FF0000>✗</color></b></size>";
             }

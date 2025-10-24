@@ -65,7 +65,7 @@ public class PiercingLinePattern : MonoBehaviour, ITargetingPattern
             float distance = DistanceFromBulletLineSegmentXZ(
                 enemy.transform.position,
                 startPos,
-                extendedWorld   
+                extendedWorld
             );
 
 

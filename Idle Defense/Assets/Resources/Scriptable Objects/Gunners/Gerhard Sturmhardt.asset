@@ -14,10 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GunnerId: gerhard
   DisplayName: Gerhard Sturmhardt
+  Area: 4
+  Mood: 0
   IdleSprite: {fileID: 21300000, guid: c274e02c2a7ba4ca28e2668def36b52b, type: 3}
   RunSprite: {fileID: 0}
   OnTurretSprite: {fileID: 21300000, guid: 53a1887c270a0c0408815e913aec635c, type: 3}
-  IdlePhrases: []
+  IdlePhrases:
+  - It's getting boring here
+  PraisePhrases: []
+  NegativePhrases: []
+  CombatChatPhrases:
+  - Get that!
   BaseHealth: 50
   BaseDamage: 50
   BaseFireRate: 0

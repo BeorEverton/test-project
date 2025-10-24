@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DamageNumbersPro
 {
     [System.Serializable]
     public struct DistanceScalingSettings
     {
-        public DistanceScalingSettings (float customDefault)
+        public DistanceScalingSettings(float customDefault)
         {
             baseDistance = 15f;
             closeDistance = 5f;

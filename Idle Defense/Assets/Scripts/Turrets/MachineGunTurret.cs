@@ -7,7 +7,7 @@ namespace Assets.Scripts.Turrets
 {
     public class MachineGunTurret : BaseTurret
     {
-        
+
 
         protected override void Start()
         {

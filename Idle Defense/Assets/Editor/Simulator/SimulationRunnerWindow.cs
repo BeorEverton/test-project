@@ -1,6 +1,3 @@
-using UnityEditor;
-using UnityEngine;
-
 namespace IdleDefense.Editor.Simulation
 {/*
     public class SimulationRunnerWindow : EditorWindow

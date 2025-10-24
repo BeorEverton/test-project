@@ -248,6 +248,13 @@ public class LimitBreakManager : MonoBehaviour
         var ctx = new LimitBreakContext { GunnerId = gunnerId, GunnerSO = so, Runtime = rt };
         skill.Activate(ctx);
         Assets.Scripts.Systems.Save.SaveGameManager.Instance?.SaveGame();
+
+        // Notify chatter
+        var chatter = FindFirstObjectByType<GunnerChatterSystem>();
+        if (chatter != null)
+        {
+            chatter.TriggerEvent(GunnerEvent.LimitBreak, so, null, 1f);
+        }
         return true;
     }
 

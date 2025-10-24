@@ -1,12 +1,11 @@
+using Assets.Scripts.WaveSystem;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Assets.Scripts.WaveSystem;
 
 
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
 
 namespace Assets.Scripts.Systems
@@ -30,11 +29,11 @@ namespace Assets.Scripts.Systems
         private void Start()
         {
             // Define speed steps based on platform
-//#if UNITY_EDITOR
+            //#if UNITY_EDITOR
             speedOptions = new List<float> { 1f, 1.5f, 2f, 3f, 5f, 10f };
-//#else
+            //#else
             //speedOptions = new List<float> { 1f, 1.5f, 2f };
-//#endif
+            //#endif
 
             speedToggleButton.onClick.AddListener(AdvanceGameSpeed);
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;

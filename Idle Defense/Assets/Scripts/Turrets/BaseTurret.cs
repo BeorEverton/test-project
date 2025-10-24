@@ -205,6 +205,14 @@ namespace Assets.Scripts.Turrets
 
             _recoil?.AddRecoil();
 
+            // Light combat chatter (small chance per shot)
+            if (GunnerManager.Instance != null && Random.value < 0.05f)
+            {
+                string gid = GunnerManager.Instance.GetEquippedGunnerId(SlotIndex);
+                var so = GunnerManager.Instance.GetSO(gid);
+                if (so != null)
+                    GunnerChatterSystem.TryForceCombat(so);
+            }
 
             _timeSinceLastShot = 0f;
         }
@@ -247,8 +255,8 @@ namespace Assets.Scripts.Turrets
                 return false;
 
             Vector3 pos = _targetEnemy.transform.position;
-            return pos.x >= screenBounds.Left&& pos.x <= screenBounds.Right &&
-                   pos.y >= screenBounds.Bottom && pos.y <= (screenBounds.Top- _topSpawnMargin);
+            return pos.x >= screenBounds.Left && pos.x <= screenBounds.Right &&
+                   pos.y >= screenBounds.Bottom && pos.y <= (screenBounds.Top - _topSpawnMargin);
         }
 
         protected virtual void Enemy_OnDeath(object sender, EventArgs _)
@@ -497,7 +505,7 @@ namespace Assets.Scripts.Turrets
         }
 
         public static TurretStatsInstance CloneStatsWithoutLevels(TurretStatsInstance src)
-        {            
+        {
             return new TurretStatsInstance
             {
                 // Identity / base
@@ -656,7 +664,7 @@ namespace Assets.Scripts.Turrets
                 ExplosionDelayUpgradeBaseCost = src.ExplosionDelayUpgradeBaseCost,
                 ExplosionDelayCostExponentialMultiplier = src.ExplosionDelayCostExponentialMultiplier,
 
-        
+
                 // flight and armor 
                 CanHitFlying = src.CanHitFlying,
                 ArmorPenetration = src.ArmorPenetration,
@@ -669,7 +677,7 @@ namespace Assets.Scripts.Turrets
         }
 
         public TurretStatsInstance GetUpgradeableStats(Currency currency)
-        {         
+        {
             return currency == Currency.BlackSteel ? PermanentStats : RuntimeStats;
         }
 
@@ -685,22 +693,22 @@ namespace Assets.Scripts.Turrets
 
             // Baseline
             if (stats.Damage > 0 || stats.DamageUpgradeAmount > 0)
-                DamageEffects.AddEffect(new FlatDamageEffect()); 
+                DamageEffects.AddEffect(new FlatDamageEffect());
 
             // Crit
             if (stats.CriticalChance > 0 || stats.CriticalChanceUpgradeAmount > 0)
-                DamageEffects.AddEffect(new CriticalHitEffect()); 
+                DamageEffects.AddEffect(new CriticalHitEffect());
 
             // Knockback
             if (stats.KnockbackStrength > 0 || stats.KnockbackStrengthUpgradeAmount > 0)
-                DamageEffects.AddEffect(new KnockbackEffect()); 
+                DamageEffects.AddEffect(new KnockbackEffect());
 
             // Bounce chain damage
             if (stats.BounceCount > 0 || stats.BounceCountUpgradeAmount > 0)
             {
                 var bounceEffect = new BounceDamageEffect(stats.BounceDamagePct);
                 BounceDamageEffectRef = bounceEffect;
-                DamageEffects.AddEffect(bounceEffect); 
+                DamageEffects.AddEffect(bounceEffect);
             }
 
             // Damage ramp (DoT-like ramp over time on target)
@@ -709,19 +717,19 @@ namespace Assets.Scripts.Turrets
 
             // Slow
             if (stats.SlowEffect > 0 || stats.SlowEffectUpgradeAmount > 0)
-                DamageEffects.AddEffect(new SlowEffect()); 
+                DamageEffects.AddEffect(new SlowEffect());
 
             // Pierce
             if (stats.PierceChance > 0 || stats.PierceChanceUpgradeAmount > 0)
             {
                 var pierceEffect = new PierceDamageEffect(stats.PierceDamageFalloff);
                 DamageEffects.AddEffect(pierceEffect);
-                PierceDamageEffectRef = pierceEffect; 
+                PierceDamageEffectRef = pierceEffect;
             }
 
             // Splash (secondary targets)
             if (stats.SplashDamage > 0 || stats.SplashDamageUpgradeAmount > 0)
-                SplashDamageEffectRef = new SplashDamageEffect(); 
+                SplashDamageEffectRef = new SplashDamageEffect();
 
             // Always-on final multiplier from LimitBreakManager (LB damage + click damage %)
             DamageEffects.AddEffect(new LimitBreakDamageEffect());

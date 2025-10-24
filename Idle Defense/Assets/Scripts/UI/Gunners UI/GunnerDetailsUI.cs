@@ -38,9 +38,9 @@ public class GunnerDetailsUI : MonoBehaviour
     public Button unequipButton;
 
     [Header("Purchase UI")]
-    [SerializeField] private TextMeshProUGUI buyPriceText; 
-    [SerializeField] private TextMeshProUGUI currencyIconText; 
-    [SerializeField] private GameObject currencyIconGO;     
+    [SerializeField] private TextMeshProUGUI buyPriceText;
+    [SerializeField] private TextMeshProUGUI currencyIconText;
+    [SerializeField] private GameObject currencyIconGO;
 
     [Header("Stats List")]
     public Transform statListRoot;         // parent of rows
@@ -256,7 +256,7 @@ public class GunnerDetailsUI : MonoBehaviour
         int points = (_rt != null) ? _rt.UnspentSkillPoints : 0;
         if (pointsText) pointsText.text = points + "" + (points == 1 ? "" : "");
         if (levelUpButton) levelUpButton.gameObject.SetActive(false); // replaced by per-row '+'
-        
+
         UpdatePurchaseAndEquipUI();
 
         // Stats list
@@ -324,7 +324,7 @@ public class GunnerDetailsUI : MonoBehaviour
             // Can upgrade now?
             bool hasPoints = _rt != null && _rt.UnspentSkillPoints > 0;
             bool canUpgrade = hasPoints && GunnerUpgradeManager.Instance != null;
-            
+
             // If upgradable, show "+ → next"; else, simple unlocked row
             if (canUpgrade)
             {
@@ -540,9 +540,13 @@ public class GunnerDetailsUI : MonoBehaviour
 
     private Sprite GetIconFor(GunnerStatKey key)
     {
-        // Replace with your own icon atlas or SO lookups
-        return null;
+        // Pull from the centralized icon manager; it maps GunnerStatKey -> "stat.*" keys
+        // and resolves the sprite from GameIconLibrarySO (with fallback if missing).
+        return GameIconManager.Instance != null
+            ? GameIconManager.Instance.IconForGunnerStat(key)
+            : null;
     }
+
 
     // Buttons ----------------------------------------------------------------
 
@@ -575,7 +579,7 @@ public class GunnerDetailsUI : MonoBehaviour
         if (_so == null || GunnerManager.Instance == null) return;
 
         var gm = GunnerManager.Instance;
-        
+
         if (!gm.IsOwned(_so.GunnerId))
         {
             Debug.Log("GunnerDetailsUI: Attempting purchase of " + _so.GunnerId);

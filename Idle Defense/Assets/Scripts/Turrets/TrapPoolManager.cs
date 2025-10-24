@@ -39,8 +39,8 @@ public class TrapPoolManager : MonoBehaviour
         }
     }
 
-    public Trap PlaceTrap(Vector3 worldPos, Vector2Int cell, float damage, float delay, 
-        float radius, BaseTurret owner, float cellWorldY )
+    public Trap PlaceTrap(Vector3 worldPos, Vector2Int cell, float damage, float delay,
+        float radius, BaseTurret owner, float cellWorldY)
     {
         foreach (var trap in traps)
         {

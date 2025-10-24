@@ -1,9 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Serialization;
-using DamageNumbersPro.Internal;
-using TMPro;
+﻿using UnityEngine;
 
 namespace DamageNumbersPro
 {
@@ -29,19 +24,19 @@ namespace DamageNumbersPro
         //Custom Events:
         protected override void OnStart()
         {
-            
+
         }
         protected override void OnStop()
         {
-            
+
         }
         protected override void OnUpdate(float deltaTime)
         {
-            
+
         }
         protected override void OnFade(float currentFade)
         {
-            
+
         }
         protected override void OnTextUpdate()
         {

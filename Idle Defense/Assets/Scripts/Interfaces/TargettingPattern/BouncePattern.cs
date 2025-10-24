@@ -28,7 +28,7 @@ public class BouncePattern : MonoBehaviour, ITargetingPattern
 
         // 1 primary hit + N extra bounces
         int totalHits = Mathf.Max(1, stats.BounceCount + 1);
-                
+
         float currentDamage = stats.Damage;
 
         for (int i = 0; i < totalHits && currentTarget != null; i++)

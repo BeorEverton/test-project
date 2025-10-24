@@ -127,7 +127,7 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
             float damage = stats.Damage - GetDamageFalloff(distToEnemy);
 
             turret.DamageEffects.ApplyAll(enemy, stats);
-            pelletsRemaining--;            
+            pelletsRemaining--;
 
             index = (index + 1) % sortedCount;
         }
@@ -221,7 +221,7 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
     }
 
     protected void OnDrawGizmosSelected()
-    {       
+    {
 
         // For debugging: Draw all grid cells traversed by pellets.
         Gizmos.color = Color.yellow;

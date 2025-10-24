@@ -42,7 +42,7 @@ namespace Assets.Scripts.Systems
         public Vector2Int GetGridPosition(Vector3 position)
         {
             // X - grid.x, Depth() - grid.y
-            
+
             return new Vector2Int(
                 Mathf.FloorToInt(position.x / _cellSize),
                 Mathf.FloorToInt(position.Depth() / _cellSize)

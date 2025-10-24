@@ -81,7 +81,7 @@ public class PrestigeManager : MonoBehaviour
     [SerializeField] private int prestigeLevel;        // optional: times reset/ascended
     [SerializeField] private int crimsonCore;          // currency
     [SerializeField] private List<string> ownedNodes = new();   // NodeIds purchased
-    
+
     [Header("Prestige UI Helper")]
     public bool ResetTurretsOwnership => resetAllTurrets;
     public bool ResetTurretsUpgrades => resetTurretUpgrades;
@@ -91,7 +91,6 @@ public class PrestigeManager : MonoBehaviour
     public bool ResetScraps => resetScraps;
     public bool ResetBlackSteel => resetBlackSteel;
     public int RestartWaveIndexForUI() => restartAtWaveIndex + 1; // 1-based for players
-
 
     // ------------ DEBUG ------------
     [Header("Debug")]
@@ -159,7 +158,6 @@ public class PrestigeManager : MonoBehaviour
         NotifyWaveStarted(e.WaveNumber);
     }
 
-
     /* ===================== PUBLIC API ===================== */
 
     public bool CanBuy(string nodeId, out string reason)
@@ -193,7 +191,6 @@ public class PrestigeManager : MonoBehaviour
         }
         return true;
     }
-
     public bool TryBuy(string nodeId)
     {
         Debug.Log($"[Prestige] Attempting to buy node '{nodeId}'...");
@@ -216,24 +213,19 @@ public class PrestigeManager : MonoBehaviour
         OnPrestigeChanged?.Invoke();
         return true;
     }
-
     public void GrantCrimson(int amount)
     {
         crimsonCore += Mathf.Max(0, amount);
         OnPrestigeChanged?.Invoke();
     }
-
     public int GetCrimson() => crimsonCore;
     public int GetPrestigeLevel() => prestigeLevel;
     public bool Owns(string nodeId) => owned.Contains(nodeId);
-
     public bool IsGunnerUnlocked(string gunnerId) => unlockedGunners.Contains(gunnerId);
     public bool IsTurretUnlocked(TurretType t) => unlockedTurrets.Contains(t);
     public bool IsLimitBreakUnlocked(LimitBreakType lb) => unlockedLBs.Contains(lb);
-
     public float GetScrapsGainMultiplier() => 1f + sum.scrapsGainPct / 100f;
     public float GetBlackSteelGainMultiplier() => 1f + sum.blackSteelGainPct / 100f;
-
 
     /* ===================== ACTUAL PRESTIGE RESET ===================== */
 
@@ -285,20 +277,24 @@ public class PrestigeManager : MonoBehaviour
 
     private void RequestRestartAtWave(int waveIndex0Based)
     {
-        // Drive WaveManager directly (and still fire our event for any listeners)
+        // Notify listeners (UI, analytics, etc.)
         OnRequestRestartRun?.Invoke(Mathf.Max(0, waveIndex0Based));
 
         var wm = WaveManager.Instance;
         if (wm == null) return;
 
-        // WaveManager is 1-based externally; convert our 0-based index to a wave number
+        // 1) Hard-abort current wave with suppression and full despawn.
+        wm.AbortWaveAndDespawnAll();
+
+        // 2) Convert to 1-based external wave number.
         int targetWaveNumber = Mathf.Max(1, waveIndex0Based + 1);
 
-        // Reset internal state and (re)start at the requested wave
-        wm.ResetWave();                 // clears dict, resets flags
-        wm.LoadWave(targetWaveNumber);  // sets the new _currentWave
-        wm.ForceRestartWave();          // starts spawning loop again
+        // 3) Reset waves, load target, and restart cleanly.
+        wm.ResetWave();
+        wm.LoadWave(targetWaveNumber);
+        wm.ForceRestartWave();
     }
+
 
     /// <summary>
     /// Computes how much Crimson the player would receive if they prestige now,

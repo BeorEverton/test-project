@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace DamageNumbersPro.Demo
@@ -26,11 +24,11 @@ namespace DamageNumbersPro.Demo
 
         void FixedUpdate()
         {
-            if(Cursor.visible)
+            if (Cursor.visible)
             {
-                image.color = Color.Lerp(image.color, new Color(1,1,1,0), Time.fixedDeltaTime * 7f);
+                image.color = Color.Lerp(image.color, new Color(1, 1, 1, 0), Time.fixedDeltaTime * 7f);
             }
-            else if(targetEnemy)
+            else if (targetEnemy)
             {
                 image.color = Color.Lerp(image.color, enemyColor, Time.fixedDeltaTime * 7f);
 

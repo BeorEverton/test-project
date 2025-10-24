@@ -1,5 +1,4 @@
 using Assets.Scripts.Enemies;
-using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
 using System.Collections;
 using UnityEngine;
@@ -36,9 +35,9 @@ public class LaserBeamPattern : MonoBehaviour, ITargetingPattern
 
 
     IEnumerator DisableLaserLine()
-    {        
+    {
         while (Time.time - lastShotTime < disableLaserTime)
-        {     
+        {
             yield return new WaitForEndOfFrame();
         }
         laserLine.enabled = false;

@@ -1,7 +1,7 @@
 using Assets.Scripts.Enemies;
-using Assets.Scripts.SO;
 using Assets.Scripts.Systems.Audio;
 using Assets.Scripts.Turrets;
+using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
 using System;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace Assets.Scripts.Systems.Save
         public void SaveGame()
         {
             int waveNumber = WaveManager.Instance.GetCurrentWaveIndex();
-            
+
             GameDataDTO gameDataDTO = SaveDataDTOs.CreateGameDataDTO(waveNumber);
 
             PlayerInfoDTO sessionStatsDTO = SaveDataDTOs.CreatePlayerInfoDTO(PlayerBaseManager.Instance.Stats);
@@ -59,7 +59,7 @@ namespace Assets.Scripts.Systems.Save
                 }
             }*/
 
-            StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();            
+            StatsDTO statsDTO = SaveDataDTOs.CreateStatsDTO();
 
             var discoveredEnemies = EnemyLibraryManager.Instance.GetAllEntries()
                 .Where(e => e.discovered)
@@ -74,7 +74,7 @@ namespace Assets.Scripts.Systems.Save
                 gameDataDTO,
                 sessionStatsDTO,
                 permanentStatsDTO,
-                
+
                 statsDTO,
                 turretInventory,
                 gunnerInventory,
@@ -95,7 +95,7 @@ namespace Assets.Scripts.Systems.Save
                 ShowDisclaimerPanel();
                 return;
             }
-            
+
             PlayerBaseManager.Instance.SavedStats = LoadDataDTOs.CreatePlayerBaseSO(gameData.PlayerInfoDTO);
             if (gameData.PermanentPlayerInfoDTO != null)
             {
@@ -106,15 +106,25 @@ namespace Assets.Scripts.Systems.Save
             {
                 GameManager.Instance.LoadCurrency(entry.Currency, entry.Amount);
             }
-
             WaveManager.Instance?.LoadWave(gameData.GameDataDTO.WaveNumber);
+
+            // Apply saved auto-advance mode (inverse of waveFailed).
+            if (WaveManager.Instance != null)
+            {
+                WaveManager.Instance.SetAutoAdvanceEnabled(!gameData.GameDataDTO.waveFailed);
+            }
+
+            // Show/hide the manual advance button to match the saved state.
+            UIManager.Instance?.ShowManualAdvanceButton(gameData.GameDataDTO.waveFailed, persist: false);
+
+
             GameTutorialManager.Instance?.LoadGame(gameData.GameDataDTO.TutorialStep);
 
             StatsManager.Instance?.LoadStats(gameData.StatsDTO);
 
             TurretInventoryManager.Instance?.ImportFromDTO(gameData.TurretInventory);
 
-            GunnerManager.Instance?.ImportFromDTO(gameData.GunnerInventory);    
+            GunnerManager.Instance?.ImportFromDTO(gameData.GunnerInventory);
 
             SettingsManager.Instance.SetMusicVolume(gameData.GameDataDTO.MusicVolume);
             SettingsManager.Instance.SetSFXVolume(gameData.GameDataDTO.SFXVolume);

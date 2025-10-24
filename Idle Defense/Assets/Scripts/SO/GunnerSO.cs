@@ -7,15 +7,31 @@ public class GunnerSO : ScriptableObject
 {
     [Header("Identity")]
     public string GunnerId;                 // unique, e.g. "gunner_mira"
-    public string DisplayName;    
+    public string DisplayName;
+
+
+    [Header("Classification")]
+    public GunnerArea Area;
+    public GunnerMood Mood;
 
     [Header("Visuals")]
     public Sprite IdleSprite;
     public Sprite RunSprite;
-    public Sprite OnTurretSprite;    
+    public Sprite OnTurretSprite;
 
     [Header("Flavor")]
+    [Tooltip("Shown when idle, no combat context.")]
     [TextArea(2, 6)] public List<string> IdlePhrases = new List<string>();
+
+    [Tooltip("Positive shoutouts about self/others; used by forced Praise calls and random event hooks.")]
+    [TextArea(2, 6)] public List<string> PraisePhrases = new List<string>();
+
+    [Tooltip("Jabs/complaints/roasts; used by forced Negative calls and random event hooks.")]
+    [TextArea(2, 6)] public List<string> NegativePhrases = new List<string>();
+
+    [Tooltip("Short lines spoken during combat (attacking, reloading, crits, etc.).")]
+    [TextArea(2, 6)] public List<string> CombatChatPhrases = new List<string>();
+
 
     [Header("Base Stats")]
     public float BaseHealth = 20f;          // gunner personal HP (enemies can hit them)
@@ -33,7 +49,7 @@ public class GunnerSO : ScriptableObject
     public float BaseArmorPenetration = 0f; // %
 
     [Header("Limit Break")]
-    public LimitBreakSkillSO LimitBreakSkill; 
+    public LimitBreakSkillSO LimitBreakSkill;
 
     [Header("Leveling")]
     public AnimationCurve XpCurve = AnimationCurve.Linear(1, 10, 50, 1000);
@@ -112,3 +128,20 @@ public enum LimitBreakType
     GlobalDamageBoost      // Temporarily multiplies damage
 }
 
+public enum GunnerArea
+{
+    VerdelumeOutpost,
+    BrineforgeHaven,
+    GearholdRise,
+    CinderwatchBastion,
+    FrostvaultRefuge
+}
+
+public enum GunnerMood
+{
+    Stoic,
+    Cheerful,
+    Cynical,
+    Aggressive,
+    Quiet
+}

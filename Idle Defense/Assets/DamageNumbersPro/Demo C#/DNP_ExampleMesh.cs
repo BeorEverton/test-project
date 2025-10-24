@@ -11,7 +11,6 @@
  */
 
 using UnityEngine;
-using DamageNumbersPro; //Include DamageNumbersPro Namespace     <-----     [REQUIRED]
 
 namespace DamageNumbersPro.Demo
 {
@@ -23,7 +22,7 @@ namespace DamageNumbersPro.Demo
         public Transform target;
         void Update()
         {
-            if(DNP_InputHandler.GetLeftClick())
+            if (DNP_InputHandler.GetLeftClick())
             {
                 SpawnPopup(Mathf.Round(Random.Range(1, 10)));
             }

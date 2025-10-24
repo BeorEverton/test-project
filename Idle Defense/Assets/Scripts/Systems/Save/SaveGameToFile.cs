@@ -16,7 +16,7 @@ namespace Assets.Scripts.Systems.Save
             PlayerPrefs.SetString(SaveKey, json);
             PlayerPrefs.Save();
 
-            
+
         }
 
         public static GameData LoadGameDataFromFile()
@@ -125,7 +125,7 @@ namespace Assets.Scripts.Systems.Save
             using var sha = SHA256.Create();
             var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(s));
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-        }      
+        }
 
     }
 }

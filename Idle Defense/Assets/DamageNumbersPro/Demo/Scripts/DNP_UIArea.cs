@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace DamageNumbersPro.Demo
@@ -27,7 +24,7 @@ namespace DamageNumbersPro.Demo
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if(currentArea == this)
+            if (currentArea == this)
             {
                 currentArea = null;
             }
@@ -44,7 +41,7 @@ namespace DamageNumbersPro.Demo
 
         public static void OnSpawn()
         {
-            if(currentArea != null && currentArea.breakCube)
+            if (currentArea != null && currentArea.breakCube)
             {
                 DNP_FallingCube cube = currentArea.GetComponent<DNP_FallingCube>();
                 cube.Break();

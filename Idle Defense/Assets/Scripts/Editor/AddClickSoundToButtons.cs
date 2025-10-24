@@ -1,9 +1,8 @@
+using Assets.Scripts.Systems.Audio;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
-using Assets.Scripts.Systems.Audio;
-using UnityEditor.Events;
 
 public class AddClickSoundToButtons : EditorWindow
 {

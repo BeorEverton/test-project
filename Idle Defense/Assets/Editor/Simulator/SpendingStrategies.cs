@@ -1,10 +1,4 @@
 // Assets/Editor/Simulation/SpendingStrategies.cs
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-using Assets.Scripts.Turrets;
-using Assets.Scripts.Systems;  // for TurretType
-
 namespace IdleDefense.Editor.Simulation
 {/*
     public enum SpendingMode { Cheapest, Random, MostEffective }

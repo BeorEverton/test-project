@@ -255,7 +255,7 @@ namespace Assets.Scripts.Turrets
             SlowEffectLevel = source.SlowEffectLevel;
             SlowEffectUpgradeAmount = source.SlowEffectUpgradeAmount;
             SlowEffectUpgradeBaseCost = source.SlowEffectUpgradeBaseCost;
-            
+
             // Bounce Pattern
             BounceCount = source.BounceCount;
             BounceCountLevel = source.BounceCountLevel;

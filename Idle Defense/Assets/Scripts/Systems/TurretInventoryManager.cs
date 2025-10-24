@@ -41,7 +41,7 @@ namespace Assets.Scripts.Systems
 
         private List<TurretStatsInstance> pendingRuntimeStats;
 
-        public List<EquippedTurretDTO> EquippedTurrets; 
+        public List<EquippedTurretDTO> EquippedTurrets;
 
 
         public int WaveRequirement(TurretType t) =>
@@ -185,7 +185,7 @@ namespace Assets.Scripts.Systems
         public (Currency currency, ulong cost) GetCostAndCurrency(TurretType type, int owned)
         {
             Currency currency = Currency.Scraps;
-            ulong cost = GetCost(type, owned); 
+            ulong cost = GetCost(type, owned);
 
             return (currency, cost);
         }

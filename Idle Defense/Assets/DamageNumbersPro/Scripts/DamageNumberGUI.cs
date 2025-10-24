@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Serialization;
-using DamageNumbersPro.Internal;
+﻿using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 
 namespace DamageNumbersPro
 {
@@ -38,7 +35,7 @@ namespace DamageNumbersPro
         protected override void OnStart()
         {
             //Only damage numbers of the same parent can interact with each other.
-            if(spamGroup != "" && transform.parent != null)
+            if (spamGroup != "" && transform.parent != null)
             {
                 spamGroup += transform.parent.GetInstanceID();
             }
@@ -104,7 +101,7 @@ namespace DamageNumbersPro
         //Components:
         public override void GetReferencesIfNecessary()
         {
-            if(textMeshProA == null)
+            if (textMeshProA == null)
             {
                 GetReferences();
             }
@@ -153,7 +150,7 @@ namespace DamageNumbersPro
         {
             textMeshProA.text = textMeshProB.text = fullString;
 
-            if(!textMeshProA.enabled)
+            if (!textMeshProA.enabled)
             {
                 textMeshProA.enabled = textMeshProB.enabled = true;
             }
@@ -169,7 +166,7 @@ namespace DamageNumbersPro
 
             //Sub Meshs:
             subMeshs = new List<TMP_SubMeshUI>();
-            foreach(TMP_SubMeshUI subMesh in textMeshProA.GetComponentsInChildren<TMP_SubMeshUI>())
+            foreach (TMP_SubMeshUI subMesh in textMeshProA.GetComponentsInChildren<TMP_SubMeshUI>())
             {
                 subMeshs.Add(subMesh);
                 meshs.Add(subMesh.mesh);

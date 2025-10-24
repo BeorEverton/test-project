@@ -106,7 +106,7 @@ namespace Assets.Scripts.Enemies
             popUpTimer.maxValue = duration;
             popUpTimer.value = duration;
             for (float t = 5f; t >= 0; t -= Time.unscaledDeltaTime)
-            {                
+            {
                 popUpTimer.value = t;
                 yield return null;
             }

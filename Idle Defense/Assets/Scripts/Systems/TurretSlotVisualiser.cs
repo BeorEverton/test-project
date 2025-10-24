@@ -1,6 +1,4 @@
-using Assets.Scripts.SO;
 using Assets.Scripts.Turrets;
-using System.Linq;
 using UnityEngine;
 // for BaseTurret
 

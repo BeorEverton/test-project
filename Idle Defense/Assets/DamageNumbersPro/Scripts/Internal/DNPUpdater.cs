@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using DamageNumbersPro;
 
 namespace DamageNumbersPro.Internal
 {
@@ -38,7 +37,7 @@ namespace DamageNumbersPro.Internal
             //Delay:
             WaitForSecondsRealtime delay = new WaitForSecondsRealtime(updateDelay);
 
-            while(true)
+            while (true)
             {
                 //Vector Update:
                 vectorsNeedUpdate = true;
@@ -46,7 +45,7 @@ namespace DamageNumbersPro.Internal
                 //Update:
                 foreach (DamageNumber popup in activePopups)
                 {
-                    if(popup != null)
+                    if (popup != null)
                     {
                         popup.UpdateDamageNumber(delta, time);
                     }
@@ -57,7 +56,7 @@ namespace DamageNumbersPro.Internal
                 }
 
                 //Clean Up:
-                if(removedPopups.Count > 0)
+                if (removedPopups.Count > 0)
                 {
                     foreach (DamageNumber removed in removedPopups)
                     {
@@ -100,7 +99,7 @@ namespace DamageNumbersPro.Internal
             }
             else
             {
-                if(containsKey)
+                if (containsKey)
                 {
                     updaters.Remove(updateDelay);
                 }

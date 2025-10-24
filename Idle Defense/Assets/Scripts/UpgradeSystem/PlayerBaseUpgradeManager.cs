@@ -4,7 +4,6 @@ using Assets.Scripts.UI;
 using Assets.Scripts.UpgradeSystem;
 using DG.Tweening;
 using System.Collections.Generic;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 
 namespace Assets.Scripts.PlayerBase
@@ -172,7 +171,7 @@ namespace Assets.Scripts.PlayerBase
             if (!_playerUpgrades.TryGetValue(type, out PlayerBaseUpgrade upgrade))
                 return;
 
-            int amount = MultipleBuyOption.Instance.GetBuyAmount();            
+            int amount = MultipleBuyOption.Instance.GetBuyAmount();
             GetCost(stats, type, amount, out float cost, out int maxAmount);
 
             if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(stats) >= upgrade.GetMaxValue(stats))
@@ -182,7 +181,7 @@ namespace Assets.Scripts.PlayerBase
             }
 
             if (TrySpend(cost))
-            {                
+            {
                 upgrade.Upgrade(stats, amount);
                 AudioManager.Instance.Play("Upgrade");
                 UpdateUpgradeDisplay(stats, type, button);
@@ -243,7 +242,8 @@ namespace Assets.Scripts.PlayerBase
             // Scale punch: 1 - 1.15 - 1
             button.DOScale(Vector3.one * 1.15f, 0.1f)
                 .SetEase(Ease.OutBack)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     button.DOScale(Vector3.one, 0.1f).SetEase(Ease.InOutSine);
                 });
         }

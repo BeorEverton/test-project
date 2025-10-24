@@ -1,9 +1,7 @@
 ﻿#if UNITY_EDITOR
 
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace DamageNumbersPro.Internal
 {
@@ -19,12 +17,12 @@ namespace DamageNumbersPro.Internal
 
             //Copying:
             EditorGUILayout.Space(4);
-            DamageNumber dn = (DamageNumber) EditorGUILayout.ObjectField(null, typeof(DamageNumber), true,GUILayout.Height(80));
+            DamageNumber dn = (DamageNumber)EditorGUILayout.ObjectField(null, typeof(DamageNumber), true, GUILayout.Height(80));
             GUIStyle dropStyle = new GUIStyle(GUI.skin.box);
             dropStyle.alignment = TextAnchor.MiddleCenter;
             Rect lastRect = GUILayoutUtility.GetLastRect();
             GUI.Box(lastRect, "Drop damage number here.", dropStyle);
-            if(dn != null)
+            if (dn != null)
             {
                 DNPPreset preset = (DNPPreset)target;
                 Undo.RegisterCompleteObjectUndo(preset, "Copied damage number.");
@@ -51,9 +49,9 @@ namespace DamageNumbersPro.Internal
                     EditorGUILayout.BeginVertical("Helpbox");
                 }
 
-                if(visible)
+                if (visible)
                 {
-                    if(isNewCategory)
+                    if (isNewCategory)
                     {
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.PrefixLabel("<size=14><b>" + currentProperty.displayName + "</b></size>", labelStyle);
@@ -70,7 +68,7 @@ namespace DamageNumbersPro.Internal
                 {
                     visible = currentProperty.boolValue;
 
-                    if(visible && currentProperty.name.StartsWith("change"))
+                    if (visible && currentProperty.name.StartsWith("change"))
                     {
                         DNPEditorInternal.Lines();
                     }

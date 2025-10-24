@@ -60,7 +60,7 @@ namespace Assets.Scripts.Systems
         }
 
         private void SubscribeToEvents()
-        {            
+        {
             PlayerBaseManager.Instance.OnHealthChanged += OnHealthChanged;
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
             GameManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
@@ -71,7 +71,7 @@ namespace Assets.Scripts.Systems
         }
 
         private void UnsubscribeFromEvents()
-        {            
+        {
             PlayerBaseManager.Instance.OnHealthChanged -= OnHealthChanged;
             WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
             GameManager.Instance.OnCurrencyChanged -= OnCurrencyChanged;
@@ -177,7 +177,7 @@ namespace Assets.Scripts.Systems
         private bool CheckCondition(TutorialConditionType condition, float threshold)
         {
             return condition switch
-            {                
+            {
                 TutorialConditionType.HealthBelow => PlayerBaseManager.Instance.CurrentHealth < threshold,
                 TutorialConditionType.HealthAbove => PlayerBaseManager.Instance.CurrentHealth > threshold,
                 TutorialConditionType.MaxHealthAbove => PlayerBaseManager.Instance.MaxHealth > threshold,
@@ -319,7 +319,7 @@ namespace Assets.Scripts.Systems
     }
 
     public enum TutorialConditionType
-    {        
+    {
         HealthBelow,
         MaxHealthAbove,
         HealthAbove,

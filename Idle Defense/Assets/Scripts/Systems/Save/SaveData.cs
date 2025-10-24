@@ -9,10 +9,10 @@ namespace Assets.Scripts.Systems.Save
         public GameDataDTO GameDataDTO;
         public PlayerInfoDTO PlayerInfoDTO;
         public PlayerInfoDTO PermanentPlayerInfoDTO;
-        
+
         public StatsDTO StatsDTO;
         public TurretInventoryDTO TurretInventory;
-        
+
         public List<string> DiscoveredEnemyNames;
 
         public GunnerInventoryDTO GunnerInventory;
@@ -21,7 +21,7 @@ namespace Assets.Scripts.Systems.Save
 
         public GameData(GameDataDTO gameData,
             PlayerInfoDTO playerInfo,
-            PlayerInfoDTO permanentPlayerInfo,            
+            PlayerInfoDTO permanentPlayerInfo,
             StatsDTO statsDTO,
             TurretInventoryDTO turretInventory,
             GunnerInventoryDTO gunnerInventory,
@@ -31,8 +31,8 @@ namespace Assets.Scripts.Systems.Save
             GameDataDTO = gameData;
             PlayerInfoDTO = playerInfo;
             PermanentPlayerInfoDTO = permanentPlayerInfo;
-            
-            StatsDTO = statsDTO;           
+
+            StatsDTO = statsDTO;
             TurretInventory = turretInventory;
 
             GunnerInventory = gunnerInventory;

@@ -14,10 +14,55 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GunnerId: lyssa
   DisplayName: Lyssa Steamheart
+  Area: 1
+  Mood: 3
   IdleSprite: {fileID: 21300000, guid: f0bbee4261dff4cb7bcae5c218b4e05f, type: 3}
   RunSprite: {fileID: 0}
   OnTurretSprite: {fileID: 21300000, guid: 1d103d1cdfeba4b409fda53bd4de6786, type: 3}
-  IdlePhrases: []
+  IdlePhrases:
+  - "Fog\u2019s thick today\u2026 feels like home in Brineforge."
+  - Nothing like the hum of an engine to calm the nerves.
+  - I swear I can still taste the salt in the air.
+  - "Steam\u2019s hissing again\u2026 means she\u2019s alive."
+  - Sometimes I miss the quiet before the turbines spin.
+  - "Salt rusts everything eventually \u2014 even memories."
+  - "Wish I had a clean rag\u2026 this coat\u2019s seen too many storms."
+  - "Can\u2019t tell if that\u2019s fog or smoke \u2014 either way, it\u2019s home."
+  - "If the sea breeze doesn\u2019t sting, you\u2019re not close enough."
+  - "I\u2019d trade a barrel of oil for a day without corrosion."
+  PraisePhrases:
+  - Nice shot, *name*! You could pass for a Brineforge gunner.
+  - "Ha! That\u2019s the kind of precision I like to see, *name*."
+  - "You\u2019re burning through enemies like boiler fire, *name*!"
+  - "Smooth work, *name*. Let\u2019s keep the pressure steady."
+  - "That\u2019s how we do it back at the docks, *name* \u2014 efficient and loud!"
+  - "You read my aim perfectly, *name* \u2014 seamless!"
+  - Perfect timing, *name*! I could sync my gauges to you.
+  - '*name*, that was cleaner than a turbine blade after overhaul.'
+  - "You\u2019re making this mage look lazy, *name*."
+  - "Couldn\u2019t have vented that better myself, *name*."
+  NegativePhrases:
+  - "Come on, *name*, even my monocle\u2019s faster than that."
+  - "Watch your aim, *name*! You\u2019re wasting good powder!"
+  - Rust take it, *name*! You call that a hit?
+  - Try not to fog up my lens with that sloppy shooting, *name*.
+  - "If I wanted slow, I\u2019d have stayed in the smog vents with rookies."
+  - "*name*, I\u2019ve seen barnacles react quicker."
+  - Steam gods, *name*, were you even looking?
+  - That shot was colder than the Brineforge docks, *name*.
+  - "You jammed the tempo, *name*! My pressure gauge\u2019s laughing."
+  - Do I need to recalibrate your trigger, *name*?
+  CombatChatPhrases:
+  - "Target locked \u2014 let\u2019s melt some armor!"
+  - "Boiler\u2019s hot, spells primed!"
+  - "Heat signature acquired \u2014 fry time!"
+  - "Keep the pressure high, or we\u2019ll drown in steam!"
+  - "Hold steady\u2026 vent pressure\u2026 fire!"
+  - "Steam surge incoming \u2014 brace yourselves!"
+  - "I\u2019ve got visual! Turning up the heat!"
+  - "They won\u2019t like this temperature."
+  - "Overheat\u2019s a myth \u2014 watch me prove it wrong!"
+  - "Let\u2019s give \u2019em a taste of industrial magic!"
   BaseHealth: 20
   BaseDamage: 35
   BaseFireRate: 0

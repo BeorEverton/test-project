@@ -1,7 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
-using Assets.Scripts.WaveSystem;
 using UnityEngine;
 
 public class TrapPattern : MonoBehaviour, ITargetingPattern

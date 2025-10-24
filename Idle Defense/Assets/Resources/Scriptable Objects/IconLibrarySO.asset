@@ -1,0 +1,176 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc15dcf61f344c4783453a9b95317f9, type: 3}
+  m_Name: IconLibrarySO
+  m_EditorClassIdentifier: 
+  entries:
+  - key: currency.blacksteel
+    sprite: {fileID: 21300000, guid: 45afb3738940b4f5aa2306b6750cfba6, type: 3}
+  - key: currency.crimson
+    sprite: {fileID: 21300000, guid: eca87834fb7f948818f465338bd28cf6, type: 3}
+  - key: currency.scraps
+    sprite: {fileID: 21300000, guid: 54f0ca206a538418882dd80ba6202648, type: 3}
+  - key: enemy_count
+    sprite: {fileID: 21300000, guid: da59c8478600d9e47b5e3a265cffd3b3, type: 3}
+  - key: gunner.gerhard
+    sprite: {fileID: 0}
+  - key: gunner.jordan
+    sprite: {fileID: 0}
+  - key: gunner.lyssa
+    sprite: {fileID: 0}
+  - key: gunner.rustopher
+    sprite: {fileID: 0}
+  - key: limitbreak.GlobalDamageBoost
+    sprite: {fileID: 0}
+  - key: limitbreak.GlobalFireRateBoost
+    sprite: {fileID: 0}
+  - key: stat.ahead_dist
+    sprite: {fileID: 0}
+  - key: stat.armorpen
+    sprite: {fileID: 0}
+  - key: stat.blacksteel
+    sprite: {fileID: 21300000, guid: 45afb3738940b4f5aa2306b6750cfba6, type: 3}
+  - key: stat.bonus_dps
+    sprite: {fileID: 0}
+  - key: stat.bonus_dps
+    sprite: {fileID: 0}
+  - key: stat.bounce_count
+    sprite: {fileID: 0}
+  - key: stat.bounce_delay
+    sprite: {fileID: 0}
+  - key: stat.bounce_loss
+    sprite: {fileID: 0}
+  - key: stat.bounce_range
+    sprite: {fileID: 0}
+  - key: stat.cone_angle
+    sprite: {fileID: 0}
+  - key: stat.crit_chance
+    sprite: {fileID: 21300000, guid: f4fce3a3067a4422e96a039b37de993a, type: 3}
+  - key: stat.crit_damage
+    sprite: {fileID: 21300000, guid: 90104b82285f24f129a3d941bd1c4d81, type: 3}
+  - key: stat.damage
+    sprite: {fileID: 21300000, guid: 7d8b6181ad16b4a708f3c323b2efbe4a, type: 3}
+  - key: stat.damage_cap
+    sprite: {fileID: 21300000, guid: 08e0577b5a0924205984392d9a6a282b, type: 3}
+  - key: stat.dist_falloff
+    sprite: {fileID: 0}
+  - key: stat.enemy_count
+    sprite: {fileID: 0}
+  - key: stat.enemy_hp
+    sprite: {fileID: 4606908045521496030, guid: d3b2198aa38e54544a5a91a49637fb19, type: 3}
+  - key: stat.explo_delay
+    sprite: {fileID: 0}
+  - key: stat.explo_radius
+    sprite: {fileID: 21300000, guid: 5cff2ff091c6c4ee5a23eed831198404, type: 3}
+  - key: stat.firerate
+    sprite: {fileID: 21300000, guid: 110a613c97ae3473ba6a34f0d531ca80, type: 3}
+  - key: stat.health
+    sprite: {fileID: 21300000, guid: a15beef3e99cc42118d9a86018e0767e, type: 3}
+  - key: stat.knockback
+    sprite: {fileID: 21300000, guid: ebf29bb309ec94fd6b605c53471770ac, type: 3}
+  - key: stat.max_traps
+    sprite: {fileID: 0}
+  - key: stat.pellet
+    sprite: {fileID: 21300000, guid: aa84a9efc9bb74c6bb34ab50ee4adc9e, type: 3}
+  - key: stat.pierce_chance
+    sprite: {fileID: 21300000, guid: 9a96bab64a8754061aecc694db792d39, type: 3}
+  - key: stat.pierce_falloff
+    sprite: {fileID: 21300000, guid: db3693b2e2b8e427a8c06c67ed355ef0, type: 3}
+  - key: stat.range
+    sprite: {fileID: 21300000, guid: adb19187ea05048c6bd3bb1f7f64ed7a, type: 3}
+  - key: stat.rotation
+    sprite: {fileID: 21300000, guid: 9f3ecf1f155e244aba2cf7f79657ca4b, type: 3}
+  - key: stat.scraps
+    sprite: {fileID: 21300000, guid: 54f0ca206a538418882dd80ba6202648, type: 3}
+  - key: stat.slow
+    sprite: {fileID: 0}
+  - key: stat.speed_cap
+    sprite: {fileID: 21300000, guid: 140398e933b9d400489aad46fc2f82ca, type: 3}
+  - key: stat.splash
+    sprite: {fileID: 21300000, guid: 97b49874aed4b43788d90720bf2b2023, type: 3}
+  - key: stat.upgrade_cost
+    sprite: {fileID: 21300000, guid: fbd956cd86f71466d90037828950626b, type: 3}
+  - key: turret.AlchemicalSprayer
+    sprite: {fileID: 0}
+  - key: turret.CapacitorCannon
+    sprite: {fileID: 0}
+  - key: turret.ClockBombDistributor
+    sprite: {fileID: 0}
+  - key: turret.DartLauncher
+    sprite: {fileID: 0}
+  - key: turret.DoubleSplitter
+    sprite: {fileID: 0}
+  - key: turret.EnergyCondenser
+    sprite: {fileID: 0}
+  - key: turret.EtherNeedle
+    sprite: {fileID: 0}
+  - key: turret.ExplosiveMineshaft
+    sprite: {fileID: 0}
+  - key: turret.FlameBelcher
+    sprite: {fileID: 0}
+  - key: turret.FrostTether
+    sprite: {fileID: 0}
+  - key: turret.FungalOvergrowthPod
+    sprite: {fileID: 0}
+  - key: turret.Geargrinder
+    sprite: {fileID: 0}
+  - key: turret.GreenGooBombDispenser
+    sprite: {fileID: 0}
+  - key: turret.HammerSlammer
+    sprite: {fileID: 0}
+  - key: turret.HeavySlammer
+    sprite: {fileID: 0}
+  - key: turret.MachineGun
+    sprite: {fileID: 0}
+  - key: turret.MagneticRevolver
+    sprite: {fileID: 0}
+  - key: turret.MagnetSpikecaster
+    sprite: {fileID: 0}
+  - key: turret.ObsidianLens
+    sprite: {fileID: 0}
+  - key: turret.OozeNetLauncher
+    sprite: {fileID: 0}
+  - key: turret.PulseSlammer
+    sprite: {fileID: 0}
+  - key: turret.RailSpikeDriver
+    sprite: {fileID: 0}
+  - key: turret.ReverseTimeModule
+    sprite: {fileID: 0}
+  - key: turret.RicochetSpikes
+    sprite: {fileID: 0}
+  - key: turret.Sniper
+    sprite: {fileID: 0}
+  - key: turret.SteamMortar
+    sprite: {fileID: 0}
+  - key: turret.SteamSawCutter
+    sprite: {fileID: 0}
+  - key: turret.TeslaArc
+    sprite: {fileID: 0}
+  - key: turret.ThermiteCore
+    sprite: {fileID: 0}
+  - key: turret.TrapGridProjector
+    sprite: {fileID: 0}
+  - key: turret.VaporJetTurret
+    sprite: {fileID: 0}
+  - key: turret.VolatileFlaskLobber
+    sprite: {fileID: 0}
+  - key: turret.WeakpointFinder
+    sprite: {fileID: 0}
+  - key: turret.WrenchSpinner
+    sprite: {fileID: 0}
+  - key: unlock.gunner
+    sprite: {fileID: 21300000, guid: 049d1403ca0954c6e8c805419a41f803, type: 3}
+  - key: unlock.limitbreak
+    sprite: {fileID: 21300000, guid: c96f62a4ab65749128908e5360e39126, type: 3}
+  - key: unlock.turret
+    sprite: {fileID: 2408140624648176425, guid: a72dd04861ebf0243a45074c473cac90, type: 3}
+  fallback: {fileID: 21300000, guid: ff6d06c5a07434d9b8edaa92176cd86f, type: 3}

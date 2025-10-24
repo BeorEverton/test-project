@@ -1,7 +1,4 @@
 // Assets/Editor/Simulation/CsvExporter.cs
-using System.IO;
-using UnityEditor;
-
 namespace IdleDefense.Editor.Simulation
 {/*
     static class CsvExporter
