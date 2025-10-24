@@ -73,18 +73,18 @@ public class GunnerChatterSystem : MonoBehaviour
 
     public void TriggerEvent(GunnerEvent evt, GunnerSO actor, GunnerSO optionalOther = null, float? chanceOverride = null)
     {
-        Debug.Log($"[GunnerChatterSystem] Event triggered: {evt} by {actor?.GunnerId} towards {optionalOther?.GunnerId}");
+        //Debug.Log($"[GunnerChatterSystem] Event triggered: {evt} by {actor?.GunnerId} towards {optionalOther?.GunnerId}");
         float p = chanceOverride.HasValue ? Mathf.Clamp01(chanceOverride.Value) : EventAutoChatChance;
         if (Random.value > p) return;
 
-        Debug.Log($"[GunnerChatterSystem] Event chatter proceeding for {actor?.GunnerId}");
+        //Debug.Log($"[GunnerChatterSystem] Event chatter proceeding for {actor?.GunnerId}");
         // Small multiplex: combat chat is more likely during combat events
         if (evt == GunnerEvent.BossKilled
             || evt == GunnerEvent.CriticalHit
             || evt == GunnerEvent.BossAppeared
             || evt == GunnerEvent.LimitBreak)
         {
-            Debug.Log($"[GunnerChatterSystem] Event chatter using combat lines for {actor?.GunnerId}");
+            //Debug.Log($"[GunnerChatterSystem] Event chatter using combat lines for {actor?.GunnerId}");
             bool spoke = TrySpeakFromList(actor, optionalOther, actor.CombatChatPhrases);
             if (spoke)
             {

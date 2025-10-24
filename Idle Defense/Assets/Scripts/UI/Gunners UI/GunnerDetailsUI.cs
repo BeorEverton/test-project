@@ -106,7 +106,7 @@ public class GunnerDetailsUI : MonoBehaviour
         if (!_isOpen) return;
 
         UnwireListeners();
-        if (cursorGhost) cursorGhost.End();
+        
         SetVisible(false);
         _isOpen = false;
         Closed?.Invoke();
@@ -606,12 +606,6 @@ public class GunnerDetailsUI : MonoBehaviour
 
         // Begin slot selection as usual
         GunnerEquipFlow.Instance?.BeginSelectSlot(_so.GunnerId);
-
-        if (cursorGhost)
-        {
-            var sprite = _so.OnTurretSprite ? _so.OnTurretSprite : _so.IdleSprite;
-            cursorGhost.Begin(sprite);
-        }
 
         if (closePanelOnEquip) Close();
     }

@@ -9,6 +9,9 @@ public class GunnerEquipFlow : MonoBehaviour
     [SerializeField] private CanvasGroup clickHintGroup; // fade in/out
     [SerializeField] private TMP_Text clickHintLabel;    // "Click a turret slot to equip"
 
+    [Header("Optional: Cursor tooltip")]
+    [SerializeField] private GunnerCursorGhost cursorGhost;
+
     public bool IsAwaitingSlotSelection { get; private set; }
     public string SelectedGunnerId { get; private set; }
 
@@ -29,7 +32,16 @@ public class GunnerEquipFlow : MonoBehaviour
         IsAwaitingSlotSelection = true;
         _lastEmptySlotIndex = -1;
         SetHint(true, "Click a slot with a turret to equip.\n(Empty slot: click twice to cancel)");
+
+        // Start cursor ghost with this gunner's portrait (if available)
+        if (cursorGhost && GunnerManager.Instance != null)
+        {
+            var so = GunnerManager.Instance.GetSO(gunnerId);
+            var sprite = so != null && so.OnTurretSprite ? so.OnTurretSprite : (so != null ? so.IdleSprite : null);
+            if (sprite) cursorGhost.Begin(sprite);
+        }
     }
+
 
     public void CompleteSelection()
     {
@@ -37,6 +49,7 @@ public class GunnerEquipFlow : MonoBehaviour
         SelectedGunnerId = null;
         _lastEmptySlotIndex = -1;
         SetHint(false, "");
+        if (cursorGhost) cursorGhost.End();
     }
 
     public void CancelSelection()
@@ -45,7 +58,9 @@ public class GunnerEquipFlow : MonoBehaviour
         SelectedGunnerId = null;
         _lastEmptySlotIndex = -1;
         SetHint(false, "");
+        if (cursorGhost) cursorGhost.End();
     }
+
 
     /// <summary>
     /// Call this when the player clicks an empty slot during selection.
