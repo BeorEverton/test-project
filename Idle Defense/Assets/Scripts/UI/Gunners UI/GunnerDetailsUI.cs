@@ -106,7 +106,7 @@ public class GunnerDetailsUI : MonoBehaviour
         if (!_isOpen) return;
 
         UnwireListeners();
-        
+
         SetVisible(false);
         _isOpen = false;
         Closed?.Invoke();
@@ -220,7 +220,7 @@ public class GunnerDetailsUI : MonoBehaviour
         if (xpValueText) xpValueText.text = Mathf.FloorToInt(curXp) + " / " + Mathf.FloorToInt(nextXp);
 
         // Center
-        if (portraitImage) portraitImage.sprite = so.OnTurretSprite ? so.OnTurretSprite : so.IdleSprite;
+        if (portraitImage) portraitImage.sprite = so.gunnerSprite;
 
         // Limit Break UI (always go through the registry)
         LimitBreakSkillSO lb = (LimitBreakManager.Instance != null)
@@ -312,7 +312,7 @@ public class GunnerDetailsUI : MonoBehaviour
 
             if (!unlocked)
             {
-                row.SetLocked(GetIconFor(key), "???", unlockLevel);
+                row.SetLocked(GetIconFor(key), GetNiceName(key), unlockLevel);
                 continue;
             }
 

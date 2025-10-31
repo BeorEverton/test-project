@@ -1,12 +1,12 @@
+using FlatKit;
+using FlatKit.StylizedSurface;
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using FlatKit;
-using FlatKit.StylizedSurface;
-using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -15,7 +15,8 @@ using Object = UnityEngine.Object;
 // ReSharper disable Unity.PreferAddressByIdToGraphicsParams
 // ReSharper disable StringLiteralTypo
 [HelpURL("https://flatkit.dustyroom.com/")]
-public class StylizedSurfaceEditor : BaseShaderGUI {
+public class StylizedSurfaceEditor : BaseShaderGUI
+{
     private Material _target;
     private MaterialProperty[] _properties;
     private int _celShadingNumSteps = 0;
@@ -36,31 +37,39 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
     private const string RenderingOptionsName = "Rendering Options";
     private const string UnityVersion = "NLC6GM";
 
-    private void DrawStandard(MaterialProperty property) {
+    private void DrawStandard(MaterialProperty property)
+    {
         // Remove everything in square brackets.
         var cleanName = Regex.Replace(property.displayName, @" ?\[.*?\]", string.Empty);
 
-        if (!Tooltips.Map.TryGetValue(property.displayName, out string tooltip)) {
+        if (!Tooltips.Map.TryGetValue(property.displayName, out string tooltip))
+        {
             Tooltips.Map.TryGetValue(cleanName, out tooltip);
         }
 
         var guiContent = new GUIContent(cleanName, tooltip);
-        if (property.type == MaterialProperty.PropType.Texture) {
-            if (!property.name.Contains("_BaseMap")) {
+        if (property.type == MaterialProperty.PropType.Texture)
+        {
+            if (!property.name.Contains("_BaseMap"))
+            {
                 EditorGUILayout.Space(10);
             }
 
             materialEditor.TexturePropertySingleLine(guiContent, property);
-        } else {
+        }
+        else
+        {
             materialEditor.ShaderProperty(property, guiContent);
         }
     }
 
-    private MaterialProperty FindProperty(string name) {
+    private MaterialProperty FindProperty(string name)
+    {
         return FindProperty(name, _properties);
     }
 
-    private bool HasProperty(string name) {
+    private bool HasProperty(string name)
+    {
         return _target != null && _target.HasProperty(name);
     }
 
@@ -69,13 +78,15 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
 #endif
     public override void MaterialChanged(Material material) { }
 
-    public override void OnGUI(MaterialEditor editor, MaterialProperty[] properties) {
+    public override void OnGUI(MaterialEditor editor, MaterialProperty[] properties)
+    {
         materialEditor = editor;
         _properties = properties;
         _target = editor.target as Material;
         Debug.Assert(_target != null, "_target != null");
 
-        if (_target.shader.name.Equals("FlatKit/Stylized Surface With Outline")) {
+        if (_target.shader.name.Equals("FlatKit/Stylized Surface With Outline"))
+        {
             EditorGUILayout.HelpBox(
                 "'Stylized Surface with Outline' shader has been deprecated. Please use the outline section in the 'Stylized Surface' shader.",
                 MessageType.Warning);
@@ -84,7 +95,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         if (!Application.unityVersion.Contains(Rev(UnityVersion)) &&
             !Application.unityVersion.Contains('b') &&
             !Application.unityVersion.Contains('a') &&
-            !Application.unityVersion.Replace('.', '^').Contains("23^2")) {
+            !Application.unityVersion.Replace('.', '^').Contains("23^2"))
+        {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
 
@@ -94,7 +106,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 GUILayout.FlexibleSpace();
                 var icon = EditorGUIUtility.IconContent("console.erroricon@2x").image;
                 var iconSize = Mathf.Min(Mathf.Min(60, icon.width), EditorGUIUtility.currentViewWidth - 100);
-                GUILayout.Label(icon, new GUIStyle {
+                GUILayout.Label(icon, new GUIStyle
+                {
                     alignment = TextAnchor.MiddleCenter,
                     imagePosition = ImagePosition.ImageLeft,
                     fixedWidth = iconSize,
@@ -111,7 +124,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                     $"You are currently using <b>Unity {unityMajorVersion}</b>.\n" +
                     "<i>The shader and the UI below may not work correctly.</i>\n" +
                     "Please <b>re-download Flat Kit</b> to get the compatible version.";
-            var style = new GUIStyle(EditorStyles.wordWrappedLabel) {
+            var style = new GUIStyle(EditorStyles.wordWrappedLabel)
+            {
                 alignment = TextAnchor.MiddleLeft,
                 richText = true,
                 fontSize = 12,
@@ -127,24 +141,30 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 GUILayout.FlexibleSpace();
                 const float buttonWidth = 120;
 
-                if (GUILayout.Button("Package Manager", EditorStyles.miniButton, GUILayout.Width(buttonWidth))) {
+                if (GUILayout.Button("Package Manager", EditorStyles.miniButton, GUILayout.Width(buttonWidth)))
+                {
                     const string packageName = "Flat Kit: Toon Shading and Water";
 
                     var type = typeof(UnityEditor.PackageManager.UI.Window);
                     var method = type.GetMethod("OpenFilter", BindingFlags.NonPublic | BindingFlags.Static);
-                    if (method != null) {
+                    if (method != null)
+                    {
                         method.Invoke(null, new object[] { $"AssetStore/{packageName}" });
-                    } else {
+                    }
+                    else
+                    {
                         UnityEditor.PackageManager.UI.Window.Open(packageName);
                     }
                 }
 
-                if (GUILayout.Button("Asset Store", EditorStyles.miniButton, GUILayout.Width(buttonWidth))) {
+                if (GUILayout.Button("Asset Store", EditorStyles.miniButton, GUILayout.Width(buttonWidth)))
+                {
                     const string assetStoreUrl = "https://u3d.as/1uVy";
                     Application.OpenURL(assetStoreUrl);
                 }
 
-                if (GUILayout.Button("Support", EditorStyles.miniButton, GUILayout.Width(buttonWidth))) {
+                if (GUILayout.Button("Support", EditorStyles.miniButton, GUILayout.Width(buttonWidth)))
+                {
                     const string contactUrl = "https://flatkit.dustyroom.com/contact-details/";
                     Application.OpenURL(contactUrl);
                 }
@@ -156,7 +176,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
 
-            foreach (var property in properties) {
+            foreach (var property in properties)
+            {
                 // materialEditor.ShaderProperty(property, property.displayName);
                 DrawStandard(property);
             }
@@ -164,7 +185,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
             return;
         }
 
-        if (_target.IsKeywordEnabled("DR_OUTLINE_ON") && _target.IsKeywordEnabled("_ALPHATEST_ON")) {
+        if (_target.IsKeywordEnabled("DR_OUTLINE_ON") && _target.IsKeywordEnabled("_ALPHATEST_ON"))
+        {
             EditorGUILayout.HelpBox(
                 "The 'Outline' and 'Alpha Clip' features are usually incompatible. The outline shader pass will not be using alpha clipping.",
                 MessageType.Warning);
@@ -174,7 +196,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         string foldoutName = string.Empty;
         int foldoutRemainingItems = 0;
         bool latestFoldoutState = false;
-        _foldoutStyle ??= new GUIStyle(EditorStyles.foldout) {
+        _foldoutStyle ??= new GUIStyle(EditorStyles.foldout)
+        {
             margin = {
                 left = -5
             },
@@ -183,15 +206,18 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
             },
         };
         _boxStyle ??= new GUIStyle(EditorStyles.helpBox);
-        _richHelpBoxStyle ??= new GUIStyle(EditorStyles.helpBox) {
+        _richHelpBoxStyle ??= new GUIStyle(EditorStyles.helpBox)
+        {
             richText = true
         };
         bool vGroupStarted = false;
 
-        foreach (MaterialProperty property in properties) {
+        foreach (MaterialProperty property in properties)
+        {
             string displayName = property.displayName;
 
-            if (displayName.Contains("[") && !displayName.Contains("FOLDOUT")) {
+            if (displayName.Contains("[") && !displayName.Contains("FOLDOUT"))
+            {
                 EditorGUI.indentLevel += 1;
             }
 
@@ -249,7 +275,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 }
             }
 
-            if (_target.IsKeywordEnabled("DR_ENABLE_LIGHTMAP_DIR") && isOverrideLightDirectionToggle) {
+            if (_target.IsKeywordEnabled("DR_ENABLE_LIGHTMAP_DIR") && isOverrideLightDirectionToggle)
+            {
                 var dirPitch = _target.GetFloat(LightmapDirectionPitch);
                 var dirYaw = _target.GetFloat(LightmapDirectionYaw);
 
@@ -261,7 +288,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 _target.SetVector(LightmapDirection, direction);
             }
 
-            if (displayName.Contains("FOLDOUT")) {
+            if (displayName.Contains("FOLDOUT"))
+            {
                 foldoutName = displayName.Split('(', ')')[1];
                 string foldoutItemCount = displayName.Split('{', '}')[1];
                 foldoutRemainingItems = Convert.ToInt32(foldoutItemCount);
@@ -271,43 +299,53 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 FoldoutStates[property.name] =
                     EditorGUILayout.Foldout(FoldoutStates[property.name], foldoutName, _foldoutStyle);
                 latestFoldoutState = FoldoutStates[property.name];
-                if (latestFoldoutState) {
+                if (latestFoldoutState)
+                {
                     BeginBox();
                 }
             }
 
-            if (foldoutRemainingItems > 0) {
+            if (foldoutRemainingItems > 0)
+            {
                 skipProperty = skipProperty || !latestFoldoutState;
                 EditorGUI.indentLevel += 1;
                 --foldoutRemainingItems;
-            } else if (!skipProperty) {
-                if (EditorGUI.indentLevel > 0 && !vGroupStarted) {
+            }
+            else if (!skipProperty)
+            {
+                if (EditorGUI.indentLevel > 0 && !vGroupStarted)
+                {
                     BeginBox();
                     vGroupStarted = true;
                 }
 
-                if (EditorGUI.indentLevel <= 0 && vGroupStarted) {
+                if (EditorGUI.indentLevel <= 0 && vGroupStarted)
+                {
                     EndBox();
                     vGroupStarted = false;
                 }
             }
 
-            if (_target.IsKeywordEnabled("_CELPRIMARYMODE_STEPS") && displayName.Contains("[LAST_PROP_STEPS]")) {
+            if (_target.IsKeywordEnabled("_CELPRIMARYMODE_STEPS") && displayName.Contains("[LAST_PROP_STEPS]"))
+            {
                 EditorGUILayout.HelpBox(
                     "This mode creates a step texture that control the light/shadow transition. To use:\n" +
                     "1. Set the number of steps (e.g. 3 means three steps between lit and shaded regions), \n" +
                     "2. Save the steps as a texture - 'Save Ramp Texture' button",
                     MessageType.Info);
                 int currentNumSteps = _target.GetInt("_CelNumSteps");
-                if (currentNumSteps != _celShadingNumSteps) {
-                    if (GUILayout.Button("Save Ramp Texture")) {
+                if (currentNumSteps != _celShadingNumSteps)
+                {
+                    if (GUILayout.Button("Save Ramp Texture"))
+                    {
                         _celShadingNumSteps = currentNumSteps;
                         PromptTextureSave(editor, GenerateStepTexture, "_CelStepTexture", FilterMode.Point);
                     }
                 }
             }
 
-            if (_target.IsKeywordEnabled("_CELPRIMARYMODE_CURVE") && displayName.Contains("[LAST_PROP_CURVE]")) {
+            if (_target.IsKeywordEnabled("_CELPRIMARYMODE_CURVE") && displayName.Contains("[LAST_PROP_CURVE]"))
+            {
                 EditorGUILayout.HelpBox(
                     "This mode uses arbitrary curves to control the light/shadow transition. How to use:\n" +
                     "1. Set shading curve (generally from 0.0 to 1.0)\n" +
@@ -316,7 +354,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                     MessageType.Info);
                 _gradient = EditorGUILayout.CurveField("Shading curve", _gradient);
 
-                if (GUILayout.Button("Save Ramp Texture")) {
+                if (GUILayout.Button("Save Ramp Texture"))
+                {
                     PromptTextureSave(editor, GenerateCurveTexture, "_CelCurveTexture",
                         FilterMode.Trilinear);
                 }
@@ -324,49 +363,62 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
 
             if (!skipProperty &&
                 property.type == MaterialProperty.PropType.Color &&
-                property.colorValue == HashColor) {
+                property.colorValue == HashColor)
+            {
                 property.colorValue = _target.GetColor(ColorPropertyName);
             }
 
-            if (!skipProperty && property.name.Contains("_EmissionMap")) {
+            if (!skipProperty && property.name.Contains("_EmissionMap"))
+            {
                 EditorGUILayout.Space(10);
                 bool emission = editor.EmissionEnabledProperty();
                 EditorGUILayout.Space(-10);
                 EditorGUI.indentLevel += 1;
-                if (emission) {
+                if (emission)
+                {
                     _target.EnableKeyword("_EMISSION");
-                } else {
+                }
+                else
+                {
                     _target.DisableKeyword("_EMISSION");
                 }
             }
 
-            if (!skipProperty && property.name.Contains("_EmissionColor")) {
+            if (!skipProperty && property.name.Contains("_EmissionColor"))
+            {
                 EditorGUI.indentLevel += 1;
             }
 
             bool hideInInspector = (property.flags & MaterialProperty.PropFlags.HideInInspector) != 0;
-            if (!hideInInspector && !skipProperty) {
+            if (!hideInInspector && !skipProperty)
+            {
                 EditorGUI.BeginChangeCheck();
                 DrawStandard(property);
 
                 // Toggle per-object outlines.
-                if (property.name.Equals("_OutlineEnabled")) {
+                if (property.name.Equals("_OutlineEnabled"))
+                {
                     var outlineEnabled = _target.IsKeywordEnabled("DR_OUTLINE_ON");
 
-                    if (_target.GetShaderPassEnabled("SRPDEFAULTUNLIT")) {
+                    if (_target.GetShaderPassEnabled("SRPDEFAULTUNLIT"))
+                    {
                         // Legacy per-object outlines.
                         const string m = "Using legacy per-object outlines. Please update to Unity 2022.3+ to use " +
                                          "the new Renderer Feature outlines.";
                         EditorGUILayout.HelpBox(m, MessageType.Info);
-                    } else {
+                    }
+                    else
+                    {
                         // Per-object outlines are now handled by a Renderer Feature.
                         var renderer = ObjectOutlineEditorUtils.GetRendererData();
-                        if (renderer != null) {
+                        if (renderer != null)
+                        {
                             GUILayout.Space(-EditorGUIUtility.standardVerticalSpacing -
                                             EditorGUIUtility.singleLineHeight);
                             GUILayout.BeginHorizontal();
                             GUILayout.FlexibleSpace();
-                            if (GUILayout.Button("Select Renderer Feature", EditorStyles.miniButtonRight)) {
+                            if (GUILayout.Button("Select Renderer Feature", EditorStyles.miniButtonRight))
+                            {
                                 Selection.activeObject = renderer;
                             }
 
@@ -374,7 +426,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                         }
                     }
 
-                    if (EditorGUI.EndChangeCheck()) {
+                    if (EditorGUI.EndChangeCheck())
+                    {
                         // Outline toggle changed state.
 #if UNITY_2022_3_OR_NEWER
                         ObjectOutlineEditorUtils.SetActive(_target, outlineEnabled);
@@ -386,7 +439,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
 #if UNITY_2022_3_OR_NEWER
                     // Switch from legacy shader pass per-object outlines (pre-4.7.0) to new Renderer Feature outlines.
                     const string legacyPassName = "SRPDEFAULTUNLIT";
-                    if (_target.GetShaderPassEnabled(legacyPassName) && outlineEnabled) {
+                    if (_target.GetShaderPassEnabled(legacyPassName) && outlineEnabled)
+                    {
                         _target.SetShaderPassEnabled(legacyPassName, false);
                         var m = $"<color=grey>[Flat Kit]</color> <b>Per-object outlines</b> are now handled by a " +
                                 $"<b>Renderer Feature</b>. The material <color=green><b>{_target.name}</b></color> " +
@@ -398,17 +452,20 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 }
             }
 
-            if (!skipProperty && displayName.Contains("Detail Impact")) {
+            if (!skipProperty && displayName.Contains("Detail Impact"))
+            {
                 DrawTileOffset(editor, FindProperty("_DetailMap"));
             }
 
             // Horizontal line separators.
             {
-                if (FoldoutStates.TryGetValue("_BaseMap", out bool baseMapFoldoutState) && baseMapFoldoutState) {
+                if (FoldoutStates.TryGetValue("_BaseMap", out bool baseMapFoldoutState) && baseMapFoldoutState)
+                {
                     if (displayName.Contains("Texture Impact") ||
                         displayName.Contains("Detail Impact") ||
                         displayName.Contains("Normal Map") ||
-                        displayName.Contains("Emission Color")) {
+                        displayName.Contains("Emission Color"))
+                    {
                         var indent = EditorGUI.indentLevel;
                         EditorGUI.indentLevel = originalIntentLevel + 1;
                         EditorGUILayout.Space(5);
@@ -419,23 +476,27 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 }
             }
 
-            if (!skipProperty && property.name.Contains("_EmissionColor")) {
+            if (!skipProperty && property.name.Contains("_EmissionColor"))
+            {
                 EditorGUILayout.Space(10);
                 EditorGUI.indentLevel -= 1;
                 EditorGUILayout.LabelField("Applied to All Maps", EditorStyles.boldLabel);
                 DrawTileOffset(editor, FindProperty("_BaseMap"));
             }
 
-            if (!skipProperty && property.displayName.Contains("Smooth Normals")) {
+            if (!skipProperty && property.displayName.Contains("Smooth Normals"))
+            {
                 SmoothNormalsUI();
             }
 
             EditorGUI.indentLevel = originalIntentLevel;
 
-            if (foldoutRemainingItems == 0 && latestFoldoutState) {
+            if (foldoutRemainingItems == 0 && latestFoldoutState)
+            {
                 EndBox();
                 latestFoldoutState = false;
-                if (foldoutName.Contains("Advanced Lighting")) {
+                if (foldoutName.Contains("Advanced Lighting"))
+                {
                     const string m = "<b>Advanced Lighting</b> features have significantly different impact in real-time and baked lighting.";
                     EditorGUILayout.LabelField(m, _richHelpBoxStyle);
                 }
@@ -446,16 +507,20 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         var renderingOptionsName = RenderingOptionsName;
         FoldoutStates[renderingOptionsName] =
             EditorGUILayout.Foldout(FoldoutStates[renderingOptionsName], renderingOptionsName, _foldoutStyle);
-        if (FoldoutStates[renderingOptionsName]) {
+        if (FoldoutStates[renderingOptionsName])
+        {
             EditorGUI.indentLevel += 1;
             BeginBox();
             HandleUrpSettings(_target, editor);
             EndBox();
         }
 
-        if (_target.IsKeywordEnabled("_UNITYSHADOWMODE_NONE")) {
+        if (_target.IsKeywordEnabled("_UNITYSHADOWMODE_NONE"))
+        {
             _target.EnableKeyword("_RECEIVE_SHADOWS_OFF");
-        } else {
+        }
+        else
+        {
             _target.DisableKeyword("_RECEIVE_SHADOWS_OFF");
         }
 
@@ -469,43 +534,55 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         */
     }
 
-    private void BeginBox() {
+    private void BeginBox()
+    {
         EditorGUILayout.BeginVertical(_boxStyle);
         EditorGUILayout.Space(3);
     }
 
-    private void EndBox() {
+    private void EndBox()
+    {
         EditorGUILayout.Space(3);
         EditorGUILayout.EndVertical();
     }
 
-    private void SmoothNormalsUI() {
+    private void SmoothNormalsUI()
+    {
         var keywordEnabled = _target.IsKeywordEnabled(OutlineSmoothNormalsKeyword);
         _smoothNormalsEnabled ??= keywordEnabled;
 
-        if (keywordEnabled != _smoothNormalsEnabled) {
+        if (keywordEnabled != _smoothNormalsEnabled)
+        {
             var mesh = GetMeshFromSelection();
-            if (mesh == null) {
+            if (mesh == null)
+            {
                 return;
             }
 
-            if (keywordEnabled) {
-                if (!MeshSmoother.HasSmoothNormals(mesh)) {
+            if (keywordEnabled)
+            {
+                if (!MeshSmoother.HasSmoothNormals(mesh))
+                {
                     SmoothNormals(mesh);
                 }
             }
-        } else if (keywordEnabled) {
+        }
+        else if (keywordEnabled)
+        {
             var mesh = GetMeshFromSelection();
-            if (mesh == null) {
+            if (mesh == null)
+            {
                 return;
             }
 
-            if (!MeshSmoother.HasSmoothNormals(mesh)) {
+            if (!MeshSmoother.HasSmoothNormals(mesh))
+            {
                 EditorGUILayout.HelpBox(
                     "Mesh does not have smooth normals. Please use the 'Smooth Normals' button to generate them.",
                     MessageType.Warning);
 
-                if (mesh.subMeshCount > 1) {
+                if (mesh.subMeshCount > 1)
+                {
                     EditorGUILayout.HelpBox(
                         "Mesh smoothing is not supported for meshes with multiple sub-meshes. " +
                         "Please combine sub-meshes into a single sub-mesh before smoothing.",
@@ -514,7 +591,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
 
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Smooth Normals", GUILayout.ExpandWidth(false))) {
+                if (GUILayout.Button("Smooth Normals", GUILayout.ExpandWidth(false)))
+                {
                     SmoothNormals(mesh);
                 }
 
@@ -525,112 +603,137 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         _smoothNormalsEnabled = keywordEnabled;
     }
 
-    private void SmoothNormals(Mesh mesh) {
-        if (mesh.isReadable) {
+    private void SmoothNormals(Mesh mesh)
+    {
+        if (mesh.isReadable)
+        {
             MeshSmoother.SmoothNormals(mesh);
             var path = AssetDatabase.GetAssetPath(mesh);
             var pathSmoothed =
                 $"{Path.GetDirectoryName(path)}\\{Path.GetFileNameWithoutExtension(path)} Smooth Normals.asset";
 
             var fileExists = File.Exists(pathSmoothed);
-            if (fileExists) {
+            if (fileExists)
+            {
                 var action1 = EditorUtility.DisplayDialogComplex("Smoothing normals",
                     "Asset already exists. Do you want to overwrite it?",
                     "Overwrite", "Cancel", "Open asset");
-                switch (action1) {
-                    case 0: {
-                        // Overwrite
-                        AssetDatabase.DeleteAsset(pathSmoothed);
-                        break;
-                    }
-                    case 1: {
-                        // Cancel
-                        _target.DisableKeyword(OutlineSmoothNormalsKeyword);
-                        return;
-                    }
-                    case 2: {
-                        // Open asset
-                        AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<Object>(pathSmoothed));
-                        return;
-                    }
+                switch (action1)
+                {
+                    case 0:
+                        {
+                            // Overwrite
+                            AssetDatabase.DeleteAsset(pathSmoothed);
+                            break;
+                        }
+                    case 1:
+                        {
+                            // Cancel
+                            _target.DisableKeyword(OutlineSmoothNormalsKeyword);
+                            return;
+                        }
+                    case 2:
+                        {
+                            // Open asset
+                            AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<Object>(pathSmoothed));
+                            return;
+                        }
                 }
             }
 
             var newMesh = Object.Instantiate(mesh);
-            try {
+            try
+            {
                 AssetDatabase.CreateAsset(newMesh, pathSmoothed);
                 Debug.Log($"<b>[Flat Kit]</b> Created asset <i>{pathSmoothed}</i>.");
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 Debug.Log("<b>[Flat Kit]</b> Please ignore the error above. It is caused by a Unity bug.");
                 var action2 = EditorUtility.DisplayDialogComplex("Error",
                     $"Could not create asset at path '{pathSmoothed}'. Please check the Console for more information.",
                     "OK", "Show Console", "Save to 'Assets' folder");
-                switch (action2) {
-                    case 0: {
-                        // OK
-                        _target.DisableKeyword(OutlineSmoothNormalsKeyword);
-                        return;
-                    }
-                    case 1: {
-                        // Show Console
-                        EditorApplication.ExecuteMenuItem("Window/General/Console");
-                        return;
-                    }
-                    case 2: {
-                        // Save to Assets folder
-                        pathSmoothed = $"Assets/{Path.GetFileName(pathSmoothed)}";
-                        AssetDatabase.CreateAsset(newMesh, pathSmoothed);
-                        break;
-                    }
+                switch (action2)
+                {
+                    case 0:
+                        {
+                            // OK
+                            _target.DisableKeyword(OutlineSmoothNormalsKeyword);
+                            return;
+                        }
+                    case 1:
+                        {
+                            // Show Console
+                            EditorApplication.ExecuteMenuItem("Window/General/Console");
+                            return;
+                        }
+                    case 2:
+                        {
+                            // Save to Assets folder
+                            pathSmoothed = $"Assets/{Path.GetFileName(pathSmoothed)}";
+                            AssetDatabase.CreateAsset(newMesh, pathSmoothed);
+                            break;
+                        }
                 }
             }
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             var newAsset = AssetDatabase.LoadAssetAtPath<Mesh>(pathSmoothed);
-            if (newAsset != null) {
+            if (newAsset != null)
+            {
                 SetMeshToSelection(newAsset);
             }
-        } else {
+        }
+        else
+        {
             var action = EditorUtility.DisplayDialogComplex("Smoothing normals",
                 "Mesh is not readable. Please enable 'Read/Write Enabled' in the mesh import settings.",
                 "Set readable", "Open import settings", "Cancel");
-            switch (action) {
-                case 0: {
-                    // Set readable
-                    var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh));
-                    if (importer != null) {
-                        var modelImporter = importer as ModelImporter;
-                        if (modelImporter != null) {
-                            modelImporter.isReadable = true;
-                            modelImporter.SaveAndReimport();
+            switch (action)
+            {
+                case 0:
+                    {
+                        // Set readable
+                        var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh));
+                        if (importer != null)
+                        {
+                            var modelImporter = importer as ModelImporter;
+                            if (modelImporter != null)
+                            {
+                                modelImporter.isReadable = true;
+                                modelImporter.SaveAndReimport();
+                            }
                         }
-                    }
 
-                    break;
-                }
-                case 1: {
-                    // Open import settings
-                    var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh));
-                    if (importer != null) {
-                        AssetDatabase.OpenAsset(importer);
+                        break;
                     }
+                case 1:
+                    {
+                        // Open import settings
+                        var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh));
+                        if (importer != null)
+                        {
+                            AssetDatabase.OpenAsset(importer);
+                        }
 
-                    break;
-                }
-                case 2: {
-                    // Cancel
-                    _target.DisableKeyword(OutlineSmoothNormalsKeyword);
-                    break;
-                }
+                        break;
+                    }
+                case 2:
+                    {
+                        // Cancel
+                        _target.DisableKeyword(OutlineSmoothNormalsKeyword);
+                        break;
+                    }
             }
         }
     }
 
-    private static Mesh GetMeshFromSelection() {
+    private static Mesh GetMeshFromSelection()
+    {
         var go = Selection.activeGameObject;
-        if (go == null) {
+        if (go == null)
+        {
             EditorGUILayout.HelpBox(
                 "All meshes using smooth normals need processing. To process a mesh, select it in a scene and " +
                 "re-enable 'Smooth Normals' in the inspector.",
@@ -639,67 +742,84 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         }
 
         var meshFilter = go.GetComponent<MeshFilter>();
-        if (meshFilter != null) {
+        if (meshFilter != null)
+        {
             return meshFilter.sharedMesh;
         }
 
         var skinnedMeshRenderer = go.GetComponent<SkinnedMeshRenderer>();
-        if (skinnedMeshRenderer != null) {
+        if (skinnedMeshRenderer != null)
+        {
             return skinnedMeshRenderer.sharedMesh;
         }
 
         return null;
     }
 
-    private static void SetMeshToSelection(Mesh mesh) {
+    private static void SetMeshToSelection(Mesh mesh)
+    {
         var go = Selection.activeGameObject;
-        if (go == null) {
+        if (go == null)
+        {
             return;
         }
 
         var meshFilter = go.GetComponent<MeshFilter>();
-        if (meshFilter != null) {
+        if (meshFilter != null)
+        {
             meshFilter.sharedMesh = mesh;
             return;
         }
 
         var skinnedMeshRenderer = go.GetComponent<SkinnedMeshRenderer>();
-        if (skinnedMeshRenderer != null) {
+        if (skinnedMeshRenderer != null)
+        {
             skinnedMeshRenderer.sharedMesh = mesh;
         }
     }
 
-// Adapted from BaseShaderGUI.cs.
-    private void HandleUrpSettings(Material material, MaterialEditor editor) {
+    // Adapted from BaseShaderGUI.cs.
+    private void HandleUrpSettings(Material material, MaterialEditor editor)
+    {
         queueOffsetProp = FindProperty("_QueueOffset");
 
         bool alphaClip = false;
-        if (material.HasProperty("_AlphaClip")) {
+        if (material.HasProperty("_AlphaClip"))
+        {
             alphaClip = material.GetFloat("_AlphaClip") >= 0.5;
         }
 
-        if (alphaClip) {
+        if (alphaClip)
+        {
             material.EnableKeyword("_ALPHATEST_ON");
-        } else {
+        }
+        else
+        {
             material.DisableKeyword("_ALPHATEST_ON");
         }
 
-        if (HasProperty("_Surface")) {
+        if (HasProperty("_Surface"))
+        {
             EditorGUI.BeginChangeCheck();
             var surfaceProp = FindProperty("_Surface");
             EditorGUI.showMixedValue = surfaceProp.hasMixedValue;
             var surfaceType = (SurfaceType)surfaceProp.floatValue;
             surfaceType = (SurfaceType)EditorGUILayout.EnumPopup("Surface Type", surfaceType);
-            if (EditorGUI.EndChangeCheck()) {
+            if (EditorGUI.EndChangeCheck())
+            {
                 editor.RegisterPropertyChangeUndo("Surface Type");
                 surfaceProp.floatValue = (float)surfaceType;
             }
 
-            if (surfaceType == SurfaceType.Opaque) {
-                if (alphaClip) {
+            if (surfaceType == SurfaceType.Opaque)
+            {
+                if (alphaClip)
+                {
                     material.renderQueue = (int)RenderQueue.AlphaTest;
                     material.SetOverrideTag("RenderType", "TransparentCutout");
-                } else {
+                }
+                else
+                {
                     material.renderQueue = (int)RenderQueue.Geometry;
                     material.SetOverrideTag("RenderType", "Opaque");
                 }
@@ -710,12 +830,14 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 material.SetInt("_ZWrite", 1);
                 material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
                 material.SetShaderPassEnabled("ShadowCaster", true);
-            } else // Transparent
+            }
+            else // Transparent
             {
                 BlendMode blendMode = (BlendMode)material.GetFloat("_Blend");
 
                 // Specific Transparent Mode Settings
-                switch (blendMode) {
+                switch (blendMode)
+                {
                     case BlendMode.Alpha:
                         material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                         material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -748,13 +870,15 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
             }
 
             // DR: draw popup.
-            if (surfaceType == SurfaceType.Transparent && HasProperty("_Blend")) {
+            if (surfaceType == SurfaceType.Transparent && HasProperty("_Blend"))
+            {
                 EditorGUI.BeginChangeCheck();
                 var blendModeProperty = FindProperty("_Blend");
                 EditorGUI.showMixedValue = blendModeProperty.hasMixedValue;
                 var blendMode = (BlendMode)blendModeProperty.floatValue;
                 blendMode = (BlendMode)EditorGUILayout.EnumPopup("Blend Mode", blendMode);
-                if (EditorGUI.EndChangeCheck()) {
+                if (EditorGUI.EndChangeCheck())
+                {
                     editor.RegisterPropertyChangeUndo("Blend Mode");
                     blendModeProperty.floatValue = (float)blendMode;
                 }
@@ -764,20 +888,23 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         DrawQueueOffsetField();
 
         // DR: draw popup.
-        if (HasProperty("_Cull")) {
+        if (HasProperty("_Cull"))
+        {
             EditorGUI.BeginChangeCheck();
             var cullProp = FindProperty("_Cull");
             EditorGUI.showMixedValue = cullProp.hasMixedValue;
             var culling = (RenderFace)cullProp.floatValue;
             culling = (RenderFace)EditorGUILayout.EnumPopup("Render Faces", culling);
-            if (EditorGUI.EndChangeCheck()) {
+            if (EditorGUI.EndChangeCheck())
+            {
                 editor.RegisterPropertyChangeUndo("Render Faces");
                 cullProp.floatValue = (float)culling;
                 material.doubleSidedGI = (RenderFace)cullProp.floatValue != RenderFace.Front;
             }
         }
 
-        if (HasProperty("_AlphaClip")) {
+        if (HasProperty("_AlphaClip"))
+        {
             EditorGUI.BeginChangeCheck();
             var clipProp = FindProperty("_AlphaClip");
             EditorGUI.showMixedValue = clipProp.hasMixedValue;
@@ -788,7 +915,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
             EditorGUI.showMixedValue = false;
 
             // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (clipProp.floatValue == 1 && HasProperty("_Cutoff")) {
+            if (clipProp.floatValue == 1 && HasProperty("_Cutoff"))
+            {
                 var cutoffProp = FindProperty("_Cutoff");
                 editor.ShaderProperty(cutoffProp, "Threshold", 1);
             }
@@ -798,29 +926,37 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
     }
 
     private void PromptTextureSave(MaterialEditor editor, Func<Texture2D> generate, string propertyName,
-        FilterMode filterMode) {
+        FilterMode filterMode)
+    {
         var rampTexture = generate();
         var pngNameNoExtension = $"{editor.target.name}{propertyName}-ramp";
         var fullPath =
             EditorUtility.SaveFilePanel("Save Ramp Texture", "Assets", pngNameNoExtension, "png");
-        if (fullPath.Length > 0) {
+        if (fullPath.Length > 0)
+        {
             SaveTextureAsPng(rampTexture, fullPath, filterMode);
             var loadedTexture = LoadTexture(fullPath);
-            if (loadedTexture != null) {
+            if (loadedTexture != null)
+            {
                 _target.SetTexture(propertyName, loadedTexture);
-            } else {
+            }
+            else
+            {
                 Debug.LogWarning("Could not save the texture. Make sure the destination is in the Assets folder.");
             }
         }
     }
 
-    private Texture2D GenerateStepTexture() {
+    private Texture2D GenerateStepTexture()
+    {
         int numSteps = _celShadingNumSteps;
-        var t2d = new Texture2D(numSteps + 1, /*height=*/1, TextureFormat.R8, /*mipChain=*/false) {
+        var t2d = new Texture2D(numSteps + 1, /*height=*/1, TextureFormat.R8, /*mipChain=*/false)
+        {
             filterMode = FilterMode.Point,
             wrapMode = TextureWrapMode.Clamp
         };
-        for (int i = 0; i < numSteps + 1; i++) {
+        for (int i = 0; i < numSteps + 1; i++)
+        {
             var color = Color.white * i / numSteps;
             t2d.SetPixel(i, 0, color);
         }
@@ -829,19 +965,23 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         return t2d;
     }
 
-    private Texture2D GenerateCurveTexture() {
+    private Texture2D GenerateCurveTexture()
+    {
         const int width = 256;
         const int height = 1;
-        var lut = new Texture2D(width, height, TextureFormat.R8, /*mipChain=*/false) {
+        var lut = new Texture2D(width, height, TextureFormat.R8, /*mipChain=*/false)
+        {
             alphaIsTransparency = false,
             wrapMode = TextureWrapMode.Clamp,
             hideFlags = HideFlags.HideAndDontSave,
             filterMode = FilterMode.Trilinear
         };
 
-        for (float x = 0; x < width; x++) {
+        for (float x = 0; x < width; x++)
+        {
             float value = _gradient.Evaluate(x / width);
-            for (float y = 0; y < height; y++) {
+            for (float y = 0; y < height; y++)
+            {
                 var color = Color.white * value;
                 lut.SetPixel(Mathf.CeilToInt(x), Mathf.CeilToInt(y), color);
             }
@@ -850,7 +990,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         return lut;
     }
 
-    private static void SaveTextureAsPng(Texture2D texture, string fullPath, FilterMode filterMode) {
+    private static void SaveTextureAsPng(Texture2D texture, string fullPath, FilterMode filterMode)
+    {
         byte[] bytes = texture.EncodeToPNG();
         File.WriteAllBytes(fullPath, bytes);
         AssetDatabase.Refresh();
@@ -858,12 +999,14 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
 
         string pathRelativeToAssets = ConvertFullPathToAssetPath(fullPath);
         TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(pathRelativeToAssets);
-        if (importer != null) {
+        if (importer != null)
+        {
             importer.filterMode = filterMode;
             importer.textureType = TextureImporterType.SingleChannel;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.mipmapEnabled = false;
-            var textureSettings = new TextureImporterPlatformSettings {
+            var textureSettings = new TextureImporterPlatformSettings
+            {
                 format = TextureImporterFormat.R8
             };
             importer.SetPlatformTextureSettings(textureSettings);
@@ -878,14 +1021,17 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
                 fullPath, pathRelativeToAssets));
     }
 
-    private static Texture2D LoadTexture(string fullPath) {
+    private static Texture2D LoadTexture(string fullPath)
+    {
         string pathRelativeToAssets = ConvertFullPathToAssetPath(fullPath);
-        if (pathRelativeToAssets.Length == 0) {
+        if (pathRelativeToAssets.Length == 0)
+        {
             return null;
         }
 
         var loadedTexture = AssetDatabase.LoadAssetAtPath(pathRelativeToAssets, typeof(Texture2D)) as Texture2D;
-        if (loadedTexture == null) {
+        if (loadedTexture == null)
+        {
             Debug.LogError(string.Format("[FlatKit] Could not load texture from {0} [{1}].", fullPath,
                 pathRelativeToAssets));
             return null;
@@ -897,16 +1043,19 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
         return loadedTexture;
     }
 
-    private static string ConvertFullPathToAssetPath(string fullPath) {
+    private static string ConvertFullPathToAssetPath(string fullPath)
+    {
         int count = (Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar).Length;
         return fullPath.Remove(0, count);
     }
 
-    private static string Rev(string a) {
+    private static string Rev(string a)
+    {
         StringBuilder b = new StringBuilder(a.Length);
         int i = 0;
 
-        foreach (char c in a) {
+        foreach (char c in a)
+        {
             b.Append((char)(c - "8<3F9="[i] % 32));
             i = (i + 1) % 6;
         }
@@ -934,7 +1083,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
 #endif
 
     [UsedImplicitly]
-    private void TransferToBaseMap() {
+    private void TransferToBaseMap()
+    {
         var baseMapProperty = FindProperty("_MainTex");
         var baseColorProperty = FindProperty("_Color");
         _target.SetTexture("_BaseMap", baseMapProperty.textureValue);
@@ -945,7 +1095,8 @@ public class StylizedSurfaceEditor : BaseShaderGUI {
     }
 
     [UsedImplicitly]
-    private void TransferToMainTex() {
+    private void TransferToMainTex()
+    {
         var baseMapProperty = FindProperty("_BaseMap");
         var baseColorProperty = FindProperty("_BaseColor");
         _target.SetTexture("_MainTex", baseMapProperty.textureValue);

@@ -20,7 +20,7 @@ public class GunnerEquipButton : MonoBehaviour
         gunnerId = so.GunnerId;
 
         if (nameLabel) nameLabel.text = so.DisplayName;
-        if (iconImage) iconImage.sprite = so.IdleSprite;
+        if (iconImage) iconImage.sprite = so.gunnerSprite;
         if (!btn) btn = GetComponent<Button>();
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(() => onClick?.Invoke(gunnerId));

@@ -27,6 +27,7 @@ public class GunnerManager : MonoBehaviour
     [Header("Starter")]
     [SerializeField, Tooltip("Preferred starter gunner kept across prestiges (drag a GunnerSO here or set once via code).")]
     private GunnerSO preferredStarterGunner;
+    private const string PREF_PREFERRED_STARTER_ID = "PreferredStarterGunnerId";
 
     // Player state
     private readonly Dictionary<string, GunnerRuntime> runtimes = new();
@@ -59,8 +60,22 @@ public class GunnerManager : MonoBehaviour
     // slotIndex -> parked gunner id (slot has NO turret; gunner is hidden and available in UI)
     private readonly Dictionary<int, string> parkedSlotToGunner = new();
 
-    // Helpers for the Limit Break
+    // Helpers for the Limit Break    
     public GunnerSO GetSO(string gunnerId) => (soById.TryGetValue(gunnerId, out var so) ? so : null);
+
+    // 3D model instances and “docked” state
+    private readonly Dictionary<string, GunnerModelBinding> modelByGunner = new();
+    private readonly HashSet<string> dockedGunners = new(); // bonuses apply only when docked
+
+
+    public bool TryGetEquippedRuntime(int slotIndex, out GunnerRuntime rt)
+    {
+        rt = null;
+        var id = GetEquippedGunnerId(slotIndex);
+        if (string.IsNullOrEmpty(id)) return false;
+        rt = GetRuntime(id);
+        return rt != null;
+    }
 
     private void Awake()
     {
@@ -92,6 +107,7 @@ public class GunnerManager : MonoBehaviour
         {
             Debug.LogWarning("[GunnerManager] No unlock table assigned; manager will be empty.");
         }
+        LoadPreferredStarterFromPrefs();
     }
 
     private void Update()
@@ -120,16 +136,52 @@ public class GunnerManager : MonoBehaviour
     }
 
     /* ===================== NEW GAME ===================== */
-
-    /// <summary>Change the preferred starter gunner at runtime (e.g., from a selection UI).</summary>
-    public void SetPreferredStarter(GunnerSO so)
+    /// <summary>Grants free ownership for each gunner id (no currency), safe to call multiple times.</summary>
+    public void GrantOwnershipFree(IEnumerable<GunnerSO> starters)
     {
-        preferredStarterGunner = so;
-        if (so != null && !IsOwned(so.GunnerId))
-            ownedGunners.Add(so.GunnerId); // allow immediate use in the current run if you want
+        if (starters == null) return;
+        foreach (var so in starters)
+        {
+            if (so == null) continue;
+            ownedGunners.Add(so.GunnerId);
+            if (!runtimes.ContainsKey(so.GunnerId))
+                runtimes[so.GunnerId] = new GunnerRuntime(so);
+        }
         Save();
         OnRosterChanged?.Invoke();
     }
+
+    /// <summary>Change the preferred starter gunner at runtime (e.g., from a selection UI).</summary>
+    private void LoadPreferredStarterFromPrefs()
+    {
+        string id = PlayerPrefs.GetString(PREF_PREFERRED_STARTER_ID, "");
+        if (!string.IsNullOrEmpty(id) && soById.TryGetValue(id, out var so))
+        {
+            preferredStarterGunner = so;
+            // Ensure we own it in the current run (quality of life)
+            ownedGunners.Add(so.GunnerId);
+        }
+    }
+
+    /// <summary>Change the preferred starter gunner at runtime (e.g., from selection UI) and persist it.</summary>
+    public void SetPreferredStarter(GunnerSO so)
+    {
+        preferredStarterGunner = so;
+        if (so != null)
+        {
+            ownedGunners.Add(so.GunnerId);   // grant ownership (free)
+            PlayerPrefs.SetString(PREF_PREFERRED_STARTER_ID, so.GunnerId);
+        }
+        else
+        {
+            PlayerPrefs.DeleteKey(PREF_PREFERRED_STARTER_ID);
+        }
+
+        PlayerPrefs.Save();
+        Save();               // your SaveGameManager path
+        OnRosterChanged?.Invoke();
+    }
+
 
     /* ===================== EQUIP / UNEQUIP ===================== */
 
@@ -178,8 +230,21 @@ public class GunnerManager : MonoBehaviour
         if (runtimes.TryGetValue(gunnerId, out var rt))
             rt.EquippedSlot = -1;
 
-        // destroy visual
-        // destroy visual + forget bars/anchor
+        // 3D model: run out, then destroy
+        if (modelByGunner.TryGetValue(gunnerId, out var model) && model != null)
+        {
+            Vector3 exit = slotAnchors.TryGetValue(slotIndex, out var t) && t != null
+                ? t.position + new Vector3(0f, 0f, -8f)
+                : model.transform.position + new Vector3(0f, 0f, -8f);
+
+            dockedGunners.Remove(gunnerId);
+            model.RunOut(exit, 0.1f, onExit: () =>
+            {
+                modelByGunner.Remove(gunnerId);
+            });
+        }
+
+        // Bars/billboard cleanup (keep order)
         if (visuals.TryGetValue(gunnerId, out var go) && go != null)
         {
             Destroy(go);
@@ -189,6 +254,7 @@ public class GunnerManager : MonoBehaviour
         limitBarByGunner.Remove(gunnerId);
         slotAnchors.Remove(slotIndex);
         billboardByGunner.Remove(gunnerId);
+
 
         NotifyTurretOfChange(slotIndex);
         Save();
@@ -216,50 +282,84 @@ public class GunnerManager : MonoBehaviour
         var so = allGunners.FirstOrDefault(g => g.GunnerId == gunnerId);
         if (so == null) return;
 
-        var lbIcon = GetSkillIcon(so);
-
         slotAnchors[slotIndex] = turretAnchor;
 
-        if (visuals.TryGetValue(gunnerId, out var existing) && existing != null)
+        // 1) Billboard (bars only). No portrait sprite.
+        GameObject card;
+        if (!visuals.TryGetValue(gunnerId, out card) || card == null)
         {
-            existing.transform.SetParent(turretAnchor, false);
-            existing.transform.localPosition = onTurretLocalOffset;
-            existing.SetActive(true);
-            ApplySprite(existing, so.OnTurretSprite);
+            card = gunnerBillboardPrefab != null
+                ? Instantiate(gunnerBillboardPrefab, turretAnchor, false)
+                : new GameObject("GunnerBillboard_" + gunnerId);
 
-            // Rebind bars if present on this instance
-            var binding = existing.GetComponent<GunnerBillboardBinding>();
-            if (binding != null && runtimes.TryGetValue(gunnerId, out var rt0))
+            card.transform.localPosition = onTurretLocalOffset;
+
+            // Ensure no portrait is shown
+            var sr = card.GetComponent<SpriteRenderer>() ?? card.AddComponent<SpriteRenderer>();
+            sr.sprite = null;
+            sr.enabled = false; // just the bars/UI
+
+            visuals[gunnerId] = card;
+        }
+        else
+        {
+            card.transform.SetParent(turretAnchor, false);
+            card.transform.localPosition = onTurretLocalOffset;
+            card.SetActive(true);
+        }
+
+        var rt = runtimes.TryGetValue(gunnerId, out var rtt) ? rtt : null;
+        var bind = card.GetComponent<GunnerBillboardBinding>();
+        if (bind != null && rt != null)
+        {
+            bind.InitializeFromRuntime(rt, GetSkillIcon(so));
+            if (bind.HealthBar) healthBarByGunner[gunnerId] = bind.HealthBar;
+            if (bind.LimitBreakBar) limitBarByGunner[gunnerId] = bind.LimitBreakBar;
+            billboardByGunner[gunnerId] = bind;
+        }
+
+        // 2) Spawn / move 3D model and run into place
+        dockedGunners.Remove(gunnerId); // will become active once docked
+
+        // Compute an off-screen start (in front of the player, positive -Z)
+        Vector3 start = turretAnchor.position + new Vector3(0f, 0f, -8f);
+        Vector3 exit = turretAnchor.position + new Vector3(0f, 0f, -8f);
+
+        GunnerModelBinding model;
+        if (!modelByGunner.TryGetValue(gunnerId, out model) || model == null)
+        {
+            if (so.ModelPrefab == null)
             {
-                binding.InitializeFromRuntime(rt0, lbIcon);
-                if (binding.HealthBar) healthBarByGunner[gunnerId] = binding.HealthBar;
-                if (binding.LimitBreakBar) limitBarByGunner[gunnerId] = binding.LimitBreakBar;
-                billboardByGunner[gunnerId] = binding;
+                Debug.LogWarning($"[GunnerManager] Gunner {gunnerId} has no ModelPrefab assigned. Using billboard-only fallback.");
+                return;
             }
-            return;
+
+            var go = Instantiate(so.ModelPrefab, start, Quaternion.LookRotation(turretAnchor.position - start));
+            model = go.GetComponent<GunnerModelBinding>();
+            if (model == null) model = go.AddComponent<GunnerModelBinding>();
+            model.Initialize(so.RunSpeed, so.LimitBreakReadyVfx);
+            modelByGunner[gunnerId] = model;
+
+            // If the billboard has a binding, link it so LB VFX are synced
+            if (bind != null) bind.ModelBinding = model;
         }
-
-        GameObject card = gunnerBillboardPrefab != null
-            ? Instantiate(gunnerBillboardPrefab, turretAnchor, false)
-            : new GameObject("GunnerBillboard_" + gunnerId);
-
-        card.transform.localPosition = onTurretLocalOffset;
-        var sr = card.GetComponent<SpriteRenderer>();
-        if (sr == null) sr = card.AddComponent<SpriteRenderer>();
-        sr.sprite = so.OnTurretSprite;
-
-        // Bars binding (optional)
-        var bindingNew = card.GetComponent<GunnerBillboardBinding>();
-        if (bindingNew != null && runtimes.TryGetValue(gunnerId, out var rt))
+        else
         {
-            bindingNew.InitializeFromRuntime(rt, lbIcon);
-            if (bindingNew.HealthBar) healthBarByGunner[gunnerId] = bindingNew.HealthBar;
-            if (bindingNew.LimitBreakBar) limitBarByGunner[gunnerId] = bindingNew.LimitBreakBar;
-            billboardByGunner[gunnerId] = bindingNew;
+            model.transform.position = start;
+            model.gameObject.SetActive(true);
         }
 
-        visuals[gunnerId] = card;
+        // Begin run-in
+        model.RunTo(turretAnchor, so.ArrivalSnapDistance, onArrive: () =>
+        {
+            // Snap and offset
+            model.transform.position = turretAnchor.position + so.ModelOffsetOnTurret;
+            dockedGunners.Add(gunnerId);
+            // Recompute turret effective stats now that the gunner is actually present
+            OnSlotGunnerStatsChanged?.Invoke(slotIndex);
+        });
     }
+
 
     private static void ApplySprite(GameObject go, Sprite sprite)
     {
@@ -270,10 +370,16 @@ public class GunnerManager : MonoBehaviour
 
     private void NotifyTurretOfChange(int slotIndex)
     {
-        // If your SlotWorldButton/scene structure keeps the turret under a known anchor,
-        // you can find the BaseTurret and nudge it to rebuild effects if needed.
-        // For now, turrets will query bonuses every Update and stay correct.
+        // For now, turrets query bonuses every Update and stay correct.
     }
+
+    public void NotifyTurretAttack(int slotIndex)
+    {
+        if (!slotToGunner.TryGetValue(slotIndex, out var gid)) return;
+        if (modelByGunner.TryGetValue(gid, out var model) && model != null)
+            model.PlayAttack();
+    }
+
 
     // Used for the chat system
     /// <summary>
@@ -527,6 +633,8 @@ public class GunnerManager : MonoBehaviour
         if (!slotToGunner.TryGetValue(slotIndex, out var id)) return bonus;
         if (!runtimes.TryGetValue(id, out var rt)) return bonus;
         if (rt.IsDead || rt.IsOnQuest) return bonus;
+        // Do not apply any bonus until the model actually docked on the turret
+        if (!dockedGunners.Contains(id)) return bonus;
 
         var so = allGunners.FirstOrDefault(g => g.GunnerId == id);
         if (so == null) return bonus;
@@ -706,7 +814,6 @@ public class GunnerManager : MonoBehaviour
         return ApplyDamageOnSlot(slot, damage);
     }
 
-
     public int GetNearestAliveSlotByX(float worldX)
     {
         int bestSlot = -1;
@@ -732,8 +839,116 @@ public class GunnerManager : MonoBehaviour
 
     public float GetSlotAnchorX(int slotIndex)
     {
-        return slotAnchors.TryGetValue(slotIndex, out var t) && t != null ? t.position.x : 0f;
+        // Fast path
+        if (slotAnchors.TryGetValue(slotIndex, out var t) && t != null)
+            return t.position.x;
+
+        // Lazy-build anchors from the scene if missing
+        var slots = FindObjectsByType<Assets.Scripts.UI.SlotWorldButton>(FindObjectsSortMode.None);
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var swb = slots[i];
+            if (swb == null) continue;
+            slotAnchors[swb.slotIndex] = swb.barrelAnchor; // may be null for safety, but usually valid
+        }
+
+        // Try again
+        if (slotAnchors.TryGetValue(slotIndex, out t) && t != null)
+            return t.position.x;
+
+        // Final fallback: 0 (keeps math safe, but you probably want anchors set by SlotWorldButton)
+        return 0f;
     }
+
+    public float GetSlotAnchorDepth(int slotIndex)
+    {
+        // Fast path
+        if (slotAnchors.TryGetValue(slotIndex, out var t) && t != null)
+            return t.position.z;
+
+        // Lazy-build anchors from the scene if missing
+        var slots = FindObjectsByType<Assets.Scripts.UI.SlotWorldButton>(FindObjectsSortMode.None);
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var swb = slots[i];
+            if (swb == null) continue;
+            slotAnchors[swb.slotIndex] = swb.barrelAnchor;
+        }
+
+        // Try again
+        if (slotAnchors.TryGetValue(slotIndex, out t) && t != null)
+            return t.position.z;
+
+        // Fallback if truly unresolved
+        return 0f;
+    }
+
+    /// <summary>
+    /// Returns true if the slot currently has a living, equipped gunner.
+    /// </summary>
+    public bool IsSlotAlive(int slotIndex)
+    {
+        if (!slotToGunner.TryGetValue(slotIndex, out var gid)) return false;
+        if (!runtimes.TryGetValue(gid, out var rt)) return false;
+        return !rt.IsDead;
+    }
+
+    /// <summary>
+    /// Applies an enemy attack with optional boss "prefer middle" and sweep hits.
+    /// Returns true if at least one slot was hit.
+    /// </summary>
+    public bool TryApplySweepDamageForEnemy(Enemy enemy, float damage, bool preferMiddleSlot)
+    {
+        if (enemy == null) return false;
+
+        // 1) Choose main slot
+        int mainSlot = -1;
+
+        if (preferMiddleSlot)
+        {
+            // If slot 2 has a living gunner, prefer it; else fallback to nearest alive by X
+            mainSlot = 2;
+            bool slot2Alive = ApplyDamageOnSlot(2, 0f); // probe for presence (0 damage)
+            if (!slot2Alive)
+                mainSlot = GetNearestAliveSlotByX(enemy.transform.position.x);
+        }
+        else
+        {
+            mainSlot = GetNearestAliveSlotByX(enemy.transform.position.x);
+        }
+
+        if (mainSlot < 0) return false;
+
+        // 2) Compute sweep slots based on enemy Info (1..5)
+        int sweepTargets = Mathf.Clamp(enemy.Info.SweepTargets, 1, 5);
+        List<int> hits = new List<int>(sweepTargets) { mainSlot };
+
+        if (sweepTargets > 1)
+        {
+            // Rule you specified:
+            // - If main=0 → hit 0 and 1
+            // - If main=4 → hit 4 and 3
+            // - Otherwise: hit main and the neighbor leaning toward the right for slots >=2, else left.
+            if (mainSlot == 0) hits.Add(1);
+            else if (mainSlot == 4) hits.Add(3);
+            else
+            {
+                int right = mainSlot + 1;
+                int left = mainSlot - 1;
+                hits.Add(mainSlot >= 2 ? right : left);
+            }
+
+            // If in future you allow 3–5 targets, extend neighbor picking here (e.g., add the other side, then expand outwards).
+        }
+
+        // 3) Apply damage to selected slots
+        bool any = false;
+        for (int i = 0; i < hits.Count; i++)
+            any |= ApplyDamageOnSlot(hits[i], damage);
+
+        return any;
+    }
+
 
     /* ===================== HEAL / LIMIT BREAK ===================== */
     /// <summary>
@@ -823,7 +1038,6 @@ public class GunnerManager : MonoBehaviour
         {
             var rt = kvp.Value;
 
-            // NEW: flatten UpgradeLevels into arrays
             int upCount = rt.UpgradeLevels?.Count ?? 0;
             int[] upKeys = new int[upCount];
             int[] upLvls = new int[upCount];
@@ -843,16 +1057,18 @@ public class GunnerManager : MonoBehaviour
                 Points = rt.UnspentSkillPoints,
                 Unlocked = rt.Unlocked.Select(u => (int)u).ToArray(),
 
-                // NEW
                 UpKeys = upKeys,
                 UpLevels = upLvls,
 
                 OnQuest = rt.IsOnQuest,
                 QuestEnd = rt.QuestEndUnixTime,
-                EquippedSlot = rt.EquippedSlot
+                EquippedSlot = rt.EquippedSlot,
+
+                PreferredStarterId = (preferredStarterGunner != null && rt.GunnerId == preferredStarterGunner.GunnerId)
+                ? preferredStarterGunner.GunnerId
+                : null
             });
         }
-
 
         // slot map
         foreach (var kvp in slotToGunner)
@@ -913,7 +1129,6 @@ public class GunnerManager : MonoBehaviour
                 }
             }
             AttachEquippedGunnerVisual_Internal(rt.GunnerId, attachAnchor, rt.EquippedSlot);
-
         }
 
         slotToGunner.Clear();
@@ -930,6 +1145,22 @@ public class GunnerManager : MonoBehaviour
                 ownedGunners.Add(id);
         }
 
+        string prefId = null;
+        foreach (var r in dto.Runtimes)
+        {
+            if (!string.IsNullOrEmpty(r.PreferredStarterId))
+            {
+                prefId = r.PreferredStarterId;
+                break; // only need the first occurrence
+            }
+        }
+
+        if (!string.IsNullOrEmpty(prefId) && soById.TryGetValue(prefId, out var soPreferd))
+        {
+            preferredStarterGunner = soPreferd;
+            ownedGunners.Add(soPreferd.GunnerId); // ensure ownership
+        }
+
         // Notify listeners that the equip map changed
         OnSlotGunnerChanged?.Invoke(-1); // -1 = bulk refresh
         OnRosterChanged?.Invoke();
@@ -943,7 +1174,7 @@ public class GunnerManager : MonoBehaviour
     /// </summary>
     public void ResetAll(bool wipeOwnership, bool wipeUpgrades, bool resetLevels)
     {
-        DebugDumpAll("PRE");
+        //DebugDumpAll("PRE");
 
         // Always unequip visuals/slots first
         var slots = new List<int>(slotToGunner.Keys);
@@ -951,17 +1182,17 @@ public class GunnerManager : MonoBehaviour
             UnequipFromSlot(slots[i]);
 
         if (wipeOwnership)
-        {
-            Debug.Log("[GunnerReset] WipeOwnership=TRUE -> clearing owned set; resetting runtimes; keeping preferred starter (if any).");
-
+        {            
             ownedGunners.Clear();
 
             // Reset EVERY runtime to a fresh baseline so no old levels/stats leak through
             foreach (var kv in runtimes)
                 ResetRuntimeToFresh(kv.Key, kv.Value);
 
-            // Keep preferred starter and auto-equip to slot 0 (fresh runtime)
-            if (preferredStarterGunner != null)
+            // Only keep & auto-equip a preferred starter if a preference actually exists in PlayerPrefs.
+            bool keepPreferred = PlayerPrefs.HasKey(PREF_PREFERRED_STARTER_ID);
+
+            if (keepPreferred && preferredStarterGunner != null)
             {
                 var pid = preferredStarterGunner.GunnerId;
                 ownedGunners.Add(pid);
@@ -972,26 +1203,28 @@ public class GunnerManager : MonoBehaviour
                     runtimes[pid] = rt;
                 }
                 ResetRuntimeToFresh(pid, rt);
-
                 EquipToFirstFreeSlot(pid, preferSlotIndex: 0);
-                Debug.Log($"[GunnerReset] Kept preferred starter: {pid} (fresh stats) and auto-equipped.");
+                
+            }
+            else
+            {
+                // Ensure no accidental carry-over when prefs were cleared by DeleteSave
+                preferredStarterGunner = null;
             }
 
             Save();
             OnRosterChanged?.Invoke();
-            DebugDumpAll("POST (wipe ownership)");
+            //DebugDumpAll("POST (wipe ownership)");
             return;
         }
 
-
-        Debug.Log($"[GunnerReset] Applying resets: resetLevels={resetLevels}, wipeUpgrades={wipeUpgrades}");
 
         foreach (var kv in runtimes)
         {
             string gid = kv.Key;
             var rt = kv.Value;
 
-            DebugDumpRuntime("BEFORE", gid, rt);
+           // DebugDumpRuntime("BEFORE", gid, rt);
 
             if (resetLevels)
             {
@@ -1022,12 +1255,12 @@ public class GunnerManager : MonoBehaviour
             rt.IsOnQuest = false;
             rt.QuestEndUnixTime = 0;
 
-            DebugDumpRuntime("AFTER", gid, rt);
+            //DebugDumpRuntime("AFTER", gid, rt);
         }
 
         Save();
         OnRosterChanged?.Invoke();
-        DebugDumpAll("POST");
+        //DebugDumpAll("POST");
     }
     /// <summary>Computes base value for a stat using level 0 upgrades.</summary>
     private float GetEffectiveStatValueForReset(string gunnerId, GunnerStatKey key)
@@ -1095,7 +1328,7 @@ public class GunnerManager : MonoBehaviour
         rt.IsOnQuest = false;
         rt.QuestEndUnixTime = 0;
         RecomputeDerivedStats(gid, rt);
-        Debug.Log($"[GunnerReset] Fresh runtime applied -> id={gid} Lvl={rt.Level} HP={rt.MaxHealth} Unlocked={rt.Unlocked.Count} Upgrades={rt.UpgradeLevels.Count}");
+        //Debug.Log($"[GunnerReset] Fresh runtime applied -> id={gid} Lvl={rt.Level} HP={rt.MaxHealth} Unlocked={rt.Unlocked.Count} Upgrades={rt.UpgradeLevels.Count}");
     }
 
 

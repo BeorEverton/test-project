@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 
-namespace FlatKit.StylizedSurface {
-public static class Tooltips {
-    // @formatter:off
-    public static readonly Dictionary<string, string> Map = new Dictionary<string, string> {
+namespace FlatKit.StylizedSurface
+{
+    public static class Tooltips
+    {
+        // @formatter:off
+        public static readonly Dictionary<string, string> Map = new Dictionary<string, string> {
         { "Color", "Primary color of the material. This color is usually the most visible." }, {
             "Cel Shading Mode", "Lets you choose how the coloring/shading is applied.\n" +
                                 "- 'None' uses only flat Color parameter above, no primary cel is added;\n" +
@@ -116,12 +118,12 @@ public static class Tooltips {
         },
 
         // Texture maps.
-        { "Albedo", "Main texture of the material. It is also known as 'Diffuse'." }, 
+        { "Albedo", "Main texture of the material. It is also known as 'Diffuse'." },
         {
             "Mix Into Shading",
             "Uses the main texture when calculating lighting and shading colors. When disabled, the Environment Lighting of the scene has a greater impact on the material."
         },
-        { "Texture Impact", "How opaque or transparent the texture is." }, 
+        { "Texture Impact", "How opaque or transparent the texture is." },
         {
             "Blending Mode", "Select which blending mode to use for the texture:\n" +
                              "-'Add' adds the texture to the existing colors of shading;\n" +
@@ -152,6 +154,6 @@ public static class Tooltips {
         { "Alpha Clipping", "Allows controlling which pixels to render based on the texture alpha values." },
         { "Enable GPU Instancing", "GPU Instancing allows rendering many copies of the same mesh at once." },
     };
-    // @formatter:on
-}
+        // @formatter:on
+    }
 }

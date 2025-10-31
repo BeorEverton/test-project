@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace ExternPropertyAttributes
+﻿namespace ExternPropertyAttributes
 {
-	public interface ICustomAttribute
-	{
-	}
+    public interface ICustomAttribute
+    {
+    }
 }

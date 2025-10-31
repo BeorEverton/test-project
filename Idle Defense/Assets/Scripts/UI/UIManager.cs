@@ -54,9 +54,9 @@ namespace Assets.Scripts.UI
 
         private bool stopOnDeath = false; // used to pause the game on death and resume with standard speed
 
-        private const string ICON_SCRAPS = "⚙";      // U+2699
-        private const string ICON_BLACKSTEEL = "§";  // U+00A7
-        private const string ICON_CRIMSONCORE = "Ø"; // U+00D8
+        public const string ICON_SCRAPS = "⚙";      // U+2699
+        public const string ICON_BLACKSTEEL = "§";  // U+00A7
+        public const string ICON_CRIMSONCORE = "Ø"; // U+00D8
 
         private LBFocus _lbFocus = LBFocus.None;
 

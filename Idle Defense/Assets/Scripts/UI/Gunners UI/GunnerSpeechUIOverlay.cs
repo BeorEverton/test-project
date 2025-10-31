@@ -36,8 +36,7 @@ public class GunnerSpeechUIOverlay : MonoBehaviour, IGunnerSpeechUI
         Sprite face = defaultPortrait;
         if (speaker != null)
         {
-            if (speaker.OnTurretSprite) face = speaker.OnTurretSprite;
-            else if (speaker.IdleSprite) face = speaker.IdleSprite;
+            if (speaker.gunnerSprite) face = speaker.gunnerSprite;
         }
 
         // guarantee active + enabled before starting the toast coroutine

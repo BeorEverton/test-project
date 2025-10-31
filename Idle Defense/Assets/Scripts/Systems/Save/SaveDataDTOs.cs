@@ -741,6 +741,7 @@ public class GunnerRuntimeDTO
     public bool OnQuest;
     public long QuestEnd;
     public int EquippedSlot;      // -1 if not equipped
+    public string PreferredStarterId;
 }
 
 

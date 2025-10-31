@@ -21,6 +21,7 @@ namespace Assets.Scripts
         private void OnEnable()
         {
             _slider.value = _slider.maxValue;
+            _slider.gameObject.SetActive(false);
         }
 
         private void UpdateMaxHealth(object sender, EventArgs e)
@@ -30,6 +31,10 @@ namespace Assets.Scripts
 
         private void UpdateCurrentHealthHealth(object sender, EventArgs e)
         {
+            if (_slider.gameObject.activeInHierarchy == false)
+            {
+                _slider.gameObject.SetActive(true);
+            }
             _slider.value = _enemy.CurrentHealth;
         }
     }

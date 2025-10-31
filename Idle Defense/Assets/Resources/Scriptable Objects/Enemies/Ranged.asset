@@ -18,6 +18,7 @@ MonoBehaviour:
   MaxHealth: 3
   MovementSpeed: 0.6
   MovementSpeedDifference: 0.22
+  IsFlying: 0
   CoinDropAmount: 5
   CurrencyDropType: 0
   CoinDropMultiplierByWaveCount: 2.3
@@ -26,3 +27,29 @@ MonoBehaviour:
   AttackRange: 2
   AttackRangeDifference: 0.1
   AttackSpeed: 1
+  SweepTargets: 1
+  Armor: 0
+  DodgeChance: 0
+  ShieldCharges: 0
+  ExploderEnabled: 0
+  ExploderDelay: 0
+  ExploderRadius: 3
+  ExploderMaxGunners: 2
+  HealerEnabled: 0
+  HealerCooldown: 5
+  HealerHealPctOfMaxHP: 0.1
+  HealerRadius: 6
+  HealerMaxTargets: 2
+  KamikazeOnReach: 0
+  KamikazeRadius: 3
+  KamikazeMaxGunners: 3
+  SummonerEnabled: 0
+  SummonPrefab: {fileID: 0}
+  SummonPrewarmCount: 10
+  SummonType: 1
+  SummonCount: 10
+  SummonStreamInterval: 2
+  SummonForwardDepth: 0.8
+  SummonXJitter: 0.5
+  SummonFirstDelay: 1
+  SummonCooldown: 1

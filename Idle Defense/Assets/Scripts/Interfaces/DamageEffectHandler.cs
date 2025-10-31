@@ -68,11 +68,20 @@ public class DamageEffectHandler
             }
         }
 
-        if (totalDamage > 0)
+        // Auto-identify AOE from turret stats.
+        // If any of these knobs are active, treat the hit as AOE (Dodge ignored on Enemy).
+        bool isAoe =
+            (stats.ExplosionRadius > 0f) ||
+            (stats.ConeAngle > 0f) ||
+            (stats.ExplosionDelay > 0f) ||
+            (stats.SplashDamage > 0f); // optional: include splash-based secondaries
+
+        if (totalDamage > 0f)
         {
-            enemy.TakeDamage(totalDamage);
+            enemy.TakeDamage(totalDamage, stats.ArmorPenetration, isAoe);
             StatsManager.Instance.AddTurretDamage(stats.TurretType, totalDamage);
         }
+
     }
 
 

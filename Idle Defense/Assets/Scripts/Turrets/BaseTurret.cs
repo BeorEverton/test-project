@@ -15,7 +15,7 @@ namespace Assets.Scripts.Turrets
 {
     public class BaseTurret : MonoBehaviour
     {
-        public EnemyTarget EnemyTargetChoice = EnemyTarget.First;
+        public EnemyTarget EnemyTargetChoice = EnemyTarget.Nearest;
 
         /// <summary>
         /// Reference to the TurretInfoSO that contains the base stats and info for this turret. DONT CHANGE AT RUNTIME!
@@ -39,6 +39,8 @@ namespace Assets.Scripts.Turrets
         protected bool _targetInRange;
         protected bool _targetInAim;
         protected float _bonusSpdMultiplier;
+
+        [SerializeField] private float modelYawOffset = 0f; // degrees: use if your mesh isn't authored facing +Z
 
         protected float _atkSpeed;
         protected string _currentShotSound = "";
@@ -68,6 +70,12 @@ namespace Assets.Scripts.Turrets
         [NonSerialized] public BounceDamageEffect BounceDamageEffectRef;
         [NonSerialized] public PierceDamageEffect PierceDamageEffectRef;
         [NonSerialized] public SplashDamageEffect SplashDamageEffectRef;
+
+        // Retargeting performance controls
+        [SerializeField] private float retargetInterval = 0.15f; // ~6-7 checks/sec per turret
+        [SerializeField] private int clusteredMaxCandidates = 32; // cap work for clustered targeting
+        private float _nextRetargetAt;
+        private static readonly List<GameObject> _candBuffer = new List<GameObject>(128);
 
         private void OnDestroy() =>
             GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
@@ -168,10 +176,18 @@ namespace Assets.Scripts.Turrets
                 }
             }
 
+            // Used for limiting target calculation
+            float maxDepth = (_effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range);
+
             if (_targetEnemy == null || !_targetEnemy.activeInHierarchy)
             {
                 _targetInRange = false;
-                TargetEnemy();
+                if (!CurrentTargetStillValid(maxDepth) || Time.time >= _nextRetargetAt)
+                {
+                    TargetEnemyFast(maxDepth);
+                    _nextRetargetAt = Time.time + retargetInterval;
+                }
+
 
                 if (_targetEnemy == null) //If no enemies are alive and in range, stop attacking
                     return;
@@ -184,12 +200,18 @@ namespace Assets.Scripts.Turrets
 
             if (_targetInAim && _targetInRange)// && IsTargetVisibleOnScreen())
                 Shoot();
-            else
-                TargetEnemy();
+            else if (!CurrentTargetStillValid(maxDepth) || Time.time >= _nextRetargetAt)
+            {
+                TargetEnemyFast(maxDepth);
+                _nextRetargetAt = Time.time + retargetInterval;
+            }
         }
 
         protected virtual void Shoot()
         {
+            // Tell the gunner model (if any) to play its attack anim
+            if (GunnerManager.Instance != null)
+                GunnerManager.Instance.NotifyTurretAttack(SlotIndex);
             StartCoroutine(ShowMuzzleFlash());
             _currentShotSound = _shotSounds[Random.Range(0, _shotSounds.Length)];
             AudioManager.Instance.PlayWithVariation(_currentShotSound, 0.8f, 1f);
@@ -217,36 +239,397 @@ namespace Assets.Scripts.Turrets
             _timeSinceLastShot = 0f;
         }
 
+        private void TargetEnemyFast(float maxDepth)
+        {
+            // Unhook old
+            if (_targetEnemy != null)
+                _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
+
+            _candBuffer.Clear();
+            var list = EnemySpawner.Instance.EnemiesAlive;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var go = list[i];
+                if (IsEnemyValid(go, maxDepth))
+                    _candBuffer.Add(go);
+            }
+
+            GameObject best = null;
+
+            switch (EnemyTargetChoice)
+            {
+                case EnemyTarget.Nearest:
+                    {
+                        float bestZ = float.MaxValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            var go = _candBuffer[i];
+                            float z = go.transform.position.Depth();
+                            if (z < bestZ) { bestZ = z; best = go; }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.Fastest:
+                    {
+                        float bestSpeed = float.MinValue;
+                        float bestZ = float.MaxValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            var e = _candBuffer[i].GetComponent<Enemy>();
+                            float spd = e.MovementSpeed;
+                            float z = e.transform.position.Depth();
+                            if (spd > bestSpeed || (Mathf.Approximately(spd, bestSpeed) && z < bestZ))
+                            { bestSpeed = spd; bestZ = z; best = e.gameObject; }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.Random:
+                    {
+                        if (_candBuffer.Count > 0)
+                            best = _candBuffer[UnityEngine.Random.Range(0, _candBuffer.Count)];
+                        break;
+                    }
+
+                case EnemyTarget.LowestHP:
+                case EnemyTarget.HighestHP:
+                    {
+                        bool highest = (EnemyTargetChoice == EnemyTarget.HighestHP);
+                        float bestHP = highest ? float.MinValue : float.MaxValue;
+                        float bestZ = float.MaxValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            var e = _candBuffer[i].GetComponent<Enemy>();
+                            float hp = e.MaxHealth;
+                            float z = e.transform.position.Depth();
+                            bool better = highest ? (hp > bestHP) : (hp < bestHP);
+                            if (better || (Mathf.Approximately(hp, bestHP) && z < bestZ))
+                            { bestHP = hp; bestZ = z; best = e.gameObject; }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.Furthest:
+                    {
+                        float bestZ = float.MinValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            float z = _candBuffer[i].transform.position.Depth();
+                            if (z > bestZ) { bestZ = z; best = _candBuffer[i]; }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.HighestDamage:
+                    {
+                        float bestDmg = float.MinValue;
+                        float bestZ = float.MaxValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            var e = _candBuffer[i].GetComponent<Enemy>();
+                            float dmg = e.Info.Damage;
+                            float z = e.transform.position.Depth();
+                            if (dmg > bestDmg || (Mathf.Approximately(dmg, bestDmg) && z < bestZ))
+                            { bestDmg = dmg; bestZ = z; best = e.gameObject; }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.ClusteredTargets:
+                    {
+                        // Lightweight cluster: broad-phase via grid, limit candidate checks
+                        float r = (_effectiveScratch != null && _effectiveScratch.ExplosionRadius > 0f)
+                                    ? _effectiveScratch.ExplosionRadius
+                                    : (RuntimeStats.ExplosionRadius > 0f ? RuntimeStats.ExplosionRadius : 2f);
+                        float r2 = r * r;
+
+                        int bestCount = -1;
+                        float bestZ = float.MaxValue;
+
+                        int checks = Mathf.Min(clusteredMaxCandidates, _candBuffer.Count);
+                        for (int i = 0; i < checks; i++)
+                        {
+                            var go = _candBuffer[i];
+                            var pos = go.transform.position;
+
+                            var nearby = GridManager.Instance.GetEnemiesInRange(pos, Mathf.CeilToInt(r));
+                            int count = 0;
+                            for (int j = 0; j < nearby.Count; j++)
+                            {
+                                var en = nearby[j];
+                                if (en == null || !en.IsAlive) continue;
+                                var p = en.transform.position;
+                                float dx = p.x - pos.x;
+                                float dz = p.z - pos.z;
+                                if (dx * dx + dz * dz <= r2) count++;
+                            }
+
+                            float z = pos.Depth();
+                            if (count > bestCount || (count == bestCount && z < bestZ))
+                            { bestCount = count; bestZ = z; best = go; }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.Flying:
+                    {
+                        float bestZ = float.MaxValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            var e = _candBuffer[i].GetComponent<Enemy>();
+                            if (!e.Info.IsFlying) continue;
+                            float z = e.transform.position.Depth();
+                            if (z < bestZ) { bestZ = z; best = e.gameObject; }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.Armored:
+                    {
+                        float bestArmor = float.MinValue;
+                        int bestShield = int.MinValue;
+                        float bestZ = float.MaxValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            var e = _candBuffer[i].GetComponent<Enemy>();
+                            var info = e.Info;
+                            float armor = info.Armor;
+                            int shield = info.ShieldCharges;
+                            float z = e.transform.position.Depth();
+
+                            if (armor > bestArmor ||
+                                (Mathf.Approximately(armor, bestArmor) && (shield > bestShield ||
+                                    (shield == bestShield && z < bestZ))))
+                            {
+                                bestArmor = armor; bestShield = shield; bestZ = z; best = e.gameObject;
+                            }
+                        }
+                        break;
+                    }
+
+                case EnemyTarget.Healer:
+                case EnemyTarget.Kamikaze:
+                case EnemyTarget.Summoner:
+                    {
+                        bool wantHealer = EnemyTargetChoice == EnemyTarget.Healer;
+                        bool wantKmk = EnemyTargetChoice == EnemyTarget.Kamikaze;
+                        bool wantSumm = EnemyTargetChoice == EnemyTarget.Summoner;
+
+                        float bestZ = float.MaxValue;
+                        for (int i = 0; i < _candBuffer.Count; i++)
+                        {
+                            var e = _candBuffer[i].GetComponent<Enemy>();
+                            var info = e.Info;
+                            bool match = (wantHealer && info.HealerEnabled)
+                                      || (wantKmk && (info.KamikazeOnReach || info.ExploderEnabled))
+                                      || (wantSumm && info.SummonerEnabled);
+                            if (!match) continue;
+                            float z = e.transform.position.Depth();
+                            if (z < bestZ) { bestZ = z; best = e.gameObject; }
+                        }
+                        break;
+                    }
+            }
+
+            // Fallback: nearest
+            if (best == null)
+            {
+                float bestZ = float.MaxValue;
+                for (int i = 0; i < _candBuffer.Count; i++)
+                {
+                    float z = _candBuffer[i].transform.position.Depth();
+                    if (z < bestZ) { bestZ = z; best = _candBuffer[i]; }
+                }
+            }
+
+            _targetEnemy = best;
+
+            if (_targetEnemy != null)
+                _targetEnemy.GetComponent<Enemy>().OnDeath += Enemy_OnDeath;
+        }
+
         protected virtual void TargetEnemy()
         {
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
 
-            List<GameObject> enemiesAlive = EnemySpawner.Instance.EnemiesAlive;
-            float maxDepth = _effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range;
+            float maxDepth = (_effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range);
 
-            _targetEnemy = EnemyTargetChoice switch
+            // Candidates in range, active, and hittable (flying filtered by turret capability)
+            var cands = EnemySpawner.Instance.EnemiesAlive
+                .Where(go => go != null && go.activeInHierarchy)
+                .Where(FilterByFlying)
+                .Where(go => go.transform.position.Depth() <= maxDepth)
+                .ToList();
+
+            GameObject pick = null;
+
+            switch (EnemyTargetChoice)
             {
-                EnemyTarget.First => enemiesAlive
-                    .OrderBy(enemy => enemy.transform.position.Depth())
-                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth),
+                // 0) Nearest by depth (smallest z)
+                case EnemyTarget.Nearest:
+                    pick = cands.OrderBy(e => e.transform.position.Depth()).FirstOrDefault();
+                    break;
 
-                EnemyTarget.Strongest => enemiesAlive
-                    .OrderByDescending(enemy => enemy.GetComponent<Enemy>().MaxHealth)
-                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth),
+                // 1) Fastest movement speed (tie -> nearest)
+                case EnemyTarget.Fastest:
+                    pick = cands
+                        .OrderByDescending(e => e.GetComponent<Enemy>().MovementSpeed)
+                        .ThenBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
 
-                EnemyTarget.Random => enemiesAlive
-                    .OrderBy(_ => Random.value)
-                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth),
+                // 2) Random in range
+                case EnemyTarget.Random:
+                    pick = cands.OrderBy(_ => UnityEngine.Random.value).FirstOrDefault();
+                    break;
 
-                _ => enemiesAlive
-                    .OrderBy(enemy => enemy.transform.position.Depth())
-                    .FirstOrDefault(y => y.transform.position.Depth() <= maxDepth)
-            };
+                // 3) Lowest Max HP (tie -> nearest)
+                case EnemyTarget.LowestHP:
+                    pick = cands
+                        .OrderBy(e => e.GetComponent<Enemy>().MaxHealth)
+                        .ThenBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
 
+                // 4) Highest Max HP (tie -> nearest)
+                case EnemyTarget.HighestHP:
+                    pick = cands
+                        .OrderByDescending(e => e.GetComponent<Enemy>().MaxHealth)
+                        .ThenBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+
+                // 5) Furthest by depth (largest z but still within range)
+                case EnemyTarget.Furthest:
+                    pick = cands
+                        .OrderByDescending(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+
+                // 6) Highest Damage (tie -> nearest)
+                case EnemyTarget.HighestDamage:
+                    pick = cands
+                        .OrderByDescending(e => e.GetComponent<Enemy>().Info.Damage)
+                        .ThenBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+
+                // 7) ClusteredTargets: pick enemy with most neighbors within an AoE radius (tie -> nearest)
+                case EnemyTarget.ClusteredTargets:
+                    {
+                        float r = (_effectiveScratch != null && _effectiveScratch.ExplosionRadius > 0f)
+                                    ? _effectiveScratch.ExplosionRadius
+                                    : (RuntimeStats.ExplosionRadius > 0f ? RuntimeStats.ExplosionRadius : 2f); // fallback
+                        float r2 = r * r;
+                        int gridRange = Mathf.Max(1, Mathf.CeilToInt(r));
+
+                        int bestCount = -1;
+                        GameObject best = null;
+
+                        for (int i = 0; i < cands.Count; i++)
+                        {
+                            var go = cands[i];
+                            var pos = go.transform.position;
+                            // Broad phase via grid (cheap), narrow via squared distance
+                            var nearby = GridManager.Instance.GetEnemiesInRange(pos, gridRange); // returns Enemy list
+                            int count = 0;
+                            for (int j = 0; j < nearby.Count; j++)
+                            {
+                                var en = nearby[j];
+                                if (en == null || !en.IsAlive) continue;
+
+                                Vector3 p = en.transform.position;
+                                float dx = p.x - pos.x;
+                                float dz = p.z - pos.z;
+                                if (dx * dx + dz * dz <= r2) count++;
+                            }
+
+                            if (count > bestCount)
+                            {
+                                bestCount = count;
+                                best = go;
+                            }
+                            else if (count == bestCount && best != null)
+                            {
+                                // Tie-breaker: nearest by depth
+                                if (go.transform.position.Depth() < best.transform.position.Depth())
+                                    best = go;
+                            }
+                        }
+
+                        pick = best;
+                    }
+                    break;
+
+                // 8) Flying = enemy with IsFlying (tie -> nearest)
+                case EnemyTarget.Flying:
+                    pick = cands
+                        .Where(e => e.GetComponent<Enemy>().Info.IsFlying)
+                        .OrderBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+
+                // 9) Armored: prefer highest Armor; if equal, prefer higher ShieldCharges; tie -> nearest
+                case EnemyTarget.Armored:
+                    pick = cands
+                        .OrderByDescending(e => e.GetComponent<Enemy>().Info.Armor)
+                        .ThenByDescending(e => e.GetComponent<Enemy>().Info.ShieldCharges)
+                        .ThenBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+
+                // 10) Healer enabled (tie -> nearest)
+                case EnemyTarget.Healer:
+                    pick = cands
+                        .Where(e => e.GetComponent<Enemy>().Info.HealerEnabled)
+                        .OrderBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+
+                // 11) Kamikaze: either KamikazeOnReach or ExploderEnabled (tie -> nearest)
+                case EnemyTarget.Kamikaze:
+                    pick = cands
+                        .Where(e => {
+                            var info = e.GetComponent<Enemy>().Info;
+                            return info.KamikazeOnReach || info.ExploderEnabled;
+                        })
+                        .OrderBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+
+                // 12) Summoner enabled (tie -> nearest)
+                case EnemyTarget.Summoner:
+                    pick = cands
+                        .Where(e => e.GetComponent<Enemy>().Info.SummonerEnabled)
+                        .OrderBy(e => e.transform.position.Depth())
+                        .FirstOrDefault();
+                    break;
+            }
+
+            // Fallback: if none matched for that category, use Nearest from the same candidate set
+            if (pick == null)
+                pick = cands.OrderBy(e => e.transform.position.Depth()).FirstOrDefault();
+
+            _targetEnemy = pick;
 
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath += Enemy_OnDeath;
+        }
+
+        private bool IsEnemyValid(GameObject go, float maxDepth)
+        {
+            if (go == null || !go.activeInHierarchy) return false;
+            var e = go.GetComponent<Enemy>();
+            if (e == null || !e.IsAlive) return false;
+            if (!FilterByFlying(go)) return false;
+            return go.transform.position.Depth() <= maxDepth;
+        }
+
+        private bool CurrentTargetStillValid(float maxDepth)
+        {
+            return _targetEnemy != null && IsEnemyValid(_targetEnemy, maxDepth);
         }
 
         private bool IsTargetVisibleOnScreen()
@@ -268,7 +651,8 @@ namespace Assets.Scripts.Turrets
             _targetEnemy = null;
         }
 
-        protected virtual void AimTowardsTarget(float bonusMultiplier)
+        /*Previous 2d mode
+         * protected virtual void AimTowardsTarget(float bonusMultiplier)
         {
             if (_targetEnemy == null)
             {
@@ -341,6 +725,65 @@ namespace Assets.Scripts.Turrets
             // Compare local rotations directly.
             float diff = Quaternion.Angle(_rotationPoint.localRotation, targetLocal);
             _targetInAim = diff <= RuntimeStats.AngleThreshold;
+        }*/
+        
+        protected virtual void AimTowardsTarget(float bonusMultiplier)
+        {
+            if (_targetEnemy == null)
+            {
+                _targetInRange = false;
+                return;
+            }
+
+            _targetInRange = true;
+
+            Transform basis = _rotationPoint.parent != null ? _rotationPoint.parent : _rotationPoint;
+
+            Vector3 toTargetWorld = _targetEnemy.transform.position - _rotationPoint.position;
+            Vector3 toTargetLocal = basis.InverseTransformDirection(toTargetWorld);
+
+            // Decide plane/axis from the project depth convention (Grid uses Z as depth)
+            bool depthIsZ = true; // your GridManager Depth() is v.z
+            Quaternion targetLocal;
+
+            if (depthIsZ)
+            {
+                // 3D: yaw around Y, aim on XZ plane
+                toTargetLocal.y = 0f;
+                if (toTargetLocal.sqrMagnitude < 1e-6f) { _targetInAim = false; return; }
+
+                float yaw = Mathf.Atan2(toTargetLocal.x, toTargetLocal.z) * Mathf.Rad2Deg + modelYawOffset;
+                targetLocal = Quaternion.Euler(0f, yaw, 0f);
+            }
+            else
+            {
+                // 2D fallback: roll around Z, aim on XY plane
+                toTargetLocal.z = 0f;
+                if (toTargetLocal.sqrMagnitude < 1e-6f) { _targetInAim = false; return; }
+
+                float roll = Mathf.Atan2(toTargetLocal.y, toTargetLocal.x) * Mathf.Rad2Deg - 90f;
+                targetLocal = Quaternion.Euler(0f, 0f, roll);
+            }
+
+            _rotationPoint.localRotation = Quaternion.Slerp(
+                _rotationPoint.localRotation,
+                targetLocal,
+                RuntimeStats.RotationSpeed * bonusMultiplier * Time.deltaTime
+            );
+
+            IsAimingOnTarget(targetLocal);
+        }
+
+        protected virtual void IsAimingOnTarget(Quaternion targetLocal)
+        {
+            if (_targetEnemy == null)
+            {
+                _targetInAim = false;
+                return;
+            }
+
+            float diff = Quaternion.Angle(_rotationPoint.localRotation, targetLocal);
+            _targetInAim = diff <= RuntimeStats.AngleThreshold;
         }
 
         private IEnumerator ShowMuzzleFlash()
@@ -382,26 +825,20 @@ namespace Assets.Scripts.Turrets
 
         public void SetTarget(int index)
         {
-            //Debug.Log("Setting index on " + name + "" + index);
-            switch (index)
+            // index comes directly from dropdown order in UI
+            if (index < 0 || index > 12) index = 0;
+            EnemyTargetChoice = (EnemyTarget)index;
+            // New: time-sliced retargeting
+            float maxDepth = (_effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range);
+
+            if (!CurrentTargetStillValid(maxDepth) || Time.time >= _nextRetargetAt)
             {
-                case 0:
-                    EnemyTargetChoice = EnemyTarget.First;
-                    break;
-                case 1:
-                    EnemyTargetChoice = EnemyTarget.Strongest;
-                    break;
-                case 2:
-                    EnemyTargetChoice = EnemyTarget.Random;
-                    break;
-                default:
-                    EnemyTargetChoice = EnemyTarget.First;
-                    break;
+                TargetEnemyFast(maxDepth);
+                _nextRetargetAt = Time.time + retargetInterval;
             }
 
-            TargetEnemy();
-
         }
+
 
         public void UpdateTurretAppearance()
         {
@@ -798,12 +1235,35 @@ namespace Assets.Scripts.Turrets
 
         #endregion
 
+        private bool FilterByFlying(GameObject go)
+        {
+            var e = go != null ? go.GetComponent<Enemy>() : null;
+            if (e == null) return false;
+
+            // Use effective scratch if present (turret + gunner), otherwise the runtime base.
+            bool canHitFlying = (_effectiveScratch != null) ? _effectiveScratch.CanHitFlying : RuntimeStats.CanHitFlying;
+
+            // If enemy is not flying, always valid; if it is, only valid when turret can hit flying
+            return !e.Info.IsFlying || canHitFlying;
+        }
+
     }
 
     public enum EnemyTarget
     {
-        First,
-        Strongest,
-        Random
+        Nearest = 0,
+        Fastest = 1,
+        Random = 2,
+        LowestHP = 3,
+        HighestHP = 4,
+        Furthest = 5,
+        HighestDamage = 6,
+        ClusteredTargets = 7,
+        Flying = 8,
+        Armored = 9,
+        Healer = 10,
+        Kamikaze = 11,
+        Summoner = 12,
     }
+
 }

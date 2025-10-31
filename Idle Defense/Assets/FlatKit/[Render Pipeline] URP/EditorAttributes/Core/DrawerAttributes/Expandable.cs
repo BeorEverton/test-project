@@ -2,8 +2,8 @@
 
 namespace ExternPropertyAttributes
 {
-	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-	public class ExpandableAttribute : DrawerAttribute
-	{
-	}
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    public class ExpandableAttribute : DrawerAttribute
+    {
+    }
 }

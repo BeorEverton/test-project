@@ -32,7 +32,7 @@ namespace Assets.Scripts.WaveSystem
         private int _currentWave = 1; //Overall wave index
         private bool _waveCompleted = false;
         private bool _waveLost = false;
-                
+
         public bool _autoAdvanceEnabled = true;     // when false, player must click to start the next wave
 
         private void Awake()

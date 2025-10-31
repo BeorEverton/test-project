@@ -165,13 +165,75 @@ namespace Assets.Scripts.Systems.Save
 
         public void DeleteSave()
         {
+            // 1) Wipe the persisted save
             SaveGameToFile.DeleteSaveGameFile();
-            PlayerBaseManager.Instance.ResetPlayerBase();
-            GameManager.Instance.ResetGame();
-            WaveManager.Instance.ResetWave();
-            StatsManager.Instance.ResetStats();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+            // 2) Clear runtime systems to pristine state
+            // Player base (session + visuals)
+            PlayerBaseManager.Instance?.ResetPlayerBase();
+            PlayerBaseManager.Instance?.InitializeGame(usePermanentStats: true);
+
+            // Core game state & currencies
+            GameManager.Instance?.ResetGame();
+
+            // Waves
+            WaveManager.Instance?.ResetWave();
+
+            // Stats
+            StatsManager.Instance?.ResetStats();
+
+            TurretSlotManager.Instance?.UnequipAll(autoEquipStarter: false);
+            // Turrets: wipe ownership & upgrades and DO NOT auto-equip (let inventory seed starter where it wants)
+            if (TurretInventoryManager.Instance != null)
+            {
+                TurretInventoryManager.Instance.ResetAll(wipeOwnership: true, wipeUpgrades: true);
+            }
+
+            // Gunners: clear preferred starter first so nothing is auto-kept/equipped
+            if (GunnerManager.Instance != null)
+            {
+                GunnerManager.Instance.SetPreferredStarter(null);
+                GunnerManager.Instance.ResetAll(
+                    wipeOwnership: true,
+                    wipeUpgrades: true,
+                    resetLevels: true
+                );
+            }
+
+            // Prestige: wipe meta
+            if (PrestigeManager.Instance != null)
+            {
+                var empty = new PrestigeDTO
+                {
+                    PrestigeLevel = 0,
+                    CrimsonCore = 0,
+                    OwnedNodeIds = new System.Collections.Generic.List<string>()
+                };
+                PrestigeManager.Instance.ImportDTO(empty);
+            }
+
+            // Enemy Library (discovered list)
+            if (EnemyLibraryManager.Instance != null)
+            {
+                foreach (var e in EnemyLibraryManager.Instance.GetAllEntries())
+                    EnemyLibraryManager.Instance.MarkAsDiscovered(e.info.Name, false);
+            }
+
+            // 3) Clear PlayerPrefs toggles that skip onboarding/selection
+            // - Starter selection UI flag
+            PlayerPrefs.DeleteKey("StarterSelectionDone");
+            // - Preferred starter id (legacy cache; export/import handles the real value)
+            PlayerPrefs.DeleteKey("PreferredStarterGunnerId");
+            PlayerPrefs.Save();
+
+            // 4) Safety: ensure we come back unpaused
+            Time.timeScale = 1f;
+
+            // 5) Reload the active scene
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
+
 
         private void ShowDisclaimerPanel()
         {

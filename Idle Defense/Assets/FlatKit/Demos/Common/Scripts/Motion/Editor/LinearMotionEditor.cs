@@ -1,10 +1,12 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
-namespace Dustyroom {
+namespace Dustyroom
+{
     [CanEditMultipleObjects]
     [CustomEditor(typeof(LinearMotion))]
-    public class LinearMotionEditor : UnityEditor.Editor {
+    public class LinearMotionEditor : UnityEditor.Editor
+    {
         private SerializedProperty _translationMode;
         private SerializedProperty _translationVector;
         private SerializedProperty _translationSpeed;
@@ -24,7 +26,8 @@ namespace Dustyroom {
         private static readonly GUIContent TextVector = new GUIContent("Vector");
         private static readonly GUIContent TextLocalCoordinate = new GUIContent("Local Coordinate");
 
-        void OnEnable() {
+        void OnEnable()
+        {
             _translationMode = serializedObject.FindProperty("translationMode");
             _translationVector = serializedObject.FindProperty("translationVector");
             _translationSpeed = serializedObject.FindProperty("translationSpeed");
@@ -38,7 +41,8 @@ namespace Dustyroom {
             _useLocalCoordinate = serializedObject.FindProperty("useLocalCoordinate");
         }
 
-        public override void OnInspectorGUI() {
+        public override void OnInspectorGUI()
+        {
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(_translationMode, TextTranslation);
@@ -46,16 +50,18 @@ namespace Dustyroom {
             EditorGUI.indentLevel++;
 
             if (_translationMode.hasMultipleDifferentValues ||
-                _translationMode.enumValueIndex == (int) LinearMotion.TranslationMode.Vector) {
+                _translationMode.enumValueIndex == (int)LinearMotion.TranslationMode.Vector)
+            {
                 EditorGUILayout.PropertyField(_translationVector, TextVector);
             }
 
             if (_translationMode.hasMultipleDifferentValues ||
-                _translationMode.enumValueIndex != 0) {
+                _translationMode.enumValueIndex != 0)
+            {
                 EditorGUILayout.PropertyField(_translationSpeed, TextSpeed);
                 EditorGUILayout.PropertyField(_translationAcceleration, TextAcceleration);
             }
-            
+
             EditorGUI.indentLevel--;
 
             EditorGUILayout.PropertyField(_rotationMode, TextRotation);
@@ -63,12 +69,14 @@ namespace Dustyroom {
             EditorGUI.indentLevel++;
 
             if (_rotationMode.hasMultipleDifferentValues ||
-                _rotationMode.enumValueIndex == (int) LinearMotion.RotationMode.Vector) {
+                _rotationMode.enumValueIndex == (int)LinearMotion.RotationMode.Vector)
+            {
                 EditorGUILayout.PropertyField(_rotationAxis, TextVector);
             }
 
             if (_rotationMode.hasMultipleDifferentValues ||
-                _rotationMode.enumValueIndex != 0) {
+                _rotationMode.enumValueIndex != 0)
+            {
                 EditorGUILayout.PropertyField(_rotationSpeed, TextSpeed);
                 EditorGUILayout.PropertyField(_rotationAcceleration, TextAcceleration);
             }

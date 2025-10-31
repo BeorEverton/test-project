@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace ExternPropertyAttributes
+﻿namespace ExternPropertyAttributes
 {
-	public enum EConditionOperator
-	{
-		And,
-		Or
-	}
+    public enum EConditionOperator
+    {
+        And,
+        Or
+    }
 }

@@ -37,7 +37,7 @@ public class GunnerEquipFlow : MonoBehaviour
         if (cursorGhost && GunnerManager.Instance != null)
         {
             var so = GunnerManager.Instance.GetSO(gunnerId);
-            var sprite = so != null && so.OnTurretSprite ? so.OnTurretSprite : (so != null ? so.IdleSprite : null);
+            var sprite = so.gunnerSprite;
             if (sprite) cursorGhost.Begin(sprite);
         }
     }

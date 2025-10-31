@@ -107,6 +107,7 @@ namespace Assets.Scripts.Systems
 
         public bool Equip(int slot, TurretStatsInstance inst)
         {
+            Debug.Log("Calling equip with " + slot + inst.ToString());
             AudioManager.Instance.Play("Click");
             UIManager.Instance.DeactivateRightPanels();
             UIManager.Instance.wallUpgradePanel.gameObject.SetActive(true);
@@ -116,8 +117,10 @@ namespace Assets.Scripts.Systems
             TurretInventoryManager.OwnedTurret entry =
                 ownedList.FirstOrDefault(o => ReferenceEquals(o.Permanent, inst) || ReferenceEquals(o.Runtime, inst));
 
+            Debug.Log("found entry? " + entry);
             if (entry == null)
                 return false;
+            Debug.Log("Proceeding" );
 
             // Use the persistent runtime reference — no cloning
             var runtime = entry.Runtime;
@@ -154,27 +157,24 @@ namespace Assets.Scripts.Systems
 
         /// <summary>
         /// Unequips everything. If autoEquipStarter is true, equips the starter
-        /// (MachineGun) into slot 0 so the run starts immediately.
+        /// (MachineGun) into the slot configured on TurretInventoryManager.initialTurretSlot.
         /// </summary>
-        public void UnequipAll(bool autoEquipStarter = true)
+        public void UnequipAll(bool autoEquipStarter = false)
         {
             for (int i = 0; i < equipped.Length; i++)
                 Unequip(i);
 
             if (!autoEquipStarter) return;
 
-            var inv = Assets.Scripts.Systems.TurretInventoryManager.Instance;
+            var inv = TurretInventoryManager.Instance;
             if (inv == null) return;
 
-            // Ensure a starter exists (your ResetAll already calls EnsureStarterTurret)
             var starter = inv.GetOwnedByType(TurretType.MachineGun);
             if (starter == null) return;
 
-            // Slot 0 by default (change if you prefer another slot)
-            Equip(0, starter);
+            int slot = Mathf.Clamp(inv.initialTurretSlot, 0, equipped.Length - 1);
+            Equip(slot, starter);
         }
-
-
 
         public bool IsAnyTurretEquipped() => equipped.Any(t => t != null);
 
@@ -234,7 +234,6 @@ namespace Assets.Scripts.Systems
         }
 
 
-
         // Convenience: enumerate permanent instances currently equipped (null filtered).
         public IEnumerable<TurretStatsInstance> GetEquippedPermanents()
         {
@@ -277,7 +276,6 @@ namespace Assets.Scripts.Systems
                 OnEquippedChanged?.Invoke(i, runtime);
             }
         }
-
 
         public void ImportRuntimeStats(List<TurretStatsInstance> stats)
         {

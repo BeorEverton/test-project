@@ -2,7 +2,7 @@
 
 namespace ExternPropertyAttributes
 {
-	public class MetaAttribute : Attribute, ICustomAttribute
-	{
-	}
+    public class MetaAttribute : Attribute, ICustomAttribute
+    {
+    }
 }

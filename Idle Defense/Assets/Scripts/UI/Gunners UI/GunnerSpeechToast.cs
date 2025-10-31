@@ -29,7 +29,7 @@ public class GunnerSpeechToast : MonoBehaviour
 
     private IEnumerator LifeRoutine()
     {
-        yield return new WaitForSeconds(lifetime);
+        yield return new WaitForSecondsRealtime(lifetime);
 
         float t = 0f;
         float start = group ? group.alpha : 1f;

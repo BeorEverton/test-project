@@ -43,6 +43,7 @@ namespace Assets.Scripts.Systems
 
         public List<EquippedTurretDTO> EquippedTurrets;
 
+        public int initialTurretSlot = 1;
 
         public int WaveRequirement(TurretType t) =>
             unlockTable.Entries.First(e => e.Type == t).WaveToUnlock;
@@ -71,7 +72,6 @@ namespace Assets.Scripts.Systems
         private void Start()
         {
             WaveManager.Instance.OnWaveStarted += HandleWaveStarted;
-            EnsureStarterTurret();
 
             if (pendingEquipped != null)
             {
@@ -89,9 +89,12 @@ namespace Assets.Scripts.Systems
                 pendingRuntimeStats = null;
             }
 
+            EnsureStarterTurret();
         }
         private void EnsureStarterTurret()
         {
+            Debug.Log("Calling ensure starter");
+            // Only seed when the player owns nothing yet
             if (owned.Count > 0)
                 return;
 
@@ -99,6 +102,7 @@ namespace Assets.Scripts.Systems
             if (!unlockedTypes.Contains(TurretType.MachineGun))
                 return;
 
+            // Create starter (MachineGun) as first owned entry
             TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(TurretType.MachineGun);
             var permanent = new TurretStatsInstance(baseSO)
             {
@@ -106,6 +110,7 @@ namespace Assets.Scripts.Systems
                 IsUnlocked = true
             };
             var runtime = BaseTurret.CloneStatsWithoutLevels(permanent);
+
             owned.Add(new OwnedTurret
             {
                 TurretType = TurretType.MachineGun,
@@ -113,9 +118,16 @@ namespace Assets.Scripts.Systems
                 Runtime = runtime
             });
 
-            // Do not force-equip by default
-            pendingEquipped = new List<int> { -1, -1, -1, -1, -1 };
+            // If SlotManager is already alive (e.g., after Delete/Reset during runtime),
+            // apply immediately instead of waiting for Start().
+            if (TurretSlotManager.Instance != null)
+            {
+                Debug.Log("Found turret slot manager, calling equip");
+                TurretSlotManager.Instance.Equip(initialTurretSlot, runtime);
+                pendingEquipped = null;
+            }
         }
+
         private void OnDestroy()
         {
             if (WaveManager.Instance != null)

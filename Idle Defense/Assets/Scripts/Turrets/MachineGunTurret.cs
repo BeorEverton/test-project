@@ -1,13 +1,9 @@
-using Assets.Scripts.Enemies;
-using Assets.Scripts.Systems;
-using Assets.Scripts.Systems.Audio;
-using UnityEngine;
-
 namespace Assets.Scripts.Turrets
 {
     public class MachineGunTurret : BaseTurret
     {
-
+        // NOT USED ANYMORE, CRITICAL HIT LOGIC MOVED TO BASETURRET
+        /*
 
         protected override void Start()
         {
@@ -43,5 +39,6 @@ namespace Assets.Scripts.Turrets
         {
             return Random.Range(0, 100) < RuntimeStats.CriticalChance;
         }
+        */
     }
 }

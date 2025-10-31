@@ -9,15 +9,20 @@ public class GunnerSO : ScriptableObject
     public string GunnerId;                 // unique, e.g. "gunner_mira"
     public string DisplayName;
 
-
     [Header("Classification")]
     public GunnerArea Area;
     public GunnerMood Mood;
 
     [Header("Visuals")]
-    public Sprite IdleSprite;
-    public Sprite RunSprite;
-    public Sprite OnTurretSprite;
+    public Sprite gunnerSprite;
+
+    [Header("3D Model")]
+    public GameObject ModelPrefab;
+    public Vector3 ModelOffsetOnTurret = new Vector3(0f, 0f, 0f);
+    public float RunSpeed = 6f;
+    public float ArrivalSnapDistance = 0.05f;
+    public GameObject LimitBreakReadyVfx; // spawned on model when LB is full
+
 
     [Header("Flavor")]
     [Tooltip("Shown when idle, no combat context.")]

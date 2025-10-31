@@ -2,7 +2,7 @@
 
 namespace ExternPropertyAttributes
 {
-	public class SpecialCaseDrawerAttribute : Attribute, ICustomAttribute
-	{
-	}
+    public class SpecialCaseDrawerAttribute : Attribute, ICustomAttribute
+    {
+    }
 }

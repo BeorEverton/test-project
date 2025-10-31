@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class BillboardLineRendererCircle : MonoBehaviour {
+public class BillboardLineRendererCircle : MonoBehaviour
+{
     public Color color = Color.black;
     public float width = 1f;
     public int numSegments = 50;
@@ -8,7 +9,8 @@ public class BillboardLineRendererCircle : MonoBehaviour {
 
     private LineRenderer _lineRenderer;
 
-    void Start() {
+    void Start()
+    {
         _lineRenderer = gameObject.GetComponent<LineRenderer>();
         if (_lineRenderer != null) return;
 
@@ -26,7 +28,8 @@ public class BillboardLineRendererCircle : MonoBehaviour {
         float deltaTheta = (float)(2.0 * Mathf.PI) / numSegments;
         float theta = 0f;
 
-        for (int i = 0; i < numSegments + 1; i++) {
+        for (int i = 0; i < numSegments + 1; i++)
+        {
             float x = Mathf.Cos(theta);
             float y = Mathf.Sin(theta);
             Vector3 pos = new Vector3(x, y, 0);
@@ -36,8 +39,10 @@ public class BillboardLineRendererCircle : MonoBehaviour {
     }
 
     [ContextMenu("Reinitialize")]
-    private void Reinitialize() {
-        if (_lineRenderer != null) {
+    private void Reinitialize()
+    {
+        if (_lineRenderer != null)
+        {
             DestroyImmediate(_lineRenderer);
         }
 
@@ -45,7 +50,8 @@ public class BillboardLineRendererCircle : MonoBehaviour {
         Update();
     }
 
-    private void Update() {
+    private void Update()
+    {
         transform.LookAt(Camera.main.transform);
         transform.Rotate(0, 180, 0);
     }

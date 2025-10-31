@@ -133,6 +133,8 @@ public class LimitBreakManager : MonoBehaviour
 
     private void Update()
     {
+        HandleLBHotkeys();
+
         // Any active sessions?
         if (_activeLBs.Count == 0)
         {
@@ -348,6 +350,40 @@ public class LimitBreakManager : MonoBehaviour
         }
     }
 
+    private void HandleLBHotkeys()
+    {
+        if (UnityEngine.InputSystem.Keyboard.current == null)
+            return;
+
+        // Map number keys (top row and numpad) to slots 0..4
+        int pressedSlot = -1;
+
+        var kb = Keyboard.current;
+        if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) pressedSlot = 0;
+        else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) pressedSlot = 1;
+        else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) pressedSlot = 2;
+        else if (kb.digit4Key.wasPressedThisFrame || kb.numpad4Key.wasPressedThisFrame) pressedSlot = 3;
+        else if (kb.digit5Key.wasPressedThisFrame || kb.numpad5Key.wasPressedThisFrame) pressedSlot = 4;
+
+        if (pressedSlot < 0) return;
+
+        // Optional: ignore if pointer is over UI so players can type in fields without triggering LBs
+        if (PointerOverUI()) return;
+
+        TryActivateBySlot(pressedSlot);
+    }
+
+    public bool TryActivateBySlot(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex > 4) return false;
+        if (GunnerManager.Instance == null) return false;
+
+        GunnerRuntime rt;
+        bool gotRt = GunnerManager.Instance.TryGetEquippedRuntime(slotIndex, out rt);
+        if (!gotRt || rt == null) return false;
+
+        return TryActivate(rt.GunnerId);
+    }
 }
 
 public enum LBFocus

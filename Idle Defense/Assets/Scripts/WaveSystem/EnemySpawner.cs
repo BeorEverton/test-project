@@ -401,7 +401,6 @@ namespace Assets.Scripts.WaveSystem
             }
         }
 
-
         #region Wave stop and manual advance
         /// <summary>
         /// Stop spawning, suppress completion checks, and despawn every active enemy.
@@ -460,9 +459,60 @@ namespace Assets.Scripts.WaveSystem
             }
             backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
         }
-
-
         #endregion
 
+        #region Enemy Spawn Enemy
+        /// <summary>
+        /// Ensure the pool has 'count' ready instances for the given prefab key.
+        /// </summary>
+        public void PrewarmPrefab(GameObject prefab, int count)
+        {
+            if (prefab == null || count <= 0) return;
+            string key = prefab.GetComponent<Enemy>().Info.Name;
+
+            // Pull 'count' objects and immediately return them to the pool inactive.
+            for (int i = 0; i < count; i++)
+            {
+                GameObject obj = _objectPool.GetObject(key, prefab);
+                // Make sure we don't accidentally show it on screen.
+                obj.transform.position = new Vector3(9999, 9999, 9999);
+                _objectPool.ReturnObject(key, obj);
+            }
+        }
+
+        /// <summary>
+        /// Spawn one enemy from the pool at the specified world position.
+        /// Automatically hooks into EnemiesAlive and death events.
+        /// </summary>
+        public Enemy SpawnSummonedEnemy(GameObject prefab, Vector3 worldPos)
+        {
+            if (prefab == null) return null;
+
+            string key = prefab.GetComponent<Enemy>().Info.Name;
+            GameObject eObj = _objectPool.GetObject(key, prefab);
+            eObj.transform.position = worldPos;
+            eObj.transform.rotation = Quaternion.identity;
+
+            Enemy e = eObj.GetComponent<Enemy>();
+
+            // Set initial movement like regular spawns: drift toward a bottom X target.
+            // This ensures EnemyManager.MoveEnemy() has a non-zero MoveDirection to work with.
+            float targetX = Random.Range(-EnemyConfig.BaseXArea, EnemyConfig.BaseXArea);
+            Vector3 targetPos = new Vector3(targetX, 0f, 0f);
+            e.MoveDirection = (targetPos - eObj.transform.position).normalized;
+
+            // Activate and integrate with current wave/presentation
+            eObj.SetActive(true);
+
+            // Gunner XP
+            GunnerManager.Instance.OnEnemySpawned(e);
+
+            // Same lifecycle as regular enemies
+            e.OnDeath += Enemy_OnEnemyDeath;
+            EnemiesAlive.Add(eObj);
+
+            return e;
+        }
+        #endregion
     }
 }

@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-
-namespace ExternPropertyAttributes
+﻿namespace ExternPropertyAttributes
 {
-	public interface IGroupAttribute
-	{
-	}
+    public interface IGroupAttribute
+    {
+    }
 }

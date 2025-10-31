@@ -4,123 +4,131 @@ using UnityEngine.Rendering.Universal;
 #if UNITY_2022_3_OR_NEWER
 using ExternPropertyAttributes;
 
-namespace FlatKit {
-public class FlatKitOutline : ScriptableRendererFeature {
-    [Tooltip("To create new settings use 'Create > FlatKit > Outline Settings'.")]
-    [Expandable]
-    public OutlineSettings settings;
+namespace FlatKit
+{
+    public class FlatKitOutline : ScriptableRendererFeature
+    {
+        [Tooltip("To create new settings use 'Create > FlatKit > Outline Settings'.")]
+        [Expandable]
+        public OutlineSettings settings;
 
-    private Material _effectMaterial;
-    private ScreenRenderPass _fullScreenPass;
-    private bool _requiresColor;
-    private bool _injectedBeforeTransparents;
-    private ScriptableRenderPassInput _requirements = ScriptableRenderPassInput.Color;
+        private Material _effectMaterial;
+        private ScreenRenderPass _fullScreenPass;
+        private bool _requiresColor;
+        private bool _injectedBeforeTransparents;
+        private ScriptableRenderPassInput _requirements = ScriptableRenderPassInput.Color;
 
-    private const string ShaderName = "Hidden/FlatKit/OutlineWrap";
-    private static int edgeColor => Shader.PropertyToID("_EdgeColor");
-    private static int thickness => Shader.PropertyToID("_Thickness");
-    private static int depthThresholdMin => Shader.PropertyToID("_DepthThresholdMin");
-    private static int depthThresholdMax => Shader.PropertyToID("_DepthThresholdMax");
-    private static int normalThresholdMin => Shader.PropertyToID("_NormalThresholdMin");
-    private static int normalThresholdMax => Shader.PropertyToID("_NormalThresholdMax");
-    private static int colorThresholdMin => Shader.PropertyToID("_ColorThresholdMin");
-    private static int colorThresholdMax => Shader.PropertyToID("_ColorThresholdMax");
-    private static int fadeRangeStart => Shader.PropertyToID("_FadeRangeStart");
-    private static int fadeRangeEnd => Shader.PropertyToID("_FadeRangeEnd");
+        private const string ShaderName = "Hidden/FlatKit/OutlineWrap";
+        private static int edgeColor => Shader.PropertyToID("_EdgeColor");
+        private static int thickness => Shader.PropertyToID("_Thickness");
+        private static int depthThresholdMin => Shader.PropertyToID("_DepthThresholdMin");
+        private static int depthThresholdMax => Shader.PropertyToID("_DepthThresholdMax");
+        private static int normalThresholdMin => Shader.PropertyToID("_NormalThresholdMin");
+        private static int normalThresholdMax => Shader.PropertyToID("_NormalThresholdMax");
+        private static int colorThresholdMin => Shader.PropertyToID("_ColorThresholdMin");
+        private static int colorThresholdMax => Shader.PropertyToID("_ColorThresholdMax");
+        private static int fadeRangeStart => Shader.PropertyToID("_FadeRangeStart");
+        private static int fadeRangeEnd => Shader.PropertyToID("_FadeRangeEnd");
 
-    public override void Create() {
-        // Settings.
+        public override void Create()
         {
-            if (settings == null) return;
-            settings.onSettingsChanged = null;
-            settings.onReset = null;
-            settings.onSettingsChanged += SetMaterialProperties;
-            settings.onReset += SetMaterialProperties;
-        }
-
-        // Material.
-        {
-#if UNITY_EDITOR
-            settings.effectMaterial = SubAssetMaterial.GetOrCreate(settings, ShaderName);
-            if (settings.effectMaterial == null) return;
-#endif
-            _effectMaterial = settings.effectMaterial;
-            SetMaterialProperties();
-        }
-
-        {
-            _fullScreenPass = new ScreenRenderPass {
-                renderPassEvent = settings.renderEvent,
-            };
-
-            _requirements = ScriptableRenderPassInput.Color; // Needed for the full-screen blit.
-            if (settings.useDepth) _requirements |= ScriptableRenderPassInput.Depth;
-            if (settings.useNormals) _requirements |= ScriptableRenderPassInput.Normal;
-            if (settings.fadeWithDistance) _requirements |= ScriptableRenderPassInput.Depth;
-            ScriptableRenderPassInput modifiedRequirements = _requirements;
-
-            _requiresColor = (_requirements & ScriptableRenderPassInput.Color) != 0;
-            _injectedBeforeTransparents = settings.renderEvent <= RenderPassEvent.BeforeRenderingTransparents;
-
-            if (_requiresColor && !_injectedBeforeTransparents) {
-                modifiedRequirements ^= ScriptableRenderPassInput.Color;
+            // Settings.
+            {
+                if (settings == null) return;
+                settings.onSettingsChanged = null;
+                settings.onReset = null;
+                settings.onSettingsChanged += SetMaterialProperties;
+                settings.onReset += SetMaterialProperties;
             }
 
-            _fullScreenPass.ConfigureInput(modifiedRequirements);
+            // Material.
+            {
+#if UNITY_EDITOR
+                settings.effectMaterial = SubAssetMaterial.GetOrCreate(settings, ShaderName);
+                if (settings.effectMaterial == null) return;
+#endif
+                _effectMaterial = settings.effectMaterial;
+                SetMaterialProperties();
+            }
+
+            {
+                _fullScreenPass = new ScreenRenderPass
+                {
+                    renderPassEvent = settings.renderEvent,
+                };
+
+                _requirements = ScriptableRenderPassInput.Color; // Needed for the full-screen blit.
+                if (settings.useDepth) _requirements |= ScriptableRenderPassInput.Depth;
+                if (settings.useNormals) _requirements |= ScriptableRenderPassInput.Normal;
+                if (settings.fadeWithDistance) _requirements |= ScriptableRenderPassInput.Depth;
+                ScriptableRenderPassInput modifiedRequirements = _requirements;
+
+                _requiresColor = (_requirements & ScriptableRenderPassInput.Color) != 0;
+                _injectedBeforeTransparents = settings.renderEvent <= RenderPassEvent.BeforeRenderingTransparents;
+
+                if (_requiresColor && !_injectedBeforeTransparents)
+                {
+                    modifiedRequirements ^= ScriptableRenderPassInput.Color;
+                }
+
+                _fullScreenPass.ConfigureInput(modifiedRequirements);
+            }
+        }
+
+        public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+        {
+            if (settings == null || !settings.applyInSceneView && renderingData.cameraData.isSceneViewCamera) return;
+            if (renderingData.cameraData.isPreviewCamera) return;
+            if (_effectMaterial == null) return;
+
+            _fullScreenPass.Setup(_effectMaterial, _requiresColor, _injectedBeforeTransparents, "Flat Kit Outline",
+                renderingData);
+            renderer.EnqueuePass(_fullScreenPass);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _fullScreenPass?.Dispose();
+        }
+
+        private void SetMaterialProperties()
+        {
+            if (_effectMaterial == null) return;
+
+            const string depthKeyword = "OUTLINE_USE_DEPTH";
+            RendererFeatureUtils.SetKeyword(_effectMaterial, depthKeyword, settings.useDepth);
+
+            const string normalsKeyword = "OUTLINE_USE_NORMALS";
+            RendererFeatureUtils.SetKeyword(_effectMaterial, normalsKeyword, settings.useNormals);
+
+            const string colorKeyword = "OUTLINE_USE_COLOR";
+            RendererFeatureUtils.SetKeyword(_effectMaterial, colorKeyword, settings.useColor);
+
+            const string outlineOnlyKeyword = "OUTLINE_ONLY";
+            RendererFeatureUtils.SetKeyword(_effectMaterial, outlineOnlyKeyword, settings.outlineOnly);
+
+            const string resolutionInvariantKeyword = "RESOLUTION_INVARIANT_THICKNESS";
+            RendererFeatureUtils.SetKeyword(_effectMaterial, resolutionInvariantKeyword, settings.resolutionInvariant);
+
+            const string fadeWithDistanceKeyword = "OUTLINE_FADE_OUT";
+            RendererFeatureUtils.SetKeyword(_effectMaterial, fadeWithDistanceKeyword, settings.fadeWithDistance);
+
+            _effectMaterial.SetColor(edgeColor, settings.edgeColor);
+            _effectMaterial.SetFloat(thickness, settings.thickness);
+
+            _effectMaterial.SetFloat(depthThresholdMin, settings.minDepthThreshold);
+            _effectMaterial.SetFloat(depthThresholdMax, settings.maxDepthThreshold);
+
+            _effectMaterial.SetFloat(normalThresholdMin, settings.minNormalsThreshold);
+            _effectMaterial.SetFloat(normalThresholdMax, settings.maxNormalsThreshold);
+
+            _effectMaterial.SetFloat(colorThresholdMin, settings.minColorThreshold);
+            _effectMaterial.SetFloat(colorThresholdMax, settings.maxColorThreshold);
+
+            _effectMaterial.SetFloat(fadeRangeStart, settings.fadeRangeStart);
+            _effectMaterial.SetFloat(fadeRangeEnd, settings.fadeRangeEnd);
         }
     }
-
-    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData) {
-        if (settings == null || !settings.applyInSceneView && renderingData.cameraData.isSceneViewCamera) return;
-        if (renderingData.cameraData.isPreviewCamera) return;
-        if (_effectMaterial == null) return;
-
-        _fullScreenPass.Setup(_effectMaterial, _requiresColor, _injectedBeforeTransparents, "Flat Kit Outline",
-            renderingData);
-        renderer.EnqueuePass(_fullScreenPass);
-    }
-
-    protected override void Dispose(bool disposing) {
-        _fullScreenPass?.Dispose();
-    }
-
-    private void SetMaterialProperties() {
-        if (_effectMaterial == null) return;
-
-        const string depthKeyword = "OUTLINE_USE_DEPTH";
-        RendererFeatureUtils.SetKeyword(_effectMaterial, depthKeyword, settings.useDepth);
-
-        const string normalsKeyword = "OUTLINE_USE_NORMALS";
-        RendererFeatureUtils.SetKeyword(_effectMaterial, normalsKeyword, settings.useNormals);
-
-        const string colorKeyword = "OUTLINE_USE_COLOR";
-        RendererFeatureUtils.SetKeyword(_effectMaterial, colorKeyword, settings.useColor);
-
-        const string outlineOnlyKeyword = "OUTLINE_ONLY";
-        RendererFeatureUtils.SetKeyword(_effectMaterial, outlineOnlyKeyword, settings.outlineOnly);
-
-        const string resolutionInvariantKeyword = "RESOLUTION_INVARIANT_THICKNESS";
-        RendererFeatureUtils.SetKeyword(_effectMaterial, resolutionInvariantKeyword, settings.resolutionInvariant);
-
-        const string fadeWithDistanceKeyword = "OUTLINE_FADE_OUT";
-        RendererFeatureUtils.SetKeyword(_effectMaterial, fadeWithDistanceKeyword, settings.fadeWithDistance);
-
-        _effectMaterial.SetColor(edgeColor, settings.edgeColor);
-        _effectMaterial.SetFloat(thickness, settings.thickness);
-
-        _effectMaterial.SetFloat(depthThresholdMin, settings.minDepthThreshold);
-        _effectMaterial.SetFloat(depthThresholdMax, settings.maxDepthThreshold);
-
-        _effectMaterial.SetFloat(normalThresholdMin, settings.minNormalsThreshold);
-        _effectMaterial.SetFloat(normalThresholdMax, settings.maxNormalsThreshold);
-
-        _effectMaterial.SetFloat(colorThresholdMin, settings.minColorThreshold);
-        _effectMaterial.SetFloat(colorThresholdMax, settings.maxColorThreshold);
-
-        _effectMaterial.SetFloat(fadeRangeStart, settings.fadeRangeStart);
-        _effectMaterial.SetFloat(fadeRangeEnd, settings.fadeRangeEnd);
-    }
-}
 }
 #else
 namespace FlatKit {

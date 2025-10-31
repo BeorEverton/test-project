@@ -3,13 +3,17 @@ using Assets.Scripts.Systems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using static System.Windows.Forms.DataFormats;
 
 namespace Assets.Scripts.WaveSystem
 {
     public class EnemyManager : MonoBehaviour
     {
         private bool _gameRunning;
+
+        private readonly Dictionary<int, int> _bossLockedSlot = new Dictionary<int, int>();
 
         private readonly List<GameObject> _pendingRemovals = new List<GameObject>();
 
@@ -20,6 +24,10 @@ namespace Assets.Scripts.WaveSystem
         [SerializeField, Range(0f, 1f)] private float steerFullProgress = 0.9f;
         // Fraction of forward speed used for sideways drift while steering
         [SerializeField] private float lateralSpeedMultiplier = 0.30f;
+
+        // Healer batching: process only ~1/N healers per frame to spread work.
+        private const int HealerBatches = 6; 
+
 
         private void Start()
         {
@@ -74,6 +82,13 @@ namespace Assets.Scripts.WaveSystem
                     continue;
                 }
 
+                // Summoner: tick from spawn time so FirstDelay is real time
+                if (enemyComponent.Info.SummonerEnabled)
+                {
+                    if (enemyComponent.SummonerReady(Time.deltaTime))
+                        enemyComponent.DoSummon();   // cheap; batching not needed here
+                }
+
                 // Knockback handling
                 if (enemyComponent.KnockbackTime > 0f)
                 {
@@ -99,6 +114,17 @@ namespace Assets.Scripts.WaveSystem
                 }
                 else
                 {
+                    // Healer: manager-batched
+                    if (enemyComponent.Info.HealerEnabled)
+                    {
+                        int batch = Time.frameCount % HealerBatches;
+                        if ((enemyComponent.GetInstanceID() & int.MaxValue) % HealerBatches == batch)
+                        {
+                            if (enemyComponent.HealerReady(Time.deltaTime * HealerBatches))
+                                DoHealerBurst(enemyComponent);
+                        }
+                    }                    
+
                     // Within attack range
                     if (enemyComponent.transform.position.Depth() <= enemyComponent.attackRange)
                     {
@@ -188,8 +214,6 @@ namespace Assets.Scripts.WaveSystem
                 enemy.CanAttack = true;
         }
 
-
-
         private void HandleGridPosition(GameObject enemy, Enemy enemyComponent)
         {
             Vector2Int currentGridPos = GridManager.Instance.GetGridPosition(enemy.transform.position);
@@ -246,10 +270,54 @@ namespace Assets.Scripts.WaveSystem
                 return;
 
             enemy.AnimateAttack();
-            //Attack(enemy.Info.Damage);
-            bool hitGunner = GunnerManager.Instance.TryApplyDamageForEnemy(enemy, enemy.Info.Damage);
-            //if (!hitGunner)
-            //  Debug.Log("All gunners are dead, ignoring attack");
+
+            // Kamikaze behavior: if enabled, explode instead of a normal attack(no rewards/ XP).
+            if (enemy.Info.KamikazeOnReach)
+            {
+                enemy.TriggerKamikazeExplosion();
+                enemy.TimeSinceLastAttack = 0f;
+                return;
+            }
+
+            int mainSlot = -1;
+            int id = enemy.GetInstanceID();
+
+            if (enemy.IsBossInstance)
+            {
+                // Ensure we have a locked slot for this boss:
+                bool needLock = !_bossLockedSlot.TryGetValue(id, out mainSlot);
+
+                // If we had a lock, verify it's still alive; if dead, re-lock.
+                if (!needLock)
+                {
+                    // Probe with 0 damage: returns false if no living gunner in that slot.
+                    if (!GunnerManager.Instance.ApplyDamageOnSlot(mainSlot, 0f))
+                        needLock = true;
+                }
+
+                if (needLock)
+                {
+                    // Prefer slot 2 if alive; otherwise nearest alive by X.
+                    mainSlot = 2;
+                    bool midAlive = GunnerManager.Instance.ApplyDamageOnSlot(2, 0f);
+                    if (!midAlive)
+                        mainSlot = GunnerManager.Instance.GetNearestAliveSlotByX(enemy.transform.position.x);
+
+                    _bossLockedSlot[id] = mainSlot; // may be -1 if none found; handled below
+                }
+            }
+            else
+            {
+                // Normal enemies: nearest living gunner by X
+                mainSlot = GunnerManager.Instance.GetNearestAliveSlotByX(enemy.transform.position.x);
+            }
+
+            if (mainSlot >= 0)
+            {
+                int[] slotsToHit = GetSweepSlots(mainSlot, enemy.Info.SweepTargets);
+                for (int i = 0; i < slotsToHit.Length; i++)
+                    GunnerManager.Instance.ApplyDamageOnSlot(slotsToHit[i], enemy.Info.Damage);
+            }
 
             enemy.TimeSinceLastAttack = 0f;
         }
@@ -257,6 +325,59 @@ namespace Assets.Scripts.WaveSystem
         private void Attack(float damage)
         {
             PlayerBaseManager.Instance.TakeDamage(damage);
+        }
+
+        /// <summary>
+        /// Heals up to MaxTargets nearest allies within radius around 'e'.
+        /// Uses grid broad-phase + squared-distance narrow phase. No allocations, no sorting.
+        /// </summary>
+        private void DoHealerBurst(Enemy e)
+        {
+            float radius = Mathf.Max(0f, e.Info.HealerRadius);
+            int maxTargets = Mathf.Max(1, e.Info.HealerMaxTargets);
+            float healPct = Mathf.Clamp01(e.Info.HealerHealPctOfMaxHP);
+            if (radius <= 0f || healPct <= 0f) return;
+
+            // Broad phase: your grid query (same as boss explosion approach)
+            var nearby = GridManager.Instance.GetEnemiesInRange(e.transform.position, Mathf.CeilToInt(radius));
+            if (nearby == null || nearby.Count == 0) return; // nothing nearby
+                                                             // (Your GridManager API is already used for boss explosion and traps.) :contentReference[oaicite:5]{index=5}
+
+            // Narrow phase: pick up to K nearest by squared distance (no allocations).
+            float r2 = radius * radius;
+
+            // Fixed small buffers (K <= 5 typically)
+            Enemy a0 = null, a1 = null, a2 = null, a3 = null, a4 = null;
+            float d0 = float.MaxValue, d1 = float.MaxValue, d2 = float.MaxValue, d3 = float.MaxValue, d4 = float.MaxValue;
+
+            Vector3 epos = e.transform.position;
+
+            for (int i = 0; i < nearby.Count; i++)
+            {
+                var cand = nearby[i];
+                if (cand == null || cand == e || !cand.IsAlive) continue;
+
+                Vector3 cpos = cand.transform.position;
+                float dx = cpos.x - epos.x;
+                float dz = cpos.z - epos.z;
+                float d2s = dx * dx + dz * dz;
+                if (d2s > r2) continue;
+
+                // Insert into the small "sorted" buffer (K<=5) with manual shifts.
+                if (d2s < d0) { a4 = a3; d4 = d3; a3 = a2; d3 = d2; a2 = a1; d2 = d1; a1 = a0; d1 = d0; a0 = cand; d0 = d2s; }
+                else if (d2s < d1) { a4 = a3; d4 = d3; a3 = a2; d3 = d2; a2 = a1; d2 = d1; a1 = cand; d1 = d2s; }
+                else if (d2s < d2) { a4 = a3; d4 = d3; a3 = a2; d3 = d2; a2 = cand; d2 = d2s; }
+                else if (d2s < d3) { a4 = a3; d4 = d3; a3 = cand; d3 = d2s; }
+                else if (d2s < d4) { a4 = cand; d4 = d2s; }
+            }
+
+            // Heal up to maxTargets; each ally gets % of its own MaxHealth
+            int healed = 0;
+            if (a0 != null && healed < maxTargets) { a0.Heal(a0.MaxHealth * healPct); healed++; }
+            if (a1 != null && healed < maxTargets) { a1.Heal(a1.MaxHealth * healPct); healed++; }
+            if (a2 != null && healed < maxTargets) { a2.Heal(a2.MaxHealth * healPct); healed++; }
+            if (a3 != null && healed < maxTargets) { a3.Heal(a3.MaxHealth * healPct); healed++; }
+            if (a4 != null && healed < maxTargets) { a4.Heal(a4.MaxHealth * healPct); healed++; }
         }
 
         // Progress helper: 0 at spawn depth, 1 at bottom. Uses EnemyConfig.EnemySpawnDepth.
@@ -276,6 +397,32 @@ namespace Assets.Scripts.WaveSystem
                 float t = (h & 0x00FFFFFF) / 16777216f; // 0..1 (24-bit mantissa)
                 return (t * 2f - 1f) * range;           // map to [-range, +range]
             }
+        }
+
+        private int[] GetSweepSlots(int mainSlot, int sweepTargets)
+        {
+            List<int> hits = new List<int> { mainSlot };
+            sweepTargets = Mathf.Clamp(sweepTargets, 1, 5);
+
+            if (sweepTargets > 1)
+            {
+                if (mainSlot == 0) hits.Add(1);
+                else if (mainSlot == 4) hits.Add(3);
+                else
+                {
+                    // Deterministic side: for 1 -> hit left (0); for 3 -> hit right (4); for 2 -> prefer right (3).
+                    int neighbor =
+                        (mainSlot <= 1) ? (mainSlot - 1) :               // 1 -> 0
+                        (mainSlot >= 3) ? (mainSlot + 1) :               // 3 -> 4
+                                           (mainSlot + 1);               // 2 -> 3 (prefer right)
+                    neighbor = Mathf.Clamp(neighbor, 0, 4);
+                    hits.Add(neighbor);
+                }
+
+                // If in the future you allow 3–5 targets, extend here by adding the opposite neighbor, then expanding outward.
+            }
+
+            return hits.ToArray();
         }
 
     }

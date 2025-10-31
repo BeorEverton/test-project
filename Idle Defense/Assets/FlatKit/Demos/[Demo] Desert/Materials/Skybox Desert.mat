@@ -16,7 +16,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -97,12 +97,13 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
-    - _Exponent: 0.51
+    - _Exponent: 0.7
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Intensity: 1
     - _Metallic: 0
+    - _NoiseIntensity: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
@@ -119,11 +120,12 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color1: {r: 0.97, g: 0.67, b: 0.51, a: 1}
-    - _Color2: {r: 0.0835484, g: 0.6922581, b: 0.74, a: 1}
+    - _Color2: {r: 0, g: 0.71832865, b: 0.7735849, a: 1}
     - _Direction: {r: 0, g: 1, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!114 &1590795572792051320
 MonoBehaviour:
   m_ObjectHideFlags: 11

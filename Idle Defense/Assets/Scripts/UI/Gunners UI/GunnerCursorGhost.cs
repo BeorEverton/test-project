@@ -15,7 +15,7 @@ public class GunnerCursorGhost : MonoBehaviour
     public void Begin(Sprite s)
     {
         if (!image) return;
-        image.sprite = s;        
+        image.sprite = s;
         root.SetActive(true);
         _active = true;
     }
@@ -23,7 +23,7 @@ public class GunnerCursorGhost : MonoBehaviour
     public void End()
     {
         _active = false;
-        root.SetActive(false);        
+        root.SetActive(false);
     }
 
     void Update()

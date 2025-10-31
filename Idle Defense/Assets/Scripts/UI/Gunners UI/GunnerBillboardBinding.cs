@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class GunnerBillboardBinding : MonoBehaviour
 {
+    [Header("3D Binding (optional)")]
+    public GunnerModelBinding ModelBinding;
+
     [Header("Bars on this billboard")]
     public DualPhaseBarUI HealthBar;
     public DualPhaseBarUI LimitBreakBar;
@@ -47,7 +50,7 @@ public class GunnerBillboardBinding : MonoBehaviour
 
     public void RefreshLimitBreak(float current)
     {
-        if (_rt == null) return;
+        if (_rt == null || _rt.LimitBreakCurrent >= _rt.LimitBreakMax) return;
         _rt.LimitBreakCurrent = current;
         if (LimitBreakBar != null) LimitBreakBar.SetValue(current);
         RefreshLimitBreakUI();
@@ -57,8 +60,12 @@ public class GunnerBillboardBinding : MonoBehaviour
     {
         bool full = _rt != null && _rt.LimitBreakCurrent >= _rt.LimitBreakMax;
         if (LimitBreakButton) LimitBreakButton.gameObject.SetActive(full);
-        if (LimitBreakGlow) LimitBreakGlow.SetActive(full);
+
+        // Prefer 3D VFX if available
+        if (ModelBinding != null) ModelBinding.SetLimitBreakReady(full);
+        else if (LimitBreakGlow) LimitBreakGlow.SetActive(full);
     }
+
 
     private void OnClickLimitBreak()
     {

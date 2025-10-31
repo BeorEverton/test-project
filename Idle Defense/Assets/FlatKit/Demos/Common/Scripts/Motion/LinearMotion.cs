@@ -1,10 +1,12 @@
 using System;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
-namespace Dustyroom {
-    public class LinearMotion : MonoBehaviour {
-        public enum TranslationMode {
+namespace Dustyroom
+{
+    public class LinearMotion : MonoBehaviour
+    {
+        public enum TranslationMode
+        {
             Off,
             XAxis,
             YAxis,
@@ -12,7 +14,8 @@ namespace Dustyroom {
             Vector
         }
 
-        public enum RotationMode {
+        public enum RotationMode
+        {
             Off,
             XAxis,
             YAxis,
@@ -30,9 +33,12 @@ namespace Dustyroom {
         public float translationAcceleration = 0f;
         public float rotationAcceleration = 0f;
 
-        private Vector3 TranslationVector {
-            get {
-                switch (translationMode) {
+        private Vector3 TranslationVector
+        {
+            get
+            {
+                switch (translationMode)
+                {
                     case TranslationMode.XAxis: return Vector3.right;
                     case TranslationMode.YAxis: return Vector3.up;
                     case TranslationMode.ZAxis: return Vector3.forward;
@@ -47,9 +53,12 @@ namespace Dustyroom {
             }
         }
 
-        Vector3 RotationVector {
-            get {
-                switch (rotationMode) {
+        Vector3 RotationVector
+        {
+            get
+            {
+                switch (rotationMode)
+                {
                     case RotationMode.XAxis: return Vector3.right;
                     case RotationMode.YAxis: return Vector3.up;
                     case RotationMode.ZAxis: return Vector3.forward;
@@ -64,14 +73,18 @@ namespace Dustyroom {
             }
         }
 
-        void Update() {
-            if (translationMode != TranslationMode.Off) {
+        void Update()
+        {
+            if (translationMode != TranslationMode.Off)
+            {
                 Vector3 positionDelta = TranslationVector * translationSpeed * Time.deltaTime;
 
-                if (useLocalCoordinate) {
+                if (useLocalCoordinate)
+                {
                     transform.localPosition += positionDelta;
                 }
-                else {
+                else
+                {
                     transform.position += positionDelta;
                 }
             }
@@ -80,15 +93,18 @@ namespace Dustyroom {
 
             Quaternion rotationDelta = Quaternion.AngleAxis(
                 rotationSpeed * Time.deltaTime, RotationVector);
-            if (useLocalCoordinate) {
+            if (useLocalCoordinate)
+            {
                 transform.localRotation = rotationDelta * transform.localRotation;
             }
-            else {
+            else
+            {
                 transform.rotation = rotationDelta * transform.rotation;
             }
         }
 
-        private void FixedUpdate() {
+        private void FixedUpdate()
+        {
             translationSpeed += translationAcceleration;
             rotationSpeed += rotationAcceleration;
         }

@@ -54,8 +54,8 @@ public class GunnerStatRowUI : MonoBehaviour
 
     public void SetLocked(Sprite s, string nameStr, int unlockLevel)
     {
-        if (icon) icon.gameObject.SetActive(false);
-        if (nameText) nameText.gameObject.SetActive(false);
+        if (icon) { icon.gameObject.SetActive(true); icon.sprite = s; }
+        if (nameText) { nameText.gameObject.SetActive(true); nameText.text = nameStr; }
         if (valueText) valueText.gameObject.SetActive(false);
         if (nextValueText) nextValueText.gameObject.SetActive(false);
         if (upgradeButton) { upgradeButton.gameObject.SetActive(false); upgradeButton.onClick.RemoveAllListeners(); }

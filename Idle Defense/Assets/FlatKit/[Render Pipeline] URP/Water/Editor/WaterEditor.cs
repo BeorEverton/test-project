@@ -1,13 +1,14 @@
+using FlatKit.Water;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using FlatKit.Water;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class FlatKitWaterEditor : ShaderGUI {
+public class FlatKitWaterEditor : ShaderGUI
+{
     private Gradient _gradient;
 
     private const string RenderingOptionsName = "Rendering Options";
@@ -15,12 +16,14 @@ public class FlatKitWaterEditor : ShaderGUI {
     private static readonly Dictionary<string, bool> FoldoutStates =
         new Dictionary<string, bool> { { RenderingOptionsName, false } };
 
-    public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties) {
+    public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
+    {
         Material targetMaterial = materialEditor.target as Material;
         string[] keywords = targetMaterial.shaderKeywords;
 
         if (!targetMaterial.IsKeywordEnabled("_COLORMODE_LINEAR") &&
-            !targetMaterial.IsKeywordEnabled("_COLORMODE_GRADIENT_TEXTURE")) {
+            !targetMaterial.IsKeywordEnabled("_COLORMODE_GRADIENT_TEXTURE"))
+        {
             targetMaterial.EnableKeyword("_COLORMODE_LINEAR");
         }
 
@@ -29,7 +32,8 @@ public class FlatKitWaterEditor : ShaderGUI {
         int originalIntentLevel = EditorGUI.indentLevel;
         int foldoutRemainingItems = 0;
         bool latestFoldoutState = false;
-        _foldoutStyle ??= new GUIStyle(EditorStyles.foldout) {
+        _foldoutStyle ??= new GUIStyle(EditorStyles.foldout)
+        {
             fontStyle = FontStyle.Bold,
             margin = {
                 left = -10
@@ -39,17 +43,21 @@ public class FlatKitWaterEditor : ShaderGUI {
             },
         };
 
-        foreach (MaterialProperty property in properties) {
+        foreach (MaterialProperty property in properties)
+        {
             bool skipProperty = false;
 
-            if (isColorModeGradient) {
+            if (isColorModeGradient)
+            {
                 skipProperty |= ShowColorGradientExportBox(materialEditor, property);
             }
 
             {
                 var brackets = property.displayName.Split('[', ']');
-                foreach (var bracket in brackets) {
-                    if (bracket.Contains("FOLDOUT") || !property.displayName.Contains('[' + bracket + ']')) {
+                foreach (var bracket in brackets)
+                {
+                    if (bracket.Contains("FOLDOUT") || !property.displayName.Contains('[' + bracket + ']'))
+                    {
                         continue;
                     }
 
@@ -58,15 +66,18 @@ public class FlatKitWaterEditor : ShaderGUI {
                     var param = bracket.TrimStart('!');
                     bool keywordOn = Array.IndexOf(keywords, param) != -1;
 
-                    if (isPositive && !keywordOn) {
+                    if (isPositive && !keywordOn)
+                    {
                         skipProperty = true;
                     }
 
-                    if (isNegative && keywordOn) {
+                    if (isNegative && keywordOn)
+                    {
                         skipProperty = true;
                     }
 
-                    if (skipProperty) {
+                    if (skipProperty)
+                    {
                         break;
                     }
                 }
@@ -75,7 +86,8 @@ public class FlatKitWaterEditor : ShaderGUI {
             // Foldouts.
             {
                 string displayName = property.displayName;
-                if (displayName.Contains("FOLDOUT")) {
+                if (displayName.Contains("FOLDOUT"))
+                {
                     string foldoutName = displayName.Split('(', ')')[1];
                     string foldoutItemCount = displayName.Split('{', '}')[1];
                     foldoutRemainingItems = Convert.ToInt32(foldoutItemCount);
@@ -86,7 +98,8 @@ public class FlatKitWaterEditor : ShaderGUI {
                     latestFoldoutState = FoldoutStates[property.name];
                 }
 
-                if (foldoutRemainingItems > 0) {
+                if (foldoutRemainingItems > 0)
+                {
                     skipProperty = skipProperty || !latestFoldoutState;
                     EditorGUI.indentLevel += 1;
                     --foldoutRemainingItems;
@@ -94,19 +107,23 @@ public class FlatKitWaterEditor : ShaderGUI {
             }
 
             bool hideInInspector = (property.flags & MaterialProperty.PropFlags.HideInInspector) != 0;
-            if (!skipProperty && !hideInInspector) {
+            if (!skipProperty && !hideInInspector)
+            {
                 DrawStandard(materialEditor, property);
             }
 
             if (targetMaterial.IsKeywordEnabled("_COLORMODE_GRADIENT_TEXTURE") &&
                 property.type == MaterialProperty.PropType.Texture &&
                 property.displayName.StartsWith("[_COLORMODE_GRADIENT_TEXTURE]") &&
-                property.textureValue != null) {
+                property.textureValue != null)
+            {
                 GUILayout.Space(-50);
-                using (new EditorGUILayout.HorizontalScope()) {
+                using (new EditorGUILayout.HorizontalScope())
+                {
                     GUILayout.Space(15);
                     if (GUILayout.Button("Reset", EditorStyles.miniButtonLeft,
-                            GUILayout.Width(60f), GUILayout.ExpandWidth(false))) {
+                            GUILayout.Width(60f), GUILayout.ExpandWidth(false)))
+                    {
                         property.textureValue = null;
                     }
 
@@ -122,27 +139,33 @@ public class FlatKitWaterEditor : ShaderGUI {
         EditorGUILayout.Space();
         FoldoutStates[RenderingOptionsName] =
             EditorGUILayout.Foldout(FoldoutStates[RenderingOptionsName], RenderingOptionsName, true, _foldoutStyle);
-        if (FoldoutStates[RenderingOptionsName]) {
+        if (FoldoutStates[RenderingOptionsName])
+        {
             EditorGUI.indentLevel += 1;
             DrawOpaqueField(targetMaterial);
             DrawQueueOffsetField(properties, targetMaterial);
         }
     }
 
-    private void DrawOpaqueField(Material material) {
+    private void DrawOpaqueField(Material material)
+    {
         var opaque = EditorGUILayout.Toggle("Opaque", material.GetTag("RenderType", false) == "Opaque");
-        if (opaque) {
+        if (opaque)
+        {
             material.SetOverrideTag("RenderType", "Opaque");
             material.SetInt("_ZWrite", 1);
             material.renderQueue = (int)RenderQueue.Geometry;
-        } else {
+        }
+        else
+        {
             material.SetOverrideTag("RenderType", "Transparent");
             material.SetInt("_ZWrite", 0);
             material.renderQueue = (int)RenderQueue.Transparent;
         }
     }
 
-    private void DrawQueueOffsetField(MaterialProperty[] properties, Material material) {
+    private void DrawQueueOffsetField(MaterialProperty[] properties, Material material)
+    {
         GUIContent queueSlider = new GUIContent("Priority",
             "Determines the chronological rendering order for a Material. High values are rendered first.");
         const int queueOffsetRange = 50;
@@ -158,7 +181,8 @@ public class FlatKitWaterEditor : ShaderGUI {
         material.renderQueue += queue;
     }
 
-    private void DrawStandard(MaterialEditor materialEditor, MaterialProperty property) {
+    private void DrawStandard(MaterialEditor materialEditor, MaterialProperty property)
+    {
         string displayName = property.displayName;
 
         // Remove everything in brackets.
@@ -169,21 +193,29 @@ public class FlatKitWaterEditor : ShaderGUI {
 
         var guiContent = new GUIContent(displayName, tooltip);
 
-        if (property.type == MaterialProperty.PropType.Texture) {
+        if (property.type == MaterialProperty.PropType.Texture)
+        {
             materialEditor.TexturePropertySingleLine(guiContent, property);
-        } else {
+        }
+        else
+        {
             materialEditor.ShaderProperty(property, guiContent);
         }
     }
 
-    private bool ShowColorGradientExportBox(MaterialEditor materialEditor, MaterialProperty property) {
+    private bool ShowColorGradientExportBox(MaterialEditor materialEditor, MaterialProperty property)
+    {
         bool isGradientTexture = property.type == MaterialProperty.PropType.Texture &&
                                  property.displayName.StartsWith("[_COLORMODE_GRADIENT_TEXTURE]");
-        if (isGradientTexture) {
-            if (property.textureValue != null) {
+        if (isGradientTexture)
+        {
+            if (property.textureValue != null)
+            {
                 return false;
             }
-        } else {
+        }
+        else
+        {
             return false;
         }
 
@@ -192,7 +224,8 @@ public class FlatKitWaterEditor : ShaderGUI {
                 "Before the gradient can be used it needs to be exported as a texture.");
         var buttonContent = EditorGUIUtility.TrTextContent("Export");
         bool buttonPressed = GradientBoxWithButton(messageContent, buttonContent);
-        if (buttonPressed) {
+        if (buttonPressed)
+        {
             var texture = GradientToTexture(_gradient);
             PromptTextureSave(materialEditor, texture, property.name);
         }
@@ -200,7 +233,8 @@ public class FlatKitWaterEditor : ShaderGUI {
         return true;
     }
 
-    private bool GradientBoxWithButton(GUIContent messageContent, GUIContent buttonContent) {
+    private bool GradientBoxWithButton(GUIContent messageContent, GUIContent buttonContent)
+    {
         float boxHeight = 40f;
         EditorGUILayout.Space(5);
         Rect rect = GUILayoutUtility.GetRect(messageContent, EditorStyles.helpBox);
@@ -215,7 +249,8 @@ public class FlatKitWaterEditor : ShaderGUI {
         bool result = GUI.Button(buttonPosition, buttonContent);
 
         var gradientPosition = new Rect(rect.xMin + 8f, secondLineY, rect.width - 60f - 18f, secondLineHeight);
-        if (_gradient == null) {
+        if (_gradient == null)
+        {
             _gradient = new Gradient();
         }
 
@@ -224,10 +259,12 @@ public class FlatKitWaterEditor : ShaderGUI {
         return result;
     }
 
-    private Texture2D GradientToTexture(Gradient g) {
+    private Texture2D GradientToTexture(Gradient g)
+    {
         const int width = 256;
 
-        Texture2D texture = new Texture2D(width, 1, TextureFormat.RGBA32, /*mipChain=*/false) {
+        Texture2D texture = new Texture2D(width, 1, TextureFormat.RGBA32, /*mipChain=*/false)
+        {
             name = "Flat Kit Water Color Gradient",
             wrapMode = TextureWrapMode.Clamp,
             hideFlags = HideFlags.HideAndDontSave,
@@ -235,7 +272,8 @@ public class FlatKitWaterEditor : ShaderGUI {
         };
         for (float x = 0;
              x < width;
-             x++) {
+             x++)
+        {
             Color32 color = g.Evaluate(x / (width - 1));
             texture.SetPixel(Mathf.CeilToInt(x), 0, color);
         }
@@ -244,9 +282,11 @@ public class FlatKitWaterEditor : ShaderGUI {
         return texture;
     }
 
-    private void PromptTextureSave(MaterialEditor materialEditor, Texture2D texture, string propertyName) {
+    private void PromptTextureSave(MaterialEditor materialEditor, Texture2D texture, string propertyName)
+    {
         Material material = materialEditor.target as Material;
-        if (material == null) {
+        if (material == null)
+        {
             return;
         }
 
@@ -254,20 +294,26 @@ public class FlatKitWaterEditor : ShaderGUI {
 
         var fullPath =
             EditorUtility.SaveFilePanel("Save Gradient Texture", "Assets", pngNameWithExtension, "png");
-        if (fullPath.Length > 0) {
+        if (fullPath.Length > 0)
+        {
             SaveTextureAsPng(texture, fullPath, FilterMode.Point);
             var loadedTexture = LoadTexture(fullPath);
-            if (loadedTexture != null) {
+            if (loadedTexture != null)
+            {
                 material.SetTexture(propertyName, loadedTexture);
-            } else {
+            }
+            else
+            {
                 Debug.LogWarning($"Could not load the texture from {fullPath}");
             }
         }
     }
 
-    private void SaveTextureAsPng(Texture2D texture, string fullPath, FilterMode filterMode) {
+    private void SaveTextureAsPng(Texture2D texture, string fullPath, FilterMode filterMode)
+    {
         byte[] bytes = texture.EncodeToPNG();
-        if (bytes == null) {
+        if (bytes == null)
+        {
             Debug.LogError("Could not encode texture as PNG.");
             return;
         }
@@ -277,19 +323,22 @@ public class FlatKitWaterEditor : ShaderGUI {
         Debug.Log($"Texture saved as: {fullPath}");
 
         string pathRelativeToAssets = ConvertFullPathToAssetPath(fullPath);
-        if (pathRelativeToAssets.Length == 0) {
+        if (pathRelativeToAssets.Length == 0)
+        {
             Debug.LogWarning($"Could not save the texture to {fullPath}.");
         }
 
         TextureImporter importer = (TextureImporter)TextureImporter.GetAtPath(pathRelativeToAssets);
         Debug.Assert(importer != null,
             $"[FlatKit] Could not create importer at {pathRelativeToAssets}.");
-        if (importer != null) {
+        if (importer != null)
+        {
             importer.filterMode = filterMode;
             importer.textureType = TextureImporterType.Default;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.mipmapEnabled = false;
-            var textureSettings = new TextureImporterPlatformSettings {
+            var textureSettings = new TextureImporterPlatformSettings
+            {
                 format = TextureImporterFormat.RGBA32
             };
             importer.SetPlatformTextureSettings(textureSettings);
@@ -301,14 +350,17 @@ public class FlatKitWaterEditor : ShaderGUI {
             $"[FlatKit] Could not change import settings of {fullPath} [{pathRelativeToAssets}]");
     }
 
-    private static Texture2D LoadTexture(string fullPath) {
+    private static Texture2D LoadTexture(string fullPath)
+    {
         string pathRelativeToAssets = ConvertFullPathToAssetPath(fullPath);
-        if (pathRelativeToAssets.Length == 0) {
+        if (pathRelativeToAssets.Length == 0)
+        {
             return null;
         }
 
         var loadedTexture = AssetDatabase.LoadAssetAtPath(pathRelativeToAssets, typeof(Texture2D)) as Texture2D;
-        if (loadedTexture == null) {
+        if (loadedTexture == null)
+        {
             Debug.LogError($"[FlatKit] Could not load texture from {fullPath} [{pathRelativeToAssets}].");
             return null;
         }
@@ -318,7 +370,8 @@ public class FlatKitWaterEditor : ShaderGUI {
         return loadedTexture;
     }
 
-    private static string ConvertFullPathToAssetPath(string fullPath) {
+    private static string ConvertFullPathToAssetPath(string fullPath)
+    {
         int count = (Directory.GetCurrentDirectory() + System.IO.Path.DirectorySeparatorChar).Length;
         return fullPath.Remove(0, count);
     }

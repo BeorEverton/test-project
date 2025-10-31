@@ -123,7 +123,7 @@ public class GunnerChatterSystem : MonoBehaviour
     private void Update()
     {
         // equipped chatter
-        _timer += Time.deltaTime;
+        _timer += Time.unscaledDeltaTime;
         if (_timer >= PeriodicTickSeconds)
         {
             _timer = 0f;
@@ -131,7 +131,7 @@ public class GunnerChatterSystem : MonoBehaviour
         }
 
         // unequipped / idle chatter
-        _inactiveIdleTimer += Time.deltaTime;
+        _inactiveIdleTimer += Time.unscaledDeltaTime;
         if (_inactiveIdleTimer >= InactiveIdleTickSeconds)
         {
             _inactiveIdleTimer = 0f;
@@ -259,7 +259,7 @@ public class GunnerChatterSystem : MonoBehaviour
 
     private System.Collections.IEnumerator ReplyRoutine(GunnerSO replier, GunnerSO originalSpeaker, bool replyPositive)
     {
-        yield return new WaitForSeconds(replyDelaySeconds);
+        yield return new WaitForSecondsRealtime(replyDelaySeconds);
 
         // Try matching tone; then combat; then idle.
         List<string> pool = replyPositive ? replier.PraisePhrases : replier.NegativePhrases;
