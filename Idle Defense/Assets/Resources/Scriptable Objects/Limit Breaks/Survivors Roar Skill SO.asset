@@ -9,13 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 804d7eb9d7382b64596668dbb7e5c8ef, type: 3}
-  m_Name: Damage Boost SO
+  m_Script: {fileID: 11500000, guid: 037ee65dda49e134faeb2287bc6cdc52, type: 3}
+  m_Name: Survivors Roar Skill SO
   m_EditorClassIdentifier: 
   Type: 2
-  DisplayName: Damage Overloaad
-  Description: Raises damage of all turrets
-  Icon: {fileID: 21300000, guid: c96f62a4ab65749128908e5360e39126, type: 3}
+  DisplayName: "Survivor\u2019s Roar"
+  Description: Emits a powerful shout that increases all damage for a while. Click
+    to increase more.
+  Icon: {fileID: 21300000, guid: ea0c207255ae94c1988241115dcab4cb, type: 3}
   Duration: 15
   Magnitude: 2
   ClickMaxBonusPct: 200

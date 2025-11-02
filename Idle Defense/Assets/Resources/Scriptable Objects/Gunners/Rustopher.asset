@@ -15,7 +15,9 @@ MonoBehaviour:
   GunnerId: rustopher
   DisplayName: Rustopher
   Area: 2
-  Mood: 2
+  Mood: 4
+  Class: 2
+  Tier: 0
   gunnerSprite: {fileID: 21300000, guid: b4341a0c02d078c46b6197a29c8045ad, type: 3}
   ModelPrefab: {fileID: 9190963545140936968, guid: e5603cf5deb556d45a8ba8be7d20a3f0, type: 3}
   ModelOffsetOnTurret: {x: 0, y: 0, z: -0.35}
@@ -26,8 +28,8 @@ MonoBehaviour:
   PraisePhrases: []
   NegativePhrases: []
   CombatChatPhrases: []
-  BaseHealth: 2000
-  BaseDamage: 500
+  BaseHealth: 80
+  BaseDamage: 20
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -39,7 +41,7 @@ MonoBehaviour:
   BasePierceChance: 0
   BasePierceFalloff: 0
   BaseArmorPenetration: 0
-  LimitBreakSkill: {fileID: 11400000, guid: 4b17f2e0a5f341d4493d521d4270e1b9, type: 2}
+  LimitBreakSkill: {fileID: 11400000, guid: ee4a07e738ff551409569e103b19808a, type: 2}
   XpCurve:
     serializedVersion: 2
     m_Curve:
@@ -101,18 +103,18 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   SkillPointsPerLevel: 1
-  StartingUnlocked: 000000000100000002000000
+  StartingUnlocked: 0000000001000000
   LevelUnlocks:
   - Level: 5
-    Unlocks: 0600000007000000
+    Unlocks: 05000000
   - Level: 10
-    Unlocks: 03000000
+    Unlocks: 02000000
   - Level: 30
-    Unlocks: 08000000
+    Unlocks: 0c000000
   UpgradeRules:
   - Stat: 0
-    Mode: 0
-    AmountPerLevel: 5
+    Mode: 1
+    AmountPerLevel: 1.2
     MinValue: 0
     MaxValue: 0
   - Stat: 1

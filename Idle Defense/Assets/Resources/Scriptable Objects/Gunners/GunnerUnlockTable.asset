@@ -16,24 +16,36 @@ MonoBehaviour:
   - Gunner: {fileID: 11400000, guid: f9d04fb61667cbc489ef6c6002e1bf99, type: 2}
     GunnerId: gerhard
     WaveToUnlock: 0
-    unlockCost: 0
+    unlockCost: 10000
     unlockCurrency: 0
     RequirePrestigeUnlock: 0
   - Gunner: {fileID: 11400000, guid: a699f5c68e18698419cf3515021ff095, type: 2}
     GunnerId: lyssa
     WaveToUnlock: 0
-    unlockCost: 20
-    unlockCurrency: 1
+    unlockCost: 10000
+    unlockCurrency: 0
     RequirePrestigeUnlock: 0
   - Gunner: {fileID: 11400000, guid: 083f4088afa8b3548a036dc90f677f6e, type: 2}
     GunnerId: jordan
     WaveToUnlock: 0
-    unlockCost: 20
-    unlockCurrency: 1
+    unlockCost: 10000
+    unlockCurrency: 0
     RequirePrestigeUnlock: 0
   - Gunner: {fileID: 11400000, guid: a3005ea37dee3e14697e4420a78d99bf, type: 2}
     GunnerId: rustopher
     WaveToUnlock: 0
-    unlockCost: 100
-    unlockCurrency: 1
-    RequirePrestigeUnlock: 1
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: a3005ea37dee3e14697e4420a78d99bf, type: 2}
+    GunnerId: rustopher
+    WaveToUnlock: 0
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: b9b3803ef567fb04980ac675c4b21068, type: 2}
+    GunnerId: GUN_04
+    WaveToUnlock: 0
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0

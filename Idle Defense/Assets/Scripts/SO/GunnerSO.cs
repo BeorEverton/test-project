@@ -12,6 +12,8 @@ public class GunnerSO : ScriptableObject
     [Header("Classification")]
     public GunnerArea Area;
     public GunnerMood Mood;
+    public Class Class;
+    public Tier Tier;
 
     [Header("Visuals")]
     public Sprite gunnerSprite;
@@ -22,7 +24,6 @@ public class GunnerSO : ScriptableObject
     public float RunSpeed = 6f;
     public float ArrivalSnapDistance = 0.05f;
     public GameObject LimitBreakReadyVfx; // spawned on model when LB is full
-
 
     [Header("Flavor")]
     [Tooltip("Shown when idle, no combat context.")]
@@ -36,7 +37,6 @@ public class GunnerSO : ScriptableObject
 
     [Tooltip("Short lines spoken during combat (attacking, reloading, crits, etc.).")]
     [TextArea(2, 6)] public List<string> CombatChatPhrases = new List<string>();
-
 
     [Header("Base Stats")]
     public float BaseHealth = 20f;          // gunner personal HP (enemies can hit them)
@@ -150,3 +150,12 @@ public enum GunnerMood
     Aggressive,
     Quiet
 }
+public enum Class
+{
+    Warrior, Mage, Tank, Assassin, Support
+}
+public enum Tier
+{
+    Starter, Veteran, Elite, Legend
+}
+

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ae58b198d070b64a97d50f206c0ea67, type: 3}
+  m_Name: Cryo Burst Skill SO
+  m_EditorClassIdentifier: 
+  Type: 0
+  DisplayName: Cryo Burst
+  Description: Emits a chilling pulse that slows enemies and slightly heals allies
+  Icon: {fileID: 21300000, guid: 4032ef10024b04973b88978762557b26, type: 3}
+  Duration: 8
+  Magnitude: 1.5
+  ClickMaxBonusPct: 100
+  BaselinePct: 0
+  Radius: 20
+  SlowPct: 45
+  SlowSeconds: 3.5
+  HealPct: 5

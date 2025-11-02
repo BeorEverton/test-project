@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Enemies;
+﻿ using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
 using Assets.Scripts.Turrets;
@@ -414,6 +414,10 @@ public class GunnerManager : MonoBehaviour
     /// <summary>Called by slot UI when a turret presence changes.</summary>
     public void NotifyTurretPresent(int slotIndex, Transform turretAnchor, bool hasTurret)
     {
+        // Always update/remember the latest anchor so run-in/out has a valid target.
+        if (turretAnchor != null)
+            slotAnchors[slotIndex] = turretAnchor;
+
         if (hasTurret)
         {
             // Auto-restore parked gunner if still available and not equipped elsewhere
@@ -428,10 +432,11 @@ public class GunnerManager : MonoBehaviour
         }
         else
         {
-            // If a gunner is currently on this slot, park them
+            // If a gunner is currently on this slot, park them (will also run out the 3D model)
             ParkGunnerFromSlot(slotIndex);
         }
     }
+
 
     /// <summary>Move the currently equipped gunner on this slot into a hidden/parked state.</summary>
     private void ParkGunnerFromSlot(int slotIndex)
@@ -445,10 +450,24 @@ public class GunnerManager : MonoBehaviour
         if (runtimes.TryGetValue(gunnerId, out var rt))
             rt.EquippedSlot = -1;
 
-        // remember who lived here
+        // remember who lived here (so we can auto-restore when a new turret appears)
         parkedSlotToGunner[slotIndex] = gunnerId;
 
-        // remove visual/bars/bindings (same cleanup as Unequip)
+        // 3D model: play run-out then destroy & clear docked state
+        if (modelByGunner.TryGetValue(gunnerId, out var model) && model != null)
+        {
+            Vector3 exit = slotAnchors.TryGetValue(slotIndex, out var t) && t != null
+                ? t.position + new Vector3(0f, 0f, -8f)
+                : model.transform.position + new Vector3(0f, 0f, -8f);
+
+            dockedGunners.Remove(gunnerId);
+            model.RunOut(exit, 0.1f, onExit: () =>
+            {
+                modelByGunner.Remove(gunnerId);
+            });
+        }
+
+        // remove billboard/card UI (health/limit bars)
         if (visuals.TryGetValue(gunnerId, out var go) && go != null)
         {
             Destroy(go);
@@ -462,6 +481,7 @@ public class GunnerManager : MonoBehaviour
         OnSlotGunnerChanged?.Invoke(slotIndex);
         OnRosterChanged?.Invoke();
     }
+
 
     /// <summary>Clear any parked mapping for this gunner (used when equipping them elsewhere).</summary>
     private void ClearParkForGunner(string gunnerId)
@@ -768,6 +788,12 @@ public class GunnerManager : MonoBehaviour
         if (!runtimes.TryGetValue(gid, out var rt)) return false;
         if (rt.IsDead) return false;
 
+        if (LimitBreakManager.Instance != null)
+        {
+            float red = Mathf.Clamp(LimitBreakManager.Instance.GunnerDamageReductionPct, 0f, 95f);
+            damage *= (1f - red / 100f);
+        }
+
         bool diedNow = rt.TakeDamage(damage, out float actual);
 
         // Tell the equipped turret (for this slot) to rebuild its effective stats immediately
@@ -779,16 +805,16 @@ public class GunnerManager : MonoBehaviour
 
         if (limitBarByGunner.TryGetValue(gid, out var lb) && lb != null)
         {
-            // ensure max is correct in case MaxHealth changed elsewhere
-            lb.SetMax(rt.LimitBreakMax);
+            // Max rarely changes here; Set once at init / heal. Just push the value.
             lb.SetValue(rt.LimitBreakCurrent);
         }
 
-        // Also notify the billboard so it can toggle the Limit Break button/glow
+        // Notify billboard to handle button/icon/VFX (will also snap if full)
         if (billboardByGunner.TryGetValue(gid, out var bb) && bb != null)
         {
             bb.RefreshLimitBreak(rt.LimitBreakCurrent);
         }
+
 
         // If all equipped are dead, signal once (consumer can fail wave)
         bool anyAlive = false;
@@ -1020,6 +1046,25 @@ public class GunnerManager : MonoBehaviour
         return (LimitBreakManager.Instance != null)
             ? LimitBreakManager.Instance.GetIconFor(so)
             : (so.LimitBreakSkill != null ? so.LimitBreakSkill.Icon : null);
+    }
+
+    /// <summary>Heals each equipped gunner by % of their MaxHealth and refreshes bars.</summary>
+    public void HealEquippedPercent(float pct)
+    {
+        pct = Mathf.Max(0f, pct);
+        foreach (var kv in slotToGunner)
+        {
+            string gid = kv.Value;
+            if (!runtimes.TryGetValue(gid, out var rt)) continue;
+            float add = rt.MaxHealth * (pct / 100f);
+            rt.Heal(add);
+
+            if (healthBarByGunner.TryGetValue(gid, out var hb) && hb != null)
+            {
+                hb.SetMax(rt.MaxHealth);
+                hb.SetValue(rt.CurrentHealth);
+            }
+        }
     }
 
     /* ===================== SAVE / LOAD ===================== */

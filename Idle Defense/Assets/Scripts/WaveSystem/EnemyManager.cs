@@ -98,13 +98,25 @@ namespace Assets.Scripts.WaveSystem
                         enemyComponent.KnockbackTime /= 2f;
                     }
 
-                    enemyComponent.KnockbackVelocity.x = 0f; // Ensure no lateral movement
-                    enemyComponent.transform.position +=
-                        (Vector3)(enemyComponent.KnockbackVelocity * Time.deltaTime);
+                    // Strictly depth-only knockback: no X drift, never touch Y
+                    enemyComponent.KnockbackVelocity.x = 0f;
+
+                    float stepMag = Mathf.Abs(enemyComponent.KnockbackVelocity.y) * Time.deltaTime;
+                    Vector3 p = enemyComponent.transform.position;
+
+                    // Choose the Z direction that INCREASES Depth()
+                    float depthNow = p.Depth();
+                    float depthPlus = new Vector3(p.x, p.y, p.z + stepMag).Depth();
+                    float depthMinus = new Vector3(p.x, p.y, p.z - stepMag).Depth();
+
+                    float signedStepZ = (depthPlus > depthMinus) ? (+stepMag) : (-stepMag);
+                    enemyComponent.transform.position = new Vector3(p.x, p.y, p.z + signedStepZ);
 
                     enemyComponent.KnockbackTime -= Time.deltaTime;
                     continue; // Skip movement/attack while being pushed
                 }
+
+
 
                 // Movement & grid position
                 if (!enemyComponent.CanAttack || enemyComponent.KnockbackTime > 0f)

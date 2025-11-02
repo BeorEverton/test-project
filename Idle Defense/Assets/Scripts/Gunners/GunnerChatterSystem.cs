@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -73,42 +75,48 @@ public class GunnerChatterSystem : MonoBehaviour
 
     public void TriggerEvent(GunnerEvent evt, GunnerSO actor, GunnerSO optionalOther = null, float? chanceOverride = null)
     {
-        //Debug.Log($"[GunnerChatterSystem] Event triggered: {evt} by {actor?.GunnerId} towards {optionalOther?.GunnerId}");
+        // Only allow chatter from OWNED gunners; ignore unowned actors entirely.
+        if (actor == null || !IsOwned(actor)) return;
+
+        // If the "other" isn’t owned, treat as no listener.
+        if (optionalOther != null && !IsOwned(optionalOther))
+            optionalOther = null;
+
         float p = chanceOverride.HasValue ? Mathf.Clamp01(chanceOverride.Value) : EventAutoChatChance;
         if (Random.value > p) return;
 
-        //Debug.Log($"[GunnerChatterSystem] Event chatter proceeding for {actor?.GunnerId}");
-        // Small multiplex: combat chat is more likely during combat events
         if (evt == GunnerEvent.BossKilled
             || evt == GunnerEvent.CriticalHit
             || evt == GunnerEvent.BossAppeared
             || evt == GunnerEvent.LimitBreak)
         {
-            //Debug.Log($"[GunnerChatterSystem] Event chatter using combat lines for {actor?.GunnerId}");
             bool spoke = TrySpeakFromList(actor, optionalOther, actor.CombatChatPhrases);
             if (spoke)
             {
                 LearnAffinity(actor, optionalOther, +AffinityGainPerChat * 0.25f);
-                // quick reply from the other gunner if present
                 if (optionalOther != null && Random.value <= replyChance)
-                    StartCoroutine(ReplyRoutine(optionalOther, actor, true)); // reply leans positive hype
+                    StartCoroutine(ReplyRoutine(optionalOther, actor, true));
             }
             return;
         }
 
-
-        // Otherwise flip for praise vs negative
         bool positive = Random.value <= PositiveBias;
         if (positive) ForcePraise(actor, optionalOther);
         else ForceNegative(actor, optionalOther);
     }
 
+
     /// <summary>Speak a combat line now (no event gate), null-safe.</summary>
     public static void TryForceCombat(GunnerSO speaker, GunnerSO listener = null)
     {
         if (Instance == null || speaker == null) return;
+        // Guard against unowned speakers/listeners.
+        if (!Instance.IsOwned(speaker)) return;
+        if (listener != null && !Instance.IsOwned(listener)) listener = null;
+
         Instance.TrySpeakFromList(speaker, listener, speaker.CombatChatPhrases);
     }
+
 
     /// <summary>Trigger a GunnerEvent (null-safe); optional chanceOverride follows existing semantics.</summary>
     public static void TryTrigger(GunnerEvent evt, GunnerSO actor, GunnerSO optionalOther = null, float? chanceOverride = null)
@@ -144,28 +152,43 @@ public class GunnerChatterSystem : MonoBehaviour
 
     private void TryPeriodicSmallTalk()
     {
-        if (ActiveGunners == null || ActiveGunners.Count < 2) return;
         if (Random.value > PeriodicChatChance) return;
 
-        // pick 2 weighted by area/mood/affinity
-        var a = ActiveGunners[Random.Range(0, ActiveGunners.Count)];
-        var b = PickPartner(a);
+        // Build a safe equipped pool directly from the manager and filter to OWNED gunners.
+        List<GunnerSO> pool = null;
+        if (GunnerManager.Instance != null)
+        {
+            // Equipped implies owned, but we still hard-filter to be safe.
+            pool = GunnerManager.Instance
+                .GetAllEquippedGunners()
+                .Where(IsOwned)
+                .ToList();
+        }
+        else
+        {
+            // Fallback to ActiveGunners but still filter to owned.
+            pool = (ActiveGunners ?? new List<GunnerSO>()).Where(IsOwned).ToList();
+        }
+
+        if (pool == null || pool.Count < 2) return;
+
+        // pick 2 weighted by area/mood/affinity from the filtered pool
+        var a = pool[Random.Range(0, pool.Count)];
+        var b = PickPartnerFromPool(a, pool);
         if (b == null) return;
 
         bool positive = Random.value <= PositiveBias;
         var list = positive ? a.PraisePhrases : a.NegativePhrases;
 
-        // Speaker A talks…
+        // Speaker A talks (falls back to combat/idle if needed)
         bool spoke = TrySpeakFromList(a, b, list)
-                 || TrySpeakFromList(a, b, a.CombatChatPhrases)
-                 || TrySpeakFromList(a, b, a.IdlePhrases);
+                     || TrySpeakFromList(a, b, a.CombatChatPhrases)
+                     || TrySpeakFromList(a, b, a.IdlePhrases);
 
         if (spoke)
         {
-            // Nudge affinity
             LearnAffinity(a, b, positive ? +AffinityGainPerChat : +AffinityGainPerChat * 0.1f);
 
-            // …then B replies quickly (configurable chance)
             if (b != null && Random.value <= replyChance)
                 StartCoroutine(ReplyRoutine(b, a, positive));
         }
@@ -178,13 +201,51 @@ public class GunnerChatterSystem : MonoBehaviour
         if (Random.value > InactiveIdleChance) return;
         if (GunnerManager.Instance == null) return;
 
-        var pool = GunnerManager.Instance.GetAllIdleGunners(); // not equipped & not on quest
+        // Only allow idle chat from gunners the player OWNS.
+        var pool = GunnerManager.Instance
+            .GetAllIdleGunners() // not equipped & not on quest
+            .Where(IsOwned)
+            .ToList();
+
         if (pool == null || pool.Count == 0) return;
 
         var speaker = pool[Random.Range(0, pool.Count)];
         TrySpeakFromList(speaker, null, speaker.IdlePhrases);
     }
 
+    private bool IsOwned(GunnerSO so)
+    {
+        return (so != null && GunnerManager.Instance != null && GunnerManager.Instance.IsOwned(so.GunnerId));
+    }
+
+    private GunnerSO PickPartnerFromPool(GunnerSO a, List<GunnerSO> pool)
+    {
+        if (a == null || pool == null || pool.Count == 0) return null;
+
+        GunnerSO best = null;
+        float bestScore = float.NegativeInfinity;
+
+        for (int i = 0; i < pool.Count; i++)
+        {
+            var b = pool[i];
+            if (b == null || b == a) continue;
+
+            float score = 1f;
+
+            if (a.Area == b.Area) score *= SameAreaBonus; else score *= CrossAreaPenalty;
+            if (a.Mood == b.Mood) score *= SameMoodBonus;
+
+            float aff = _affinity.Get(a.GunnerId, b.GunnerId);
+            score += aff;
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+                best = b;
+            }
+        }
+        return best;
+    }
 
     private GunnerSO PickPartner(GunnerSO a)
     {
@@ -221,12 +282,23 @@ public class GunnerChatterSystem : MonoBehaviour
     {
         if (speaker == null || pool == null || pool.Count == 0) return false;
 
-        string raw = pool[Random.Range(0, pool.Count)];
+        // If no listener, avoid phrases that require a *name* token.
+        List<string> candidates = (listener == null || string.IsNullOrEmpty(nameToken))
+            ? pool
+            : pool;
+
+        if (listener == null && !string.IsNullOrEmpty(nameToken))
+            candidates = pool.Where(p => !string.IsNullOrEmpty(p) && !p.Contains(nameToken)).ToList();
+
+        if (candidates == null || candidates.Count == 0) return false;
+
+        string raw = candidates[Random.Range(0, candidates.Count)];
         string line = FormatLine(raw, speaker, listener);
 
         speechUIBehaviour.ShowLine(speaker, listener, line);
         return true;
     }
+
 
     private string FormatLine(string raw, GunnerSO speaker, GunnerSO listener)
     {

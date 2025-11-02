@@ -6,12 +6,13 @@ public class KnockbackEffect : IDamageEffect
 {
     public float ModifyDamage(float currentDamage, TurretStatsInstance stats, Enemy enemy)
     {
-        if (stats.KnockbackStrength > 0)
+        if (stats.KnockbackStrength > 0f)
         {
-            Vector2 dir = (enemy.transform.position - Vector3.zero).normalized;
-            enemy.KnockbackVelocity = dir * stats.KnockbackStrength;
+            // Z-only push (backwards from the player toward deeper depth)
+            enemy.KnockbackVelocity = new Vector2(0f, stats.KnockbackStrength);
             enemy.KnockbackTime = 0.2f;
         }
+
         return currentDamage; // No change to damage
     }
 }

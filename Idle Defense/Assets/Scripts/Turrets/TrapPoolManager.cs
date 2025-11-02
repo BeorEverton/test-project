@@ -21,17 +21,11 @@ public class TrapPoolManager : MonoBehaviour
     /// </summary>
     public void InitializePool(GameObject trapPrefab, int poolSize)
     {
-        Debug.Log($"Initializing trap pool with size {poolSize} for turret {gameObject.name}");
-        // Clear any existing pool
-        foreach (var trap in traps)
-        {
-            if (trap.visual != null)
-                Destroy(trap.visual);
-        }
-        traps.Clear();
+        Debug.Log($"Initializing/ensuring trap pool size {poolSize} (non-destructive) for {gameObject.name}");
 
-        // Create fresh pool for this turret
-        for (int i = 0; i < poolSize; i++)
+        // Non-destructive: only top up if we don't have enough entries
+        int need = Mathf.Max(0, poolSize - traps.Count);
+        for (int i = 0; i < need; i++)
         {
             var obj = Instantiate(trapPrefab, transform);
             obj.SetActive(false);
@@ -39,24 +33,44 @@ public class TrapPoolManager : MonoBehaviour
         }
     }
 
+
     public Trap PlaceTrap(Vector3 worldPos, Vector2Int cell, float damage, float delay,
         float radius, BaseTurret owner, float cellWorldY)
     {
+        Debug.Log($"Placing trap at cell {cell} ");
         foreach (var trap in traps)
         {
+            Debug.Log($"Checking trap instance (isActive={trap.isActive})");
             if (!trap.isActive)
             {
-                trap.visual.transform.position = worldPos;
-                trap.visual.SetActive(true);
-                trap.cell = cell;
-                trap.damage = damage;
-                trap.delay = delay;
-                trap.radius = radius;
-                trap.isActive = true;
-                trap.ownerTurret = owner;
-                trap.worldY = cellWorldY;
-                return trap;
+                Debug.Log($"Using pooled trap instance for cell {cell} ");
+
+                // --- ADD: upgrade to LB trap if owner is null ---
+                Trap chosen = trap;
+                if (owner == null && !(trap is LimitBreakTrap))
+                {
+                    // Swap the list entry with a LimitBreakTrap, preserving the visual
+                    int idx = traps.IndexOf(trap);
+                    var lb = new LimitBreakTrap();
+                    lb.visual = trap.visual;
+                    traps[idx] = lb;
+                    chosen = lb;
+                }
+                // -----------------------------------------------
+
+                chosen.visual.transform.position = worldPos;
+                chosen.visual.SetActive(true);
+                chosen.cell = cell;
+                chosen.damage = damage;
+                chosen.delay = delay;
+                chosen.radius = radius;
+                chosen.isActive = true;
+                if (owner)
+                    chosen.ownerTurret = owner;
+                chosen.worldY = cellWorldY;
+                return chosen;
             }
+
         }
         return null;
     }

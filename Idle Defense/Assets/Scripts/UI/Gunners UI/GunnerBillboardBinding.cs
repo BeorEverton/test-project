@@ -47,14 +47,31 @@ public class GunnerBillboardBinding : MonoBehaviour
 
         RefreshLimitBreakUI();
     }
-
     public void RefreshLimitBreak(float current)
     {
-        if (_rt == null || _rt.LimitBreakCurrent >= _rt.LimitBreakMax) return;
+        if (_rt == null) return;
+
         _rt.LimitBreakCurrent = current;
-        if (LimitBreakBar != null) LimitBreakBar.SetValue(current);
+
+        bool full = _rt.LimitBreakCurrent >= _rt.LimitBreakMax;
+
+        if (LimitBreakBar != null)
+        {
+            if (full)
+            {
+                // Snap to full, no animation
+                LimitBreakBar.SetValue(_rt.LimitBreakMax);
+            }
+            else
+            {
+                // Animate normally toward the new value
+                LimitBreakBar.SetValue(_rt.LimitBreakCurrent);
+            }
+        }
+
         RefreshLimitBreakUI();
     }
+
 
     private void RefreshLimitBreakUI()
     {

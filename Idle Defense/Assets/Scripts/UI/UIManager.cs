@@ -390,19 +390,21 @@ namespace Assets.Scripts.UI
         {
             if (_lbBars.TryGetValue(sessionId, out var bar))
             {
-                bar.UpdateValue(rawPct);
-                bar.UpdateTimer(remaining, total);
-
-                // Optional: adjust the numeric label prefix per effect type if you carry it in DisplayName
-                // Example prefixes:
-                string prefix = "LB +";
-                if (bar != null && !string.IsNullOrEmpty(bar.name))
+                if (bar.HasValue)
                 {
-                    if (bar.name.ToLower().Contains("dmg") || bar.name.ToLower().Contains("damage")) prefix = "Dmg +";
-                    else if (bar.name.ToLower().Contains("spd") || bar.name.ToLower().Contains("fire")) prefix = "Spd +";
+                    bar.UpdateValue(rawPct);
+                    string prefix = "LB +";
+                    if (bar.name != null)
+                    {
+                        var n = bar.name.ToLower();
+                        if (n.Contains("damage")) prefix = "Dmg +";
+                        else if (n.Contains("fire") || n.Contains("spd")) prefix = "Spd +";
+                    }
+                    bar.UpdateLabelNumeric(prefix, rawPct);
                 }
-                bar.UpdateLabelNumeric(prefix, rawPct);
+                bar.UpdateTimer(remaining, total);
             }
+
         }
 
         private void HandleLBSessionEnded(string sessionId)

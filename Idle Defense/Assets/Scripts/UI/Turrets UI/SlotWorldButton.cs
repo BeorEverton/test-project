@@ -58,8 +58,6 @@ namespace Assets.Scripts.UI
             TurretSlotManager.Instance.OnEquippedChanged += RefreshSlot;
             WaveManager.Instance.OnWaveStarted += OnWaveStart;
 
-
-
             RefreshSlot(slotIndex, TurretSlotManager.Instance.Get(slotIndex));
             UpdateOverlay();
             UpdateColor();
@@ -190,6 +188,7 @@ namespace Assets.Scripts.UI
                 //Debug.Log("[SlotWorldButton] Deactivating existing turret in slot " + slotIndex);
                 spawned.gameObject.SetActive(false);
                 spawned.transform.SetParent(null);
+                spawned.transform.localScale = Vector3.one;
             }
 
             if (inst == null)

@@ -80,34 +80,64 @@ namespace Assets.Scripts.UI
 
         private void SetMaxInternal(double max)
         {
-            _rawMax = Mathf.Max(1f, (float)max); // clamp at least 1
-            InitSliders();                       // update slider ranges if needed
+            // Ignore if unchanged to avoid snapping/interrupting animations
+            if (System.Math.Abs(max - _rawMax) < 0.0001d) return;
+
+            _rawMax = Mathf.Max(1f, (float)max);
+            InitSliders();
 
             // Clamp current/target to new max
             _rawCurrent = System.Math.Min(_rawCurrent, _rawMax);
             _rawTarget = System.Math.Min(_rawTarget, _rawMax);
 
-            // Snap both bars (caller can SetValue again if they want an animation from the old)
-            ApplyImmediate(_rawCurrent);
+            // Keep current visual position; just update ranges and label
+            float curV = GetSliderValue(frontSlider);
+            SetSliderValue(backSlider, curV);
+            SetSliderValue(frontSlider, curV);
             UpdateLabel(_rawCurrent, _rawMax);
+            // Do not change _phase here (avoid killing ongoing lerps)
         }
 
         private void SetValueInternal(double value)
         {
-            _rawTarget = System.Math.Max(0d, System.Math.Min(value, _rawMax));
+            // Clamp into [0.._rawMax]
+            double clamped = System.Math.Max(0d, System.Math.Min(value, _rawMax));
 
-            // Phase 1: animate BACK to target from its current position.
+            // If target equals current committed value and we aren't mid-animation, no-op
+            if (_phase == Phase.Idle && System.Math.Abs(clamped - _rawCurrent) < 0.0001d)
+                return;
+
+            // If already full and asked to go >= full, snap and stay
+            if (_rawCurrent >= _rawMax && clamped >= _rawMax)
+            {
+                _rawCurrent = _rawMax;
+                ApplyImmediate(_rawCurrent); // snap both sliders to full, idle
+                return;
+            }
+
+            _rawTarget = clamped;
+
+            // Phase 1: animate BACK to target from its current position (not from zero)
             _backStart = GetSliderValue(backSlider);
             _backEnd = MapToSlider(_rawTarget);
             _backT = 0f;
 
-            // Phase 2 prepared: front will animate afterwards.
+            // Phase 2 prepared: front will animate afterwards
             _frontStart = GetSliderValue(frontSlider);
-            _frontEnd = _backEnd; // same destination
+            _frontEnd = _backEnd;
             _frontT = 0f;
 
             _delayT = 0f;
-            _phase = Phase.BackLerp;
+
+            // If the back is already at destination (tiny deltas), skip straight to front
+            if (System.Math.Abs(_backStart - _backEnd) < 0.0001f)
+            {
+                _phase = Phase.FrontLerp;
+            }
+            else
+            {
+                _phase = Phase.BackLerp;
+            }
         }
 
         private void Update()

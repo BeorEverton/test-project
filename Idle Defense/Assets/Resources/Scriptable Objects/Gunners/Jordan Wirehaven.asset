@@ -28,8 +28,8 @@ MonoBehaviour:
   NegativePhrases: []
   CombatChatPhrases:
   - I'm getting angry
-  BaseHealth: 80
-  BaseDamage: 20
+  BaseHealth: 60
+  BaseDamage: 40
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -41,7 +41,7 @@ MonoBehaviour:
   BasePierceChance: 0
   BasePierceFalloff: 0
   BaseArmorPenetration: 0
-  LimitBreakSkill: {fileID: 11400000, guid: 4b17f2e0a5f341d4493d521d4270e1b9, type: 2}
+  LimitBreakSkill: {fileID: 11400000, guid: 5e56096787b07974381409892646a5dc, type: 2}
   XpCurve:
     serializedVersion: 2
     m_Curve:

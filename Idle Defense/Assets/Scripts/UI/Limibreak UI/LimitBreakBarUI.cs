@@ -19,6 +19,7 @@ namespace Assets.Scripts.UI
         public string SessionId { get; private set; }
 
         private float _maxCap;
+        public bool HasValue => _maxCap > 0f;
 
         public void Init(string sessionId, string displayName, Sprite icon, float maxCap, float baselinePct)
         {
@@ -30,17 +31,16 @@ namespace Assets.Scripts.UI
                 _slider.minValue = 0f;
                 _slider.maxValue = _maxCap;
                 _slider.value = Mathf.Clamp(baselinePct, 0f, _maxCap);
-                _slider.gameObject.SetActive(true);
+                _slider.gameObject.SetActive(_maxCap > 0f); // hide for utility/timer-only bars
             }
 
             if (_icon != null) _icon.sprite = icon;
-            if (_labelText != null) _labelText.text = displayName; // keep it simple; UIManager may override
+            if (_labelText != null) _labelText.text = displayName;
 
-            // Clear timer at start; UIManager will feed ticks
             if (_timerText != null) _timerText.text = string.Empty;
             if (_durationFill != null)
             {
-                _durationFill.fillAmount = 1f; // start as full
+                _durationFill.fillAmount = 1f;
                 _durationFill.gameObject.SetActive(true);
             }
         }

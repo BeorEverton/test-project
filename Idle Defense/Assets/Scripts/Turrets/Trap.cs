@@ -4,7 +4,7 @@ using Assets.Scripts.Turrets;
 using System.Collections;
 using UnityEngine;
 
-public class Trap
+public class Trap 
 {
     public GameObject visual;
     public Vector2Int cell;
@@ -20,10 +20,13 @@ public class Trap
     {
         if (!isActive) return;
 
-        ownerTurret.StartCoroutine(TriggerRoutine(triggeringEnemy));
+        // Run on turret when available; otherwise use the pool manager as a coroutine host
+        MonoBehaviour runner = ownerTurret != null ? ownerTurret : TrapPoolManager.Instance;
+        runner.StartCoroutine(TriggerRoutine(triggeringEnemy));
     }
 
-    private IEnumerator TriggerRoutine(Enemy triggeringEnemy)
+
+    protected virtual IEnumerator TriggerRoutine(Enemy triggeringEnemy)
     {
         if (delay > 0f)
             yield return new WaitForSeconds(delay);

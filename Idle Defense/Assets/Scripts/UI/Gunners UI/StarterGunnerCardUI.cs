@@ -14,7 +14,11 @@ public class StarterGunnerCardUI : MonoBehaviour
 
     [Header("Stats")]
     public Transform statRoot;
-    public GunnerStatRowUI statRowPrefab; // reuse the same row prefab as GunnerDetailsUI if you like
+    public GunnerStatRowUI statRowPrefab; // reuse the same row prefab as GunnerDetailsUI 
+
+    [Header("Limit Break")]
+    public Image limitIcon;
+    public TextMeshProUGUI limitDescText;
 
     [Header("Controls")]
     public Button selectButton;
@@ -36,6 +40,29 @@ public class StarterGunnerCardUI : MonoBehaviour
         // header
         if (nameText) nameText.text = so.DisplayName;
         if (coverImage) coverImage.sprite = so.gunnerSprite;
+
+        LimitBreakSkillSO lb = (LimitBreakManager.Instance != null)
+            ? LimitBreakManager.Instance.ResolveFor(so)
+            : (GunnerManager.Instance != null ? GunnerManager.Instance.ResolveLimitBreakFor(so) : so.LimitBreakSkill);
+
+        if (lb != null)
+        {
+            if (limitIcon) limitIcon.sprite = lb.Icon;
+
+            if (limitDescText)
+            {
+                string name = string.IsNullOrEmpty(lb.DisplayName) ? "Limit Break" : lb.DisplayName;
+
+                if (!string.IsNullOrEmpty(lb.Description))
+                {
+                    limitDescText.text = lb.Description;
+                }
+                else
+                {
+                    limitDescText.text = $"{name} — x{lb.Magnitude:0.##} for {lb.Duration:0.#}s";
+                }
+            }
+        }
 
         int lvl = _rt != null ? _rt.Level : 1;
         float curXp = _rt != null ? _rt.CurrentXp : 0f;

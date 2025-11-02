@@ -129,6 +129,8 @@ namespace Assets.Scripts.Enemies
 
         public void TakeDamage(float amount, float armorPenetrationPct = 0, bool isAoe = false, bool isCritical = false)
         {
+            if (!IsAlive) return; // ignore stray ticks after death
+
             // 0) Shield gate (blocks entire *instance* before any dodge/armor)
             if (shieldChargesRT > 0)
             {
@@ -160,10 +162,17 @@ namespace Assets.Scripts.Enemies
             isCritical = tookCriticalHit;
             if (SettingsManager.Instance.AllowPopups)
             {
-                if (damageNumberCritical && isCritical)
-                    damageNumberCritical.Spawn(transform.position, UIManager.AbbreviateNumber(finalDamage, false, true));
-                else if (damageNumber)
-                    damageNumber.Spawn(transform.position, UIManager.AbbreviateNumber(finalDamage, false, true));
+                if (finalDamage >= 0.05f)
+                {
+                    string txt = finalDamage < 1f
+                        ? finalDamage.ToString("0.0")
+                        : UIManager.AbbreviateNumber(finalDamage, false, true);
+
+                    if (damageNumberCritical && isCritical)
+                        damageNumberCritical.Spawn(transform.position, txt);
+                    else if (damageNumber)
+                        damageNumber.Spawn(transform.position, txt);
+                }
             }
 
             OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
