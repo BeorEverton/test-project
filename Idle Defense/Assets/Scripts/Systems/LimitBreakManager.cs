@@ -541,13 +541,18 @@ public class LimitBreakManager : MonoBehaviour
     }
     private IEnumerator Co_BoilJet(string gunnerId, float dps, float width, float duration, LimitBreakSkillSO skill)
     {
-        float t = duration;
-        int slot = GunnerManager.Instance != null ? GunnerManager.Instance.GetRuntime(gunnerId)?.EquippedSlot ?? -1 : -1;
+        // Resolve the slot for this gunner
+        var gm = GunnerManager.Instance;
+        var rt = gm != null ? gm.GetRuntime(gunnerId) : null;
+        int slot = (rt != null) ? rt.EquippedSlot : -1;
         if (slot < 0) yield break;
 
-        // origin at turret anchor height
-        var originT = FindFirstObjectByType<Assets.Scripts.UI.SlotWorldButton>()?.barrelAnchor;
-        if (originT == null) yield break;        
+        // Find the scene turret bound to that slot (existing helper)
+        BaseTurret turret = FindTurretBySlot(slot);
+        if (turret == null) yield break;
+
+        // Prefer the muzzle flash point as origin; fall back to the turret transform
+        Transform originT = (turret._rotationPoint != null) ? turret._rotationPoint : turret.transform;
 
         // Start a timer-only LB bar (no slider)
         string sessionId = Guid.NewGuid().ToString("N");
@@ -555,36 +560,68 @@ public class LimitBreakManager : MonoBehaviour
         {
             SessionId = sessionId,
             DisplayName = (skill != null && !string.IsNullOrWhiteSpace(skill.DisplayName)) ? skill.DisplayName : "Boil Jet",
-            Icon = skill != null ? skill.Icon : null,
-            MaxClickCap = 0f,        // hides slider
+            Icon = (skill != null) ? skill.Icon : null,
+            MaxClickCap = 0f,
             BaselinePct = 0f,
             Focus = LBFocus.None
         });
 
+        // Spawn one persistent line indicator and update it in-place.
+        // Passing duration=0 keeps it alive; we destroy it when the LB ends.
+        Vector3 startNow = originT.position;
+        startNow = new Vector3(startNow.x, startNow.y + 1f, startNow.z);
+
+        GameObject lineObj = SpawnLineIndicator(startNow, startNow, 0f);
+        var lr = (lineObj != null) ? lineObj.GetComponent<LineRenderer>() : null;
+        if (lr != null)
+        {
+            // Use the skill width if provided, otherwise keep prefab thickness
+            lr.startWidth = lr.endWidth = Mathf.Max(0.01f, width);
+        }
+
+        float t = duration;
         while (t > 0f)
         {
+            // Re-evaluate origin each frame in case the turret (muzzle) moves
             Vector3 start = originT.position;
             start = new Vector3(start.x, start.y + 1f, start.z);
+
             Vector3 aim = GetMouseOnXZ(start.y);
-            Vector3 dir = (aim - start); dir.y = 0f; if (dir.sqrMagnitude < 0.001f) dir = Vector3.forward;
+            Vector3 dir = (aim - start);
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.001f) dir = Vector3.forward;
             dir.Normalize();
+
             Vector3 end = start + dir * maxAimDistance;
 
-            SpawnLineIndicator(start, end, 0.05f);
+            // Update the one and only line
+            if (lr != null)
+            {
+                lr.positionCount = 2;
+                lr.useWorldSpace = true;
+                lr.SetPosition(0, start);
+                lr.SetPosition(1, end);
+            }
 
+            // Apply damage along the line this frame
             int n = EnemiesInLine(start, end, width, _enemyBuf);
             float tick = Mathf.Min(Time.deltaTime, t);
             float damage = dps * tick;
             for (int i = 0; i < n; i++)
-                _enemyBuf[i].TakeDamage(damage, armorPenetrationPct: 0f, isAoe: true);
+            {
+                var e = _enemyBuf[i];
+                if (e != null && e.IsAlive)
+                    e.TakeDamage(damage, armorPenetrationPct: 0f, isAoe: true);
+            }
 
-            // tick the timer bar
             OnLBSessionTick?.Invoke(sessionId, 0f, t, duration);
 
             t -= Time.deltaTime;
             yield return null;
         }
 
+        // Clean up
+        if (lineObj != null) Destroy(lineObj);
         OnLBSessionEnded?.Invoke(sessionId);
     }
 

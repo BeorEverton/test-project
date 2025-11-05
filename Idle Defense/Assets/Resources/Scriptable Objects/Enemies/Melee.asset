@@ -16,7 +16,7 @@ MonoBehaviour:
   Icon: {fileID: -7068553724952606805, guid: ff9c7f35851f09f4c91e112653092e30, type: 3}
   EnemyClass: 0
   MaxHealth: 1
-  MovementSpeed: 0.5
+  MovementSpeed: 3.5
   MovementSpeedDifference: 0.2
   IsFlying: 0
   CoinDropAmount: 2
@@ -43,3 +43,13 @@ MonoBehaviour:
   KamikazeOnReach: 0
   KamikazeRadius: 3
   KamikazeMaxGunners: 3
+  SummonerEnabled: 0
+  SummonPrefab: {fileID: 0}
+  SummonPrewarmCount: 0
+  SummonType: 0
+  SummonCount: 10
+  SummonStreamInterval: 5
+  SummonForwardDepth: 0.8
+  SummonXJitter: 0.5
+  SummonFirstDelay: 0.75
+  SummonCooldown: 0

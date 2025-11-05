@@ -12,16 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 077cc73e000aa434d946d397acc7b3d4, type: 3}
   m_Name: Unlock Gunner Test
   m_EditorClassIdentifier: 
-  NodeId: rustopher
-  DisplayName: Unlock gunner1
-  Description: Reduces cost
+  NodeId: LIm01
+  DisplayName: Unlock Lyssa
+  Description: Unlocks the gunner Lyssa Steamheart
   Icon: {fileID: 21300000, guid: 90ad77f86d3f340988ade060dbf09fac, type: 3}
   AnchoredPosition: {x: -330, y: -165}
   BranchId: 3
   RequiresAny: []
-  RequiresAll: []
+  RequiresAll:
+  - dmg_2
+  - enemyHealth
   MinPrestigeLevel: 0
   CrimsonCost: 1
+  Repeatable: 0
+  MaxLevel: 0
+  CostGrowthMultiplier: 2
   GlobalDamagePct: 0
   GlobalFireRatePct: 0
   GlobalCritChancePct: 0
@@ -54,7 +59,7 @@ MonoBehaviour:
   DamageMultiplierCapBonus: 0
   UnlockLimitBreaks: 
   UnlockGunnerIds:
-  - test
+  - GUN_04
   UnlockTurretTypes: 
   AllUpgradeCostPct: 0
   PerUpgradeTypeDiscounts: []

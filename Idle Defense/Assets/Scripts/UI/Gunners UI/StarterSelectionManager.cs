@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -14,9 +15,6 @@ public class StarterSelectionManager : MonoBehaviour
     [Tooltip("How many the player must choose.")]
     public int requiredSelections = 1;
 
-    [Tooltip("Slot to auto-equip the first pick into.")]
-    public int starterSlotIndex = 0;
-
     [Header("UI")]
     public Transform gridParent;
     public StarterGunnerCardUI cardPrefab;
@@ -26,15 +24,20 @@ public class StarterSelectionManager : MonoBehaviour
     private readonly List<StarterGunnerCardUI> _cards = new();
     private readonly List<GunnerSO> _picked = new();
 
-    private const string PREF_STARTER_DONE = "StarterSelectionDone";
-
     private void Start()
     {
-        if (PlayerPrefs.GetInt(PREF_STARTER_DONE, 0) == 1)
+        StartCoroutine(LateStart());
+    }
+
+    IEnumerator LateStart()
+    {
+        yield return null;
+        yield return null;
+        if (GunnerManager.Instance.preferredStarterGunner != null)
         {
             if (rootPanel) rootPanel.SetActive(false);
             enabled = false;
-            return;
+            yield break;
         }
 
         BuildGrid();
@@ -109,21 +112,20 @@ public class StarterSelectionManager : MonoBehaviour
         var gm = GunnerManager.Instance;
         if (gm == null) return;
 
-        // 1) Preferred = FIRST pick (persisted)
+        // 1) Preferred = FIRST pick (persist in save)
         var preferred = _picked[0];
-        gm.SetPreferredStarter(preferred); // persists + grants ownership free
+        gm.SetPreferredStarter(preferred);   // grants ownership + writes via save
 
-        // 2) Grant ownership to all 3 (free)
+        // 2) Grant ownership to all selected (free)
         gm.GrantOwnershipFree(_picked);
-
-        // 3) Auto-equip FIRST pick on the starter turret slot
-        gm.EquipToFirstFreeSlot(preferred.GunnerId, preferSlotIndex: starterSlotIndex); // anchors handled internally
-
-        // 4) Done forever
-        PlayerPrefs.SetInt(PREF_STARTER_DONE, 1);
-        PlayerPrefs.Save();
+                
+        // 3) Ensure GunnerManager has the intended starter slot index before equip.
+        // If your UI determines a specific starter slot, call SetStarterSlotIndex(desiredIndex) here.
+        // Otherwise, it uses the manager's default (serialized) value.
+        gm.EquipToFirstFreeSlot(preferred.GunnerId, preferSlotIndex: gm.StarterSlotIndex);
 
         if (rootPanel) rootPanel.SetActive(false);
         enabled = false;
+
     }
 }

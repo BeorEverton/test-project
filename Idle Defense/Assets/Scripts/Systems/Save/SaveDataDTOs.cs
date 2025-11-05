@@ -225,7 +225,7 @@ namespace Assets.Scripts.Systems.Save
         public static PrestigeDTO CreatePrestigeDTO()
         {
             if (PrestigeManager.Instance == null)
-                return new PrestigeDTO { PrestigeLevel = 0, CrimsonCore = 0, OwnedNodeIds = new List<string>() };
+                return new PrestigeDTO { PrestigeLevel = 0, OwnedNodeIds = new List<string>() };
 
             return PrestigeManager.Instance.ExportDTO();
         }
@@ -751,6 +751,7 @@ public class GunnerInventoryDTO
     public List<GunnerRuntimeDTO> Runtimes = new();
     public List<SlotGunnerDTO> SlotMap = new(); // slot -> gunner id
     public List<string> OwnedGunners = new();
+    public string PreferredStarterId;   // null if none chosen yet
 }
 
 [Serializable]
@@ -764,6 +765,5 @@ public class SlotGunnerDTO
 public class PrestigeDTO
 {
     public int PrestigeLevel;
-    public int CrimsonCore;
     public List<string> OwnedNodeIds;
 }

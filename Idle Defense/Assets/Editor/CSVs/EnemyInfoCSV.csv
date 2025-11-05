@@ -1,33 +1,33 @@
-Ingame,Name,EnemyClass,MaxHealth,HealthMultiplier,MovementSpeed,MovementSpeedDifference,CoinDropAmount,CoinDropMultiplier,Damage,AttackRange,AttackSpeed,Total Power
-TRUE,Melee,Melee,1,1.09,0.5,0.2,2,2.2,1,0.3,1.3,4.47
-TRUE,Scout,Scout,2,1.08,2,0.2,4,2.22,1,0.3,0.8,7.85
-TRUE,Ranged,Ranged,3,1.06,0.6,0.22,5,2.3,1,2,1,9.42
-TRUE,Tank,Tank,12,1.2,0.3,0.125,9,3.4,2,0.3,0.8,17.31
-TRUE,Charger,Charger,4,1.075,1.5,0.23,8,3,5,0.3,0.55,15.93
-TRUE,Sniper,Sniper,4,1.07,1,0.23,9,3.6,4,3,0.8,17.20
-TRUE,Assassin,Assassin,3,1.06,2.5,0.2,10,4,9,0.4,1.5,20.90
-TRUE,Champion,Champion,11,1.15,2,0.2,12,5,6,0.3,1.5,23.65
-TRUE,Grunt,Grunt,2,1.19,0.5,0.2,3,2.2,2,0.3,1.3,6.97
-TRUE,Fusai,Fusai,4,1.29,0.6,0.2,6,2.2,4,0.3,1.3,12.09
-TRUE,Breaker,Breaker,8,1.39,0.7,0.2,10,2.2,7,0.3,1.3,20.71
-TRUE,Marksman,Marksman,4,1.16,0.6,0.22,6,2.3,2,2,1,11.92
-TRUE,Arashi,Arashi,6,1.26,0.7,0.22,9,2.3,4,2,1,17.04
-TRUE,Howler,Howler,10,1.36,0.9,0.22,13,2.3,7,2,1,25.78
-TRUE,Bulwark,Bulwark,13,1.3,0.3,0.125,10,3.4,3,0.3,0.8,19.81
-TRUE,Kaba,Kaba,15,1.4,0.4,0.125,12,3.4,5,0.3,0.8,24.93
-TRUE,Bunker,Bunker,19,1.5,0.5,0.125,17,3.4,8,0.3,0.8,33.55
-TRUE,Spotter,Spotter,3,1.18,2,0.2,5,2.22,2,0.3,0.8,10.35
-TRUE,Hayai,Hayai,5,1.28,2.1,0.2,8,2.22,4,0.3,0.8,15.47
-TRUE,Trace,Trace,9,1.38,2.2,0.2,12,2.22,7,0.3,0.8,24.09
-TRUE,Blitz,Blitz,5,1.175,1.5,0.23,9,3,6,0.3,0.55,18.43
-TRUE,Totsugeki,Totsugeki,7,1.275,1.6,0.23,12,3,8,0.3,0.55,23.55
-TRUE,Crash,Crash,11,1.375,1.7,0.23,16,3,11,0.3,0.55,32.17
-TRUE,Scope,Scope,5,1.17,1,0.23,8,3.6,2,3.2,0.8,15.50
-TRUE,Kanshi,Kanshi,7,1.27,1.1,0.23,11,3.6,4,3.6,0.8,21.22
-TRUE,Deadeye,Deadeye,11,1.37,1.2,0.23,15,3.6,7,4,0.8,30.44
-TRUE,Shade,Shade,4,1.16,2.5,0.2,12,4,10,0.4,1.5,23.40
-TRUE,Shinobi,Shinobi,6,1.26,2.6,0.2,14,4,12,0.4,1.5,28.52
-TRUE,Vanish,Vanish,10,1.36,2.7,0.2,19,4,15,0.4,1.5,37.14
-TRUE,Dreadnought,Dreadnought,12,1.25,2,0.2,13,5,7,0.3,1.5,26.15
-TRUE,Shogun,Shogun,14,1.35,2.1,0.2,16,5,9,0.3,1.5,31.27
-TRUE,Overlord,Overlord,18,1.45,2.2,0.2,20,5,12,0.3,1.5,39.89
+InGame,Name,EnemyClass,IconAssetPath,MaxHealth,HealthMultiplierByWaveCount,MovementSpeed,MovementSpeedDifference,IsFlying,CoinDropAmount,CurrencyDropType,CoinDropMultiplierByWaveCount,Damage,AttackRange,AttackRangeDifference,AttackSpeed,SweepTargets,Armor,DodgeChance,ShieldCharges,ExploderEnabled,ExploderDelay,ExploderRadius,ExploderMaxGunners,HealerEnabled,HealerCooldown,HealerHealPctOfMaxHP,HealerRadius,HealerMaxTargets,KamikazeOnReach,KamikazeRadius,KamikazeMaxGunners,SummonerEnabled,SummonPrefabAssetPath,SummonPrewarmCount,SummonType,SummonCount,SummonStreamInterval,SummonForwardDepth,SummonXJitter,SummonFirstDelay,SummonCooldown
+TRUE,Arashi,Arashi,Assets/Used Sprites/Enemies/Black White 3/Diamond 3.png,6,1.26,3.7,0.22,FALSE,9,Scraps,2.3,4,2,0.1,1,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Assassin,Assassin,Assets/Used Sprites/Enemies/White Black 1/Pentagonal Base.png,3,1.06,5.5,0.2,FALSE,10,Scraps,4,9,0.4,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Blitz,Blitz,Assets/Used Sprites/Enemies/White Red Black 2/Square 2.png,5,1.175,4.5,0.23,FALSE,9,Scraps,3,6,0.3,0.1,0.55,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Breaker,Breaker,Assets/Used Sprites/Enemies/Red Black White 4/Round 4.png,8,1.39,3.7,0.2,FALSE,10,Scraps,2.2,7,0.3,0.1,1.3,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Bulwark,Bulwark,Assets/Used Sprites/Enemies/White Red Black 2/Shield 2.png,13,1.3,3.3,0.125,FALSE,10,Scraps,3.4,3,0.3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Bunker,Bunker,Assets/Used Sprites/Enemies/Red Black White 4/Shield 4.png,19,1.5,3.5,0.125,FALSE,17,Scraps,3.4,8,0.3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Champion,Champion,Assets/Used Sprites/Enemies/White Black 1/Hexagon.png,11,1.15,5,0.2,FALSE,12,Scraps,5,6,0.3,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Charger,Charger,Assets/Used Sprites/Enemies/White Black 1/Pentagonal Base.png,4,1.075,4.5,0.23,FALSE,8,Scraps,3,5,0.3,0.1,0.55,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Crash,Crash,Assets/Used Sprites/Enemies/Red Black White 4/Square 4.png,11,1.375,4.7,0.23,FALSE,16,Scraps,3,11,0.3,0.1,0.55,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Deadeye,Deadeye,Assets/Used Sprites/Enemies/Red Black White 4/Star 4.png,11,1.37,4.2,0.23,FALSE,15,Scraps,3.6,7,4,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Dreadnought,Dreadnought,Assets/Used Sprites/Enemies/White Red Black 2/Hexagon 2.png,12,1.25,5,0.2,FALSE,13,Scraps,5,7,0.3,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Fusai,Fusai,Assets/Used Sprites/Enemies/Black White 3/Round 3.png,4,1.29,3.6,0.2,FALSE,6,Scraps,2.2,4,0.3,0.1,1.3,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Grunt,Grunt,Assets/Used Sprites/Enemies/White Red Black 2/Round 2.png,2,1.19,3.5,0.2,FALSE,3,Scraps,2.2,2,0.3,0.1,1.3,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Hayai,Hayai,Assets/Used Sprites/Enemies/Black White 3/Triangular 3.png,5,1.28,5.1,0.2,FALSE,8,Scraps,2.22,4,0.3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Howler,Howler,Assets/Used Sprites/Enemies/Red Black White 4/Diamond 4.png,10,1.36,3.9,0.22,FALSE,13,Scraps,2.3,7,2,0.1,1,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Kaba,Kaba,Assets/Used Sprites/Enemies/Black White 3/Shield 3.png,15,1.4,3.4,0.125,FALSE,12,Scraps,3.4,5,0.3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Kanshi,Kanshi,Assets/Used Sprites/Enemies/Black White 3/Star 3.png,7,1.27,4.1,0.23,FALSE,11,Scraps,3.6,4,3.6,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Marksman,Marksman,Assets/Used Sprites/Enemies/White Red Black 2/Diamond 2.png,4,1.16,3.6,0.22,FALSE,6,Scraps,2.3,2,2,0.1,1,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Melee,Melee,Assets/Used Sprites/Enemies/White Black 1/Round Base.png,1,1.09,3.5,0.2,FALSE,2,Scraps,2.2,1,0.3,0.1,1.3,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Overlord,Overlord,Assets/Used Sprites/Enemies/Red Black White 4/Hexagon 4.png,18,1.45,5.2,0.2,FALSE,20,Scraps,5,12,0.3,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Ranged,Ranged,Assets/Used Sprites/Enemies/White Black 1/Diamond Base.png,3,1.06,3.6,0.22,FALSE,5,Scraps,2.3,1,2,0.1,1,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,10,Stream,10,2,0.8,0.5,1,1
+TRUE,Scope,Scope,Assets/Used Sprites/Enemies/White Red Black 2/Star 2.png,5,1.17,4,0.23,FALSE,8,Scraps,3.6,2,3.2,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Scout,Scout,Assets/Used Sprites/Enemies/White Black 1/Triangular Base.png,2,1.08,5,0.2,FALSE,4,Scraps,2.22,1,0.3,0.1,0.8,1,0,0,0,FALSE,0,2,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Shade,Shade,Assets/Used Sprites/Enemies/White Red Black 2/Pentagonal 2.png,4,1.16,5.5,0.2,FALSE,12,Scraps,4,10,0.4,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Shinobi,Shinobi,Assets/Used Sprites/Enemies/Black White 3/Pentagonal 3.png,6,1.26,5.6,0.2,FALSE,14,Scraps,4,12,0.4,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Shogun,Shogun,Assets/Used Sprites/Enemies/Black White 3/Hexagon 3.png,14,1.35,5.1,0.2,FALSE,16,Scraps,5,9,0.3,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Sniper,Sniper,Assets/Used Sprites/Enemies/White Black 1/Star Base.png,4,1.07,4,0.23,FALSE,9,Scraps,3.6,4,3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Spotter,Spotter,Assets/Used Sprites/Enemies/White Red Black 2/Triangular 2.png,3,1.18,5,0.2,FALSE,5,Scraps,2.22,2,0.3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Tank,Tank,Assets/Used Sprites/Enemies/White Black 1/Shield Base.png,12,1.2,3.3,0.125,FALSE,9,Scraps,3.4,2,0.3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Totsugeki,Totsugeki,Assets/Used Sprites/Enemies/Black White 3/Square 3.png,7,1.275,4.6,0.23,FALSE,12,Scraps,3,8,0.3,0.1,0.55,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Trace,Trace,Assets/Used Sprites/Enemies/Red Black White 4/Triangular 4.png,9,1.38,5.2,0.2,FALSE,12,Scraps,2.22,7,0.3,0.1,0.8,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0
+TRUE,Vanish,Vanish,Assets/Used Sprites/Enemies/Red Black White 4/Pentagonal 4.png,10,1.36,5.7,0.2,FALSE,19,Scraps,4,15,0.4,0.1,1.5,1,0,0,0,FALSE,0,3,2,FALSE,5,0.1,6,2,FALSE,3,3,FALSE,,0,Burst,10,5,0.8,0.5,0.75,0

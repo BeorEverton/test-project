@@ -109,7 +109,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0412, y: 0}
+  m_AnchoredPosition: {x: 0.04120004, y: 0}
   m_SizeDelta: {x: -0.2726, y: -0.2328}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1711432700186899889
@@ -147,10 +147,10 @@ RectTransform:
   - {fileID: 7912516925861587063}
   m_Father: {fileID: 704372733190267644}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1, y: -0.73}
-  m_SizeDelta: {x: 2, y: 0.6}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0.26999998}
+  m_SizeDelta: {x: 0, y: 0.6}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6559428269432172205
 CanvasRenderer:
@@ -340,7 +340,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0412, y: 0}
+  m_AnchoredPosition: {x: 0.04120004, y: 0}
   m_SizeDelta: {x: -0.2128, y: -0.2243}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2590392655651813166
@@ -937,7 +937,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5407042744403027568
 RectTransform:
   m_ObjectHideFlags: 0
@@ -973,13 +973,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5493991113804967045}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1235,7 +1235,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0412, y: 0}
+  m_AnchoredPosition: {x: 0.04120004, y: 0}
   m_SizeDelta: {x: -0.2128, y: -0.2243}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7113792495331854472
@@ -1271,7 +1271,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0412, y: 0}
+  m_AnchoredPosition: {x: 0.04120004, y: 0}
   m_SizeDelta: {x: -0.2726, y: -0.2328}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7259951064229559318
@@ -1459,10 +1459,10 @@ RectTransform:
   - {fileID: 5961429847608954268}
   m_Father: {fileID: 704372733190267644}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1, y: -1.379}
-  m_SizeDelta: {x: 2, y: 0.6}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -0.37899995}
+  m_SizeDelta: {x: 0, y: 0.6}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &4764353614388957517
 CanvasRenderer:
@@ -1658,7 +1658,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -1.206}
-  m_SizeDelta: {x: 2, y: 2}
+  m_SizeDelta: {x: 1.8889, y: 1.8889}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &1788050556653276104
 Canvas:
@@ -1681,7 +1681,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!114 &5135483991246613613
 MonoBehaviour:
@@ -1750,7 +1750,7 @@ Transform:
   m_GameObject: {fileID: 8387825123847848085}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.4, z: -1.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1825,6 +1825,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2634cd974fe3534ebc6553d0edfb35d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ModelBinding: {fileID: 0}
   HealthBar: {fileID: 5208111637534543107}
   LimitBreakBar: {fileID: 1779593657041114633}
   LimitBreakButton: {fileID: 1145962589277157720}

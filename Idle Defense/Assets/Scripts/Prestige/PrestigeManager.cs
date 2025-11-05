@@ -79,7 +79,6 @@ public class PrestigeManager : MonoBehaviour
 
     [Header("State")]
     [SerializeField] private int prestigeLevel;        // optional: times reset/ascended
-    [SerializeField] private int crimsonCore;          // currency
     [SerializeField] private List<string> ownedNodes = new();   // NodeIds purchased
 
     [Header("Prestige UI Helper")]
@@ -168,10 +167,15 @@ public class PrestigeManager : MonoBehaviour
         if (owned.Contains(nodeId)) { reason = "Already owned."; return false; }
 
         // Cost check (unless debug free)
-        if (!debugFreePurchases && crimsonCore < node.CrimsonCost)
+        if (!debugFreePurchases)
         {
-            reason = "Not enough Crimson Core.";
-            return false;
+            var gmgr = GameManager.Instance;
+            var balance = gmgr != null ? gmgr.GetCurrency(Currency.CrimsonCore) : 0UL;
+            if (balance < (ulong)Mathf.Max(0, node.CrimsonCost))
+            {
+                reason = "Not enough Crimson Core.";
+                return false;
+            }
         }
 
         if (!debugBypassPrereqs)
@@ -194,13 +198,25 @@ public class PrestigeManager : MonoBehaviour
     public bool TryBuy(string nodeId)
     {
         Debug.Log($"[Prestige] Attempting to buy node '{nodeId}'...");
-        Debug.Log($"[Prestige] Current Crimson: {crimsonCore}, Prestige Level: {prestigeLevel}, Can Buy?: {CanBuy(nodeId, out _)}");
+        
         if (!CanBuy(nodeId, out _)) return false;
 
         var node = Resolve(nodeId);
 
         if (!debugFreePurchases)
-            crimsonCore -= Mathf.Max(0, node.CrimsonCost);
+        {
+            var gmgr = GameManager.Instance;
+            if (gmgr != null)
+            {
+                var cost = (ulong)Mathf.Max(0, node.CrimsonCost);
+
+                if (!gmgr.TrySpendCurrency(Currency.CrimsonCore, cost))
+                {
+                    return false;
+                }                
+            }
+        }
+
 
         owned.Add(nodeId);
         ownedNodes = owned.ToList();
@@ -215,10 +231,16 @@ public class PrestigeManager : MonoBehaviour
     }
     public void GrantCrimson(int amount)
     {
-        crimsonCore += Mathf.Max(0, amount);
+        var gmgr = GameManager.Instance;
+        if (gmgr != null && amount > 0)
+            gmgr.AddCurrency(Currency.CrimsonCore, (ulong)amount);
         OnPrestigeChanged?.Invoke();
     }
-    public int GetCrimson() => crimsonCore;
+    public int GetCrimson()
+    {
+        var gmgr = GameManager.Instance;
+        return gmgr != null ? (int)Mathf.Min(int.MaxValue, (long)gmgr.GetCurrency(Currency.CrimsonCore)) : 0;
+    }
     public int GetPrestigeLevel() => prestigeLevel;
     public bool Owns(string nodeId) => owned.Contains(nodeId);
     public bool IsGunnerUnlocked(string gunnerId) => unlockedGunners.Contains(gunnerId);
@@ -241,7 +263,9 @@ public class PrestigeManager : MonoBehaviour
     {
         int grantCrimson = PreviewCrimsonForPrestige();
         prestigeLevel++;
-        crimsonCore += Mathf.Max(0, grantCrimson);
+        var gmgr = GameManager.Instance;
+        if (gmgr != null && grantCrimson > 0)
+            gmgr.AddCurrency(Currency.CrimsonCore, (ulong)grantCrimson);
 
         // ---- resets ----
         if (resetAllTurrets || resetTurretUpgrades)
@@ -252,6 +276,23 @@ public class PrestigeManager : MonoBehaviour
 
         if (resetScraps || resetBlackSteel)
             TryResetCurrencies(resetScraps, resetBlackSteel);
+
+        // Reaffirm anchors so parked/equipped visuals hook back up cleanly
+        var slotMgr = Assets.Scripts.Systems.TurretSlotManager.Instance;
+        if (slotMgr != null && GunnerManager.Instance != null)
+        {
+            // If a preferred starter was equipped to slot 0, make sure the anchor is known
+            if (slotMgr.Get(0) != null)
+            {
+                // GunnerManager will lazily rebuild anchors if null; this just nudges visuals
+                GunnerManager.Instance.NotifyTurretPresent(
+                    slotIndex: 0,
+                    turretAnchor: null,
+                    hasTurret: true
+                );
+            }
+        }
+
 
         if (PlayerBaseManager.Instance != null)
         {
@@ -339,12 +380,19 @@ public class PrestigeManager : MonoBehaviour
         var inv = TurretInventoryManager.Instance;
         if (inv == null) return;
 
+        // 1) Clear slots first (do NOT auto-equip here)
+        var slots = Assets.Scripts.Systems.TurretSlotManager.Instance;
+        if (slots != null)
+            slots.UnequipAll(autoEquipStarter: false);
+
+        // 2) Reset inventory (this seeds the starter and may equip it if SlotMgr is alive)
         inv.ResetAll(wipeOwnership, wipeUpgrades);
 
-        // Also unequip everything so slots start clean
-        var slots = Assets.Scripts.Systems.TurretSlotManager.Instance;
-        if (slots != null) slots.UnequipAll();
+        // 3) If nothing is equipped (e.g., due to timing), force-equip the starter like delete-save does
+        if (slots != null && !slots.IsAnyTurretEquipped())
+            slots.UnequipAll(autoEquipStarter: true);
     }
+
 
     private void TryResetGunners(bool wipeOwnership, bool wipeUpgrades, bool resetLevels)
     {
@@ -592,7 +640,6 @@ public class PrestigeManager : MonoBehaviour
         return new PrestigeDTO
         {
             PrestigeLevel = prestigeLevel,
-            CrimsonCore = crimsonCore,
             OwnedNodeIds = ownedNodes != null ? new List<string>(ownedNodes) : new List<string>()
         };
     }
@@ -600,7 +647,6 @@ public class PrestigeManager : MonoBehaviour
     public void ImportDTO(PrestigeDTO dto)
     {
         prestigeLevel = Mathf.Max(0, dto.PrestigeLevel);
-        crimsonCore = Mathf.Max(0, dto.CrimsonCore);
 
         ownedNodes = dto.OwnedNodeIds != null ? new List<string>(dto.OwnedNodeIds) : new List<string>();
         RecomputeCaches();
@@ -618,7 +664,7 @@ public class PrestigeManager : MonoBehaviour
     public void Debug_PrintSummary()
     {
         var ownedList = string.Join(", ", owned.OrderBy(x => x));
-        Debug.Log($"[Prestige] Lvl={prestigeLevel} Crimson={crimsonCore} Owned({owned.Count})=[{ownedList}]");
+        
         Debug.Log($"[Prestige] Effects: " +
                   $"DMG+{sum.dmgPct}% FR+{sum.fireRatePct}% CRIT+{sum.critChancePct}% CDMG+{sum.critDmgPct}% " +
                   $"Pierce+{sum.pierceChancePct}% APen+{sum.armorPenPct}% Range+{sum.rangePct}% Rot+{sum.rotationSpeedPct}%");
@@ -634,7 +680,7 @@ public class PrestigeManager : MonoBehaviour
     {
         owned.Clear();
         ownedNodes.Clear();
-        crimsonCore = 0;
+        
         prestigeLevel = 0;
         RecomputeCaches();
         Save();

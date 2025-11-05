@@ -17,7 +17,13 @@ namespace Assets.Scripts.Systems
         public event Action<GameState> OnGameStateChanged;
 
         // Currency Management
-        private readonly Dictionary<Currency, ulong> currencies = new();
+        private readonly Dictionary<Currency, ulong> currencies = new Dictionary<Currency, ulong>
+        {
+            { Currency.Scraps, 0UL },
+            { Currency.BlackSteel, 0UL },
+            { Currency.CrimsonCore, 0UL }
+        };
+
         public ulong GetCurrency(Currency currency) => currencies[currency];
 
         public event Action<Currency, ulong> OnCurrencyChanged;

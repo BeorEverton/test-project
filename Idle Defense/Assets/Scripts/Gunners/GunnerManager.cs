@@ -25,9 +25,12 @@ public class GunnerManager : MonoBehaviour
     [SerializeField] private Vector3 onTurretLocalOffset = new Vector3(0f, 0.6f, 0f);
 
     [Header("Starter")]
-    [SerializeField, Tooltip("Preferred starter gunner kept across prestiges (drag a GunnerSO here or set once via code).")]
-    private GunnerSO preferredStarterGunner;
-    private const string PREF_PREFERRED_STARTER_ID = "PreferredStarterGunnerId";
+    [SerializeField, Tooltip("Preferred starter gunner kept across prestiges.")]
+    public GunnerSO preferredStarterGunner;
+
+    [SerializeField] private int starterDefaultSlotIndex = 2;
+
+    public int StarterSlotIndex => starterDefaultSlotIndex;
 
     // Player state
     private readonly Dictionary<string, GunnerRuntime> runtimes = new();
@@ -66,7 +69,6 @@ public class GunnerManager : MonoBehaviour
     // 3D model instances and “docked” state
     private readonly Dictionary<string, GunnerModelBinding> modelByGunner = new();
     private readonly HashSet<string> dockedGunners = new(); // bonuses apply only when docked
-
 
     public bool TryGetEquippedRuntime(int slotIndex, out GunnerRuntime rt)
     {
@@ -107,7 +109,6 @@ public class GunnerManager : MonoBehaviour
         {
             Debug.LogWarning("[GunnerManager] No unlock table assigned; manager will be empty.");
         }
-        LoadPreferredStarterFromPrefs();
     }
 
     private void Update()
@@ -151,34 +152,15 @@ public class GunnerManager : MonoBehaviour
         OnRosterChanged?.Invoke();
     }
 
-    /// <summary>Change the preferred starter gunner at runtime (e.g., from a selection UI).</summary>
-    private void LoadPreferredStarterFromPrefs()
-    {
-        string id = PlayerPrefs.GetString(PREF_PREFERRED_STARTER_ID, "");
-        if (!string.IsNullOrEmpty(id) && soById.TryGetValue(id, out var so))
-        {
-            preferredStarterGunner = so;
-            // Ensure we own it in the current run (quality of life)
-            ownedGunners.Add(so.GunnerId);
-        }
-    }
-
     /// <summary>Change the preferred starter gunner at runtime (e.g., from selection UI) and persist it.</summary>
     public void SetPreferredStarter(GunnerSO so)
     {
         preferredStarterGunner = so;
         if (so != null)
-        {
-            ownedGunners.Add(so.GunnerId);   // grant ownership (free)
-            PlayerPrefs.SetString(PREF_PREFERRED_STARTER_ID, so.GunnerId);
-        }
-        else
-        {
-            PlayerPrefs.DeleteKey(PREF_PREFERRED_STARTER_ID);
-        }
+            ownedGunners.Add(so.GunnerId); // grant ownership (free)
 
-        PlayerPrefs.Save();
-        Save();               // your SaveGameManager path
+        // Persist through your normal save file, not PlayerPrefs
+        Save();
         OnRosterChanged?.Invoke();
     }
 
@@ -493,8 +475,6 @@ public class GunnerManager : MonoBehaviour
         }
         if (foundSlot.HasValue) parkedSlotToGunner.Remove(foundSlot.Value);
     }
-
-
 
     /* ===================== BUY / UNLOCK ===================== */
     private bool TryGetEntry(string id, out GunnerUnlockTableSO.Entry e)
@@ -1082,7 +1062,6 @@ public class GunnerManager : MonoBehaviour
         foreach (var kvp in runtimes)
         {
             var rt = kvp.Value;
-
             int upCount = rt.UpgradeLevels?.Count ?? 0;
             int[] upKeys = new int[upCount];
             int[] upLvls = new int[upCount];
@@ -1101,25 +1080,25 @@ public class GunnerManager : MonoBehaviour
                 Xp = rt.CurrentXp,
                 Points = rt.UnspentSkillPoints,
                 Unlocked = rt.Unlocked.Select(u => (int)u).ToArray(),
-
                 UpKeys = upKeys,
                 UpLevels = upLvls,
-
                 OnQuest = rt.IsOnQuest,
                 QuestEnd = rt.QuestEndUnixTime,
                 EquippedSlot = rt.EquippedSlot,
 
+                // kept for backward-compatibility with old saves that didn’t have top-level field
                 PreferredStarterId = (preferredStarterGunner != null && rt.GunnerId == preferredStarterGunner.GunnerId)
-                ? preferredStarterGunner.GunnerId
-                : null
+                                     ? preferredStarterGunner.GunnerId
+                                     : null
             });
         }
 
-        // slot map
+        // slot map & ownership
         foreach (var kvp in slotToGunner)
             dto.SlotMap.Add(new SlotGunnerDTO { SlotIndex = kvp.Key, GunnerId = kvp.Value });
-
         dto.OwnedGunners.AddRange(ownedGunners);
+
+        dto.PreferredStarterId = preferredStarterGunner != null ? preferredStarterGunner.GunnerId : null;
 
         return dto;
     }
@@ -1190,13 +1169,16 @@ public class GunnerManager : MonoBehaviour
                 ownedGunners.Add(id);
         }
 
-        string prefId = null;
-        foreach (var r in dto.Runtimes)
+        // Resolve preferred starter:
+        // 1) Prefer the new top-level field
+        string prefId = dto.PreferredStarterId;
+
+        // 2) Backward-compat: if missing, scan per-runtime legacy field
+        if (string.IsNullOrEmpty(prefId))
         {
-            if (!string.IsNullOrEmpty(r.PreferredStarterId))
+            foreach (var r in dto.Runtimes)
             {
-                prefId = r.PreferredStarterId;
-                break; // only need the first occurrence
+                if (!string.IsNullOrEmpty(r.PreferredStarterId)) { prefId = r.PreferredStarterId; break; }
             }
         }
 
@@ -1205,9 +1187,12 @@ public class GunnerManager : MonoBehaviour
             preferredStarterGunner = soPreferd;
             ownedGunners.Add(soPreferd.GunnerId); // ensure ownership
         }
+        else
+        {
+            preferredStarterGunner = null;
+        }
 
-        // Notify listeners that the equip map changed
-        OnSlotGunnerChanged?.Invoke(-1); // -1 = bulk refresh
+        OnSlotGunnerChanged?.Invoke(-1); // bulk refresh
         OnRosterChanged?.Invoke();
     }
 
@@ -1234,10 +1219,7 @@ public class GunnerManager : MonoBehaviour
             foreach (var kv in runtimes)
                 ResetRuntimeToFresh(kv.Key, kv.Value);
 
-            // Only keep & auto-equip a preferred starter if a preference actually exists in PlayerPrefs.
-            bool keepPreferred = PlayerPrefs.HasKey(PREF_PREFERRED_STARTER_ID);
-
-            if (keepPreferred && preferredStarterGunner != null)
+            if (preferredStarterGunner != null)
             {
                 var pid = preferredStarterGunner.GunnerId;
                 ownedGunners.Add(pid);
@@ -1248,7 +1230,7 @@ public class GunnerManager : MonoBehaviour
                     runtimes[pid] = rt;
                 }
                 ResetRuntimeToFresh(pid, rt);
-                EquipToFirstFreeSlot(pid, preferSlotIndex: 0);
+                EquipToFirstFreeSlot(pid, preferSlotIndex: 2);
                 
             }
             else
@@ -1321,8 +1303,9 @@ public class GunnerManager : MonoBehaviour
     /// If the anchor dictionary is empty (common right after resets), we rebuild it
     /// from SlotWorldButton in the scene. If still missing, we set the mapping now
     /// and defer the visual attach until anchors are available.</summary>
-    public void EquipToFirstFreeSlot(string gunnerId, int preferSlotIndex = 0)
+    public void EquipToFirstFreeSlot(string gunnerId, int preferSlotIndex = 2)
     {
+        Debug.Log($"EquipToFirstFreeSlot called for gunner {gunnerId} preferring slot {preferSlotIndex}.");
         if (string.IsNullOrEmpty(gunnerId)) return;
 
         // Resolve anchor safely
@@ -1344,7 +1327,7 @@ public class GunnerManager : MonoBehaviour
             OnSlotGunnerChanged?.Invoke(preferSlotIndex);
             return;
         }
-
+        Debug.Log("Preerred slot anchor found; equipping gunner visually now. " + preferSlotIndex);
         if (!EquipToSlot(gunnerId, preferSlotIndex, slotBarrel))
             Debug.LogWarning($"[GunnerManager] Could not equip gunner {gunnerId} to preferred slot {preferSlotIndex} (anchor ok).");
     }

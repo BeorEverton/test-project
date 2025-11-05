@@ -1,4 +1,5 @@
 using Assets.Scripts.UI;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,8 @@ public class GunnerBillboardBinding : MonoBehaviour
     public GameObject LimitBreakGlow;  // optional VFX highlight
 
     private GunnerRuntime _rt;
+
+    private bool _lbButtonLocked = false;
 
     void Awake()
     {
@@ -76,7 +79,16 @@ public class GunnerBillboardBinding : MonoBehaviour
     private void RefreshLimitBreakUI()
     {
         bool full = _rt != null && _rt.LimitBreakCurrent >= _rt.LimitBreakMax;
-        if (LimitBreakButton) LimitBreakButton.gameObject.SetActive(full);
+
+        if (LimitBreakButton)
+        {
+            // Show only when full; interactable only if not locked.
+            LimitBreakButton.gameObject.SetActive(full);
+            LimitBreakButton.interactable = full && !_lbButtonLocked;
+
+            // If not full anymore, clear the lock so next time it fills we can click again.
+            if (!full) _lbButtonLocked = false;
+        }
 
         // Prefer 3D VFX if available
         if (ModelBinding != null) ModelBinding.SetLimitBreakReady(full);
@@ -87,11 +99,34 @@ public class GunnerBillboardBinding : MonoBehaviour
     private void OnClickLimitBreak()
     {
         if (_rt == null) return;
-        bool ok = LimitBreakManager.Instance != null && LimitBreakManager.Instance.TryActivate(_rt.GunnerId);
+        if (_lbButtonLocked) return; // prevent double-press during same frame
+
+        _lbButtonLocked = true;
+        if (LimitBreakButton) LimitBreakButton.interactable = false; // immediate lock
+
+        bool ok = (LimitBreakManager.Instance != null) && LimitBreakManager.Instance.TryActivate(_rt.GunnerId);
         if (ok)
         {
+            // Force-clear the runtime meter so the button hides even if debug "no cost" is enabled.
+            _rt.LimitBreakCurrent = 0f;
             if (LimitBreakBar != null) LimitBreakBar.SetValue(0f);
+
+            // Propagate to the rest of UI and systems that mirror this value.
+            GunnerManager.Instance?.NotifyLimitBreakChanged(_rt.GunnerId);
+
+            // Will hide the button now (since not full) and also clear the lock for the next charge.
             RefreshLimitBreakUI();
         }
+        else
+        {
+            // Activation failed (requirements, cooldown, etc.). Re-enable click if still full.
+            _lbButtonLocked = false;
+            if (LimitBreakButton)
+            {
+                bool stillFull = _rt.LimitBreakCurrent >= _rt.LimitBreakMax;
+                LimitBreakButton.interactable = stillFull;
+            }
+        }
     }
+
 }

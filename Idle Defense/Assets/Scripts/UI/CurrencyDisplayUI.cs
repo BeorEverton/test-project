@@ -36,6 +36,12 @@ namespace Assets.Scripts.UI
             Unsubscribe();
         }
 
+        private void OnEnable()
+        {
+            TrySubscribe();
+            RefreshNow();
+        }
+
         private void TrySubscribe()
         {
             if (_listening) return;

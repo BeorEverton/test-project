@@ -607,6 +607,8 @@ public class GunnerDetailsUI : MonoBehaviour
         // Begin slot selection as usual
         GunnerEquipFlow.Instance?.BeginSelectSlot(_so.GunnerId);
 
+        UIManager.Instance?.ChangeCanvas(true); // Close secondary canvas and go back to main
+
         if (closePanelOnEquip) Close();
     }
 

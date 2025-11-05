@@ -368,12 +368,12 @@ namespace Assets.Scripts.Enemies
             if (isMini)
             {
                 _body.localScale = _originalScale.Value * 2f;
-                sr.color = Color.red;
+                if (sr) sr.color = Color.red; 
             }
             else
             {
                 _body.localScale = _originalScale.Value * 4f;
-                sr.color = Color.black;
+                if (sr) sr.color = Color.black;
             }
             _applyBossVisualsAfterReset = false;
         }

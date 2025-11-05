@@ -205,8 +205,7 @@ namespace Assets.Scripts.Systems.Save
             {
                 var empty = new PrestigeDTO
                 {
-                    PrestigeLevel = 0,
-                    CrimsonCore = 0,
+                    PrestigeLevel = 0,                    
                     OwnedNodeIds = new System.Collections.Generic.List<string>()
                 };
                 PrestigeManager.Instance.ImportDTO(empty);

@@ -23,6 +23,7 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
     public void ExecuteAttack(BaseTurret turret, TurretStatsInstance stats, GameObject primaryTarget)
     {
         RuntimeStats = stats;
+        
 
         _pathCells.Clear();
         _pelletTargetPositions.Clear();
@@ -89,7 +90,6 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
                             new Vector2(enemy.transform.position.x, enemy.transform.position.Depth())
                         );
 
-
                         enemyBuffer[enemyCount] = enemy;
                         enemyDistances[enemyCount] = distToEnemy;
                         sortedIndices[sortedCount++] = enemyCount;
@@ -118,11 +118,12 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
 
         // Distribute pellets
         int pelletsRemaining = stats.PelletCount;
-        int index = 0;
+        int index = 0;        
 
         while (pelletsRemaining > 0 && sortedCount > 0)
         {
             Enemy enemy = enemyBuffer[sortedIndices[index]];
+
             float distToEnemy = enemyDistances[sortedIndices[index]];
             float damage = stats.Damage - GetDamageFalloff(distToEnemy);
 
@@ -144,20 +145,6 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
         List<Vector2Int> pelletPathCells = GridRaycaster.GetCellsAlongLine(start, pelletTarget);
         _cellsInPathToTarget.Add(pelletTarget, pelletPathCells);
     }
-
-    /*
-    private void FirePellet(Vector2 baseDir, float angleOffset)
-    {
-        Vector2 pelletDir = RotateVector2(baseDir, angleOffset);
-
-        Vector2 pelletTarget = (Vector2)transform.position + pelletDir * maxRange;
-        _pelletTargetPositions.Add(pelletTarget);
-
-        List<Vector2Int> pelletPathCells = GridRaycaster.GetCellsAlongLine(transform.position, pelletTarget);
-        _pathCells.AddRange(pelletPathCells);
-
-        _cellsInPathToTarget.Add(pelletTarget, pelletPathCells);
-    }*/
 
     private void FireWithUnevenPelletCount(Vector2 baseDir)
     {

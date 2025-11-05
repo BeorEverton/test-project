@@ -16,8 +16,9 @@ MonoBehaviour:
   Icon: {fileID: -7068553724952606805, guid: 4b45aacacce485349a30dc4522bd7d60, type: 3}
   EnemyClass: 9
   MaxHealth: 4
-  MovementSpeed: 0.6
+  MovementSpeed: 3.6
   MovementSpeedDifference: 0.2
+  IsFlying: 0
   CoinDropAmount: 6
   CurrencyDropType: 0
   CoinDropMultiplierByWaveCount: 2.2
@@ -26,3 +27,29 @@ MonoBehaviour:
   AttackRange: 0.3
   AttackRangeDifference: 0.1
   AttackSpeed: 1.3
+  SweepTargets: 1
+  Armor: 0
+  DodgeChance: 0
+  ShieldCharges: 0
+  ExploderEnabled: 0
+  ExploderDelay: 0
+  ExploderRadius: 3
+  ExploderMaxGunners: 2
+  HealerEnabled: 0
+  HealerCooldown: 5
+  HealerHealPctOfMaxHP: 0.1
+  HealerRadius: 6
+  HealerMaxTargets: 2
+  KamikazeOnReach: 0
+  KamikazeRadius: 3
+  KamikazeMaxGunners: 3
+  SummonerEnabled: 0
+  SummonPrefab: {fileID: 0}
+  SummonPrewarmCount: 0
+  SummonType: 0
+  SummonCount: 10
+  SummonStreamInterval: 5
+  SummonForwardDepth: 0.8
+  SummonXJitter: 0.5
+  SummonFirstDelay: 0.75
+  SummonCooldown: 0

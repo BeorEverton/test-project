@@ -59,7 +59,8 @@ namespace Assets.Scripts.Turrets
 
         // Gunner variables
         [NonSerialized] public int SlotIndex = -1;            // set by SlotWorldButton on spawn
-        private TurretStatsInstance _effectiveScratch;        // reused buffer (turret + gunner)                                                              
+        private TurretStatsInstance _effectiveScratch;
+        private TurretStatsInstance EffectiveStats => _effectiveScratch ?? RuntimeStats;
         private int _effectsSignature = -1; // Tracks which effects are active
         private bool _boundToGunnerEvents = false;
 
@@ -101,6 +102,7 @@ namespace Assets.Scripts.Turrets
             UpdateTurretAppearance();
 
             targetingPattern = targetingPatternBehaviour as ITargetingPattern;
+            BuildEffectiveStats();
             InitializeEffects();
         }
 
@@ -141,7 +143,8 @@ namespace Assets.Scripts.Turrets
             _bonusSpdMultiplier = 1f + clickPct / 100f;
 
             // Final fire interval = base interval / (click multiplier * LB multiplier)
-            _atkSpeed = (1f / RuntimeStats.FireRate) / (_bonusSpdMultiplier * lbFRMult);
+            _atkSpeed = (1f / EffectiveStats.FireRate) / (_bonusSpdMultiplier * lbFRMult);
+
 
             _timeSinceLastShot += Time.deltaTime;
             Attack();
@@ -168,7 +171,7 @@ namespace Assets.Scripts.Turrets
             if (_targetEnemy != null)
             {
                 float ty = _targetEnemy.transform.position.Depth();
-                if (ty > _effectiveScratch.Range)
+                if (ty > EffectiveStats.Range)
                 {
                     _targetEnemy.GetComponent<Enemy>().DelayRemoveDeathEvent(Enemy_OnDeath);
                     _targetEnemy = null;
@@ -177,7 +180,7 @@ namespace Assets.Scripts.Turrets
             }
 
             // Used for limiting target calculation
-            float maxDepth = (_effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range);
+            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range : RuntimeStats.Range);
 
             if (_targetEnemy == null || !_targetEnemy.activeInHierarchy)
             {
@@ -219,7 +222,7 @@ namespace Assets.Scripts.Turrets
             if (targetingPattern is PiercingLinePattern plp)
                 plp.startPos = _muzzleFlashPosition.position;
 
-            targetingPattern?.ExecuteAttack(this, _effectiveScratch, _targetEnemy);
+            targetingPattern?.ExecuteAttack(this, EffectiveStats, _targetEnemy);
 
             // Cache once; also find it if it's on a child
             if (_recoil == null)
@@ -339,8 +342,8 @@ namespace Assets.Scripts.Turrets
                 case EnemyTarget.ClusteredTargets:
                     {
                         // Lightweight cluster: broad-phase via grid, limit candidate checks
-                        float r = (_effectiveScratch != null && _effectiveScratch.ExplosionRadius > 0f)
-                                    ? _effectiveScratch.ExplosionRadius
+                        float r = (EffectiveStats != null && EffectiveStats.ExplosionRadius > 0f)
+                                    ? EffectiveStats.ExplosionRadius
                                     : (RuntimeStats.ExplosionRadius > 0f ? RuntimeStats.ExplosionRadius : 2f);
                         float r2 = r * r;
 
@@ -454,7 +457,7 @@ namespace Assets.Scripts.Turrets
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
 
-            float maxDepth = (_effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range);
+            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range : RuntimeStats.Range);
 
             // Candidates in range, active, and hittable (flying filtered by turret capability)
             var cands = EnemySpawner.Instance.EnemiesAlive
@@ -519,8 +522,8 @@ namespace Assets.Scripts.Turrets
                 // 7) ClusteredTargets: pick enemy with most neighbors within an AoE radius (tie -> nearest)
                 case EnemyTarget.ClusteredTargets:
                     {
-                        float r = (_effectiveScratch != null && _effectiveScratch.ExplosionRadius > 0f)
-                                    ? _effectiveScratch.ExplosionRadius
+                        float r = (EffectiveStats != null && EffectiveStats.ExplosionRadius > 0f)
+                                    ? EffectiveStats.ExplosionRadius
                                     : (RuntimeStats.ExplosionRadius > 0f ? RuntimeStats.ExplosionRadius : 2f); // fallback
                         float r2 = r * r;
                         int gridRange = Mathf.Max(1, Mathf.CeilToInt(r));
@@ -829,7 +832,7 @@ namespace Assets.Scripts.Turrets
             if (index < 0 || index > 12) index = 0;
             EnemyTargetChoice = (EnemyTarget)index;
             // New: time-sliced retargeting
-            float maxDepth = (_effectiveScratch != null ? _effectiveScratch.Range : RuntimeStats.Range);
+            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range : RuntimeStats.Range);
 
             if (!CurrentTargetStillValid(maxDepth) || Time.time >= _nextRetargetAt)
             {
@@ -1120,7 +1123,7 @@ namespace Assets.Scripts.Turrets
 
         private void InitializeEffects()
         {
-            // Build once from current RuntimeStats; next frames will compare and rebuild from _effectiveScratch if needed.
+            // Build once from current RuntimeStats; next frames will compare and rebuild from EffectiveStats if needed.
             RebuildEffectsFromStats(RuntimeStats);
         }
 
@@ -1221,17 +1224,36 @@ namespace Assets.Scripts.Turrets
         // Made public to call from upgrade manager in case gunner is dead
         public void RecomputeEffectiveFromGunner()
         {
-            if (_effectiveScratch == null) _effectiveScratch = new TurretStatsInstance();
-            // Merge turret + current gunner into scratch
-            GunnerManager.Instance.ApplyTo(RuntimeStats, SlotIndex, _effectiveScratch);
-
-            // Prestige global bonuses (damage, fire rate, crits, pierce, etc.)
-            if (PrestigeManager.Instance != null)
-                PrestigeManager.Instance.ApplyToTurretStats(_effectiveScratch);
-
-            // Rebuild damage effects from the effective stats (adds/removes Slow/Knockback/etc.)
+            BuildEffectiveStats();
             RebuildEffectsFromStats(_effectiveScratch);
+
+
         }
+
+        private void BuildEffectiveStats()
+        {
+            // Start from a FULL clone of RuntimeStats so every field is valid (PelletCount, SplashDamage, etc.)
+            _effectiveScratch = CloneStatsWithoutLevels(RuntimeStats);
+
+            // Layer Gunner (if present)
+            if (GunnerManager.Instance != null)
+            {
+                // ApplyTo(baseStats, slotIndex, outStats) should write deltas into _effectiveScratch
+                GunnerManager.Instance.ApplyTo(RuntimeStats, SlotIndex, _effectiveScratch);
+            }
+
+            // Layer Prestige (if present)
+            if (PrestigeManager.Instance != null)
+            {
+                PrestigeManager.Instance.ApplyToTurretStats(_effectiveScratch);
+            }
+        }
+
+        private void InitializeEffectsWithEffective()
+        {
+            RebuildEffectsFromStats(EffectiveStats);
+        }
+
 
         #endregion
 
@@ -1241,7 +1263,7 @@ namespace Assets.Scripts.Turrets
             if (e == null) return false;
 
             // Use effective scratch if present (turret + gunner), otherwise the runtime base.
-            bool canHitFlying = (_effectiveScratch != null) ? _effectiveScratch.CanHitFlying : RuntimeStats.CanHitFlying;
+            bool canHitFlying = (EffectiveStats != null) ? EffectiveStats.CanHitFlying : RuntimeStats.CanHitFlying;
 
             // If enemy is not flying, always valid; if it is, only valid when turret can hit flying
             return !e.Info.IsFlying || canHitFlying;

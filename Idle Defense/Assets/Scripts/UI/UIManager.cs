@@ -12,6 +12,9 @@ namespace Assets.Scripts.UI
     public class UIManager : MonoBehaviour
     {
         public static UIManager Instance { get; private set; }
+        [Header("Canvas")]
+        [SerializeField] private Canvas mainCanvas;
+        [SerializeField] private Canvas secondaryCanvas;
 
         [Header("Panels and UI Elements")]
         [SerializeField] private GameObject[] rightPanels;
@@ -416,5 +419,13 @@ namespace Assets.Scripts.UI
             }
         }
         #endregion
+
+        public void ChangeCanvas(bool main)
+        {
+            if (mainCanvas != null)
+                mainCanvas.gameObject.SetActive(main);
+            if (secondaryCanvas != null)
+                secondaryCanvas.gameObject.SetActive(!main);
+        }
     }
 }
