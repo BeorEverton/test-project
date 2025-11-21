@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
+using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections;
@@ -21,8 +22,8 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI _dmgBonus, _spdBonus, _wave, _enemies;
         [SerializeField] private GameObject permanentUpgradePanels;
         [SerializeField] private GameObject temporaryUpgradePanels;
+        [SerializeField] private TurretUpgradePanelUI turretUpgradePanelUI;
 
-        [Header("Limit Break Slider")]
         [Header("Limit Break (Multiple)")]
         [SerializeField] private Transform _lbBarsParent;         // assign a horizontal/vertical layout group
         [SerializeField] private LimitBreakBarUI _lbBarPrefab;    // drag the prefab here
@@ -35,7 +36,7 @@ namespace Assets.Scripts.UI
         [SerializeField] private GameObject equipPanel;
         [SerializeField] private GameObject permanentEquipPanel;
         [SerializeField] private TextMeshProUGUI toast;   // 1-line overlay
-        public GameObject wallUpgradePanel;
+        public GameObject turretUpgradePanel;
 
         [Header("Death Screen")]
         [SerializeField] private GameObject deathCountdownPanel, startGamePanel;
@@ -50,7 +51,10 @@ namespace Assets.Scripts.UI
 
         private int activeSlot; // for the equipment
 
-        private int _enemyCount;
+        // Enemy display
+        [SerializeField] private Image _enemyRingFill;
+        private int _totalEnemiesThisWave;
+        private int _enemiesRemaining;
 
         private float timeScaleOnPause;
         public bool gamePaused = false;
@@ -98,22 +102,53 @@ namespace Assets.Scripts.UI
 
         #endregion
 
+        public void OpenTurretUpgradePanel(int slotIndex, BaseTurret turret)
+        {
+            turretUpgradePanelUI.Open(slotIndex, turret);
+        }
+
         private void OnEnemyDeath(object sender, EventArgs _)
         {
-            _enemyCount--;
-            _enemies.text = $"Enemies\n{_enemyCount}";
+            if (_totalEnemiesThisWave <= 0)
+                return;
+
+            _enemiesRemaining--;
+            if (_enemiesRemaining < 0)
+                _enemiesRemaining = 0;
+
+            // Update number (optional – you can remove this if you only want the ring)
+            _enemies.text = $"{_enemiesRemaining}";
+
+            // Update ring: 1 when full wave alive, 0 when all dead.
+            if (_enemyRingFill != null)
+            {
+                float ratio = (float)_enemiesRemaining / (float)_totalEnemiesThisWave;
+                ratio = Mathf.Clamp01(ratio);
+                _enemyRingFill.fillAmount = ratio;
+            }
         }
+
 
         private void OnWaveStarted(object sender, WaveManager.OnWaveStartedEventArgs args)
         {
-            _wave.text = $"Zone\n{args.WaveNumber}";
+            _wave.text = $"{args.WaveNumber}";
         }
 
         private void OnWaveCreated(object sender, EnemySpawner.OnWaveCreatedEventArgs args)
         {
-            _enemyCount = args.EnemyCount;
-            _enemies.text = $"Enemies\n{_enemyCount}";
+            _totalEnemiesThisWave = args.EnemyCount;
+            _enemiesRemaining = _totalEnemiesThisWave;
+
+            // Numeric display (if you still want the count)
+            _enemies.text = $"{_enemiesRemaining}";
+
+            // Ring starts full when there are enemies, empty if somehow 0.
+            if (_enemyRingFill != null)
+            {
+                _enemyRingFill.fillAmount = (_totalEnemiesThisWave > 0) ? 1f : 0f;
+            }
         }
+
 
         /// <summary>
         /// Colors the bonus text based on the value

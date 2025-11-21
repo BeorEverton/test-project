@@ -230,8 +230,8 @@ namespace Assets.Scripts.Turrets
 
             _recoil?.AddRecoil();
 
-            // Light combat chatter (small chance per shot)
-            if (GunnerManager.Instance != null && Random.value < 0.05f)
+            // Light combat chatter 
+            if (GunnerManager.Instance != null && Random.value < 0.05f && GunnerManager.Instance.GetEquippedGunnerId(SlotIndex) != null)
             {
                 string gid = GunnerManager.Instance.GetEquippedGunnerId(SlotIndex);
                 var so = GunnerManager.Instance.GetSO(gid);

@@ -1,16 +1,21 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class StarterGunnerCardUI : MonoBehaviour
+public class StarterGunnerCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Header")]
     public Image coverImage;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI levelText;
+    public TextMeshProUGUI regionText;
+    public TextMeshProUGUI classText;
     public Slider xpSlider;
     public TextMeshProUGUI xpValueText;
+    public TextMeshProUGUI description;
 
     [Header("Stats")]
     public Transform statRoot;
@@ -22,7 +27,14 @@ public class StarterGunnerCardUI : MonoBehaviour
 
     [Header("Controls")]
     public Button selectButton;
-    public TextMeshProUGUI selectLabel; // will show "Select", or "Select (1st/2nd/3rd)" if picked
+    public TextMeshProUGUI selectLabel; 
+
+    [Header("Hover")]
+    [Tooltip("Multiplier applied to local scale when hovered.")]
+    public float hoverScaleMultiplier = 1.15f;
+
+    private Vector3 _originalScale;
+    private bool _originalScaleCached;
 
     public GunnerSO Bound { get; private set; }
 
@@ -31,6 +43,8 @@ public class StarterGunnerCardUI : MonoBehaviour
 
     public void Bind(GunnerSO so, System.Action<GunnerSO> onSelect)
     {
+        CacheOriginalScale();
+
         Bound = so;
         _onSelect = onSelect;
 
@@ -39,6 +53,9 @@ public class StarterGunnerCardUI : MonoBehaviour
 
         // header
         if (nameText) nameText.text = so.DisplayName;
+        if (regionText) regionText.text = Regex.Replace(so.Area.ToString(), "(\\B[A-Z])", " $1");
+        if (classText) classText.text = so.Class.ToString();
+        if (description) description.text = so.backgroundDescription;
         if (coverImage) coverImage.sprite = so.gunnerSprite;
 
         LimitBreakSkillSO lb = (LimitBreakManager.Instance != null)
@@ -248,4 +265,25 @@ public class StarterGunnerCardUI : MonoBehaviour
             ? GameIconManager.Instance.IconForGunnerStat(key)
             : null;
     }
+
+    private void CacheOriginalScale()
+    {
+        if (_originalScaleCached) return;
+        _originalScale = transform.localScale;
+        _originalScaleCached = true;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        CacheOriginalScale();
+        transform.localScale = _originalScale * hoverScaleMultiplier;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (!_originalScaleCached) return;
+        transform.localScale = _originalScale;
+    }
 }
+
+

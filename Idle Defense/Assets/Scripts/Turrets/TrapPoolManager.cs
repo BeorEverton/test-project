@@ -21,7 +21,7 @@ public class TrapPoolManager : MonoBehaviour
     /// </summary>
     public void InitializePool(GameObject trapPrefab, int poolSize)
     {
-        Debug.Log($"Initializing/ensuring trap pool size {poolSize} (non-destructive) for {gameObject.name}");
+        
 
         // Non-destructive: only top up if we don't have enough entries
         int need = Mathf.Max(0, poolSize - traps.Count);
@@ -37,13 +37,13 @@ public class TrapPoolManager : MonoBehaviour
     public Trap PlaceTrap(Vector3 worldPos, Vector2Int cell, float damage, float delay,
         float radius, BaseTurret owner, float cellWorldY)
     {
-        Debug.Log($"Placing trap at cell {cell} ");
+        
         foreach (var trap in traps)
         {
-            Debug.Log($"Checking trap instance (isActive={trap.isActive})");
+            
             if (!trap.isActive)
             {
-                Debug.Log($"Using pooled trap instance for cell {cell} ");
+                
 
                 // --- ADD: upgrade to LB trap if owner is null ---
                 Trap chosen = trap;

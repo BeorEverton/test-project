@@ -21,6 +21,7 @@ public class TabSelectorButton : MonoBehaviour
         if (button == null)
         {
             button = GetComponent<Button>();
+            if (button == null) return;
             buttonTransform = button.GetComponent<RectTransform>();
         }
 

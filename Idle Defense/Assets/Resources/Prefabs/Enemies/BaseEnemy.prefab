@@ -487,6 +487,7 @@ GameObject:
   - component: {fileID: 8078747747107829962}
   - component: {fileID: 7521058934371825118}
   - component: {fileID: 1756096594409517404}
+  - component: {fileID: 431166021929189058}
   m_Layer: 0
   m_Name: BaseEnemy
   m_TagString: Untagged
@@ -539,6 +540,7 @@ MonoBehaviour:
   damageNumber: {fileID: 7580200115758363479, guid: f542b15eb8e74ce4db58a16be4a66f42, type: 3}
   damageNumberCritical: {fileID: 7580200115758363479, guid: 7ded230258a3e7e4f9e825660b57a574, type: 3}
   _body: {fileID: 4868341913795606881}
+  hitFlash: {fileID: 0}
   tookCriticalHit: 0
   _muzzleFlashPoint: {fileID: 3555503537699238602}
   _muzzleFlashRenderer: {fileID: 3619371046383394133}
@@ -576,6 +578,21 @@ MonoBehaviour:
   _fadeDuration: 0.2
   _burstSprite: {fileID: 4732235922430116017}
   _burstDuration: 0.08
+--- !u!114 &431166021929189058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4012000093620566100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cf1ada96c4cb8d4ba04065e97cd1b34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRenderer: {fileID: 1502381339027185210}
+  flashMaterial: {fileID: 2100000, guid: 7b48258ab3ca59b4899c1ed0d12c3689, type: 2}
+  flashDuration: 0.5
 --- !u!1 &6609154857986846892
 GameObject:
   m_ObjectHideFlags: 0
@@ -1015,6 +1032,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2905140295279961859}
   m_SourcePrefab: {fileID: 100100000, guid: 745fc92bc271b864592c322817fcbd01, type: 3}
+--- !u!137 &1502381339027185210 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5826793212114092208, guid: 745fc92bc271b864592c322817fcbd01, type: 3}
+  m_PrefabInstance: {fileID: 4901440662069829258}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4868341913795606881 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 745fc92bc271b864592c322817fcbd01, type: 3}

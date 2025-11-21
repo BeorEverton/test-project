@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,10 @@ public class GunnerDetailsUI : MonoBehaviour
 
     [Header("Top")]
     public TextMeshProUGUI gunnerNameText;
+    public TextMeshProUGUI gunnerRegion;
+    public TextMeshProUGUI gunnerClass;
+    public TextMeshProUGUI gunnerRarity;
+    public TextMeshProUGUI gunnerDescription;
     public TextMeshProUGUI levelText;
     public Slider xpSlider;
     public TextMeshProUGUI xpValueText;
@@ -206,6 +211,11 @@ public class GunnerDetailsUI : MonoBehaviour
             : null; // guard for null instance (editor preview etc.)
 
         // Top
+        if (gunnerNameText) gunnerNameText.text = so.DisplayName;
+        if (gunnerRegion) gunnerRegion.text = Regex.Replace(so.Area.ToString(), "(\\B[A-Z])", " $1");
+        if (gunnerClass) gunnerClass.text = so.Class.ToString();
+        if (gunnerRarity) gunnerRarity.text = so.Tier.ToString();
+        if (gunnerDescription) gunnerDescription.text = so.backgroundDescription;
         if (gunnerNameText) gunnerNameText.text = so.DisplayName;
         if (levelText) levelText.text = "Lv " + (_rt != null ? _rt.Level : 1);
 

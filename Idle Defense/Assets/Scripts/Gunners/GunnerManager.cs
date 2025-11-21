@@ -171,9 +171,12 @@ public class GunnerManager : MonoBehaviour
 
     public bool IsAvailable(string gunnerId)
     {
+        if (!IsOwned(gunnerId)) return false;
         if (!runtimes.TryGetValue(gunnerId, out var rt)) return false;
+        if (rt != null & rt.IsDead) return false;
         return !IsEquipped(gunnerId) && rt.IsAvailableNow();
     }
+
 
     public bool EquipToSlot(string gunnerId, int slotIndex, Transform turretAnchor)
     {
@@ -498,7 +501,7 @@ public class GunnerManager : MonoBehaviour
     public Currency GetPurchaseCurrency(string id)
     {
         if (TryGetEntry(id, out var e)) return e.unlockCurrency;
-        return Currency.Scraps; // safe default
+        return Currency.BlackSteel; 
     }
 
     public bool TryPurchaseGunner(string id)
@@ -776,6 +779,21 @@ public class GunnerManager : MonoBehaviour
 
         bool diedNow = rt.TakeDamage(damage, out float actual);
 
+        // Visual: either flash or play death, depending on result
+        if (modelByGunner.TryGetValue(gid, out var model) && model != null)
+        {
+            if (diedNow)
+            {
+                // Stop any queued flashes and play death animation
+                model.PlayDeath();
+            }
+            else if (actual > 0f)
+            {
+                model.PlayHitFlash();
+            }
+        }
+
+
         // Tell the equipped turret (for this slot) to rebuild its effective stats immediately
         OnSlotGunnerStatsChanged?.Invoke(slotIndex);
 
@@ -963,12 +981,21 @@ public class GunnerManager : MonoBehaviour
     /// </summary>
     public void HealAllGunners(bool resetLimitBreak = false)
     {
+        // Track which gunners were dead and are now revived
+        var revivedIds = new List<string>();
+
         // Heal every known gunner (equipped or not)
         foreach (var kv in runtimes)
         {
+            string gid = kv.Key;
             var rt = kv.Value;
+
+            bool wasDead = rt.IsDead;
             rt.Heal(rt.MaxHealth);
             if (resetLimitBreak) rt.ResetLimitBreak();
+
+            if (wasDead && !rt.IsDead)
+                revivedIds.Add(gid);
         }
 
         // Refresh bars only for equipped (those have billboards)
@@ -989,6 +1016,16 @@ public class GunnerManager : MonoBehaviour
             }
         }
 
+        // Play revive animation for any equipped gunners that came back to life
+        for (int i = 0; i < revivedIds.Count; i++)
+        {
+            string gid = revivedIds[i];
+            if (modelByGunner.TryGetValue(gid, out var model) && model != null)
+            {
+                model.PlayRevive();
+            }
+        }
+
         // Ping turrets so they re-merge (important if a dead gunner was just healed)
         if (OnSlotGunnerStatsChanged != null)
         {
@@ -996,6 +1033,8 @@ public class GunnerManager : MonoBehaviour
                 OnSlotGunnerStatsChanged.Invoke(s);
         }
     }
+
+
 
     // Delegate to the new manager
     public bool TryActivateLimitBreak(string gunnerId)
@@ -1204,12 +1243,13 @@ public class GunnerManager : MonoBehaviour
     /// </summary>
     public void ResetAll(bool wipeOwnership, bool wipeUpgrades, bool resetLevels)
     {
-        //DebugDumpAll("PRE");
-
         // Always unequip visuals/slots first
         var slots = new List<int>(slotToGunner.Keys);
         for (int i = 0; i < slots.Count; i++)
             UnequipFromSlot(slots[i]);
+
+        // Clear any “memory” of who used to be where
+        parkedSlotToGunner.Clear();
 
         if (wipeOwnership)
         {            
@@ -1305,7 +1345,7 @@ public class GunnerManager : MonoBehaviour
     /// and defer the visual attach until anchors are available.</summary>
     public void EquipToFirstFreeSlot(string gunnerId, int preferSlotIndex = 2)
     {
-        Debug.Log($"EquipToFirstFreeSlot called for gunner {gunnerId} preferring slot {preferSlotIndex}.");
+        //Debug.Log($"EquipToFirstFreeSlot called for gunner {gunnerId} preferring slot {preferSlotIndex}.");
         if (string.IsNullOrEmpty(gunnerId)) return;
 
         // Resolve anchor safely
@@ -1327,7 +1367,7 @@ public class GunnerManager : MonoBehaviour
             OnSlotGunnerChanged?.Invoke(preferSlotIndex);
             return;
         }
-        Debug.Log("Preerred slot anchor found; equipping gunner visually now. " + preferSlotIndex);
+        //Debug.Log("Preerred slot anchor found; equipping gunner visually now. " + preferSlotIndex);
         if (!EquipToSlot(gunnerId, preferSlotIndex, slotBarrel))
             Debug.LogWarning($"[GunnerManager] Could not equip gunner {gunnerId} to preferred slot {preferSlotIndex} (anchor ok).");
     }

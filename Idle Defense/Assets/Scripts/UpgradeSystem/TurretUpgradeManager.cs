@@ -19,7 +19,7 @@ namespace Assets.Scripts.Systems
         [SerializeField] private float exponentialPower = 1.15f;
 
         [Header("Max/Min stats")]
-        [SerializeField] private float maxRange = 50f;
+        [SerializeField] private float maxRange = 40f;
         [SerializeField] private float maxRotationSpeed = 20f;
         [SerializeField] private float maxCriticalChance = 90f;
         [SerializeField] private int maxBounce = 100;
@@ -230,14 +230,15 @@ namespace Assets.Scripts.Systems
                         GetExponentialCost(t, TurretUpgradeType.CriticalChance, a, out float cost, out int amount);
 
                         if (current >= maxCriticalChance)
-                            return ($"{(int)current}%", "Max", "", "0X");
+                            return ($"{current:F1}%", "Max", "", "0X");
 
                         return (
-                            $"{(int)current}%",
-                            $"+{(int)bonus}%",
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
+
                     }
                 },
                 [TurretUpgradeType.CriticalDamageMultiplier] = new()
@@ -264,11 +265,12 @@ namespace Assets.Scripts.Systems
                     GetExponentialCost(t, TurretUpgradeType.CriticalDamageMultiplier, a, out float cost, out int amount);
 
                     return (
-                        $"{(int)current}%",
-                        $"+{(int)bonus}%",
+                        $"{current:F1}%",
+                        $"+{bonus:F1}%",
                         $"{UIManager.AbbreviateNumber(cost)}",
                         $"{amount}X"
                     );
+
                 }
                 },
                 [TurretUpgradeType.ExplosionRadius] = new()
@@ -700,14 +702,15 @@ namespace Assets.Scripts.Systems
                         GetExponentialCost(t, TurretUpgradeType.BounceDamagePct, a, out float cost, out int amount);
 
                         if (current >= maxBounceDmgPct)
-                            return ($"{current * 100}%", "Max", "", "0X");
+                            return ($"{(current * 100f):F1}%", "Max", "", "0X");
 
                         return (
-                            $"{current * 100}%",
-                            $"{bonus * 100}%",
+                            $"{(current * 100f):F1}%",
+                            $"+{(bonus * 100f):F1}%",
                             $"{UIManager.AbbreviateNumber(cost)}",
                             $"{amount}X"
                         );
+
                     }
 
                 },

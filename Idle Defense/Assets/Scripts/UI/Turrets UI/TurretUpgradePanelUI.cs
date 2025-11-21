@@ -1,5 +1,6 @@
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,8 @@ namespace Assets.Scripts.UI
 
         private int _slotIndex;
         private BaseTurret _baseTurret;
+        private Coroutine _coroutine;
+        private bool activated;
 
         // For gunners
         private bool _subscribed;
@@ -88,6 +91,7 @@ namespace Assets.Scripts.UI
 
         private void OnEnable()
         {
+            if (_coroutine == null && !activated) _coroutine = StartCoroutine(FirstActivationSettings());
             if (!_subscribed && GunnerManager.Instance != null)
             {
                 GunnerManager.Instance.OnSlotGunnerChanged += HandleGunnerChanged;
@@ -129,5 +133,22 @@ namespace Assets.Scripts.UI
                 buttons[i].UpdateDisplayFromType();
         }
 
+        IEnumerator FirstActivationSettings()
+        {
+            yield return null;
+            if (!_baseTurret)
+            {
+                foreach (var slot in FindObjectsByType<SlotWorldButton>(FindObjectsSortMode.None))
+                {
+                    if (slot.GetComponentInChildren<BaseTurret>() != null)
+                    {
+                        Open(slot.slotIndex, slot.GetComponentInChildren<BaseTurret>());
+                        break;
+                    }
+                    else continue;
+                }
+            }
+            activated = true;
+        }
     }
 }

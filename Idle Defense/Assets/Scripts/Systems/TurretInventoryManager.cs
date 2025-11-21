@@ -93,7 +93,7 @@ namespace Assets.Scripts.Systems
         }
         private void EnsureStarterTurret()
         {
-            Debug.Log("Calling ensure starter");
+            //Debug.Log("Calling ensure starter");
             // Only seed when the player owns nothing yet
             if (owned.Count > 0)
                 return;
@@ -122,7 +122,7 @@ namespace Assets.Scripts.Systems
             // apply immediately instead of waiting for Start().
             if (TurretSlotManager.Instance != null)
             {
-                Debug.Log("Found turret slot manager, calling equip");
+                //Debug.Log("Found turret slot manager, calling equip");
                 TurretSlotManager.Instance.Equip(initialTurretSlot, runtime);
                 pendingEquipped = null;
             }

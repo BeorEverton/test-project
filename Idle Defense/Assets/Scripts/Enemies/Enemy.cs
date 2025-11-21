@@ -55,6 +55,8 @@ namespace Assets.Scripts.Enemies
         [SerializeField] private DamageNumber damageNumber, damageNumberCritical;
         [SerializeField] private Transform _body;
 
+        [SerializeField] private HitFlashOverlay hitFlash;
+
         // Laser targeting
         private float _baseMovementSpeed;
 
@@ -73,6 +75,8 @@ namespace Assets.Scripts.Enemies
         private float summonerTimer = 0f;
         private bool hasSummonedOnce = false;
 
+        private bool _deathSequenceStarted = false; // Ensures all death stuff is set
+
 #if UNITY_EDITOR //To display coinDrop and damage in the inspector debug mode
         private ulong _coinDropAmount;
         private float _damage;
@@ -87,15 +91,12 @@ namespace Assets.Scripts.Enemies
         // Movement
         public Vector3 MoveDirection;
 
-
         private void Awake()
         {
             if (_body != null)
                 _bodyOriginalLocalPos = _body.localPosition;
-        }
-
-        private void Start()
-        {
+            if (hitFlash == null)
+                hitFlash = GetComponentInChildren<HitFlashOverlay>();
             EnemyDeathEffect = GetComponent<EnemyDeathEffect>();
         }
 
@@ -159,6 +160,9 @@ namespace Assets.Scripts.Enemies
             // 3) Apply
             CurrentHealth -= finalDamage;
 
+            if (hitFlash != null)
+                hitFlash.TriggerFlash();
+
             isCritical = tookCriticalHit;
             if (SettingsManager.Instance.AllowPopups)
             {
@@ -186,6 +190,9 @@ namespace Assets.Scripts.Enemies
         {
             // Only proceed when health is actually zero or below
             if (CurrentHealth > 0f) return;
+            if (_deathSequenceStarted) return; // already dead
+
+            _deathSequenceStarted = true;
 
             IsAlive = false;
 
@@ -303,6 +310,9 @@ namespace Assets.Scripts.Enemies
 
         private void ResetEnemy()
         {
+            // Reset death state
+            _deathSequenceStarted = false;
+
             // Reset visual state if modified
             if (_originalScale.HasValue)
             {
@@ -315,7 +325,7 @@ namespace Assets.Scripts.Enemies
             _originalScale = null;
             _originalColor = null;
 
-            // Only reset info if not overridden (i.e., not a boss clone)
+            // Only reset info if not overridden
             if (!IsBossInstance && WaveManager.Instance.GetCurrentWave().WaveEnemies.ContainsKey(Info.EnemyClass))
             {
                 Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
@@ -343,7 +353,7 @@ namespace Assets.Scripts.Enemies
             KnockbackTime = 0f;
             KnockbackVelocity = Vector2.zero;
 
-            // Specials: reset runtime
+            // reset runtime
             shieldChargesRT = Mathf.Max(0, _info.ShieldCharges);
             suppressRewardsOnDeath = false;
             didKamize = false;

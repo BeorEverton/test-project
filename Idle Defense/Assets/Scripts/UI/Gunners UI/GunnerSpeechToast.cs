@@ -27,6 +27,12 @@ public class GunnerSpeechToast : MonoBehaviour
         _routine = StartCoroutine(LifeRoutine());
     }
 
+    private void OnEnable()
+    {
+        if (_routine != null) StopCoroutine(_routine);
+        _routine = StartCoroutine(LifeRoutine());
+    }
+
     private IEnumerator LifeRoutine()
     {
         yield return new WaitForSecondsRealtime(lifetime);

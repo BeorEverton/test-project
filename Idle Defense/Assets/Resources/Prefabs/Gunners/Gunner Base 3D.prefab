@@ -4873,9 +4873,9 @@ SkinnedMeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5974671289373584747}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
+  m_DynamicOccludee: 0
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
@@ -4889,6 +4889,7 @@ SkinnedMeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 4c57ae33a72fa6842bafed60410cd603, type: 2}
+  - {fileID: 2100000, guid: 7b48258ab3ca59b4899c1ed0d12c3689, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6549,6 +6550,7 @@ GameObject:
   - component: {fileID: 9190963545141370088}
   - component: {fileID: 9190963545131561838}
   - component: {fileID: 7760312276090419628}
+  - component: {fileID: 9021600297004719242}
   m_Layer: 0
   m_Name: Gunner Base 3D
   m_TagString: Untagged
@@ -6612,7 +6614,23 @@ MonoBehaviour:
   RunBool: Run
   AttackTrigger: Attack
   LimitBreakReadyFx: {fileID: 3255345927646330219}
+  HitFlashOverlay: {fileID: 9021600297004719242}
   RunSpeed: 6
+--- !u!114 &9021600297004719242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9190963545140936968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cf1ada96c4cb8d4ba04065e97cd1b34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRenderer: {fileID: 1124241810843123305}
+  flashMaterial: {fileID: 2100000, guid: 7b48258ab3ca59b4899c1ed0d12c3689, type: 2}
+  flashDuration: 0.8
 --- !u!1 &9190963545140936970
 GameObject:
   m_ObjectHideFlags: 0

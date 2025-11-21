@@ -118,5 +118,11 @@ namespace Assets.Scripts.Enemies
             StopAllCoroutines();
             enemyDiscoveredPopUp.SetActive(false);
         }
+
+        public void DeleteAllInfo()
+        {
+            entryLookup.Clear();
+            enemyEntries.Clear();
+        }
     }
 }

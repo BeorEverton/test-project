@@ -8,9 +8,14 @@ public class GunnerModelBinding : MonoBehaviour
     public Animator Animator;        // Bool: "Run", Trigger: "Attack"
     public string RunBool = "Run";
     public string AttackTrigger = "Attack";
+    public string DeathTrigger = "Death";
+    public string ReviveTrigger = "Revive";
 
     [Header("FX")]
     public GameObject LimitBreakReadyFx; // optional; toggled when LB is full
+
+    [Header("Render / Hit Flash")]
+    public HitFlashOverlay HitFlashOverlay;
 
     [Header("Motion")]
     public float RunSpeed = 6f;
@@ -18,6 +23,7 @@ public class GunnerModelBinding : MonoBehaviour
     private bool _runningOut;
     private Action _onArrive;
     private Action _onExit;
+    private bool _isDead;
 
     public void Initialize(float runSpeed, GameObject lbFxPrefab)
     {
@@ -26,6 +32,32 @@ public class GunnerModelBinding : MonoBehaviour
             LimitBreakReadyFx = Instantiate(lbFxPrefab, transform);
         SetLimitBreakReady(false);
     }
+
+    public void PlayHitFlash()
+    {
+        if (HitFlashOverlay != null)
+            HitFlashOverlay.TriggerFlash();
+    }
+
+    public void PlayDeath()
+    {
+        // Stop any queued flashes and ensure overlay is off
+        if (HitFlashOverlay != null)
+            HitFlashOverlay.StopAndClear();
+
+        if (Animator && !string.IsNullOrEmpty(DeathTrigger))
+            Animator.SetTrigger(DeathTrigger);
+        _isDead = true;
+    }
+
+    public void PlayRevive()
+    {
+        if (!_isDead) return;
+        if (Animator && !string.IsNullOrEmpty(ReviveTrigger))
+            Animator.SetTrigger(ReviveTrigger);
+        _isDead = false;
+    }
+
 
     public void RunTo(Transform target, float snapDist, Action onArrive)
     {
@@ -47,6 +79,7 @@ public class GunnerModelBinding : MonoBehaviour
 
     public void PlayAttack()
     {
+        if (_isDead) return;
         if (Animator) Animator.SetTrigger(AttackTrigger);
     }
 

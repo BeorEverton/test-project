@@ -101,6 +101,7 @@ namespace Assets.Scripts.WaveSystem
         {
             while (GameRunning)
             {
+                
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
                     WaveNumber = _currentWave
@@ -294,10 +295,25 @@ namespace Assets.Scripts.WaveSystem
 
         public void ResetWave()
         {
+            // Fully reset state but DO NOT start coroutines here.
+            StopAllCoroutines();
+            _waveCompleted = false;
+            _waveLost = false;
+
+            // Clear waves dictionary and counters
             _currentWave = 1;
             _maxWaves = 0;
             _waves.Clear();
-            GameRunning = true;
+
+            // Ensure nothing is running until caller explicitly restarts
+            GameRunning = false;
+
+            // Also make sure spawner is clean (queues, active enemies, etc.)
+            if (_enemySpawner != null)
+            {                
+                _enemySpawner.ClearAllPoolsHard();
+
+            }
         }
 
         public void ForceRestartWave()
@@ -353,7 +369,7 @@ namespace Assets.Scripts.WaveSystem
             if (wave == null) return;
 
             // Only for boss / mini-boss waves
-            if (!(wave.IsBossWave() || wave.IsMiniBossWave()))
+            if ((wave.WaveNumber % 5) != 0 || (wave.WaveNumber % 10) != 0)
                 return;                                  // ignore normal waves
                                                          // (EnemySpawner also uses these helpers)
                                                          // :contentReference[oaicite:6]{index=6}
@@ -379,5 +395,47 @@ namespace Assets.Scripts.WaveSystem
 
         #endregion
 
+        #region Debugging
+        // Put anywhere inside WaveManager (e.g., below ForceRestartWave)
+
+        /// <summary>
+        /// Fully aborts current wave, clears state, loads the target wave, and restarts cleanly.
+        /// Assumes waves for targetWave already exist in _waves.
+        /// </summary>
+        public void RestartAtWave(int targetWave)
+        {
+            // Stop & despawn everything first (no leftovers)
+            AbortWaveAndDespawnAll();
+
+            // Reset internal state and spawner queues without auto-start
+            ResetWave();
+
+            // Clamp and set the desired wave index
+            LoadWave(targetWave);
+
+            // Start the loop fresh
+            _autoAdvanceEnabled = true;
+            ForceRestartWave();
+        }
+
+        /// <summary>
+        /// Debug-only convenience: guarantees waves are generated up to the requested target,
+        /// then executes a hard restart into that wave.
+        /// </summary>
+        public async void DebugJumpToWave(int targetWave)
+        {
+            targetWave = Mathf.Max(1, targetWave);
+
+            // Ensure we have the wave baked in the dictionary
+            if (_maxWaves < targetWave)
+            {
+                int toGen = targetWave - _maxWaves;
+                await GenerateWavesAsync(startWaveNumber: _maxWaves + 1, amountToGenerate: toGen + 10);
+            }
+
+            RestartAtWave(targetWave);
+        }
+
+        #endregion
     }
 }

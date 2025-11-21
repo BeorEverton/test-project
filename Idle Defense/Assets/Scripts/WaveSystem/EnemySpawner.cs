@@ -63,6 +63,10 @@ namespace Assets.Scripts.WaveSystem
 
         public static float spawnXSpread = 22f;
 
+        // Reused per-despawn to avoid allocations
+        private readonly HashSet<GameObject> _tmpReturned = new HashSet<GameObject>(256);
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -78,25 +82,66 @@ namespace Assets.Scripts.WaveSystem
             PlayerBaseManager.Instance.OnWaveFailed += PlayerBaseManager_OnWaveFailed;
         }
 
-        public async void StartWave(Wave wave)
+        public void ClearAllPoolsHard()
         {
+            // Stop any activity and clear live lists
+            AbortWaveAndDespawnAll();
+
+            // Forget any cached config/buffers so we can't resume the old wave by mistake
+            _currentWaveConfig = null;
+            _enemiesCurrentWave.Clear();
+            EnemiesAlive.Clear();
+            _waveSpawned = false;
+            _canSpawnEnemies = false;
+
+            StopAllCoroutines();
+
+            // Destroy every pooled instance to release memory
+            _objectPool.ClearAll();
+        }
+
+        // ---  free pools for enemy types not present in the upcoming wave ---
+        private void PurgePoolsNotIn(Wave wave)
+        {
+            if (wave == null || wave.WaveConfig == null) return;
+
+            // Build the set of keys to keep. Keys are Info.Name used by ObjectPool.
+            HashSet<string> keep = new HashSet<string>();
+            foreach (var entry in wave.WaveConfig.EnemyWaveEntries)
+            {
+                if (entry == null || entry.EnemyPrefab == null) continue;
+                var enemy = entry.EnemyPrefab.GetComponent<Enemy>();
+                if (enemy == null || enemy.Info == null) continue;
+                keep.Add(enemy.Info.Name);
+            }
+
+            _objectPool.ClearAllExcept(keep);
+        }
+
+        public async void StartWave(Wave wave)
+        {            
+            // Defensive: fully stop any previous spawning/check loops
+            AbortWaveAndDespawnAll();
+
+            // Purge unused enemy types before building this wave (saves memory long-term)
+            PurgePoolsNotIn(wave);
+
             _currentWaveConfig = wave.WaveConfig;
             _waveSpawned = false;
             OnWaveStarted?.Invoke(this, EventArgs.Empty);
-
+                     
             await CreateWave();
             await Shuffle.ShuffleList(_enemiesCurrentWave);
             await CheckIfBossWave(wave);
 
             _canSpawnEnemies = true;
             _spawnEnemiesCoroutine = StartCoroutine(SpawnEnemiesDelayed());
-
             _waveCompletionCheckCoroutine = StartCoroutine(PeriodicWaveCompletionCheck());
-
         }
 
+
         private async Task CreateWave()
-        {
+        {            
             _enemiesCurrentWave.Clear();
             foreach (EnemyWaveEntry entry in _currentWaveConfig.EnemyWaveEntries)
             {
@@ -190,7 +235,6 @@ namespace Assets.Scripts.WaveSystem
 
         private Task CreateEnemiesFromEntry(EnemyWaveEntry entry)
         {
-
             for (int i = 0; i < entry.NumberOfEnemies; i++)
             {
                 string entryName = entry.EnemyPrefab.GetComponent<Enemy>().Info.Name;
@@ -213,7 +257,7 @@ namespace Assets.Scripts.WaveSystem
         }
 
         private IEnumerator SpawnEnemiesDelayed()
-        {
+        {            
             yield return null; // wait 1 frame to ensure setup
             yield return StartCoroutine(SpawnEnemies());
         }
@@ -223,6 +267,12 @@ namespace Assets.Scripts.WaveSystem
             foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies).ToList())
             {
                 Enemy enemy = enemyObj.GetComponent<Enemy>();
+
+                // Hook death tracking 
+                enemy.OnDeath += Enemy_OnEnemyDeath;
+                if (!EnemiesAlive.Contains(enemyObj))
+                    EnemiesAlive.Add(enemyObj);
+
                 // Center the boss on screen instead of random spawn
                 if (enemy.IsBossInstance)
                 {
@@ -247,19 +297,20 @@ namespace Assets.Scripts.WaveSystem
 
                 Vector3 targetPos = new Vector3(targetX, 0f, 0f);
                 enemy.MoveDirection = (targetPos - enemyObj.transform.position).normalized;
+
+                // all listeners ready
                 enemyObj.SetActive(true);
 
                 // Gunner XP
                 GunnerManager.Instance.OnEnemySpawned(enemy);
 
-
-                enemy.OnDeath += Enemy_OnEnemyDeath;
-                EnemiesAlive.Add(enemyObj);
-
                 yield return new WaitForSeconds(_currentWaveConfig.TimeBetweenSpawns);
             }
 
             _waveSpawned = true;
+
+            // In case all enemies were killed during spawn delay
+            CheckIfWaveCompleted();
         }
 
         /// <summary>
@@ -291,14 +342,14 @@ namespace Assets.Scripts.WaveSystem
         {
             if (sender is Enemy enemy)
             {
-                // Chatter: boss killed (check flag BEFORE it's reset in HandleEnemyDeath)
+                // Chatter boss killed
                 if (enemy.IsBossInstance && GunnerManager.Instance != null)
                 {
                     var eq = GunnerManager.Instance.GetAllEquippedGunners();
                     if (eq != null && eq.Count > 0)
                     {
                         var a = eq[Random.Range(0, eq.Count)];
-                        // Let the first speak; quick reply is handled by the chatter system
+                        // Let the first speak, quick reply is handled by the chatter system
                         GunnerChatterSystem.TryTrigger(GunnerEvent.BossKilled, a);
                     }
                 }
@@ -393,7 +444,12 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator PeriodicWaveCompletionCheck()
         {
-            WaitForSeconds wait = new WaitForSeconds(2f); // adjust as needed for performance
+            WaitForSeconds wait = new WaitForSeconds(2f); // for performance
+            
+            // wait until the wave has finished spawning
+            while (!_waveSpawned && !_suppressWaveComplete)
+                yield return null;
+
             while (_waveSpawned && !_suppressWaveComplete)
             {
                 CheckIfWaveCompleted();
@@ -412,11 +468,11 @@ namespace Assets.Scripts.WaveSystem
             _canSpawnEnemies = false;
             if (_spawnEnemiesCoroutine != null) { StopCoroutine(_spawnEnemiesCoroutine); _spawnEnemiesCoroutine = null; }
             if (_waveCompletionCheckCoroutine != null) { StopCoroutine(_waveCompletionCheckCoroutine); _waveCompletionCheckCoroutine = null; }
-
+            
             // prevent OnWaveCompleted from firing while we clear the field
             _suppressWaveComplete = true;
 
-            DespawnAllActiveEnemies();
+            DespawnAllActiveEnemies();            
 
             // allow normal completion checks again
             _suppressWaveComplete = false;
@@ -430,7 +486,10 @@ namespace Assets.Scripts.WaveSystem
         {
             bool hadBoss = false;
 
-            // copy to avoid modifying while iterating
+            // Track what we returned in pass A to avoid double-enqueue in pass B
+            _tmpReturned.Clear();
+
+            // --- Pass A: return every active enemy now ---
             foreach (var enemyObj in EnemiesAlive.ToList())
             {
                 if (enemyObj == null) { continue; }
@@ -443,9 +502,26 @@ namespace Assets.Scripts.WaveSystem
 
                 if (enemy.IsBossInstance) { hadBoss = true; enemy.IsBossInstance = false; }
 
-                // return to pool immediately
+                // return to pool immediately (will SetActive(false) inside)
                 _objectPool.ReturnObject(enemy.Info.Name, enemyObj);
+                _tmpReturned.Add(enemyObj);
                 EnemiesAlive.Remove(enemyObj);
+            }
+
+            // --- Pass B: return any pre-created-but-not-spawned entries ---
+            // These were SetActive(false) in CreateEnemiesFromEntry and never added to EnemiesAlive.
+            // We skip those already handled above (in case some were spawned earlier).
+            for (int i = 0; i < _enemiesCurrentWave.Count; i++)
+            {
+                var enemyObj = _enemiesCurrentWave[i];
+                if (enemyObj == null) continue;
+                if (_tmpReturned.Contains(enemyObj)) continue; // already returned in Pass A
+
+                var enemy = enemyObj.GetComponent<Enemy>();
+                if (enemy == null) continue;
+
+                // Return to pool (safe even if already inactive)
+                _objectPool.ReturnObject(enemy.Info.Name, enemyObj);
             }
 
             // clear any pre-created-but-not-spawned entries for this wave
@@ -459,6 +535,7 @@ namespace Assets.Scripts.WaveSystem
             }
             backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
         }
+
         #endregion
 
         #region Enemy Spawn Enemy
@@ -481,8 +558,8 @@ namespace Assets.Scripts.WaveSystem
         }
 
         /// <summary>
-        /// Spawn one enemy from the pool at the specified world position.
-        /// Automatically hooks into EnemiesAlive and death events.
+        /// Spawn one enemy from the pool at the specified world position
+        /// Automatically hooks into EnemiesAlive and death events
         /// </summary>
         public Enemy SpawnSummonedEnemy(GameObject prefab, Vector3 worldPos)
         {
@@ -495,8 +572,12 @@ namespace Assets.Scripts.WaveSystem
 
             Enemy e = eObj.GetComponent<Enemy>();
 
-            // Set initial movement like regular spawns: drift toward a bottom X target.
-            // This ensures EnemyManager.MoveEnemy() has a non-zero MoveDirection to work with.
+            // Hook death and tracking 
+            e.OnDeath += Enemy_OnEnemyDeath;
+            if (!EnemiesAlive.Contains(eObj))
+                EnemiesAlive.Add(eObj);
+
+            // Set initial movement like regular spawns
             float targetX = Random.Range(-EnemyConfig.BaseXArea, EnemyConfig.BaseXArea);
             Vector3 targetPos = new Vector3(targetX, 0f, 0f);
             e.MoveDirection = (targetPos - eObj.transform.position).normalized;
@@ -507,12 +588,11 @@ namespace Assets.Scripts.WaveSystem
             // Gunner XP
             GunnerManager.Instance.OnEnemySpawned(e);
 
-            // Same lifecycle as regular enemies
-            e.OnDeath += Enemy_OnEnemyDeath;
-            EnemiesAlive.Add(eObj);
-
             return e;
         }
+
         #endregion
+
+
     }
 }

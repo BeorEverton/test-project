@@ -18,7 +18,6 @@ public class StarterSelectionManager : MonoBehaviour
     [Header("UI")]
     public Transform gridParent;
     public StarterGunnerCardUI cardPrefab;
-    public Button confirmButton;
     public GameObject rootPanel;
 
     private readonly List<StarterGunnerCardUI> _cards = new();
@@ -41,18 +40,12 @@ public class StarterSelectionManager : MonoBehaviour
         }
 
         BuildGrid();
-        UpdateConfirm();
         if (rootPanel) rootPanel.SetActive(true);
-
-        if (confirmButton)
-        {
-            confirmButton.onClick.RemoveAllListeners();
-            confirmButton.onClick.AddListener(OnConfirm);
-        }
     }
 
     private void BuildGrid()
     {
+        Time.timeScale = 0f;
         foreach (Transform c in gridParent) Destroy(c.gameObject);
         _cards.Clear();
         _picked.Clear();
@@ -67,46 +60,48 @@ public class StarterSelectionManager : MonoBehaviour
 
     private void OnSelectClicked(GunnerSO so)
     {
+        Time.timeScale = 1f;
         // Single-selection behavior:
+        if (requiredSelections <= 1)
+        {
+            _picked.Clear();
+            _picked.Add(so);
+
+            // Update labels (briefly shows "Selected" before closing)
+            for (int i = 0; i < _cards.Count; i++)
+            {
+                var soI = _cards[i].Bound;
+                bool isPicked = _picked.Count > 0 && _picked[0] == soI;
+                _cards[i].SetPickedIndex(isPicked ? 0 : -1);
+            }
+
+            // Immediately apply and close for single-selection flow
+            ApplySelectionAndClose();
+            return;
+        }
+
+        // Multi-select fallback (if you ever use requiredSelections > 1)
         if (_picked.Contains(so))
         {
-            // Toggle off
-            _picked.Clear();
+            _picked.Remove(so);
         }
         else
         {
-            if (requiredSelections <= 1)
-            {
-                // Switch selection to the new one
-                _picked.Clear();
-                _picked.Add(so);
-            }
-            else
-            {
-                // Fallback for multi-select setups
-                if (_picked.Count >= requiredSelections) return;
-                _picked.Add(so);
-            }
+            if (_picked.Count >= requiredSelections) return;
+            _picked.Add(so);
         }
 
         // Update card button labels
         for (int i = 0; i < _cards.Count; i++)
         {
             var soI = _cards[i].Bound;
-            bool isPicked = _picked.Count > 0 && _picked[0] == soI;
-            _cards[i].SetPickedIndex(isPicked ? 0 : -1); // 0 -> Selected, -1 -> Select
+            bool isPicked = _picked.Contains(soI);
+            _cards[i].SetPickedIndex(isPicked ? 0 : -1);
         }
-
-        UpdateConfirm();
+        
     }
 
-
-    private void UpdateConfirm()
-    {
-        if (confirmButton) confirmButton.interactable = _picked.Count == requiredSelections;
-    }
-
-    private void OnConfirm()
+    private void ApplySelectionAndClose()
     {
         if (_picked.Count != requiredSelections) return;
         var gm = GunnerManager.Instance;
@@ -118,7 +113,7 @@ public class StarterSelectionManager : MonoBehaviour
 
         // 2) Grant ownership to all selected (free)
         gm.GrantOwnershipFree(_picked);
-                
+
         // 3) Ensure GunnerManager has the intended starter slot index before equip.
         // If your UI determines a specific starter slot, call SetStarterSlotIndex(desiredIndex) here.
         // Otherwise, it uses the manager's default (serialized) value.
@@ -126,6 +121,6 @@ public class StarterSelectionManager : MonoBehaviour
 
         if (rootPanel) rootPanel.SetActive(false);
         enabled = false;
-
     }
+
 }

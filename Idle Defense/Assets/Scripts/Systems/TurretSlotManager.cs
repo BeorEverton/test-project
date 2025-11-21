@@ -106,22 +106,19 @@ namespace Assets.Scripts.Systems
         }
 
         public bool Equip(int slot, TurretStatsInstance inst)
-        {
-            Debug.Log("Calling equip with " + slot + inst.ToString());
+        {            
             AudioManager.Instance.Play("Click");
             UIManager.Instance.DeactivateRightPanels();
-            UIManager.Instance.wallUpgradePanel.gameObject.SetActive(true);
+            UIManager.Instance.turretUpgradePanel.gameObject.SetActive(true);
 
             // Find the owned entry containing this stats instance (either perm or runtime)
             var ownedList = TurretInventoryManager.Instance.Owned;
             TurretInventoryManager.OwnedTurret entry =
                 ownedList.FirstOrDefault(o => ReferenceEquals(o.Permanent, inst) || ReferenceEquals(o.Runtime, inst));
-
-            Debug.Log("found entry? " + entry);
+                        
             if (entry == null)
                 return false;
-            Debug.Log("Proceeding" );
-
+            
             // Use the persistent runtime reference — no cloning
             var runtime = entry.Runtime;
             var permanent = entry.Permanent;

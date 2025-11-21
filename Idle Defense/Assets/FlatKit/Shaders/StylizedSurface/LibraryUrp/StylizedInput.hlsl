@@ -11,6 +11,7 @@
 CBUFFER_START(UnityPerMaterialNoBatching)
 #else
 CBUFFER_START(UnityPerMaterial)
+
 #endif
 #endif
 

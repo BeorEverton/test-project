@@ -2,6 +2,7 @@ using Assets.Scripts.SO; // for TurretType etc.
 using Assets.Scripts.Systems;
 using Assets.Scripts.Systems.Save;
 using Assets.Scripts.Turrets;
+using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
 using System;
 using System.Collections.Generic;
@@ -277,23 +278,6 @@ public class PrestigeManager : MonoBehaviour
         if (resetScraps || resetBlackSteel)
             TryResetCurrencies(resetScraps, resetBlackSteel);
 
-        // Reaffirm anchors so parked/equipped visuals hook back up cleanly
-        var slotMgr = Assets.Scripts.Systems.TurretSlotManager.Instance;
-        if (slotMgr != null && GunnerManager.Instance != null)
-        {
-            // If a preferred starter was equipped to slot 0, make sure the anchor is known
-            if (slotMgr.Get(0) != null)
-            {
-                // GunnerManager will lazily rebuild anchors if null; this just nudges visuals
-                GunnerManager.Instance.NotifyTurretPresent(
-                    slotIndex: 0,
-                    turretAnchor: null,
-                    hasTurret: true
-                );
-            }
-        }
-
-
         if (PlayerBaseManager.Instance != null)
         {
             // Reset base permanent upgrades if desired. (You can refine later.)
@@ -309,6 +293,8 @@ public class PrestigeManager : MonoBehaviour
 
         // ---- restart run ----
         RequestRestartAtWave(restartAtWaveIndex);
+
+        UIManager.Instance.ShowManualAdvanceButton(false, false);
     }
 
     /// <summary>
@@ -332,8 +318,7 @@ public class PrestigeManager : MonoBehaviour
 
         // 3) Reset waves, load target, and restart cleanly.
         wm.ResetWave();
-        wm.LoadWave(targetWaveNumber);
-        wm.ForceRestartWave();
+        wm.RestartAtWave(targetWaveNumber);
     }
 
 

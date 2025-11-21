@@ -8,6 +8,8 @@ public class GunnerSO : ScriptableObject
     [Header("Identity")]
     public string GunnerId;                 // unique, e.g. "gunner_mira"
     public string DisplayName;
+    [TextArea(2,10)]
+    public string backgroundDescription;
 
     [Header("Classification")]
     public GunnerArea Area;

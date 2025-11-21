@@ -93,7 +93,7 @@ public class PrestigeUIController : MonoBehaviour
         int min = pm.GetMinWaveToPrestige();
         bool canPrestige = pm.CanPrestigeNow();
 
-        if (prestigeButton) prestigeButton.interactable = canPrestige;
+        if (prestigeButton) prestigeButton.gameObject.SetActive(canPrestige);
 
         string label = !canPrestige
             ? $"Reach wave {min} to Prestige"

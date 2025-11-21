@@ -1,4 +1,5 @@
 using Assets.Scripts.Systems;
+using Assets.Scripts.Turrets;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -19,7 +20,42 @@ namespace Assets.Scripts.UI
             gameObject.SetActive(true);
         }
 
-        public void Close() => gameObject.SetActive(false);
+        public void CloseAndSelect()
+        {
+            // Hide the equip list
+            gameObject.SetActive(false);
+
+            // Try to open the upgrade panel for the newly equipped turret in this slot.
+            // 1) Get the runtime stats now bound to the target slot
+            var runtime = TurretSlotManager.Instance.Get(targetSlot);
+            if (runtime == null)
+            {
+                Debug.LogWarning($"[EquipPanelUI] No runtime stats found on slot {targetSlot} after equip.");
+                return;
+            }
+
+            // 2) Resolve the spawned turret GameObject from the runtime instance
+            var go = TurretInventoryManager.Instance.GetGameObjectForInstance(runtime);
+            if (go == null)
+            {
+                // Fallback: if the mapping didn’t resolve yet, try a light scene lookup under the slot anchor
+                // (Usually not needed because SlotWorldButton spawns synchronously on OnEquippedChanged)
+                Debug.LogWarning($"[EquipPanelUI] No GameObject registered for slot {targetSlot}. Upgrade UI will not open.");
+                return;
+            }
+
+            // 3) Get the BaseTurret component
+            var baseTurret = go.GetComponent<BaseTurret>();
+            if (baseTurret == null)
+            {
+                Debug.LogWarning($"[EquipPanelUI] Spawned turret on slot {targetSlot} has no BaseTurret component.");
+                return;
+            }
+
+            // 4) Open the standard upgrade panel with the correct slot and turret
+            UIManager.Instance.OpenTurretUpgradePanel(targetSlot, baseTurret);
+        }
+
 
         // -------------------------------------------------------------------------
 
@@ -55,7 +91,7 @@ namespace Assets.Scripts.UI
                     () =>
                     {
                         if (TurretSlotManager.Instance.Equip(targetSlot, instPermanent))
-                            Close();
+                            CloseAndSelect();
                     },
                     icon
                 );

@@ -3,6 +3,8 @@ using Assets.Scripts.Turrets;
 using Assets.Scripts.UpgradeSystem;
 using DG.Tweening;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -93,9 +95,15 @@ namespace Assets.Scripts.UI
 
         private void OnEnable()
         {
+            StartCoroutine(LateEnable());            
+        }
+
+        // Used because these buttons are enabled at the start of the game and there wans't enough time for the instances
+        IEnumerator LateEnable()
+        {
+            yield return null;
             GameManager.Instance.OnCurrencyChanged += HandleCurrencyChanged;
             MultipleBuyOption.Instance.OnBuyAmountChanged += OnBuyAmountChanged;
-
             UpdateUpgradeAmount();
             UpdateInteractableState();
             UpdateDisplayFromType();
@@ -126,7 +134,6 @@ namespace Assets.Scripts.UI
             UpdateInteractableState();
         }
 
-
         public void UpdateDisplayFromType()
         {
             if (_upgradeManager == null) return;
@@ -153,7 +160,6 @@ namespace Assets.Scripts.UI
                 _baseTurret.RecomputeEffectiveFromGunner();
             }
         }
-
 
         public void EnableTooltip()
         {
@@ -196,7 +202,6 @@ namespace Assets.Scripts.UI
             ReplaceWithEffectiveValue();
         }
 
-
         public void UpdateInteractableState()
         {
             if (_baseTurret == null || _upgradeManager == null)
@@ -238,23 +243,33 @@ namespace Assets.Scripts.UI
 
         private void ReplaceWithEffectiveValue()
         {
+            // If there's no turret bound, we can't compute an effective value.
             if (_baseTurret == null) return;
 
-            _scratch ??= new TurretStatsInstance();
-            // build effective = base + gunner
-            GunnerManager.Instance.ApplyTo(_baseTurret.RuntimeStats, _baseTurret.SlotIndex, _scratch);
+            // 1) Start from a FULL clone of the turret's baseline (mirrors gameplay path).
+            //    This guarantees every field (e.g., PelletCount, SplashDamage) has a valid base value.
+            _scratch = BaseTurret.CloneStatsWithoutLevels(_baseTurret.RuntimeStats);
 
-            // add prestige (display-only; does not touch _turret or any manager calcs)
+            // 2) Layer Gunner bonuses, using the same "apply deltas to an existing sheet" model
+            //    that the runtime uses (BuildEffectiveStats in BaseTurret).
+            if (GunnerManager.Instance != null)
+            {
+                // Apply on top of the cloned baseline to preserve untouched stats.
+                GunnerManager.Instance.ApplyTo(_baseTurret.RuntimeStats, _baseTurret.SlotIndex, _scratch);
+            }
+
+            // 3) Layer Prestige bonuses for the final effective display (UI-only; does not mutate runtime/permanent).
             if (PrestigeManager.Instance != null)
+            {
                 PrestigeManager.Instance.ApplyToTurretStats(_scratch);
+            }
 
-            // pick the matching stat from the effective sheet
+            // 4) Read the correct field from the fully-built effective sheet and show it.
             float v = GetEffectiveForType(_upgradeType, _scratch);
             string s = FormatForType(_upgradeType, v);
-
-            // replace the number the manager wrote (cost/bonus stay untouched)
             _statValue.SetText(s);
         }
+
 
         private static float GetEffectiveForType(TurretUpgradeType t, TurretStatsInstance s)
         {
@@ -304,22 +319,32 @@ namespace Assets.Scripts.UI
                 case TurretUpgradeType.FireRate: return $"{v:F2}/s";
                 case TurretUpgradeType.Range: return $"{v:F1}";
                 case TurretUpgradeType.RotationSpeed: return $"{v:F1}";
-                case TurretUpgradeType.CriticalChance: return $"{(int)v}%";
-                case TurretUpgradeType.CriticalDamageMultiplier: return $"{(int)v}%";
-                case TurretUpgradeType.SplashDamage: return UIManager.AbbreviateNumber(v * 100f, true) + "%";
+
+                // Show fractional percentages when the stat can be upgraded by fractions
+                case TurretUpgradeType.CriticalChance: return $"{v:F1}%";
+                case TurretUpgradeType.CriticalDamageMultiplier: return $"{v:F1}%";
+
+                case TurretUpgradeType.SplashDamage: return $"{(v * 100f):F1}%";
                 case TurretUpgradeType.PierceChance: return $"{v:F1}%";
                 case TurretUpgradeType.PierceDamageFalloff: return $"{v:F1}%";
                 case TurretUpgradeType.DamageFalloffOverDistance: return $"{v:F1}%";
+
                 case TurretUpgradeType.BounceDelay: return $"{v:F2}s";
-                case TurretUpgradeType.BounceDamagePct: return $"{v * 100f}%";
+                case TurretUpgradeType.BounceDamagePct: return $"{(v * 100f):F1}%";
+
                 case TurretUpgradeType.ConeAngle: return $"{v:F1}°";
                 case TurretUpgradeType.ExplosionDelay: return $"{v:F2}s";
+
                 case TurretUpgradeType.SlowEffect: return $"{v:F1}%";
                 case TurretUpgradeType.PercentBonusDamagePerSec: return $"{v:F1}%";
                 case TurretUpgradeType.ArmorPenetration: return $"{v:F1}%";
-                default: return UIManager.AbbreviateNumber(v);
+
+                // Counts like pellets or trap pool still look best as ints, but for everything else prefer one decimal.
+                default:
+                    return $"{v:F1}";
             }
         }
+
 
 
         #endregion

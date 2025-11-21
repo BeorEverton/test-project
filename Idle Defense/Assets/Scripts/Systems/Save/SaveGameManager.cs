@@ -182,6 +182,9 @@ namespace Assets.Scripts.Systems.Save
             // Stats
             StatsManager.Instance?.ResetStats();
 
+            // Enemy library
+            EnemyLibraryManager.Instance.DeleteAllInfo();
+
             TurretSlotManager.Instance?.UnequipAll(autoEquipStarter: false);
             // Turrets: wipe ownership & upgrades and DO NOT auto-equip (let inventory seed starter where it wants)
             if (TurretInventoryManager.Instance != null)
