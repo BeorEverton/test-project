@@ -11,12 +11,14 @@ namespace Assets.Scripts.Systems
     {
         public static GameManager Instance { get; private set; }
         public PlayerInput Input { get; private set; }
-
-        // In game just means not paused. Game Over is the management phase
         public GameState CurrentGameState { get; private set; } = GameState.InGame;
         public event Action<GameState> OnGameStateChanged;
 
         // Currency Management
+        [SerializeField]
+        [Tooltip("If true, normal enemy currency is only added when pickups are collected/expired instead of on death.")]
+        private bool awardCurrencyOnPickup = false;
+        public bool AwardCurrencyOnPickup => awardCurrencyOnPickup;
         private readonly Dictionary<Currency, ulong> currencies = new Dictionary<Currency, ulong>
         {
             { Currency.Scraps, 0UL },
@@ -49,8 +51,14 @@ namespace Assets.Scripts.Systems
 
         private void OnEnemyDeath(object sender, EnemySpawner.OnEnemyDeathEventArgs e)
         {
-            AddCurrency(e.CurrencyType, e.Amount);
+            // add currency immediately on death, visual pickups are just cosmetics
+            if (!awardCurrencyOnPickup)
+            {
+                AddCurrency(e.CurrencyType, e.Amount);
+            }
+            // else, we do nothing CurrencyPickupManager will award the currency when pickups are collected or expire
         }
+
 
         public void AddCurrency(Currency currency, ulong amount)
         {

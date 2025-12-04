@@ -3953,6 +3953,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1168820199}
+  - {fileID: 1927431719}
   - {fileID: 863115418}
   - {fileID: 358102876}
   - {fileID: 879600093}
@@ -42244,6 +42245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 349ecde10cbc68d46b29cda572990617, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  awardCurrencyOnPickup: 1
 --- !u!114 &1168820201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69282,6 +69284,68 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1182239162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1927431718
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1927431719}
+  - component: {fileID: 1927431720}
+  m_Layer: 0
+  m_Name: PickupsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1927431719
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1927431718}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 128342893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1927431720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1927431718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39091614f68b5e04c9c38be0804acfba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickupPrefab: {fileID: 3785989147786053850, guid: e19237e384a61534988ba96a097fec3d, type: 3}
+  initialPoolSize: 256
+  scrapsSprite: {fileID: -8778013333032281461, guid: 8f4fcb375c5b3bb4b858d581870a63fa, type: 3}
+  blackSteelSprite: {fileID: -5051925769294808329, guid: 8f4fcb375c5b3bb4b858d581870a63fa, type: 3}
+  crimsonCoreSprite: {fileID: 8988472409164797853, guid: 8f4fcb375c5b3bb4b858d581870a63fa, type: 3}
+  maxLifetimeSeconds: 5
+  fadeOutDurationSeconds: 0.25
+  travelDurationSeconds: 0.35
+  travelScaleUp: 0.3
+  pickupCellSize: 1
+  debugDrawGrid: 1
+  debugCellColor: {r: 1, g: 1, b: 0, a: 0.2}
+  debugMouseCellColor: {r: 0, g: 1, b: 0, a: 0.3}
+  mouseGroundY: 0
+  pickupHeightOffset: 0.2
+  scrapsTargetWorld: {fileID: 5317477778837133676}
+  blackSteelTargetWorld: {fileID: 1155565400}
+  crimsonCoreTargetWorld: {fileID: 1532035337}
 --- !u!1 &1927774481
 GameObject:
   m_ObjectHideFlags: 0

@@ -6613,6 +6613,8 @@ MonoBehaviour:
   Animator: {fileID: 9190963545131561838}
   RunBool: Run
   AttackTrigger: Attack
+  DeathTrigger: Death
+  ReviveTrigger: Revive
   LimitBreakReadyFx: {fileID: 3255345927646330219}
   HitFlashOverlay: {fileID: 9021600297004719242}
   RunSpeed: 6
@@ -6630,7 +6632,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetRenderer: {fileID: 1124241810843123305}
   flashMaterial: {fileID: 2100000, guid: 7b48258ab3ca59b4899c1ed0d12c3689, type: 2}
-  flashDuration: 0.8
+  flashDuration: 0.4
+  minDelayBetweenFlashes: 0.1
+  maxQueuedFlashes: 2
 --- !u!1 &9190963545140936970
 GameObject:
   m_ObjectHideFlags: 0

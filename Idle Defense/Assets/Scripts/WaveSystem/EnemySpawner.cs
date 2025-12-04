@@ -30,6 +30,7 @@ namespace Assets.Scripts.WaveSystem
         {
             public Currency CurrencyType;
             public ulong Amount;
+            public Vector3 WorldPosition; // death position of the enemy
         }
 
         public class OnWaveCreatedEventArgs : EventArgs
@@ -374,7 +375,8 @@ namespace Assets.Scripts.WaveSystem
                 OnEnemyDeath?.Invoke(this, new OnEnemyDeathEventArgs
                 {
                     CurrencyType = enemy.Info.CurrencyDropType,
-                    Amount = boosted
+                    Amount = boosted,
+                    WorldPosition = enemy.transform.position
                 });
             }
 
