@@ -31,6 +31,9 @@ namespace Assets.Scripts.UI
         [Header("Upgrade Type")]
         [SerializeField] private TurretUpgradeType _upgradeType;
 
+        [Header("Optional Cooldown UI")]
+        [SerializeField] private Slider _fireCooldownSlider;
+
         private Button _button;
         private int _upgradeAmount;
 
@@ -50,6 +53,8 @@ namespace Assets.Scripts.UI
 
         private void Awake()
         {
+            if (_fireCooldownSlider == null)
+                _fireCooldownSlider = GetComponentInChildren<Slider>(true);
             // Auto-assign the first two TextMeshProUGUI components in children
             TextMeshProUGUI[] tmpros = GetComponentsInChildren<TextMeshProUGUI>();
 
@@ -75,6 +80,30 @@ namespace Assets.Scripts.UI
             // Initialize the button interactable state
             UpdateInteractableState();
         }
+
+        private void Update()
+        {
+            if (_upgradeType == TurretUpgradeType.FireRate)
+                UpdateFireRateCooldownUI();
+        }
+
+        private void UpdateFireRateCooldownUI()
+        {
+            if (_fireCooldownSlider == null)
+                return;
+
+            // Only show this slider on the FireRate button and when we have a turret instance.
+            bool show = _upgradeType == TurretUpgradeType.FireRate && _baseTurret != null;
+
+            if (_fireCooldownSlider.gameObject.activeSelf != show)
+                _fireCooldownSlider.gameObject.SetActive(show);
+
+            if (!show)
+                return;
+
+            _fireCooldownSlider.value = _baseTurret.FireCooldown01;
+        }
+
 
         /// <summary>
         /// Called by TurretUpgradePanelUI each time the panel opens.

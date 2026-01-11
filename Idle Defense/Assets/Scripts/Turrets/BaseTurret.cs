@@ -78,6 +78,17 @@ namespace Assets.Scripts.Turrets
         private float _nextRetargetAt;
         private static readonly List<GameObject> _candBuffer = new List<GameObject>(128);
 
+        public float FireCooldown01
+        {
+            get
+            {
+                // _atkSpeed is the interval between shots (already includes LimitBreak multipliers).
+                // When _atkSpeed is 0 or very small, treat as ready.
+                if (_atkSpeed <= 0.0001f) return 1f;
+                return Mathf.Clamp01(_timeSinceLastShot / _atkSpeed);
+            }
+        }
+
         private void OnDestroy() =>
             GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
 
