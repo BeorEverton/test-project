@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcad58d211455f64b8345aa8496e5eb2, type: 3}
+  m_Name: Heli-Bunker
+  m_EditorClassIdentifier: 
+  Name: Heli-Bunker
+  Icon: {fileID: 4233310686934124197, guid: d845cc33df90002429fdc4093797496f, type: 3}
+  EnemyId: 23
+  MaxHealth: 4
+  MovementSpeed: 3.7
+  MovementSpeedDifference: 0.2
+  IsFlying: 0
+  CoinDropAmount: 9
+  CurrencyDropType: 0
+  CoinDropMultiplierByWaveCount: 2.2
+  HealthMultiplierByWaveCount: 1.05
+  Damage: 2
+  AttackRange: 0.3
+  AttackRangeDifference: 0.1
+  AttackSpeed: 1
+  SweepTargets: 1
+  Armor: 0
+  DodgeChance: 0
+  ShieldCharges: 0
+  ExploderEnabled: 0
+  ExploderDelay: 0
+  ExploderRadius: 3
+  ExploderMaxGunners: 2
+  HealerEnabled: 0
+  HealerCooldown: 5
+  HealerHealPctOfMaxHP: 0.1
+  HealerRadius: 6
+  HealerMaxTargets: 2
+  KamikazeOnReach: 0
+  KamikazeRadius: 3
+  KamikazeMaxGunners: 3
+  SummonerEnabled: 0
+  SummonPrefab: {fileID: 0}
+  SummonPrewarmCount: 0
+  SummonType: 0
+  SummonCount: 10
+  SummonStreamInterval: 5
+  SummonForwardDepth: 0.8
+  SummonXJitter: 0.5
+  SummonFirstDelay: 0.75
+  SummonCooldown: 0

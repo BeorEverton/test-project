@@ -130,7 +130,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float currentFireRate = t.FireRate;
-                        float bonusFireRate = GetBonusAmount(t, TurretUpgradeType.FireRate);
+                        float bonusFireRate = GetBonusAmount(t, TurretUpgradeType.FireRate, a);
                         GetExponentialCost(t, TurretUpgradeType.FireRate, a, out float cost, out int amount);
 
                         return (
@@ -162,7 +162,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.Range;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.Range);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.Range, a);
                         GetExponentialCost(t, TurretUpgradeType.Range, a, out float cost, out int amount);
 
                         return (
@@ -194,7 +194,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.RotationSpeed;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.RotationSpeed);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.RotationSpeed, a);
                         GetExponentialCost(t, TurretUpgradeType.RotationSpeed, a, out float cost, out int amount);
 
                         return (
@@ -226,7 +226,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.CriticalChance;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.CriticalChance);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.CriticalChance, a);
                         GetExponentialCost(t, TurretUpgradeType.CriticalChance, a, out float cost, out int amount);
 
                         if (current >= maxCriticalChance)
@@ -261,7 +261,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                 {
                     float current = t.CriticalDamageMultiplier;
-                    float bonus = GetBonusAmount(t, TurretUpgradeType.CriticalDamageMultiplier);
+                    float bonus = GetBonusAmount(t, TurretUpgradeType.CriticalDamageMultiplier, a);
                     GetExponentialCost(t, TurretUpgradeType.CriticalDamageMultiplier, a, out float cost, out int amount);
 
                     return (
@@ -296,7 +296,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.ExplosionRadius;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.ExplosionRadius);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.ExplosionRadius, a);
                         GetHybridCost(t, TurretUpgradeType.ExplosionRadius, a, out float cost, out int amount);
 
                         if (t.ExplosionRadius >= 5f)
@@ -330,7 +330,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.SplashDamage;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.SplashDamage);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.SplashDamage, a);
                         GetHybridCost(t, TurretUpgradeType.SplashDamage, a, out float cost, out int amount);
 
                         return (
@@ -363,7 +363,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.PierceChance;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.PierceChance);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.PierceChance, a);
                         GetHybridCost(t, TurretUpgradeType.PierceChance, a, out float cost, out int amount);
 
                         if (current >= 100f)
@@ -399,7 +399,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float currentFalloff = t.PierceDamageFalloff;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.PierceDamageFalloff);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.PierceDamageFalloff, a);
                         GetHybridCost(t, TurretUpgradeType.PierceDamageFalloff, a, out float cost, out int amount);
 
                         return (
@@ -430,7 +430,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.PelletCount;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.PelletCount);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.PelletCount, a);
                         GetHybridCost(t, TurretUpgradeType.PelletCount, a, out float cost, out int amount);
 
                         return (
@@ -462,7 +462,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.DamageFalloffOverDistance;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.DamageFalloffOverDistance);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.DamageFalloffOverDistance, a);
                         GetHybridCost(t, TurretUpgradeType.DamageFalloffOverDistance, a, out float cost, out int amount);
 
                         if (current <= 0f)
@@ -496,7 +496,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.KnockbackStrength;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.KnockbackStrength);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.KnockbackStrength, a);
                         GetHybridCost(t, TurretUpgradeType.KnockbackStrength, a, out float cost, out int amount);
 
                         return (
@@ -527,7 +527,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.PercentBonusDamagePerSec;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.PercentBonusDamagePerSec);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.PercentBonusDamagePerSec, a);
                         GetHybridCost(t, TurretUpgradeType.PercentBonusDamagePerSec, a, out float cost, out int amount);
 
                         return (
@@ -560,7 +560,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.SlowEffect;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.SlowEffect);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.SlowEffect, a);
                         GetHybridCost(t, TurretUpgradeType.SlowEffect, a, out float cost, out int amount);
 
                         if (current >= 100f)
@@ -594,7 +594,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.BounceCount;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceCount);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceCount, a);
                         GetExponentialCost(t, TurretUpgradeType.BounceCount, a, out float cost, out int amount);
 
                         if (current >= maxBounce)
@@ -628,7 +628,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.BounceRange;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceRange);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceRange, a);
                         GetExponentialCost(t, TurretUpgradeType.BounceRange, a, out float cost, out int amount);
 
                         if (current >= maxBounceRange)
@@ -663,7 +663,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.BounceDelay;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceDelay);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceDelay, a);
                         GetExponentialCost(t, TurretUpgradeType.BounceDelay, a, out float cost, out int amount);
 
                         if (current <= minBounceDelay)
@@ -698,7 +698,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.BounceDamagePct;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceDamagePct);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceDamagePct, a);
                         GetExponentialCost(t, TurretUpgradeType.BounceDamagePct, a, out float cost, out int amount);
 
                         if (current >= maxBounceDmgPct)
@@ -734,7 +734,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.ConeAngle;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.ConeAngle);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.ConeAngle, a);
                         GetExponentialCost(t, TurretUpgradeType.ConeAngle, a, out float cost, out int amount);
 
                         if (current >= maxConeAngle)
@@ -769,7 +769,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.ExplosionDelay;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.ExplosionDelay);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.ExplosionDelay, a);
                         GetExponentialCost(t, TurretUpgradeType.ExplosionDelay, a, out float cost, out int amount);
 
                         if (current <= minExplosionDelay)
@@ -804,7 +804,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.AheadDistance;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.AheadDistance);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.AheadDistance, a);
                         GetExponentialCost(t, TurretUpgradeType.AheadDistance, a, out float cost, out int amount);
 
                         if (current >= maxTrapAheadDistance)
@@ -839,7 +839,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.MaxTrapsActive;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.MaxTrapsActive);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.MaxTrapsActive, a);
                         GetExponentialCost(t, TurretUpgradeType.MaxTrapsActive, a, out float cost, out int amount);
 
                         if (current >= maxTrapPool)
@@ -874,7 +874,7 @@ namespace Assets.Scripts.Systems
                     GetDisplayStrings = (t, a) =>
                     {
                         float current = t.ArmorPenetration;
-                        float bonus = GetBonusAmount(t, TurretUpgradeType.ArmorPenetration);
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.ArmorPenetration, a);
                         GetExponentialCost(t, TurretUpgradeType.ArmorPenetration, a, out float cost, out int amount);
 
                         if (current >= maxArmorPenetration)
@@ -899,16 +899,10 @@ namespace Assets.Scripts.Systems
             if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
                 return;
 
-            float cost = upgrade.GetCost(turret, amount, currency);
+            float cost;
+            int effectiveAmount = GetEffectiveBuyAmount(turret, type, amount, currency, out cost);
 
-
-            if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(turret) >= upgrade.GetMaxValue(turret))
-            {
-                UpdateUpgradeDisplay(turret, type, button);
-                return;
-            }
-
-            if (upgrade.GetMinValue != null && upgrade.GetCurrentValue(turret) < upgrade.GetMinValue(turret))
+            if (effectiveAmount <= 0)
             {
                 UpdateUpgradeDisplay(turret, type, button);
                 return;
@@ -916,7 +910,7 @@ namespace Assets.Scripts.Systems
 
             if (TrySpend(upgrade.CurrencyUsed, cost))
             {
-                upgrade.UpgradeTurret(turret, amount);
+                upgrade.UpgradeTurret(turret, effectiveAmount);
                 AudioManager.Instance.Play("Upgrade");
                 button._baseTurret.UpdateTurretAppearance();
                 UpdateUpgradeDisplay(turret, type, button);
@@ -926,14 +920,10 @@ namespace Assets.Scripts.Systems
             }
 
             SaveGameManager.Instance.SaveGame();
-
         }
 
-        public void UpgradePermanentTurretStat(
-                BaseTurret baseTurret,
-                TurretUpgradeType type,
-                TurretUpgradeButton button,
-                int amount)
+        // OUT  DATE - use UpgradeTurretStat instead
+        public void UpgradePermanentTurretStat(BaseTurret baseTurret,TurretUpgradeType type,TurretUpgradeButton button,int amount)
         {
             if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade))
                 return;
@@ -1001,23 +991,13 @@ namespace Assets.Scripts.Systems
             return amount;
         }
 
-        private float GetBonusAmount(TurretStatsInstance stats, TurretUpgradeType type)
+        private float GetBonusAmount(TurretStatsInstance stats, TurretUpgradeType type, int amount)
         {
-            int amount = MultipleBuyOption.Instance.GetBuyAmount();
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) || upgrade == null)
+                return 0f;
 
-            float upgradeAmount = !_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade)
-                ? 0f
-                : upgrade.GetUpgradeAmount(stats);
-
-            if (upgrade == null)
-                return 1f;
-
-            //if (amount == 9999)
-            //    amount = upgrade.GetAmount(stats) == 0
-            //        ? 1
-            //        : upgrade.GetAmount(stats);
-
-            return upgradeAmount * amount;
+            float step = upgrade.GetUpgradeAmount != null ? upgrade.GetUpgradeAmount(stats) : 0f;
+            return step * amount;
         }
 
 
@@ -1291,6 +1271,58 @@ namespace Assets.Scripts.Systems
             return cost + RecursiveExponentialCost(baseCost, multiplier, level + 1, amount - 1);
         }
 
+        private static readonly HashSet<TurretUpgradeType> _hybridTypes = new()
+        {
+            TurretUpgradeType.ExplosionRadius,
+            TurretUpgradeType.SplashDamage,
+            TurretUpgradeType.PierceChance,
+            TurretUpgradeType.PierceDamageFalloff,
+            TurretUpgradeType.PelletCount,
+            TurretUpgradeType.DamageFalloffOverDistance,
+            TurretUpgradeType.KnockbackStrength,
+            TurretUpgradeType.PercentBonusDamagePerSec,
+            TurretUpgradeType.SlowEffect,
+        };
+
+        public int GetEffectiveBuyAmount(TurretStatsInstance stats, TurretUpgradeType type, int desiredAmount, Currency currencyUsed, out float cost)
+        {
+            cost = 0f;
+
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) || upgrade == null || stats == null)
+                return 0;
+
+            // If already capped, bail early
+            if (upgrade.GetMaxValue != null && upgrade.GetCurrentValue(stats) >= upgrade.GetMaxValue(stats))
+                return 0;
+
+            // Determine effective steps (respect stat caps)
+            int effective = desiredAmount;
+            effective = CapAmountByStatLimit(stats, type, effective);
+
+            // Enforce "minimum 1" only if we can actually change the stat.
+            if (effective <= 0)
+                return 0;
+
+            if (_hybridTypes.Contains(type))
+            {
+                GetHybridCost(stats, type, effective, out cost, out effective, currencyUsed);
+            }
+            else
+            {
+                GetExponentialCost(stats, type, effective, out cost, out effective, currencyUsed);
+            }
+
+            // After cost calculation, effective may still be 0
+            if (effective <= 0)
+            {
+                cost = 0f;
+                return 0;
+            }
+
+            cost = Mathf.Max(1f, cost);
+            return effective;
+        }
+
         public void UpdateUpgradeDisplay(TurretStatsInstance turret, TurretUpgradeType type, TurretUpgradeButton button)
         {
             if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) || turret == null)
@@ -1300,10 +1332,24 @@ namespace Assets.Scripts.Systems
 
             (string value, string bonus, string cost, string count) = upgrade.GetDisplayStrings(turret, amount);
 
-
-
             button.UpdateStats(value, bonus, cost, count);
         }
+
+        /// <summary>
+        /// Applies an upgrade to a provided stats instance (caller should pass a CLONE).
+        /// Used by UI to simulate the post-upgrade effective value without mutating the real turret.
+        /// </summary>
+        public void ApplyUpgradeToStats(TurretStatsInstance stats, TurretUpgradeType type, int amount)
+        {
+            if (stats == null) return;
+            if (amount <= 0) return;
+
+            if (!_turretUpgrades.TryGetValue(type, out TurretUpgrade upgrade) || upgrade == null)
+                return;
+
+            upgrade.UpgradeTurret?.Invoke(stats, amount);
+        }
+
 
         public List<TurretUpgradeType> GetAvailableUpgrades(TurretStatsInstance stats)
         {

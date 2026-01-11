@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1616927600e77b4bb5e26ff29470896, type: 3}
+  m_Name: Verdant Rustspire
+  m_EditorClassIdentifier: 
+  Id: ENV_01
+  DisplayName: Verdant Rustspire
+  ZoneIndex: 0
+  Waves:
+  - WaveNumberInZone: 1
+    WaveConfig: {fileID: 11400000, guid: 31a4592ffc2b60d488c62ae7fa46d2db, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 2
+    WaveConfig: {fileID: 11400000, guid: de4d3e208290a084cae4d108a96fb805, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 3
+    WaveConfig: {fileID: 11400000, guid: 5586dd2f1d19aad45906336900b74067, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 4
+    WaveConfig: {fileID: 11400000, guid: d3b76f98e4d4f1348861640f454e4824, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 5
+    WaveConfig: {fileID: 11400000, guid: 056c8ea873f29ec43aee01c731b7b38b, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 4
+    WaveConfig: {fileID: 11400000, guid: 056c8ea873f29ec43aee01c731b7b38b, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 7
+    WaveConfig: {fileID: 11400000, guid: 084c6554da5ce0c4bbb8ccf0187d3e33, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 8
+    WaveConfig: {fileID: 11400000, guid: 60e8ca93aa08d424cbd49911300abbd3, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 4
+    WaveConfig: {fileID: 11400000, guid: 056c8ea873f29ec43aee01c731b7b38b, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 10
+    WaveConfig: {fileID: 11400000, guid: 4a75eccec66f54444b1e1a0a82e15b6a, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 1
+    OverrideBossPrefab: {fileID: 0}
+  BossPrefab: {fileID: 7949349015582361943, guid: 4a8c1e4f7e0513d45a45f2cffcd34a92, type: 3}
+  MiniBossPrefab: {fileID: 0}
+  GroundMat: {fileID: 2100000, guid: 7c2c5a0b294914197a9130e7e3337128, type: 2}
+  SkyMat: {fileID: 2100000, guid: d73d521995c70408b822a65d436df1e0, type: 2}
+  GroundOverlayMaterial: {fileID: 0}
+  ZoneParticlePrefab: {fileID: 0}

@@ -45,6 +45,10 @@ namespace Assets.Scripts.Systems
 
         public int initialTurretSlot = 1;
 
+        [Header("Starter Turret")]
+        [SerializeField] private TurretType starterTurretType = TurretType.MachineGun;
+
+
         public int WaveRequirement(TurretType t) =>
             unlockTable.Entries.First(e => e.Type == t).WaveToUnlock;
 
@@ -91,42 +95,46 @@ namespace Assets.Scripts.Systems
 
             EnsureStarterTurret();
         }
+
         private void EnsureStarterTurret()
         {
-            //Debug.Log("Calling ensure starter");
             // Only seed when the player owns nothing yet
             if (owned.Count > 0)
                 return;
 
+            // Ensure unlocks are evaluated for wave 0
             TryUnlockByWave(0);
-            if (!unlockedTypes.Contains(TurretType.MachineGun))
+
+            // Starter must be unlocked (by wave OR prestige rules)
+            if (!IsTurretTypeUnlocked(starterTurretType))
                 return;
 
-            // Create starter (MachineGun) as first owned entry
-            TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(TurretType.MachineGun);
+            // Create starter as first owned entry
+            TurretInfoSO baseSO = TurretLibrary.Instance.GetInfo(starterTurretType);
             var permanent = new TurretStatsInstance(baseSO)
             {
-                TurretType = TurretType.MachineGun,
+                TurretType = starterTurretType,
                 IsUnlocked = true
             };
+
             var runtime = BaseTurret.CloneStatsWithoutLevels(permanent);
 
             owned.Add(new OwnedTurret
             {
-                TurretType = TurretType.MachineGun,
+                TurretType = starterTurretType,
                 Permanent = permanent,
                 Runtime = runtime
             });
 
-            // If SlotManager is already alive (e.g., after Delete/Reset during runtime),
-            // apply immediately instead of waiting for Start().
+            // If SlotManager is already alive, equip immediately.
             if (TurretSlotManager.Instance != null)
             {
-                //Debug.Log("Found turret slot manager, calling equip");
-                TurretSlotManager.Instance.Equip(initialTurretSlot, runtime);
+                int slot = Mathf.Clamp(initialTurretSlot, 0, 4);
+                TurretSlotManager.Instance.Equip(slot, runtime);
                 pendingEquipped = null;
             }
         }
+
 
         private void OnDestroy()
         {

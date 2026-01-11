@@ -3,8 +3,8 @@ using Assets.Scripts.Turrets;
 using Assets.Scripts.UpgradeSystem;
 using DG.Tweening;
 using System;
+using System.Text;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,6 +16,7 @@ namespace Assets.Scripts.UI
     {
         [Header("Currency Type")]
         [SerializeField] private Currency currencyType = Currency.Scraps;
+        public Currency CurrencyType => currencyType;
 
         [Header("Set in Runtime")]
         private TurretUpgradeManager _upgradeManager;
@@ -141,8 +142,8 @@ namespace Assets.Scripts.UI
             // Let the manager compute cost/bonus from the true upgradeable container
             _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
 
-            // Then replace the visible number with the effective (base + gunner)
-            ReplaceWithEffectiveValue();
+            // Replace BOTH the value and the shown +X using effective (gunner + prestige) math
+            ReplaceWithEffectiveValueAndDelta();
         }
 
         public void OnClick()
@@ -161,9 +162,17 @@ namespace Assets.Scripts.UI
             }
         }
 
+        #region Tooltip Support
         public void EnableTooltip()
         {
             string description = GetUpgradeDescription(_upgradeType);
+
+            // Append dynamic breakdown (base + gunner + prestige) so the tooltip matches what the player sees.
+            string breakdown = BuildUpgradeBreakdownTooltip(_upgradeType);
+
+            if (!string.IsNullOrEmpty(breakdown))
+                description = $"{description}\n\n{breakdown}";
+
             TooltipManager.Instance.ShowTooltip(description);
         }
 
@@ -172,6 +181,73 @@ namespace Assets.Scripts.UI
             TooltipManager.Instance.HideTooltip();
         }
 
+        private string BuildUpgradeBreakdownTooltip(TurretUpgradeType type)
+        {
+            if (_baseTurret == null || _baseTurret.RuntimeStats == null)
+                return string.Empty;
+
+            // 1) Base (turret-only)
+            var baseScratch = BaseTurret.CloneStatsWithoutLevels(_baseTurret.RuntimeStats);
+            float baseV = GetEffectiveForType(type, baseScratch);
+
+            // 2) Base + Gunner
+            var gunnerScratch = BaseTurret.CloneStatsWithoutLevels(_baseTurret.RuntimeStats);
+            if (GunnerManager.Instance != null)
+                GunnerManager.Instance.ApplyTo(_baseTurret.RuntimeStats, _baseTurret.SlotIndex, gunnerScratch);
+            float gunnerV = GetEffectiveForType(type, gunnerScratch);
+
+            // 3) Base + Gunner + Prestige
+            var finalScratch = BaseTurret.CloneStatsWithoutLevels(_baseTurret.RuntimeStats);
+            if (GunnerManager.Instance != null)
+                GunnerManager.Instance.ApplyTo(_baseTurret.RuntimeStats, _baseTurret.SlotIndex, finalScratch);
+
+            if (PrestigeManager.Instance != null)
+                PrestigeManager.Instance.ApplyToTurretStats(finalScratch);
+
+            float finalV = GetEffectiveForType(type, finalScratch);
+
+            float gunnerDelta = gunnerV - baseV;
+            float prestigeDelta = finalV - gunnerV;
+
+            // Formatting
+            string baseS = FormatForType(type, baseV);
+            string gunnerDeltaS = FormatDeltaForType(type, gunnerDelta);
+            string prestigeDeltaS = FormatDeltaForType(type, prestigeDelta);
+            string totalS = FormatForType(type, finalV);
+
+            var sb = new StringBuilder(128);
+            sb.AppendLine($"Base: {baseS}");
+
+            // Only show lines that matter (keeps tooltip clean in cases where bonus is 0)
+            if (!IsZeroDelta(type, gunnerDelta))
+                sb.AppendLine($"Gunner: {gunnerDeltaS}");
+
+            if (!IsZeroDelta(type, prestigeDelta))
+                sb.AppendLine($"Prestige: {prestigeDeltaS}");
+
+            sb.AppendLine($"Total: {totalS}");
+
+            return sb.ToString().TrimEnd();
+        }
+
+        private static bool IsZeroDelta(TurretUpgradeType type, float delta)
+        {
+            // Int-like stats should use integer comparison tolerance
+            if (IsIntLike(type))
+                return Mathf.Abs(Mathf.Round(delta)) <= 0f;
+
+            return Mathf.Abs(delta) < 0.0001f;
+        }
+
+        private static bool IsIntLike(TurretUpgradeType type)
+        {
+            return type == TurretUpgradeType.PelletCount
+                || type == TurretUpgradeType.BounceCount
+                || type == TurretUpgradeType.MaxTrapsActive;
+        }
+
+        #endregion
+
         public void UpdateStats(string value, string upgradeAmount, string upgradeCost, string count)
         {
             _statValue.SetText(value);
@@ -179,8 +255,8 @@ namespace Assets.Scripts.UI
             _statUpgradeCost.SetText(UIManager.GetCurrencyIcon(currencyType) + " " + upgradeCost);
             _statUpgradeCount.SetText(count);
 
-            // Get gunner stats
-            ReplaceWithEffectiveValue();
+            // Replace BOTH the value and the shown +X using effective (gunner + prestige) math
+            ReplaceWithEffectiveValueAndDelta();
 
         }
 
@@ -199,7 +275,7 @@ namespace Assets.Scripts.UI
         public void UpdateDisplay()
         {
             _upgradeManager.UpdateUpgradeDisplay(_turret, _upgradeType, this);
-            ReplaceWithEffectiveValue();
+            ReplaceWithEffectiveValueAndDelta();
         }
 
         public void UpdateInteractableState()
@@ -207,18 +283,29 @@ namespace Assets.Scripts.UI
             if (_baseTurret == null || _upgradeManager == null)
                 return;
 
-            int amount = MultipleBuyOption.Instance.GetBuyAmount();
-            float cost = _upgradeManager.GetTurretUpgradeCost(
-                _turret, _upgradeType, amount, currencyType);
+            float cost;
+            int desired = MultipleBuyOption.Instance.GetBuyAmount();
+            int effective = _upgradeManager.GetEffectiveBuyAmount(_turret, _upgradeType, desired, currencyType, out cost);
 
-            bool hasEnough = GameManager.Instance.GetCurrency(currencyType) >= (ulong)cost;
-            _button.interactable = hasEnough && _upgradeAmount > 0;
+            _upgradeAmount = effective;
+
+            bool hasEnough = effective > 0 && GameManager.Instance.GetCurrency(currencyType) >= (ulong)cost;
+            _button.interactable = hasEnough;
+
 
         }
 
         private void UpdateUpgradeAmount()
         {
-            _upgradeAmount = MultipleBuyOption.Instance.GetBuyAmount();
+            if (_upgradeManager == null || _turret == null)
+            {
+                _upgradeAmount = MultipleBuyOption.Instance.GetBuyAmount();
+                return;
+            }
+
+            float cost;
+            int desired = MultipleBuyOption.Instance.GetBuyAmount();
+            _upgradeAmount = _upgradeManager.GetEffectiveBuyAmount(_turret, _upgradeType, desired, currencyType, out cost);
         }
 
         public void OnPointerEnter()
@@ -241,35 +328,106 @@ namespace Assets.Scripts.UI
 
         #region Gunner Support        
 
-        private void ReplaceWithEffectiveValue()
+        // Cached MemberwiseClone() reflection to avoid JSON allocations during frequent UI updates.
+        private static System.Reflection.MethodInfo _memberwiseCloneMI;
+
+        private static TurretStatsInstance CloneStatsFast(TurretStatsInstance src)
         {
-            // If there's no turret bound, we can't compute an effective value.
-            if (_baseTurret == null) return;
+            if (src == null) return null;
 
-            // 1) Start from a FULL clone of the turret's baseline (mirrors gameplay path).
-            //    This guarantees every field (e.g., PelletCount, SplashDamage) has a valid base value.
-            _scratch = BaseTurret.CloneStatsWithoutLevels(_baseTurret.RuntimeStats);
+            // TurretStatsInstance is expected to be a class. MemberwiseClone makes a cheap copy of all fields.
+            _memberwiseCloneMI ??= typeof(TurretStatsInstance).GetMethod(
+                "MemberwiseClone",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic
+            );
 
-            // 2) Layer Gunner bonuses, using the same "apply deltas to an existing sheet" model
-            //    that the runtime uses (BuildEffectiveStats in BaseTurret).
-            if (GunnerManager.Instance != null)
-            {
-                // Apply on top of the cloned baseline to preserve untouched stats.
-                GunnerManager.Instance.ApplyTo(_baseTurret.RuntimeStats, _baseTurret.SlotIndex, _scratch);
-            }
-
-            // 3) Layer Prestige bonuses for the final effective display (UI-only; does not mutate runtime/permanent).
-            if (PrestigeManager.Instance != null)
-            {
-                PrestigeManager.Instance.ApplyToTurretStats(_scratch);
-            }
-
-            // 4) Read the correct field from the fully-built effective sheet and show it.
-            float v = GetEffectiveForType(_upgradeType, _scratch);
-            string s = FormatForType(_upgradeType, v);
-            _statValue.SetText(s);
+            return (TurretStatsInstance)_memberwiseCloneMI.Invoke(src, null);
         }
 
+        private TurretStatsInstance BuildEffectiveSheetFrom(TurretStatsInstance baseSheet)
+        {
+            // Start from a full clone so ApplyTo can layer deltas on top safely.
+            TurretStatsInstance effective = CloneStatsFast(baseSheet);
+            if (effective == null) return null;
+
+            if (GunnerManager.Instance != null)
+            {
+                GunnerManager.Instance.ApplyTo(baseSheet, _baseTurret.SlotIndex, effective);
+            }
+
+            if (PrestigeManager.Instance != null)
+            {
+                PrestigeManager.Instance.ApplyToTurretStats(effective);
+            }
+
+            return effective;
+        }
+
+        private void ReplaceWithEffectiveValueAndDelta()
+        {
+            if (_baseTurret == null || _upgradeManager == null) return;
+
+            // CURRENT (effective)
+            TurretStatsInstance curBase = _turret; // runtime or permanent container chosen in Init()
+            TurretStatsInstance curEff = BuildEffectiveSheetFrom(curBase);
+            if (curEff == null) return;
+
+            float curV = GetEffectiveForType(_upgradeType, curEff);
+
+            // NEXT (effective) = clone base, apply upgrade to clone, then build effective
+            TurretStatsInstance nextBase = CloneStatsFast(curBase);
+            if (nextBase == null) return;
+
+            _upgradeManager.ApplyUpgradeToStats(nextBase, _upgradeType, _upgradeAmount);
+
+            TurretStatsInstance nextEff = BuildEffectiveSheetFrom(nextBase);
+            if (nextEff == null) return;
+
+            float nextV = GetEffectiveForType(_upgradeType, nextEff);
+
+            // Update value
+            _statValue.SetText(FormatForType(_upgradeType, curV));
+
+            // Update delta shown on the button to match reality
+            float delta = nextV - curV;
+            _statUpgradeAmount.SetText(FormatDeltaForType(_upgradeType, delta));
+        }
+
+        private static string FormatDeltaForType(TurretUpgradeType t, float delta)
+        {
+            // Keep the same formatting as the stat, but force a + / - prefix.
+            string sign = delta >= 0f ? "+" : "-";
+            float v = Mathf.Abs(delta);
+
+            // Reuse the same per-type formatting (but without losing the sign).
+            switch (t)
+            {
+                case TurretUpgradeType.FireRate: return $"{sign}{v:F2}/s";
+                case TurretUpgradeType.Range: return $"{sign}{v:F1}";
+                case TurretUpgradeType.RotationSpeed: return $"{sign}{v:F1}";
+
+                case TurretUpgradeType.CriticalChance: return $"{sign}{v:F1}%";
+                case TurretUpgradeType.CriticalDamageMultiplier: return $"{sign}{v:F1}%";
+
+                case TurretUpgradeType.SplashDamage: return $"{sign}{(v * 100f):F1}%";
+                case TurretUpgradeType.PierceChance: return $"{sign}{v:F1}%";
+                case TurretUpgradeType.PierceDamageFalloff: return $"{sign}{v:F1}%";
+                case TurretUpgradeType.DamageFalloffOverDistance: return $"{sign}{v:F1}%";
+
+                case TurretUpgradeType.BounceDelay: return $"{sign}{v:F2}s";
+                case TurretUpgradeType.BounceDamagePct: return $"{sign}{(v * 100f):F1}%";
+
+                case TurretUpgradeType.ConeAngle: return $"{sign}{v:F1}°";
+                case TurretUpgradeType.ExplosionDelay: return $"{sign}{v:F2}s";
+
+                case TurretUpgradeType.SlowEffect: return $"{sign}{v:F1}%";
+                case TurretUpgradeType.PercentBonusDamagePerSec: return $"{sign}{v:F1}%";
+                case TurretUpgradeType.ArmorPenetration: return $"{sign}{v:F1}%";
+
+                default:
+                    return $"{sign}{v:F1}";
+            }
+        }
 
         private static float GetEffectiveForType(TurretUpgradeType t, TurretStatsInstance s)
         {

@@ -8,8 +8,7 @@ namespace Assets.Scripts.SO
         [Header("Base info")]
         public string Name;
         public Sprite Icon;
-        [Tooltip("The class of the enemy. Will be used to scale through levels")]
-        public EnemyClass EnemyClass;
+        public int EnemyId; // used on libraries and wave scaling
 
         [Header("Base stats")]
         [Tooltip("Max health")]

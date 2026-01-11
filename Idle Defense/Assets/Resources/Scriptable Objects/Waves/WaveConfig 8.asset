@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac1ec8c5ea8013c4ea1e6ab4ed4c9f3b, type: 3}
+  m_Name: WaveConfig 8
+  m_EditorClassIdentifier: 
+  WaveStartIndex: 0
+  EnemyWaveEntries:
+  - EnemyPrefab: {fileID: 1582153025905571294, guid: eba3e73d5adfb9143b85d451ce7c504e, type: 3}
+    NumberOfEnemies: 1
+  - EnemyPrefab: {fileID: 5719079096867314638, guid: db4982f616dbf3140ae7cc5583355fe8, type: 3}
+    NumberOfEnemies: 1
+  - EnemyPrefab: {fileID: 7132878058401336631, guid: 1af6ec5e4a33f1642b041b06b51a7d36, type: 3}
+    NumberOfEnemies: 1
+  - EnemyPrefab: {fileID: 8983687310494030301, guid: aeff080aacfaaa34e921496fb8be5b66, type: 3}
+    NumberOfEnemies: 2
+  - EnemyPrefab: {fileID: 3951883345677795443, guid: 3d305b7f5055e164fac6b9223ac9c955, type: 3}
+    NumberOfEnemies: 5
+  TimeBetweenSpawns: 0.2
+  TotalSpawnDuration: 25
+  SpawnCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.3
+      inSlope: -2.658481
+      outSlope: -2.658481
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.21170536
+    - serializedVersion: 3
+      time: 0.15
+      value: 0
+      inSlope: -0.06262737
+      outSlope: -0.06262737
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.62824905
+      outWeight: 0.3616641
+    - serializedVersion: 3
+      time: 0.3
+      value: 0.29810792
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.44278908
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.45
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.6
+      value: 1
+      inSlope: 6.666665
+      outSlope: 6.666665
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

@@ -25,7 +25,7 @@ namespace Assets.Editor
             // General
             "InGame",                 // 0
             "Name",                   // 1
-            "EnemyClass",             // 2
+            "EnemyId",             // 2
             "IconAssetPath",          // 3 optional (can be empty)
             // Base stats
             "MaxHealth",              // 4
@@ -132,7 +132,7 @@ namespace Assets.Editor
                 // Base info and icon
                 enemyInfo.name = name;
                 enemyInfo.Name = name;
-                enemyInfo.EnemyClass = ParseEnum(cols[2], EnemyClass.Grunt);
+                enemyInfo.EnemyId = ParseEnemyId(cols[2], name);
 
                 string iconPath = cols[3].Trim();
                 if (!string.IsNullOrEmpty(iconPath))
@@ -244,7 +244,7 @@ namespace Assets.Editor
                 // General
                 row[0] = "TRUE"; // InGame flag; exporter assumes existing SOs are in-game
                 row[1] = e.Name ?? string.Empty;
-                row[2] = e.EnemyClass.ToString();
+                row[2] = e.EnemyId.ToString();
                 row[3] = SafeAssetPath(e.Icon); // IconAssetPath
 
                 // Base stats
@@ -323,6 +323,20 @@ namespace Assets.Editor
         }
 
         // ===== Helpers =====
+
+        private static int ParseEnemyId(string s, string enemyName)
+        {
+            // Preferred: numeric ID
+            if (int.TryParse(s?.Trim(), NumberStyles.Integer, CI, out int id) && id > 0)
+                return id;
+
+            // Back-compat: older CSVs may contain the old EnemyClass string here.
+            // We generate a stable (but not guaranteed collision-free) fallback ID.
+            // IMPORTANT: You should eventually replace these with real unique IDs in the CSV.
+            int hash = Mathf.Abs((enemyName ?? string.Empty).GetHashCode());
+            return Mathf.Max(1, hash);
+        }
+
 
         private static void EnsureFolder(string assetFolder)
         {

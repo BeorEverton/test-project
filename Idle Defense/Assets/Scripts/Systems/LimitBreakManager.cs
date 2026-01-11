@@ -60,10 +60,16 @@ public class LimitBreakManager : MonoBehaviour
                                                                              // When it ends
     public static event Action<string> OnLBSessionEnded;
 
+    // Tracks coroutine-based LBs per gunner so we can cancel them on death.
+    private readonly Dictionary<string, List<Action>> _cancelActionsByGunner = new();
+
+
     // ==== Multi-session support ====
     private class ActiveLB
     {
         public string SessionId;
+        public string OwnerGunnerId; // who started this session (used to cancel on death)
+
         public LBFocus Focus;
         public float MaxCap;
         public float Baseline;
@@ -73,6 +79,10 @@ public class LimitBreakManager : MonoBehaviour
         public Sprite Icon;
         public string DisplayName;
     }
+
+    // Set briefly during TryActivate so skills that call ActivateDamageBoost/ActivateFireRateBoost
+    // (without passing gunnerId) still get ownership.
+    private string _activatingGunnerId = null;
 
     private readonly Dictionary<string, ActiveLB> _activeLBs = new();
     private float _aggDamagePct = 0f;
@@ -292,7 +302,17 @@ public class LimitBreakManager : MonoBehaviour
         }
 
         var ctx = new LimitBreakContext { GunnerId = gunnerId, GunnerSO = so, Runtime = rt };
-        skill.Activate(ctx);
+
+        _activatingGunnerId = gunnerId;
+        try
+        {
+            skill.Activate(ctx);
+        }
+        finally
+        {
+            _activatingGunnerId = null;
+        }
+
         Assets.Scripts.Systems.Save.SaveGameManager.Instance?.SaveGame();
 
         // Notify chatter (unchanged)
@@ -326,6 +346,8 @@ public class LimitBreakManager : MonoBehaviour
         var s = new ActiveLB
         {
             SessionId = sessionId,
+            OwnerGunnerId = _activatingGunnerId, // captured from TryActivate
+
             Focus = focus,
             MaxCap = cap,
             Baseline = baseline,
@@ -334,9 +356,10 @@ public class LimitBreakManager : MonoBehaviour
             Total = duration,
             Icon = (skill != null) ? skill.Icon : null,
             DisplayName = (skill != null && !string.IsNullOrWhiteSpace(skill.DisplayName))
-                            ? skill.DisplayName
-                            : (focus == LBFocus.Damage ? "Damage Boost" : "Fire Rate Boost")
+                    ? skill.DisplayName
+                    : (focus == LBFocus.Damage ? "Damage Boost" : "Fire Rate Boost")
         };
+
 
         _activeLBs[sessionId] = s;
 
@@ -354,11 +377,15 @@ public class LimitBreakManager : MonoBehaviour
         // Timer loop
         while (s.Remaining > 0f)
         {
-            // Emit tick (UI reads raw Current, also needs remaining/total for the timer)
+            // If someone force-stopped this session (death), stop the coroutine immediately.
+            if (!_activeLBs.ContainsKey(s.SessionId))
+                yield break;
+
             OnLBSessionTick?.Invoke(s.SessionId, s.Current, s.Remaining, s.Total);
             s.Remaining -= Time.deltaTime;
             yield return null;
         }
+
 
         // End
         OnLBSessionEnded?.Invoke(s.SessionId);
@@ -556,6 +583,9 @@ public class LimitBreakManager : MonoBehaviour
 
         // Start a timer-only LB bar (no slider)
         string sessionId = Guid.NewGuid().ToString("N");
+        bool cancelled = false;
+        bool ended = false;
+
         OnLBSessionStarted?.Invoke(new LBSessionInfo
         {
             SessionId = sessionId,
@@ -566,23 +596,33 @@ public class LimitBreakManager : MonoBehaviour
             Focus = LBFocus.None
         });
 
-        // Spawn one persistent line indicator and update it in-place.
-        // Passing duration=0 keeps it alive; we destroy it when the LB ends.
         Vector3 startNow = originT.position;
         startNow = new Vector3(startNow.x, startNow.y + 1f, startNow.z);
 
         GameObject lineObj = SpawnLineIndicator(startNow, startNow, 0f);
         var lr = (lineObj != null) ? lineObj.GetComponent<LineRenderer>() : null;
-        if (lr != null)
+        if (lr != null) lr.startWidth = lr.endWidth = Mathf.Max(0.01f, width);
+
+        // Register cancellation owned by this gunner
+        Action cancelAction = () =>
         {
-            // Use the skill width if provided, otherwise keep prefab thickness
-            lr.startWidth = lr.endWidth = Mathf.Max(0.01f, width);
-        }
+            if (ended) return;
+            cancelled = true;
+
+            if (lineObj != null) Destroy(lineObj);
+
+            ended = true;
+            OnLBSessionEnded?.Invoke(sessionId);
+        };
+        RegisterCancelAction(gunnerId, cancelAction);
 
         float t = duration;
-        while (t > 0f)
+        while (t > 0f && !cancelled)
         {
-            // Re-evaluate origin each frame in case the turret (muzzle) moves
+            // Optional: also stop if the gunner is already dead (extra safety)
+            var rtCheck = GunnerManager.Instance != null ? GunnerManager.Instance.GetRuntime(gunnerId) : null;
+            if (rtCheck == null || rtCheck.CurrentHealth <= 0f) break;
+
             Vector3 start = originT.position;
             start = new Vector3(start.x, start.y + 1f, start.z);
 
@@ -594,7 +634,6 @@ public class LimitBreakManager : MonoBehaviour
 
             Vector3 end = start + dir * maxAimDistance;
 
-            // Update the one and only line
             if (lr != null)
             {
                 lr.positionCount = 2;
@@ -603,7 +642,6 @@ public class LimitBreakManager : MonoBehaviour
                 lr.SetPosition(1, end);
             }
 
-            // Apply damage along the line this frame
             int n = EnemiesInLine(start, end, width, _enemyBuf);
             float tick = Mathf.Min(Time.deltaTime, t);
             float damage = dps * tick;
@@ -620,9 +658,17 @@ public class LimitBreakManager : MonoBehaviour
             yield return null;
         }
 
-        // Clean up
-        if (lineObj != null) Destroy(lineObj);
-        OnLBSessionEnded?.Invoke(sessionId);
+        // Normal end (if not cancelled)
+        if (!ended)
+        {
+            if (lineObj != null) Destroy(lineObj);
+            ended = true;
+            OnLBSessionEnded?.Invoke(sessionId);
+        }
+
+        // Always unregister
+        UnregisterCancelAction(gunnerId, cancelAction);
+
     }
 
     // 3) Heat Vent → radial push + small heal to gunners
@@ -951,6 +997,87 @@ public class LimitBreakManager : MonoBehaviour
         lbDebugIgnoreCooldown = ignoreCooldown;
         lbDebugNoCost = noCost;
         Debug.Log($"[LB DEBUG] Set: IgnoreReq={(ignoreRequirements ? "ON" : "OFF")}, IgnoreCD={(ignoreCooldown ? "ON" : "OFF")}, NoCost={(noCost ? "ON" : "OFF")}");
+    }
+
+    // CANCEL LBs WHEN A GUNNER DIES 
+    public void StopAllForGunner(string gunnerId)
+    {
+        //Debug.Log("Stopping all LB sessions for gunnerId=" + gunnerId + " active count " + _activeLBs.Count);
+        if (string.IsNullOrEmpty(gunnerId)) return;
+
+        // 1) Cancel coroutine-based LBs owned by this gunner (BoilJet, targeted skills, etc.)
+        if (_cancelActionsByGunner.TryGetValue(gunnerId, out var cancels) && cancels != null)
+        {
+            // Copy to avoid modification during iteration
+            var copy = cancels.ToArray();
+            for (int i = 0; i < copy.Length; i++)
+            {
+                try { copy[i]?.Invoke(); }
+                catch (Exception ex) { Debug.LogException(ex); }
+            }
+            _cancelActionsByGunner.Remove(gunnerId);
+        }
+
+        // 2) Cancel tracked (Update-driven) sessions
+        if (_activeLBs.Count == 0) return;
+
+        var toStop = new List<string>();
+
+        Debug.Log("passed the stop checks");
+
+        foreach (var kv in _activeLBs)
+        {
+            var s = kv.Value;
+            if (s != null && s.OwnerGunnerId == gunnerId)
+                toStop.Add(kv.Key);
+        }
+
+        for (int i = 0; i < toStop.Count; i++)
+        {
+            string sessionId = toStop[i];
+
+            // Notify UI this session ended immediately
+            OnLBSessionEnded?.Invoke(sessionId);
+
+            _activeLBs.Remove(sessionId);
+        }
+
+        // If that was the last session(s), input/decay will self-reset next Update() early-return.
+        // But make the "stop" feel immediate:
+        if (_activeLBs.Count == 0)
+        {
+            isHolding = false;
+            decreaseTimer = 0f;
+
+            _aggDamagePct = 0f;
+            _aggFirePct = 0f;
+
+            DamageMultiplier = 1f;
+            FireRateMultiplier = 1f;
+            ClickDamageBonusPct = 0f;
+            ClickSpeedBonusPct = 0f;
+        }
+    }
+
+    private void RegisterCancelAction(string gunnerId, Action cancel)
+    {
+        if (string.IsNullOrEmpty(gunnerId) || cancel == null) return;
+        if (!_cancelActionsByGunner.TryGetValue(gunnerId, out var list))
+        {
+            list = new List<Action>(2);
+            _cancelActionsByGunner[gunnerId] = list;
+        }
+        list.Add(cancel);
+    }
+
+    private void UnregisterCancelAction(string gunnerId, Action cancel)
+    {
+        if (string.IsNullOrEmpty(gunnerId) || cancel == null) return;
+        if (_cancelActionsByGunner.TryGetValue(gunnerId, out var list))
+        {
+            list.Remove(cancel);
+            if (list.Count == 0) _cancelActionsByGunner.Remove(gunnerId);
+        }
     }
 
 

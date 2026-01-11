@@ -114,8 +114,6 @@ namespace Assets.Scripts.WaveSystem
                     continue; // Skip movement/attack while being pushed
                 }
 
-
-
                 // Movement & grid position
                 if (!enemyComponent.CanAttack || enemyComponent.KnockbackTime > 0f)
                 {

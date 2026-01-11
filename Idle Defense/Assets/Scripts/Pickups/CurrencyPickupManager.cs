@@ -142,7 +142,7 @@ public class CurrencyPickupManager : MonoBehaviour
         Vector2Int cell = GetGridPosition(worldPos);
 
         CurrencyPickup pickup = GetFromPool();
-        Debug.Log("Getting currency pickup from pool for " + e.CurrencyType + " amount " + e.Amount);
+        
         pickup.Initialize(this, e.CurrencyType, e.Amount, worldPos, sprite, cell);
 
         _active.Add(pickup);
@@ -322,7 +322,7 @@ public class CurrencyPickupManager : MonoBehaviour
         if (pickup == null)
             return;
 
-        Debug.Log("Currency pickup expired: " + pickup.CurrencyType + " amount " + pickup.Amount);
+        
         // Auto-collect currency on timeout if we're awarding on pickup
         if (GameManager.Instance != null && GameManager.Instance.AwardCurrencyOnPickup && pickup.Amount > 0)
         {

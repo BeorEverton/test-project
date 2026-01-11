@@ -15,8 +15,6 @@ namespace Assets.Scripts.Systems.Save
 
             PlayerPrefs.SetString(SaveKey, json);
             PlayerPrefs.Save();
-
-
         }
 
         public static GameData LoadGameDataFromFile()
@@ -33,13 +31,16 @@ namespace Assets.Scripts.Systems.Save
 
         public static void DeleteSaveGameFile()
         {
+            PlayerPrefs.DeleteAll();
+            
             if (PlayerPrefs.HasKey(SaveKey))
             {
-                PlayerPrefs.DeleteKey(SaveKey);
-                Debug.Log("Game save deleted from PlayerPrefs");
+                Debug.Log("Game save still exists PlayerPrefs");
             }
             else
-                Debug.LogWarning("No save file found in PlayerPrefs");
+                Debug.LogWarning("Save file deleted");
+            
+
         }
 
 

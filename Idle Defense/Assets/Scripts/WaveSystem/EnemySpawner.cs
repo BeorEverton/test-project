@@ -47,6 +47,13 @@ namespace Assets.Scripts.WaveSystem
 
         private float _screenTop;
 
+        [Header("Spawn pacing / performance")]
+        [Tooltip("Maximum number of enemies active at the same time. 0 = no limit.")]
+        [SerializeField] private int _maxConcurrentEnemies = 500;
+
+        [Tooltip("Minimum duration (seconds) to spawn the whole wave, even if TotalSpawnDuration is smaller.")]
+        [SerializeField] private float _minSpawnDuration = 3f;
+
         private List<GameObject> _enemiesCurrentWave = new();
         private ObjectPool _objectPool;
         private WaveConfigSO _currentWaveConfig;
@@ -152,84 +159,164 @@ namespace Assets.Scripts.WaveSystem
 
         private Task CheckIfBossWave(Wave wave)
         {
-            if (wave.IsMiniBossWave() || wave.IsBossWave())
+            // Default background when not a boss wave
+            Color defaultBgColor = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
+
+            if (wave == null)
             {
-                Enemy bossEnemy = _enemiesCurrentWave[Random.Range(0, _enemiesCurrentWave.Count)].GetComponent<Enemy>();
-                EnemyInfoSO baseInfo = bossEnemy.Info;
-                EnemyInfoSO clonedInfo = Instantiate(baseInfo);
-
-                if (wave.IsMiniBossWave())
-                {
-                    int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
-                    float healthMultiplier;
-                    float damageMultiplier;
-                    float coinMultiplier;
-                    if (currentWave == 5) // First mini boss is weaker
-                    {
-                        healthMultiplier = 30f;
-                        damageMultiplier = 15f;
-                        coinMultiplier = 20f;
-                    }
-                    else
-                    {
-                        healthMultiplier = Mathf.Min(currentWave * 50f, 500f);
-                        damageMultiplier = Mathf.Min(currentWave * 10f, 100f);
-                        coinMultiplier = Mathf.Min(currentWave * 10f, 100f);
-                    }
-
-
-                    clonedInfo.MaxHealth *= healthMultiplier;
-                    clonedInfo.Damage *= damageMultiplier;
-                    clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
-
-                    clonedInfo.MovementSpeed *= 0.9f;
-                    clonedInfo.AttackRange += .2f; // Because the gfx size changes
-                }
-
-                if (wave.IsBossWave())
-                {
-                    int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
-                    float healthMultiplier;
-                    float damageMultiplier;
-                    float coinMultiplier;
-                    if (currentWave == 10) // First boss is weaker
-                    {
-                        healthMultiplier = 60f;
-                        damageMultiplier = 25f;
-                        coinMultiplier = 45f;
-                    }
-                    else
-                    {
-                        healthMultiplier = Mathf.Min(currentWave * 100f, 1000f);
-                        damageMultiplier = Mathf.Min(currentWave * 20f, 500f);
-                        coinMultiplier = Mathf.Min(currentWave * 20f, 500f);
-                    }
-
-
-                    clonedInfo.MaxHealth *= healthMultiplier;
-                    clonedInfo.Damage *= damageMultiplier;
-                    clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
-
-                    clonedInfo.MovementSpeed *= 0.85f;
-                    clonedInfo.AttackRange += .6f;
-                }
-
-                AudioManager.Instance.Play("Boss Appear");
-
-                // Chatter: boss appeared
-                if (GunnerManager.Instance != null)
-                {
-                    var equipped = GunnerManager.Instance.GetAllEquippedGunners();
-                    if (equipped != null && equipped.Count > 0)
-                    {
-                        var a = equipped[Random.Range(0, equipped.Count)];
-                        GunnerChatterSystem.TryTrigger(GunnerEvent.BossAppeared, a);
-                    }
-                }
-
-                bossEnemy.ApplyBossInfo(clonedInfo, wave.IsMiniBossWave());
+                backgroundMaterial.color = defaultBgColor;
+                return Task.CompletedTask;
             }
-            else backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f); // Roll back to the regular color if not boss wave
+
+            bool isMini = wave.IsMiniBossWave();
+            bool isBoss = wave.IsBossWave();
+
+            if (!isMini && !isBoss)
+            {
+                backgroundMaterial.color = defaultBgColor;
+                return Task.CompletedTask;
+            }
+
+            Enemy bossEnemy = null;
+
+            // --- 1) Try to use zone/boss-specific prefab if configured ---
+            GameObject overridePrefab = null;
+
+            if (isBoss && wave.BossPrefab != null)
+                overridePrefab = wave.BossPrefab;
+            else if (isMini && wave.MiniBossPrefab != null)
+                overridePrefab = wave.MiniBossPrefab;
+
+            if (overridePrefab != null)
+            {
+                Enemy prefabEnemy = overridePrefab.GetComponent<Enemy>();
+                if (prefabEnemy == null || prefabEnemy.Info == null)
+                {
+                    Debug.LogWarning("EnemySpawner.CheckIfBossWave: override boss prefab is missing Enemy/Info; falling back to random enemy.");
+                }
+                else
+                {
+                    string key = prefabEnemy.Info.Name;
+
+                    GameObject bossGO = GetEnemyFromPool(key, overridePrefab);
+                    bossGO.SetActive(false); // will be activated later in SpawnEnemies()
+
+                    _enemiesCurrentWave.Add(bossGO);
+
+                    // Update UI with new total enemy count
+                    OnWaveCreated?.Invoke(this, new OnWaveCreatedEventArgs { EnemyCount = _enemiesCurrentWave.Count });
+
+                    bossEnemy = bossGO.GetComponent<Enemy>();
+                }
+            }
+
+            // 2) Fallback: pick any existing enemy and promote it to boss
+            if (bossEnemy == null)
+            {
+                if (_enemiesCurrentWave.Count == 0)
+                {
+                    Debug.LogWarning("EnemySpawner.CheckIfBossWave: boss/miniboss wave requested but _enemiesCurrentWave is empty.");
+                    backgroundMaterial.color = defaultBgColor;
+                    return Task.CompletedTask;
+                }
+
+                bossEnemy = _enemiesCurrentWave[Random.Range(0, _enemiesCurrentWave.Count)].GetComponent<Enemy>();
+            }
+
+            if (bossEnemy == null || bossEnemy.Info == null)
+            {
+                Debug.LogWarning("EnemySpawner.CheckIfBossWave: could not obtain a valid Enemy to promote to boss.");
+                backgroundMaterial.color = defaultBgColor;
+                return Task.CompletedTask;
+            }
+
+            EnemyInfoSO baseInfo = bossEnemy.Info;
+
+            // If ZoneManager built a scaled clone for this enemy id, use that as the baseline.
+            // This ensures bosses scale with the current wave difficulty BEFORE the boss multipliers.
+            if (wave != null && wave.WaveEnemies != null)
+            {
+                int id = baseInfo != null ? baseInfo.EnemyId : 0;
+                if (id > 0 && wave.WaveEnemies.TryGetValue(id, out var scaled))
+                    baseInfo = scaled;
+            }
+
+            EnemyInfoSO clonedInfo = Instantiate(baseInfo);
+
+            if (isMini)
+            {
+                int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
+                float healthMultiplier;
+                float damageMultiplier;
+                float coinMultiplier;
+
+                if (currentWave == 5) // First mini boss is weaker
+                {
+                    healthMultiplier = 30f;
+                    damageMultiplier = 15f;
+                    coinMultiplier = 20f;
+                }
+                else
+                {
+                    healthMultiplier = Mathf.Min(currentWave * 50f, 500f);
+                    damageMultiplier = Mathf.Min(currentWave * 10f, 100f);
+                    coinMultiplier = Mathf.Min(currentWave * 10f, 100f);
+                }
+
+                clonedInfo.MaxHealth *= healthMultiplier;
+                clonedInfo.Damage *= damageMultiplier;
+                clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
+
+                clonedInfo.MovementSpeed *= 0.9f;
+                clonedInfo.AttackRange += .2f; // Because the gfx size changes
+            }
+
+            if (isBoss)
+            {
+                int currentWave = WaveManager.Instance.GetCurrentWaveIndex();
+                float healthMultiplier;
+                float damageMultiplier;
+                float coinMultiplier;
+
+                if (currentWave == 10) // First boss is weaker
+                {
+                    healthMultiplier = 60f;
+                    damageMultiplier = 25f;
+                    coinMultiplier = 45f;
+                }
+                else
+                {
+                    healthMultiplier = Mathf.Min(currentWave * 100f, 1000f);
+                    damageMultiplier = Mathf.Min(currentWave * 20f, 500f);
+                    coinMultiplier = Mathf.Min(currentWave * 20f, 500f);
+                }
+
+                clonedInfo.MaxHealth *= healthMultiplier;
+                clonedInfo.Damage *= damageMultiplier;
+                clonedInfo.CoinDropAmount = (ulong)(clonedInfo.CoinDropAmount * coinMultiplier);
+
+                clonedInfo.MovementSpeed *= 0.85f;
+                clonedInfo.AttackRange += .6f;
+            }
+
+            AudioManager.Instance.Play("Boss Appear");
+
+            // Chatter: boss appeared
+            if (GunnerManager.Instance != null)
+            {
+                var equipped = GunnerManager.Instance.GetAllEquippedGunners();
+                if (equipped != null && equipped.Count > 0)
+                {
+                    var a = equipped[Random.Range(0, equipped.Count)];
+                    GunnerChatterSystem.TryTrigger(GunnerEvent.BossAppeared, a);
+                }
+            }
+
+            bossEnemy.ApplyBossInfo(clonedInfo, isMini);
+
+            // Boss waves tint the background; non-boss fallback handled earlier
+            if (backgroundMaterial != null)
+                backgroundMaterial.color = new Color(0.3f, 0, 0);
 
             return Task.CompletedTask;
         }
@@ -262,57 +349,142 @@ namespace Assets.Scripts.WaveSystem
             yield return null; // wait 1 frame to ensure setup
             yield return StartCoroutine(SpawnEnemies());
         }
-
+        /// <summary>
+        /// Spawn enemies over time using the per-wave spawn curve defined in WaveConfigSO.
+        /// The curve controls cumulative fraction of enemies spawned from t=0..1.
+        /// We also enforce a max concurrent enemy count for performance.
+        /// </summary>
         private IEnumerator SpawnEnemies()
         {
-            foreach (GameObject enemyObj in _enemiesCurrentWave.TakeWhile(enemyObj => _canSpawnEnemies).ToList())
+            int totalEnemies = _enemiesCurrentWave.Count;
+            if (totalEnemies <= 0)
             {
-                Enemy enemy = enemyObj.GetComponent<Enemy>();
+                _waveSpawned = true;
+                CheckIfWaveCompleted();
+                yield break;
+            }
 
-                // Hook death tracking 
-                enemy.OnDeath += Enemy_OnEnemyDeath;
-                if (!EnemiesAlive.Contains(enemyObj))
-                    EnemiesAlive.Add(enemyObj);
+            // --- Determine spawn duration for THIS wave ---
+            float spawnDuration = _minSpawnDuration;
 
-                // Center the boss on screen instead of random spawn
-                if (enemy.IsBossInstance)
+            if (_currentWaveConfig != null)
+            {
+                if (_currentWaveConfig.TotalSpawnDuration > 0f)
                 {
-                    enemyObj.transform.position = new Vector3(0f, 0f, 0f).WithDepth(EnemyConfig.EnemySpawnDepth);
+                    spawnDuration = Mathf.Max(_minSpawnDuration, _currentWaveConfig.TotalSpawnDuration);
                 }
                 else
                 {
-                    enemyObj.transform.position = GetRandomSpawnPosition();
+                    // Fallback: original behaviour scaled by enemy count.
+                    float guess = _currentWaveConfig.TimeBetweenSpawns * totalEnemies;
+                    spawnDuration = Mathf.Max(_minSpawnDuration, guess);
                 }
+            }
 
-                float targetX = Random.Range(-EnemyConfig.BaseXArea, EnemyConfig.BaseXArea);
+            // --- Determine curve for THIS wave ---
+            AnimationCurve curve;
+            if (_currentWaveConfig != null &&
+                _currentWaveConfig.SpawnCurve != null &&
+                _currentWaveConfig.SpawnCurve.length >= 2)
+            {
+                curve = _currentWaveConfig.SpawnCurve;
+            }
+            else
+            {
+                // Linear fallback if no curve assigned
+                curve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+            }
 
-                EnemyLibraryManager.Instance.MarkAsDiscovered(enemy.Info.Name);
+            float elapsed = 0f;
+            int spawnedCount = 0;
+            int maxConcurrent = _maxConcurrentEnemies;
 
-                if (enemy.IsBossInstance) //Set boss music when boss is spawned
+            while (_canSpawnEnemies && spawnedCount < totalEnemies)
+            {
+                elapsed += Time.deltaTime;
+                float t = spawnDuration > 0f ? Mathf.Clamp01(elapsed / spawnDuration) : 1f;
+
+                // Curve gives us cumulative fraction that *should* be spawned now.
+                float fraction = Mathf.Clamp01(curve.Evaluate(t));
+                int targetSpawned = Mathf.Clamp(
+                    Mathf.RoundToInt(fraction * totalEnemies),
+                    0,
+                    totalEnemies);
+
+#if UNITY_EDITOR
+                if (Time.frameCount % 15 == 0) // not every frame
                 {
-                    AudioManager.Instance.StopAllMusics();
-                    AudioManager.Instance.PlayMusic("Boss");
-                    backgroundMaterial.color = new Color(0.3f, 0, 0);
-                    targetX = 0;
+                    //Debug.Log($"[SpawnCurve] t={t:0.00} frac={fraction:0.00} target={targetSpawned}/{totalEnemies} spawned={spawnedCount} alive={EnemiesAlive.Count}");
+                }
+#endif
+
+
+                // Spawn towards target, respecting concurrent cap.                
+                while (_canSpawnEnemies &&
+                       spawnedCount < targetSpawned &&
+                       (maxConcurrent <= 0 || EnemiesAlive.Count < maxConcurrent))
+                {
+                    // If something aborted the wave and cleared the buffer, bail.
+                    if (_enemiesCurrentWave.Count == 0)
+                        break;
+
+                    // Take one enemy from the end of the buffer and remove it.
+                    int lastIndex = _enemiesCurrentWave.Count - 1;
+                    GameObject enemyObj = _enemiesCurrentWave[lastIndex];
+                    _enemiesCurrentWave.RemoveAt(lastIndex);
+                    spawnedCount++;
+
+                    Enemy enemy = enemyObj.GetComponent<Enemy>();
+
+                    // Hook death tracking 
+                    enemy.OnDeath += Enemy_OnEnemyDeath;
+                    if (!EnemiesAlive.Contains(enemyObj))
+                        EnemiesAlive.Add(enemyObj);
+
+                    // Center the boss on screen instead of random spawn
+                    if (enemy.IsBossInstance)
+                    {
+                        enemyObj.transform.position =
+                            new Vector3(0f, 0f, 0f).WithDepth(EnemyConfig.EnemySpawnDepth);
+                    }
+                    else
+                    {
+                        enemyObj.transform.position = GetRandomSpawnPosition();
+                    }
+
+                    float targetX = Random.Range(-EnemyConfig.BaseXArea, EnemyConfig.BaseXArea);
+
+                    EnemyLibraryManager.Instance.MarkAsDiscovered(enemy.Info.Name);
+
+                    if (enemy.IsBossInstance) // Set boss music when boss is spawned
+                    {
+                        AudioManager.Instance.StopAllMusics();
+                        AudioManager.Instance.PlayMusic("Boss");
+                        backgroundMaterial.color = new Color(0.3f, 0, 0);
+                        targetX = 0;
+                    }
+
+                    Vector3 targetPos = new Vector3(targetX, 0f, 0f);
+                    enemy.MoveDirection = (targetPos - enemyObj.transform.position).normalized;
+
+                    // all listeners ready
+                    enemyObj.SetActive(true);
+
+                    // Gunner XP
+                    GunnerManager.Instance.OnEnemySpawned(enemy);
                 }
 
-                Vector3 targetPos = new Vector3(targetX, 0f, 0f);
-                enemy.MoveDirection = (targetPos - enemyObj.transform.position).normalized;
 
-                // all listeners ready
-                enemyObj.SetActive(true);
-
-                // Gunner XP
-                GunnerManager.Instance.OnEnemySpawned(enemy);
-
-                yield return new WaitForSeconds(_currentWaveConfig.TimeBetweenSpawns);
+                // Next frame: re-evaluate curve and concurrent cap.
+                yield return null;
             }
 
             _waveSpawned = true;
 
-            // In case all enemies were killed during spawn delay
+            // In case all enemies were killed during spawn duration
             CheckIfWaveCompleted();
         }
+
 
         /// <summary>
         /// Updates the bounds of the screen to know where enemies should respawn
@@ -385,17 +557,24 @@ namespace Assets.Scripts.WaveSystem
 
         private IEnumerator HandleEnemyDeath(Enemy enemy)
         {
+            // Stop listening to this instance
             enemy.OnDeath -= Enemy_OnEnemyDeath;
+
+            // If it was a boss, reset presentation
             if (enemy.IsBossInstance)
             {
                 enemy.IsBossInstance = false;
                 AudioManager.Instance.PlayMusic("Main");
                 backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
             }
+
+            // Remove from live list
             EnemiesAlive.Remove(enemy.gameObject);
 
+            // Play death FX before returning to the pool
             yield return StartCoroutine(enemy.EnemyDeathEffect.PlayEffectRoutine());
 
+            // Return once to the pool for reuse in future waves
             _objectPool.ReturnObject(enemy.Info.Name, enemy.gameObject);
         }
 

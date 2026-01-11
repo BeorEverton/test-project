@@ -165,11 +165,20 @@ namespace Assets.Scripts.UI
                 // turret is equipped
                 Transform expectedParent = management ? canvasTransformPermanent : canvasTransform;
 
-                VFX.RangeOverlayManager.Instance.ShowFor(baseTurret);
+                // Manual turret has infinite range: do not show the range overlay.
+                if (baseTurret is ManualTurret)
+                {
+                    VFX.RangeOverlayManager.Instance.Hide();
+                }
+                else
+                {
+                    VFX.RangeOverlayManager.Instance.ShowFor(baseTurret);
+                }
 
                 activePanel.GetComponent<TurretUpgradePanelUI>()
                                     .Open(slotIndex, baseTurret);
             }
+
 
         }
 
@@ -261,6 +270,7 @@ namespace Assets.Scripts.UI
 
             UpdateOverlay();
             UpdateColor();
+            OnSlotClicked();
         }
 
         private void UpdateColor()

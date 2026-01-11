@@ -779,6 +779,14 @@ public class GunnerManager : MonoBehaviour
 
         bool diedNow = rt.TakeDamage(damage, out float actual);
 
+        if (diedNow)
+        {
+            Debug.Log($"[GunnerManager] Gunner {gid} has died.");
+            // If this gunner was powering any Limit Break session(s), stop them immediately.
+            LimitBreakManager.Instance?.StopAllForGunner(gid);
+        }
+
+
         // Visual: either flash or play death, depending on result
         if (modelByGunner.TryGetValue(gid, out var model) && model != null)
         {

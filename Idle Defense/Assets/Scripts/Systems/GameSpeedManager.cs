@@ -30,14 +30,41 @@ namespace Assets.Scripts.Systems
         {
             // Define speed steps based on platform
             //#if UNITY_EDITOR
-            speedOptions = new List<float> { 1f, 1.5f, 2f, 3f, 5f, 10f };
+            speedOptions = new List<float> { 1f, 1.5f, 2f, 3f, 4f, 5f, 10f };
             //#else
             //speedOptions = new List<float> { 1f, 1.5f, 2f };
             //#endif
 
             speedToggleButton.onClick.AddListener(AdvanceGameSpeed);
             WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+        }
 
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                SetGameSpeed(1f);
+            }
+            else if (Input.GetKeyDown(KeyCode.F2))
+            {
+                SetGameSpeed(2f);
+            }
+            else if (Input.GetKeyDown(KeyCode.F3) && speedOptions.Contains(3f))
+            {
+                SetGameSpeed(3f);
+            }
+            else if (Input.GetKeyDown(KeyCode.F4) && speedOptions.Contains(4f))
+            {
+                SetGameSpeed(4f);
+            }
+            else if (Input.GetKeyDown(KeyCode.F5) && speedOptions.Contains(5f))
+            {
+                SetGameSpeed(5f);
+            }
+            else if (Input.GetKeyDown(KeyCode.F6) && speedOptions.Contains(10f))
+            {
+                SetGameSpeed(10f);
+            }
         }
 
         private void AdvanceGameSpeed()

@@ -60,7 +60,7 @@ namespace Assets.Scripts.Turrets
         // Gunner variables
         [NonSerialized] public int SlotIndex = -1;            // set by SlotWorldButton on spawn
         private TurretStatsInstance _effectiveScratch;
-        private TurretStatsInstance EffectiveStats => _effectiveScratch ?? RuntimeStats;
+        protected TurretStatsInstance EffectiveStats => _effectiveScratch ?? RuntimeStats;
         private int _effectsSignature = -1; // Tracks which effects are active
         private bool _boundToGunnerEvents = false;
 

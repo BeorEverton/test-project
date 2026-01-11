@@ -30,6 +30,7 @@ public class SettingsManager : MonoBehaviour
     [SerializeField] private Toggle muteToggle;
     [SerializeField] private Toggle popupToggle;
     [SerializeField] private Toggle tooltipToggle;
+    [SerializeField] private ToggleVisibility settingPanelVisibility;
 
 
     private void Awake()
@@ -48,6 +49,15 @@ public class SettingsManager : MonoBehaviour
         {
             if (!_linkLookup.ContainsKey(link.key))
                 _linkLookup.Add(link.key, link.url);
+        }
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            UpdateSettingsUI();
+            settingPanelVisibility.Toggle();
         }
     }
 

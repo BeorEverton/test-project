@@ -24,6 +24,20 @@ namespace Assets.Scripts.Systems.Save
         [SerializeField] private GameObject disclaimerPanel;
         private bool _disclaimerShown = true;
 
+        private bool _isDeletingSave;
+
+        private static float _suppressSavesUntilUnscaledTime = 0f;
+
+        public static void SuppressSavesForSeconds(float seconds)
+        {
+            _suppressSavesUntilUnscaledTime = Time.unscaledTime + Mathf.Max(0f, seconds);
+        }
+
+        private static bool IsSaveSuppressed()
+        {
+            return Time.unscaledTime < _suppressSavesUntilUnscaledTime;
+        }
+
 
         private void Awake()
         {
@@ -40,6 +54,9 @@ namespace Assets.Scripts.Systems.Save
 
         public void SaveGame()
         {
+            if (_isDeletingSave || IsSaveSuppressed())
+                return;
+
             int waveNumber = WaveManager.Instance.GetCurrentWaveIndex();
 
             GameDataDTO gameDataDTO = SaveDataDTOs.CreateGameDataDTO(waveNumber);
@@ -165,6 +182,9 @@ namespace Assets.Scripts.Systems.Save
 
         public void DeleteSave()
         {
+            _isDeletingSave = true;
+            SuppressSavesForSeconds(3f);
+
             // 1) Wipe the persisted save
             SaveGameToFile.DeleteSaveGameFile();
 
@@ -178,6 +198,7 @@ namespace Assets.Scripts.Systems.Save
 
             // Waves
             WaveManager.Instance?.ResetWave();
+            WaveManager.Instance.SetAutoAdvanceEnabled(true);
 
             // Stats
             StatsManager.Instance?.ResetStats();

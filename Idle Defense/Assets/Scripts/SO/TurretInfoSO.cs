@@ -253,6 +253,7 @@ namespace Assets.Scripts.SO
         MagnetSpikecaster,
         FungalOvergrowthPod,
         TrapGridProjector,
-        ExplosiveMineshaft
+        ExplosiveMineshaft,
+        AutoMachineGun
     }
 }

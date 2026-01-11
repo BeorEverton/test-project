@@ -326,9 +326,9 @@ namespace Assets.Scripts.Enemies
             _originalColor = null;
 
             // Only reset info if not overridden
-            if (!IsBossInstance && WaveManager.Instance.GetCurrentWave().WaveEnemies.ContainsKey(Info.EnemyClass))
+            if (!IsBossInstance && WaveManager.Instance.GetCurrentWave().WaveEnemies.ContainsKey(Info.EnemyId))
             {
-                Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyClass];
+                Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyId];
             }
 
             ApplyBodySpriteFromInfo();

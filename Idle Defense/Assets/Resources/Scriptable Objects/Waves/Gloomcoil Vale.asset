@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1616927600e77b4bb5e26ff29470896, type: 3}
+  m_Name: Gloomcoil Vale
+  m_EditorClassIdentifier: 
+  Id: ENV_02
+  DisplayName: Gloomcoil Vale
+  ZoneIndex: 0
+  Waves:
+  - WaveNumberInZone: 3
+    WaveConfig: {fileID: 11400000, guid: 5586dd2f1d19aad45906336900b74067, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 4
+    WaveConfig: {fileID: 11400000, guid: d3b76f98e4d4f1348861640f454e4824, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  BossPrefab: {fileID: 0}
+  MiniBossPrefab: {fileID: 0}
+  GroundMat: {fileID: 2100000, guid: e8c9cf42b0af84af58f6d9c41f024d8f, type: 2}
+  SkyMat: {fileID: 2100000, guid: 7bbd6567f57f743be9da5759fd15265f, type: 2}
+  GroundOverlayMaterial: {fileID: 0}
+  ZoneParticlePrefab: {fileID: 0}
