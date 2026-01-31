@@ -163,6 +163,13 @@ namespace Assets.Scripts.WaveSystem
 
                 _currentWaveInstance = wave;
 
+                // Apply runtime tuning to the wave clones (does not touch assets).
+                // Apply runtime tuning to the wave clones (does not touch assets).
+                if (RuntimeBalanceTuningManager.Instance != null)
+                {
+                    RuntimeBalanceTuningManager.Instance.ApplyToCurrentWaveOnly();
+                }
+
                 try
                 {
                     _enemySpawner.StartWave(wave);

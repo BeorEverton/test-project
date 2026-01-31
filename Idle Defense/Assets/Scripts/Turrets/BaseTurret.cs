@@ -182,7 +182,7 @@ namespace Assets.Scripts.Turrets
             if (_targetEnemy != null)
             {
                 float ty = _targetEnemy.transform.position.Depth();
-                if (ty > EffectiveStats.Range)
+                if (ty > EffectiveStats.Range + (LimitBreakManager.Instance != null ? LimitBreakManager.Instance.TurretRangeAuraAdd : 0f))
                 {
                     _targetEnemy.GetComponent<Enemy>().DelayRemoveDeathEvent(Enemy_OnDeath);
                     _targetEnemy = null;
@@ -191,7 +191,7 @@ namespace Assets.Scripts.Turrets
             }
 
             // Used for limiting target calculation
-            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range : RuntimeStats.Range);
+            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range + (LimitBreakManager.Instance != null ? LimitBreakManager.Instance.TurretRangeAuraAdd : 0f) : RuntimeStats.Range);
 
             if (_targetEnemy == null || !_targetEnemy.activeInHierarchy)
             {
@@ -242,13 +242,21 @@ namespace Assets.Scripts.Turrets
             _recoil?.AddRecoil();
 
             // Light combat chatter 
-            if (GunnerManager.Instance != null && Random.value < GunnerChatterSystem.Instance.PeriodicChatChance && GunnerManager.Instance.GetEquippedGunnerId(SlotIndex) != null)
+            // Light combat chatter (only if the equipped gunner in this slot is alive)
+            if (GunnerManager.Instance != null
+                && GunnerChatterSystem.Instance != null
+                && Random.value < GunnerChatterSystem.Instance.PeriodicChatChance
+                && GunnerManager.Instance.IsSlotAlive(SlotIndex))
             {
                 string gid = GunnerManager.Instance.GetEquippedGunnerId(SlotIndex);
-                var so = GunnerManager.Instance.GetSO(gid);
-                if (so != null)
-                    GunnerChatterSystem.TryForceCombat(so);
+                if (!string.IsNullOrEmpty(gid))
+                {
+                    var so = GunnerManager.Instance.GetSO(gid);
+                    if (so != null)
+                        GunnerChatterSystem.TryForceCombat(so);
+                }
             }
+
 
             _timeSinceLastShot = 0f;
         }
@@ -468,7 +476,7 @@ namespace Assets.Scripts.Turrets
             if (_targetEnemy != null)
                 _targetEnemy.GetComponent<Enemy>().OnDeath -= Enemy_OnDeath;
 
-            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range : RuntimeStats.Range);
+            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range + (LimitBreakManager.Instance != null ? LimitBreakManager.Instance.TurretRangeAuraAdd : 0f) : RuntimeStats.Range);
 
             // Candidates in range, active, and hittable (flying filtered by turret capability)
             var cands = EnemySpawner.Instance.EnemiesAlive
@@ -843,7 +851,7 @@ namespace Assets.Scripts.Turrets
             if (index < 0 || index > 12) index = 0;
             EnemyTargetChoice = (EnemyTarget)index;
             // New: time-sliced retargeting
-            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range : RuntimeStats.Range);
+            float maxDepth = (EffectiveStats != null ? EffectiveStats.Range + (LimitBreakManager.Instance != null ? LimitBreakManager.Instance.TurretRangeAuraAdd : 0f) : RuntimeStats.Range);
 
             if (!CurrentTargetStillValid(maxDepth) || Time.time >= _nextRetargetAt)
             {

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c60a9b936f2ce34e84d2a67a719d223, type: 3}
+  m_Name: Steam Slam
+  m_EditorClassIdentifier: 
+  Type: 0
+  DisplayName: Steam Slam
+  Description: Converts turret steam pressure into a devastating AoE punch. Click
+    to shoot
+  Icon: {fileID: 21300000, guid: 13756a141b0b84db08f0c80f06bb5d45, type: 3}
+  Duration: 8
+  Magnitude: 1.5
+  ClickMaxBonusPct: 100
+  BaselinePct: 0
+  Radius: 3.5
+  DamagePctOfGunnerDamage: 200
+  FlatDamage: 250
+  MinDamage: 0
+  MaxDamage: 999999

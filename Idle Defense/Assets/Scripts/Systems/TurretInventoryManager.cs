@@ -15,7 +15,7 @@ namespace Assets.Scripts.Systems
 
         [SerializeField] private TurretUnlockTableSO unlockTable;
         public readonly HashSet<TurretType> unlockedTypes = new();
-        [SerializeField] private TurretLibrarySO turretLibrary;   // assign the new asset
+        //[SerializeField] private TurretLibrarySO turretLibrary;   // assign the new asset
 
         public List<OwnedTurret> owned = new();
         public List<OwnedTurret> Owned => owned;

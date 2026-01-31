@@ -63,6 +63,12 @@ namespace Assets.Scripts.UI
                 }
             }
 
+            // Sync target dropdown to the currently opened turret
+            var targetDropdown = GetComponentInChildren<TurretTargetDropdown>(true);
+            if (targetDropdown != null)
+                targetDropdown.Bind(_baseTurret);
+
+
             gameObject.SetActive(true);
 
             // Unequip visibility same as before

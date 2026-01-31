@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7381254b2df0e82498228da61e91d8e3, type: 3}
+  m_Name: Heat Management Skill SO
+  m_EditorClassIdentifier: 
+  Type: 0
+  DisplayName: Heat Management
+  Description: Increases own health in exchange for some damage loss
+  Icon: {fileID: 21300000, guid: c96f62a4ab65749128908e5360e39126, type: 3}
+  Duration: 15
+  Magnitude: 1.5
+  ClickMaxBonusPct: 100
+  BaselinePct: 0
+  ExtraHP: 500
+  DamagePenaltyPct: 20

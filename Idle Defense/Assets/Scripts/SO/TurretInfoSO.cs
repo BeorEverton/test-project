@@ -254,6 +254,6 @@ namespace Assets.Scripts.SO
         FungalOvergrowthPod,
         TrapGridProjector,
         ExplosiveMineshaft,
-        AutoMachineGun
+        MachineGunAuto
     }
 }

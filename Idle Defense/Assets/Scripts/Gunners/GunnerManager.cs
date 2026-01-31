@@ -62,9 +62,17 @@ public class GunnerManager : MonoBehaviour
 
     // slotIndex -> parked gunner id (slot has NO turret; gunner is hidden and available in UI)
     private readonly Dictionary<int, string> parkedSlotToGunner = new();
-
-    // Helpers for the Limit Break    
+        
+    // Helpers for the Limit Break
     public GunnerSO GetSO(string gunnerId) => (soById.TryGetValue(gunnerId, out var so) ? so : null);
+
+    // Read-only enumeration so other systems (LimitBreakManager) can affect only equipped gunners
+    public IEnumerable<string> EnumerateEquippedGunnerIds()
+    {
+        // slotToGunner is the single source of truth for equipped mapping
+        return slotToGunner.Values;
+    }
+
 
     // 3D model instances and “docked” state
     private readonly Dictionary<string, GunnerModelBinding> modelByGunner = new();

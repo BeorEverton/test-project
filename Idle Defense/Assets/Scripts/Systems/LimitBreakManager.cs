@@ -44,6 +44,7 @@ public class LimitBreakManager : MonoBehaviour
     // LB active flags
     private bool fireRateLBActive = false;
     private bool damageLBActive = false;
+    public float TurretRangeAuraAdd { get; private set; }
 
     // --- Event-driven UI bridge ---
     // (focus, maxClickCap, baselinePct, totalDuration)
@@ -90,6 +91,8 @@ public class LimitBreakManager : MonoBehaviour
 
     public float TotalDamageBonusPct => _aggDamagePct;
     public float TotalFireRateBonusPct => _aggFirePct;
+    public float TurretRangeMultiplier { get; private set; } = 1f;
+
 
 
     // Default cap (used when no LB active)
@@ -118,7 +121,6 @@ public class LimitBreakManager : MonoBehaviour
 
     // Dome (Iron Citadel): % reduction to gunners' incoming damage
     public float GunnerDamageReductionPct { get; private set; } = 0f;
-
 
     private void Awake()
     {
@@ -285,6 +287,11 @@ public class LimitBreakManager : MonoBehaviour
         var rt = GunnerManager.Instance.GetRuntime(gunnerId);
         var skill = ResolveFor(so);
         if (so == null || rt == null || skill == null) return false;
+
+        // Safety: dead gunners can't activate LB (prevents chatter + session ownership edge cases)
+        if (rt.CurrentHealth <= 0f)
+            return false;
+
 
         // Requirement: LB must be full (unless debug override)
         bool ready = (rt.LimitBreakCurrent >= rt.LimitBreakMax);
@@ -505,6 +512,10 @@ public class LimitBreakManager : MonoBehaviour
     // ===== Queries =====
     private static readonly List<Enemy> _enemyBuf = new List<Enemy>(256);
 
+    // ===== Permafrost Domain (global slow) =====
+    private readonly HashSet<int> _permafrostAffected = new HashSet<int>(512);
+    private bool _permafrostActive = false;
+
     private int EnemiesInRadius(Vector3 pos, float radius, List<Enemy> into)
     {
         into.Clear();
@@ -554,6 +565,8 @@ public class LimitBreakManager : MonoBehaviour
         }
         return into.Count;
     }
+
+    #region ACTIVATE METHODS FOR EACH LB TYPE
 
     // 1) Survivor’s Roar → Damage LB (click boosts already supported)
     public void ActivateSurvivorsRoar(float mult, float duration, LimitBreakSkillSO s)
@@ -710,18 +723,50 @@ public class LimitBreakManager : MonoBehaviour
     }
 
 
-    private float GetEffectiveGunnerDamage(string gunnerId, GunnerSO so)
+    public float GetEffectiveGunnerDamage(LimitBreakContext ctx)
     {
-        // Prefer a runtime/effective value if you have it in your GunnerManager; fallback to BaseDamage
-        float baseDmg = so != null ? so.BaseDamage : 0f;
-        try
+        if (ctx.GunnerSO == null || ctx.Runtime == null) return 0f;
+
+        // Prefer upgrade-aware values (this matches how gunners scale elsewhere)
+        var up = GunnerUpgradeManager.Instance;
+        float dmg;
+
+        if (up != null)
         {
-            // If you already expose something like this, use it:
-            // return Mathf.Max(0f, GunnerManager.Instance.GetEffectiveGunnerDamage(gunnerId));
-            return Mathf.Max(0f, baseDmg);
+            dmg = up.GetEffectiveStatValue(ctx.GunnerSO, ctx.Runtime, GunnerStatKey.Damage);
         }
-        catch { return Mathf.Max(0f, baseDmg); }
+        else
+        {
+            dmg = ctx.GunnerSO.BaseDamage;
+        }
+
+        // If you ever allow Damage to be locked for some gunners, you can gate it here:
+        // if (ctx.Runtime.Unlocked != null && !ctx.Runtime.Unlocked.Contains(GunnerStatKey.Damage)) dmg = 0f;
+
+        return Mathf.Max(0f, dmg);
     }
+
+    /// <summary>
+    /// Utility for "flat OR % of gunner damage" power scaling with optional clamps.
+    /// pctOfGunnerDamage: 0 means "disabled" and uses flatPower.
+    /// </summary>
+    public float ResolvePower(LimitBreakContext ctx, float flatPower, float pctOfGunnerDamage, float minPower = 0f, float maxPower = float.PositiveInfinity)
+    {
+        float p = flatPower;
+
+        if (pctOfGunnerDamage > 0f)
+        {
+            float gunnerDmg = GetEffectiveGunnerDamage(ctx);
+            p = gunnerDmg * (pctOfGunnerDamage / 100f);
+        }
+
+        if (!float.IsPositiveInfinity(maxPower))
+            p = Mathf.Min(p, maxPower);
+
+        p = Mathf.Max(p, minPower);
+        return p;
+    }
+
 
     private IEnumerator Co_Cinderslash_Targeted(string gunnerId, float soSlashMul, float radius, float apPct, float unusedWidth,
                                             float trapRadius, float soTrapMul, float trapDelay,
@@ -736,9 +781,15 @@ public class LimitBreakManager : MonoBehaviour
 
         BaseTurret turret = FindTurretBySlot(slot);
         if (turret == null) yield break;
+                
+        // Effective gunner damage 
+        float gunnerDmg = Mathf.Max(0f, GetEffectiveGunnerDamage(new LimitBreakContext
+        {
+            GunnerId = gunnerId,
+            GunnerSO = so,
+            Runtime = rt
+        }));
 
-        // Effective gunner damage
-        float gunnerDmg = Mathf.Max(0f, GetEffectiveGunnerDamage(gunnerId, so));
         // Default to 200% if SO sends 0 (you can tune per-SO later)
         float slashDamage = gunnerDmg * (soSlashMul > 0f ? soSlashMul : 2f);
         float trapDamage = gunnerDmg * (soTrapMul > 0f ? soTrapMul : 2f);
@@ -965,6 +1016,1040 @@ public class LimitBreakManager : MonoBehaviour
     {
         StartCoroutine(RunLBSession(LBFocus.FireRate, fireRateMult, duration, null));
         GunnerManager.Instance?.HealEquippedPercent(healPct);
+    }
+
+    // Frost Infusion -> instant piercing "needle wave" that damages + slows.
+    // damage is already resolved by the SkillSO (flat or % of gunner dmg).
+    public void ActivateFrostInfusion(
+        string gunnerId,
+        float damage,
+        float length,
+        float width,
+        float slowPct,
+        float slowSeconds,
+        float armorPenetrationPct = 0f,
+        LimitBreakSkillSO skill = null)
+    {
+        StartCoroutine(Co_FrostInfusion(
+            gunnerId, damage, length, width, slowPct, slowSeconds, armorPenetrationPct, skill));
+    }
+
+    private IEnumerator Co_FrostInfusion(
+    string gunnerId,
+    float damage,
+    float length,
+    float width,
+    float slowPct,
+    float slowSeconds,
+    float armorPenetrationPct,
+    LimitBreakSkillSO skill)
+    {
+        // Resolve the slot for this gunner
+        var gm = GunnerManager.Instance;
+        var rt = gm != null ? gm.GetRuntime(gunnerId) : null;
+        int slot = (rt != null) ? rt.EquippedSlot : -1;
+        if (slot < 0) yield break;
+
+        // Find the live turret in the scene
+        BaseTurret turret = FindTurretBySlot(slot);
+        if (turret == null) yield break;
+
+        // Origin: muzzle/rotation point (same as Boil Jet)
+        Transform originT = (turret._rotationPoint != null) ? turret._rotationPoint : turret.transform;
+
+        Vector3 start = originT.position;
+        start = new Vector3(start.x, start.y + 1f, start.z);
+
+        // Aim once at activation time
+        Vector3 aim = GetMouseOnXZ(start.y);
+        Vector3 dir = (aim - start);
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < 0.001f)
+            dir = Vector3.forward;
+
+        dir.Normalize();
+
+        float clampedLen = Mathf.Max(0.25f, length);
+        Vector3 end = start + dir * clampedLen;
+
+        // Quick indicator
+        GameObject lineObj = SpawnLineIndicator(start, end, 0.18f);
+        var lr = (lineObj != null) ? lineObj.GetComponent<LineRenderer>() : null;
+        if (lr != null) lr.startWidth = lr.endWidth = Mathf.Max(0.01f, width);
+
+        // Hit enemies in the line (piercing)
+        int n = EnemiesInLine(start, end, width, _enemyBuf);
+        if (n <= 0) yield break;
+
+        // Store who we slowed so we can restore later
+        // (Local list avoids allocations across frames)
+        List<Enemy> slowed = new List<Enemy>(n);
+
+        for (int i = 0; i < n; i++)
+        {
+            var e = _enemyBuf[i];
+            if (e == null || !e.IsAlive) continue;
+
+            e.TakeDamage(damage, armorPenetrationPct: armorPenetrationPct, isAoe: true);
+
+            if (slowPct > 0f)
+            {
+                e.ReduceMovementSpeed(slowPct);
+                slowed.Add(e);
+            }
+        }
+
+        // Restore slow after duration (IMPORTANT: see note below)
+        if (slowSeconds > 0f && slowed.Count > 0 && slowPct > 0f)
+        {
+            yield return new WaitForSeconds(slowSeconds);
+
+            // Assumption: ReduceMovementSpeed is additive and accepts negative to undo.
+            // If your Enemy implementation clamps or doesn't support negative values,
+            // I’ll show you the alternative fix right after this code section.
+            for (int i = 0; i < slowed.Count; i++)
+            {
+                var e = slowed[i];
+                if (e == null || !e.IsAlive) continue;
+                e.ReduceMovementSpeed(-slowPct);
+            }
+        }
+    }
+
+    // Permafrost Domain → massively slow all enemies for several seconds (no recovery by design)
+    public void ActivatePermafrostDomain(float radius, float slowPct, float durationSeconds)
+    {
+        StartCoroutine(Co_PermafrostDomain(radius, slowPct, durationSeconds));
+    }
+
+    private IEnumerator Co_PermafrostDomain(float radius, float slowPct, float durationSeconds)
+    {
+        // Mark active (if later you want to read this from elsewhere)
+        _permafrostActive = true;
+
+        // IMPORTANT: clear affected set so each cast is independent
+        _permafrostAffected.Clear();
+
+        // Center: use the same “battlefield-ish” convention as other LBs.
+        // CryoBurst uses NearZ + 3f【turn7file9†LimitBreakManager.cs†L16-L18】, so we’ll keep it consistent.
+        Vector3 center = new Vector3(0f, 0f, GridManager.Instance.NearZ + 3f);
+
+        // Optional visual indicator that lasts the whole domain
+        SpawnCircleIndicator(center, radius, durationSeconds);
+
+        float t = durationSeconds;
+
+        // Tick so that enemies spawning during the domain also get slowed,
+        // but each enemy gets slowed only once (prevents stacking).
+        const float tickInterval = 0.15f;
+
+        while (t > 0f)
+        {
+            int n = EnemiesInRadius(center, radius, _enemyBuf);
+
+            for (int i = 0; i < n; i++)
+            {
+                var e = _enemyBuf[i];
+                if (e == null || !e.IsAlive) continue;
+
+                int id = e.GetInstanceID();
+                if (_permafrostAffected.Contains(id)) continue;
+
+                _permafrostAffected.Add(id);
+
+                // Your existing convention: ReduceMovementSpeed(slowPct)【turn7file9†LimitBreakManager.cs†L19-L22】
+                // Since you *want* no recovery, we do not restore later.
+                e.ReduceMovementSpeed(slowPct);
+            }
+
+            float dt = Mathf.Min(tickInterval, t);
+            t -= dt;
+            yield return new WaitForSeconds(dt);
+        }
+
+        _permafrostActive = false;
+    }
+
+    public void ActivateSandstormCollapse(
+    string gunnerId,
+    float dps,
+    float startRadius,
+    float endRadius,
+    float duration,
+    float armorPenetrationPct = 0f,
+    LimitBreakSkillSO skill = null)
+    {
+        StartCoroutine(Co_SandstormCollapse(
+            gunnerId, dps, startRadius, endRadius, duration, armorPenetrationPct, skill));
+    }
+
+    private IEnumerator Co_SandstormCollapse(
+    string gunnerId,
+    float dps,
+    float startRadius,
+    float endRadius,
+    float duration,
+    float armorPenetrationPct,
+    LimitBreakSkillSO skill)
+    {
+        // Safety
+        if (duration <= 0.01f) yield break;
+        dps = Mathf.Max(0f, dps);
+
+        // Center of battlefield (consistent with your other “global center” LBs)
+        Vector3 center = new Vector3(0f, 0f, GridManager.Instance.NearZ + 3f);
+
+        float r0 = Mathf.Max(0f, startRadius);
+        float r1 = Mathf.Max(r0, endRadius);
+
+        // Visual that persists; we’ll scale it manually (so don’t auto-destroy here)
+        GameObject vfx = SpawnCircleIndicator(center, r0, 0f);
+        if (vfx != null)
+            vfx.transform.localScale = new Vector3(r0 * 2f, 1f, r0 * 2f);
+
+        float t = duration;
+
+        while (t > 0f)
+        {
+            // Optional: stop if gunner died (like your Boil Jet safety)
+            var rtCheck = GunnerManager.Instance != null ? GunnerManager.Instance.GetRuntime(gunnerId) : null;
+            if (rtCheck == null || rtCheck.CurrentHealth <= 0f) break;
+
+            float dt = Mathf.Min(Time.deltaTime, t);
+            float u = 1f - (t / duration); // 0 -> 1
+
+            float r = Mathf.Lerp(r0, r1, u);
+
+            if (vfx != null)
+                vfx.transform.localScale = new Vector3(r * 2f, 1f, r * 2f);
+
+            int n = EnemiesInRadius(center, r, _enemyBuf); // your grid query helper :contentReference[oaicite:4]{index=4}
+
+            float damage = dps * dt; // same DPS tick model you already use :contentReference[oaicite:5]{index=5}
+            for (int i = 0; i < n; i++)
+            {
+                var e = _enemyBuf[i];
+                if (e != null && e.IsAlive)
+                    e.TakeDamage(damage, armorPenetrationPct: armorPenetrationPct, isAoe: true);
+            }
+
+            t -= dt;
+            yield return null;
+        }
+
+        if (vfx != null) Destroy(vfx);
+    }
+
+    // Steamblossom Burst → click a spot; spawn multiple LB traps around it
+    public void ActivateSteamblossomBurst(
+        string gunnerId,
+        int trapCount,
+        float spawnRadiusWorld,
+        float trapRadius,
+        float trapDelay,
+        float armorPenetrationPct,
+        float flatTrapDamage,
+        float trapDamagePctOfGunnerDamage,
+        GameObject lbTrapPrefab,
+        int lbPoolSize
+    )
+    {
+        StartCoroutine(Co_SteamblossomBurst_Targeted(
+            gunnerId,
+            trapCount,
+            spawnRadiusWorld,
+            trapRadius,
+            trapDelay,
+            armorPenetrationPct,
+            flatTrapDamage,
+            trapDamagePctOfGunnerDamage,
+            lbTrapPrefab,
+            lbPoolSize
+        ));
+    }
+
+    private IEnumerator Co_SteamblossomBurst_Targeted(
+        string gunnerId,
+        int trapCount,
+        float spawnRadiusWorld,
+        float trapRadius,
+        float trapDelay,
+        float armorPenetrationPct,
+        float flatTrapDamage,
+        float trapDamagePctOfGunnerDamage,
+        GameObject lbTrapPrefab,
+        int lbPoolSize
+    )
+    {
+        // Resolve slot & turret (same style as Cinderslash)
+        var gm = GunnerManager.Instance;
+        var rt = gm != null ? gm.GetRuntime(gunnerId) : null;
+        var so = gm != null ? gm.GetSO(gunnerId) : null;
+        int slot = (rt != null) ? rt.EquippedSlot : -1;
+        if (slot < 0) yield break;
+
+        BaseTurret turret = FindTurretBySlot(slot);
+        if (turret == null) yield break;
+
+        // Guard
+        trapCount = Mathf.Max(1, trapCount);
+        spawnRadiusWorld = Mathf.Max(0f, spawnRadiusWorld);
+        trapRadius = Mathf.Max(0f, trapRadius);
+        trapDelay = Mathf.Max(0f, trapDelay);
+
+        // Pool
+        if (TrapPoolManager.Instance == null || lbTrapPrefab == null)
+        {
+            Debug.LogWarning("[SteamblossomBurst] TrapPoolManager or prefab missing.");
+            yield break;
+        }
+        TrapPoolManager.Instance.InitializePool(lbTrapPrefab, lbPoolSize);
+                
+        // Damage scaling (upgrade-aware)
+        var ctx = new LimitBreakContext
+        {
+            GunnerId = gunnerId,
+            GunnerSO = so,
+            Runtime = rt
+        };
+
+        float gunnerDmg = Mathf.Max(0f, GetEffectiveGunnerDamage(ctx));
+        float perTrapDamage = flatTrapDamage;
+
+
+        if (trapDamagePctOfGunnerDamage > 0f)
+            perTrapDamage = gunnerDmg * (trapDamagePctOfGunnerDamage / 100f);
+
+        perTrapDamage = Mathf.Max(0f, perTrapDamage);
+
+        // Debounce the press that opened LB (same as Cinderslash)
+        if (Mouse.current != null && Mouse.current.leftButton.isPressed)
+            yield return new WaitUntil(() => Mouse.current.leftButton.wasReleasedThisFrame);
+
+        // Live indicator at mouse (snap to cell center)
+        float indicatorRadius = Mathf.Max(spawnRadiusWorld, GridManager.Instance._cellSize * 0.5f);
+        GameObject indicator = null;
+
+        while (true)
+        {
+            Vector3 hover = GetMouseOnXZ(0f);
+            Vector2Int hoverCell = GridManager.Instance.GetGridPosition(hover);
+            Vector3 cellCenter = GridManager.Instance.GetWorldPosition(hoverCell, 0f);
+
+            if (indicator == null) indicator = SpawnCircleIndicator(cellCenter, indicatorRadius, 0f);
+            else
+            {
+                indicator.transform.position = cellCenter;
+                indicator.transform.localScale = new Vector3(indicatorRadius * 2f, 1f, indicatorRadius * 2f);
+            }
+
+            if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                if (indicator != null) Destroy(indicator);
+
+                // Decide which cells get traps
+                int maxCellRadius = WorldRadiusToCellRadius(spawnRadiusWorld);
+                var cells = BuildRingCells(hoverCell, trapCount, maxCellRadius);
+
+                // Place traps
+                for (int i = 0; i < cells.Count; i++)
+                {
+                    Vector2Int c = cells[i];
+                    Vector3 wp = GridManager.Instance.GetWorldPosition(c, 0f);
+
+                    var placed = TrapPoolManager.Instance.PlaceTrap(
+                        wp,       // worldPos
+                        c,        // cell
+                        perTrapDamage,
+                        trapDelay,
+                        trapRadius,
+                        null,     // owner turret is null for LB traps (matches Cinderslash usage)
+                        0f
+                    );
+
+                    if (placed == null)
+                        continue;
+
+                    var lbTrap = placed as LimitBreakTrap;
+                    if (lbTrap != null)
+                    {
+                        lbTrap.ConfigureLB(
+                            absoluteDamage: perTrapDamage,
+                            apPct: Mathf.Clamp(armorPenetrationPct, 0f, 100f),
+                            radiusOverride: trapRadius,
+                            delayOverride: trapDelay
+                        );
+                    }
+                }
+
+                yield break;
+            }
+
+            yield return null;
+        }
+    }
+
+    // 11) Abyssal Hymn → heal all equipped gunners + charge other equipped gunners' limit breaks
+    public void ActivateAbyssalHymn(string casterGunnerId, float healPct, float chargePctOfTargetMax, bool includeCaster = false)
+    {
+        var gm = GunnerManager.Instance;
+        if (gm == null) return;
+
+        // 1) Heal (uses your existing, proven path)
+        gm.HealEquippedPercent(healPct);
+
+        // 2) Charge others
+        foreach (var gid in gm.EnumerateEquippedGunnerIds())
+        {
+            if (string.IsNullOrEmpty(gid)) continue;
+            if (!includeCaster && gid == casterGunnerId) continue;
+
+            var rt = gm.GetRuntime(gid);
+            if (rt == null) continue;
+
+            float add = rt.LimitBreakMax * (Mathf.Max(0f, chargePctOfTargetMax) / 100f);
+            rt.LimitBreakCurrent = Mathf.Min(rt.LimitBreakMax, rt.LimitBreakCurrent + add);
+
+            gm.NotifyLimitBreakChanged(gid);
+        }
+    }
+
+    // ===================== POLEN PULSE =====================
+    // Damages enemies in an AoE once per tick while active (damage is % of gunner damage),
+    // and grants +Range to ALL turrets while active. Clicking ramps both effects.
+
+    public void ActivatePolenPulse(
+    string gunnerId,
+    float duration,
+    float tickInterval,
+    float radiusWorld,
+    float minRangeBoostPct,
+    float maxRangeBoostPct,
+    float minDamagePctOfGunnerDamage,
+    float maxDamagePctOfGunnerDamage,
+    float clickGain,
+    float maxClickCharge,
+    LimitBreakSkillSO skill
+)
+    {
+        StartCoroutine(Co_PolenPulse(
+            gunnerId,
+            duration,
+            tickInterval,
+            radiusWorld,
+            minRangeBoostPct,
+            maxRangeBoostPct,
+            minDamagePctOfGunnerDamage,
+            maxDamagePctOfGunnerDamage,
+            clickGain,
+            maxClickCharge,
+            skill
+        ));
+    }
+
+    private IEnumerator Co_PolenPulse(
+        string gunnerId,
+        float duration,
+        float tickInterval,
+        float radiusWorld,
+        float minRangeBoostPct,
+        float maxRangeBoostPct,
+        float minDmgPct,
+        float maxDmgPct,
+        float clickGain,
+        float maxClickCharge,
+        LimitBreakSkillSO skill
+    )
+    {
+        var gm = GunnerManager.Instance;
+        var rt = gm != null ? gm.GetRuntime(gunnerId) : null;
+        var so = gm != null ? gm.GetSO(gunnerId) : null;
+        int slot = (rt != null) ? rt.EquippedSlot : -1;
+        if (slot < 0) yield break;
+
+        BaseTurret turret = FindTurretBySlot(slot);
+        if (turret == null) yield break;
+
+        // Session bookkeeping (matches your existing event signature)
+        string sessionId = $"{gunnerId}_POLEN_{Time.frameCount}";
+        OnLBSessionStarted?.Invoke(new LBSessionInfo
+        {
+            SessionId = sessionId,
+            DisplayName = (skill != null && !string.IsNullOrWhiteSpace(skill.DisplayName)) ? skill.DisplayName : "Polen Pulse",
+            Icon = (skill != null) ? skill.Icon : null,
+            MaxClickCap = maxClickCharge,
+            BaselinePct = 0f,
+            Focus = LBFocus.None
+        });
+
+
+        // Optional: show indicator ring
+        var ring = SpawnCircleIndicator(turret.transform.position, radiusWorld, duration);
+
+        // Click scaling state
+        float clickCharge = 0f;
+
+        // Save previous range mult so multiple LBs don’t stomp each other
+        float prevRangeMult = TurretRangeMultiplier;
+
+        float tRemaining = duration;
+        float tickLeft = 0f;
+
+        // Debounce activation click
+        if (Mouse.current != null && Mouse.current.leftButton.isPressed)
+            yield return new WaitUntil(() => Mouse.current.leftButton.wasReleasedThisFrame);
+
+        while (tRemaining > 0f)
+        {
+            // Stop if gunner dies mid-LB
+            if (rt != null && rt.IsDead) break;
+
+            // Click to increase more
+            if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+                clickCharge = Mathf.Min(maxClickCharge, clickCharge + Mathf.Max(0f, clickGain));
+
+            float alpha = (maxClickCharge <= 0f) ? 0f : (clickCharge / maxClickCharge);
+
+            float rangeBoostPct = Mathf.Lerp(minRangeBoostPct, maxRangeBoostPct, alpha);
+            TurretRangeMultiplier = prevRangeMult * (1f + (rangeBoostPct / 100f));
+
+            // Tick damage once per interval
+            tickLeft -= Time.deltaTime;
+            if (tickLeft <= 0f)
+            {
+                tickLeft = Mathf.Max(0.05f, tickInterval);
+
+                // Effective gunner damage (upgrade-aware)
+                float gunnerDmg = Mathf.Max(0f, GetEffectiveGunnerDamage(new LimitBreakContext
+                {
+                    GunnerId = gunnerId,
+                    GunnerSO = so,
+                    Runtime = rt
+                }));
+
+                float dmgPct = Mathf.Lerp(minDmgPct, maxDmgPct, alpha);
+                float hitDamage = gunnerDmg * (dmgPct / 100f);
+
+                Vector3 center = turret.transform.position;
+                int n = EnemiesInRadius(center, radiusWorld, _enemyBuf);
+                for (int i = 0; i < n; i++)
+                {
+                    var e = _enemyBuf[i];
+                    if (e != null && e.IsAlive)
+                        e.TakeDamage(hitDamage, armorPenetrationPct: 0f, isAoe: true);
+                }
+            }
+
+            // Session tick event
+            OnLBSessionTick?.Invoke(sessionId, clickCharge, tRemaining, duration);
+
+            tRemaining -= Time.deltaTime;
+            yield return null;
+        }
+
+        // Cleanup
+        TurretRangeMultiplier = prevRangeMult;
+        if (ring != null) Destroy(ring);
+        OnLBSessionEnded?.Invoke(sessionId);
+    }
+
+    // X) Anchor Drop -> click a spot; after a short delay, AoE damage + radial knockback
+    public void ActivateAnchorDrop(
+        float radius,
+        float impactDelay,
+        float knockTime,
+        float knockSpeed,
+        float damage,
+        float armorPenetrationPct,
+        GameObject impactPrefab,
+        float impactPrefabYOffset
+    )
+    {
+        StartCoroutine(Co_AnchorDrop(radius, impactDelay, knockTime, knockSpeed, damage, armorPenetrationPct, impactPrefab, impactPrefabYOffset));
+    }
+
+    private IEnumerator Co_AnchorDrop(
+        float radius,
+        float impactDelay,
+        float knockTime,
+        float knockSpeed,
+        float damage,
+        float armorPenetrationPct,
+        GameObject impactPrefab,
+        float impactPrefabYOffset
+    )
+    {
+        Vector3 aim = GetMouseOnXZ(0f);
+
+        // Visual telegraph
+        SpawnCircleIndicator(aim, radius, 0.25f);
+
+        // Optional VFX
+        if (impactPrefab != null)
+        {
+            Vector3 vfxPos = aim + Vector3.up * impactPrefabYOffset;
+            Instantiate(impactPrefab, vfxPos, Quaternion.identity);
+        }
+
+        if (impactDelay > 0f)
+            yield return new WaitForSeconds(impactDelay);
+
+        int n = EnemiesInRadius(aim, radius, _enemyBuf);
+        for (int i = 0; i < n; i++)
+        {
+            var e = _enemyBuf[i];
+            if (e == null || !e.IsAlive) continue;
+
+            // Radial knockback away from impact
+            Vector3 dir = (e.transform.position - aim);
+            dir.y = 0f;
+
+            if (dir.sqrMagnitude < 0.0001f)
+                dir = Vector3.forward;
+
+            dir = dir.normalized * knockSpeed;
+
+            e.KnockbackVelocity = new Vector2(dir.x, dir.z);
+            e.KnockbackTime = knockTime;
+
+            // AoE damage
+            e.TakeDamage(damage, armorPenetrationPct: armorPenetrationPct, isAoe: true);
+        }
+    }
+
+    public void ActivateLavaArc(
+    LimitBreakContext ctx,
+    GameObject prefab,
+    Vector3 spawnOffset,
+    float totalDuration,
+    float forwardDistance,
+    float sideDistance,
+    float damage,
+    float armorPenetrationPct,
+    float damageRadius,
+    float tickRate,
+    float perEnemyHitInterval,
+    float spinDps
+)
+    {
+        StartCoroutine(Co_LavaArc(
+            ctx, prefab, spawnOffset, totalDuration, forwardDistance, sideDistance,
+            damage, armorPenetrationPct, damageRadius, tickRate, perEnemyHitInterval, spinDps
+        ));
+    }
+
+    private IEnumerator Co_LavaArc(
+        LimitBreakContext ctx,
+        GameObject prefab,
+        Vector3 spawnOffset,
+        float totalDuration,
+        float forwardDistance,
+        float sideDistance,
+        float damage,
+        float armorPenetrationPct,
+        float damageRadius,
+        float tickRate,
+        float perEnemyHitInterval,
+        float spinDps
+    )
+    {
+        // Resolve origin + forward without asking player to aim.
+        // If your ctx exposes a gunner transform, use it. Otherwise fallback to a global origin.
+        Transform originTr = TryGetLimitBreakOrigin(ctx);
+        Vector3 origin = (originTr != null) ? originTr.position : Vector3.zero;
+        Vector3 forward = (originTr != null) ? originTr.forward : Vector3.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+        forward.Normalize();
+
+        // Side direction in XZ
+        Vector3 side = Vector3.Cross(Vector3.up, forward).normalized;
+
+        Vector3 start = origin + spawnOffset;
+
+        // Outbound end point (forward + side)
+        Vector3 outEnd = start + forward * forwardDistance + side * sideDistance;
+
+        // Return uses a different curve so it feels like a boomerang arc
+        Vector3 returnCtrl = start + forward * (forwardDistance * 0.35f) - side * (sideDistance * 1.25f);
+        Vector3 outCtrl = start + forward * (forwardDistance * 0.55f) + side * (sideDistance * 1.1f);
+
+        Transform boomerang = null;
+        if (prefab != null)
+        {
+            var go = Instantiate(prefab, start, Quaternion.LookRotation(forward, Vector3.up));
+            boomerang = go.transform;
+        }
+
+        // Per-enemy hit limiter for THIS activation only
+        var lastHitTime = new System.Collections.Generic.Dictionary<int, float>(128);
+
+        float dt = (tickRate <= 0f) ? 0.02f : (1f / tickRate);
+        float half = Mathf.Max(0.01f, totalDuration * 0.5f);
+
+        // Outbound
+        yield return RunPathProjectile(
+            boomerang,
+            duration: half,
+            step: dt,
+            spinDps: spinDps,
+            pathPos: (t) => QuadraticBezier(start, outCtrl, outEnd, t),
+            damageRadius: damageRadius,
+            damage: damage,
+            armorPenetrationPct: armorPenetrationPct,
+            perEnemyHitInterval: perEnemyHitInterval,
+            lastHitTime: lastHitTime
+        );
+
+        // Return
+        yield return RunPathProjectile(
+            boomerang,
+            duration: half,
+            step: dt,
+            spinDps: spinDps,
+            pathPos: (t) => QuadraticBezier(outEnd, returnCtrl, start, t),
+            damageRadius: damageRadius,
+            damage: damage,
+            armorPenetrationPct: armorPenetrationPct,
+            perEnemyHitInterval: perEnemyHitInterval,
+            lastHitTime: lastHitTime
+        );
+
+        if (boomerang != null)
+            Destroy(boomerang.gameObject);
+    }
+
+    private IEnumerator RunPathProjectile(
+        Transform projectile,
+        float duration,
+        float step,
+        float spinDps,
+        System.Func<float, Vector3> pathPos,
+        float damageRadius,
+        float damage,
+        float armorPenetrationPct,
+        float perEnemyHitInterval,
+        System.Collections.Generic.Dictionary<int, float> lastHitTime
+    )
+    {
+        float t = 0f;
+        while (t < duration)
+        {
+            float u = Mathf.Clamp01(t / duration);
+            Vector3 pos = pathPos(u);
+
+            if (projectile != null)
+            {
+                projectile.position = pos;
+                if (spinDps != 0f)
+                    projectile.Rotate(0f, spinDps * step, 0f, Space.Self);
+            }
+
+            ApplyPathDamageTick(
+                pos,
+                damageRadius,
+                damage,
+                armorPenetrationPct,
+                perEnemyHitInterval,
+                lastHitTime
+            );
+
+            t += step;
+            yield return new WaitForSeconds(step);
+        }
+
+        // Final tick at u=1
+        Vector3 finalPos = pathPos(1f);
+        if (projectile != null) projectile.position = finalPos;
+        ApplyPathDamageTick(finalPos, damageRadius, damage, armorPenetrationPct, perEnemyHitInterval, lastHitTime);
+    }
+
+    private void ApplyPathDamageTick(
+        Vector3 center,
+        float radius,
+        float damage,
+        float armorPenetrationPct,
+        float perEnemyHitInterval,
+        System.Collections.Generic.Dictionary<int, float> lastHitTime
+    )
+    {
+        int n = EnemiesInRadius(center, radius, _enemyBuf);
+        float now = Time.time;
+
+        for (int i = 0; i < n; i++)
+        {
+            var e = _enemyBuf[i];
+            if (e == null || !e.IsAlive) continue;
+
+            int id = e.GetInstanceID();
+            if (perEnemyHitInterval > 0f && lastHitTime.TryGetValue(id, out float last))
+            {
+                if ((now - last) < perEnemyHitInterval)
+                    continue;
+            }
+
+            lastHitTime[id] = now;
+            e.TakeDamage(damage, armorPenetrationPct: armorPenetrationPct, isAoe: true);
+        }
+    }
+
+    private static Vector3 QuadraticBezier(Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        float u = 1f - t;
+        return (u * u * a) + (2f * u * t * b) + (t * t * c);
+    }
+
+    // Try to keep origin resolution generic / expandable.
+    // Replace this with whatever your project uses consistently.
+    private Transform TryGetLimitBreakOrigin(LimitBreakContext ctx)
+    {
+        // Use zero position for now.
+        return transform;
+
+    }
+
+    public void ActivateRustExecution(string gunnerId, float damageMultiplier, float armorPenetrationPct)
+    {
+        StartCoroutine(Co_RustExecution(gunnerId, damageMultiplier, armorPenetrationPct));
+    }
+
+    private IEnumerator Co_RustExecution(string gunnerId, float damageMultiplier, float armorPenetrationPct)
+    {
+        // Resolve gunner
+        var gm = GunnerManager.Instance;
+        var rt = gm != null ? gm.GetRuntime(gunnerId) : null;
+        var so = gm != null ? gm.GetSO(gunnerId) : null;
+        if (rt == null || so == null) yield break;
+
+        // Dead gunners shouldn't execute
+        if (rt.CurrentHealth <= 0f) yield break;
+
+        // Effective gunner damage (same approach as Cinderslash)
+        float gunnerDmg = Mathf.Max(0f, GetEffectiveGunnerDamage(new LimitBreakContext
+        {
+            GunnerId = gunnerId,
+            GunnerSO = so,
+            Runtime = rt
+        }));
+
+        float dmg = gunnerDmg * Mathf.Max(0f, damageMultiplier);
+
+        // Live circular indicator at mouse, snapped to cell size (same as Cinderslash)
+        float cellSize = GridManager.Instance._cellSize;
+
+        // Keep this small so it really feels like "click the enemy"
+        float pickRadius = Mathf.Max(cellSize * 0.5f, 0.75f);
+
+        GameObject indicator = null;
+
+        while (true)
+        {
+            Vector3 hover = GetMouseOnXZ(0f);
+            Vector2Int hoverCell = GridManager.Instance.GetGridPosition(hover);
+            Vector3 cellCenter = GridManager.Instance.GetWorldPosition(hoverCell, 0f);
+
+            if (indicator == null) indicator = SpawnCircleIndicator(cellCenter, pickRadius, 0f);
+            else
+            {
+                indicator.transform.position = cellCenter;
+                indicator.transform.localScale = new Vector3(pickRadius * 2f, 1f, pickRadius * 2f);
+            }
+
+            if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                // Find enemies near the clicked cell center
+                int n = EnemiesInRadius(cellCenter, pickRadius, _enemyBuf);
+
+                Enemy target = null;
+
+                // Choose the "best" enemy inside the click radius.
+                // This matches "click an enemy" in a no-collider world:
+                // pick closest to the click point.
+                float bestSqr = float.PositiveInfinity;
+
+                for (int i = 0; i < n; i++)
+                {
+                    var e = _enemyBuf[i];
+                    if (e == null || !e.IsAlive) continue;
+
+                    float sqr = (e.transform.position - cellCenter).sqrMagnitude;
+                    if (sqr < bestSqr)
+                    {
+                        bestSqr = sqr;
+                        target = e;
+                    }
+                }
+
+                // If no enemy was clicked, keep waiting (same UX as requested)
+                if (target == null)
+                    continue;
+
+                if (indicator != null) Destroy(indicator);
+
+                // Execute: single target, massive damage, ignore armor
+                target.TakeDamage(dmg, armorPenetrationPct: armorPenetrationPct, isAoe: false);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+
+    }
+
+    public void ActivatePressureSync(float fireRateMultiplier, float duration, float healPct, LimitBreakSkillSO skill)
+    {
+        // Heal gunners (exact same pattern as Heat Vent)
+        GunnerManager.Instance?.HealEquippedPercent(healPct);
+
+        // Fire rate buff uses your existing LB session system
+        ActivateFireRateBoost(fireRateMultiplier, duration, skill);
+    }
+
+    public void ActivateColdExecution(
+    string gunnerId,
+    float range,
+    float angleDeg,
+    float damageMultiplier,
+    float armorPenetrationPct,
+    float slowPct,
+    float slowSeconds
+)
+    {
+        StartCoroutine(Co_ColdExecution(gunnerId, range, angleDeg, damageMultiplier, armorPenetrationPct, slowPct, slowSeconds));
+    }
+
+    private IEnumerator Co_ColdExecution(
+        string gunnerId,
+        float range,
+        float angleDeg,
+        float damageMultiplier,
+        float armorPenetrationPct,
+        float slowPct,
+        float slowSeconds
+    )
+    {
+        var gm = GunnerManager.Instance;
+        var rt = gm != null ? gm.GetRuntime(gunnerId) : null;
+        var so = gm != null ? gm.GetSO(gunnerId) : null;
+        if (rt == null || so == null) yield break;
+
+        // Use the turret slot forward as the cone direction if possible
+        int slot = rt.EquippedSlot;
+        BaseTurret turret = (slot >= 0) ? FindTurretBySlot(slot) : null;
+
+        Vector3 origin = (turret != null) ? turret.transform.position : new Vector3(0f, 0f, GridManager.Instance.NearZ + 2f);
+        Vector3 forward = (turret != null) ? turret.transform.forward : Vector3.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+        forward.Normalize();
+
+        // Compute damage from effective gunner damage (same as Cinderslash/Rust Execution)
+        float gunnerDmg = Mathf.Max(0f, GetEffectiveGunnerDamage(new LimitBreakContext
+        {
+            GunnerId = gunnerId,
+            GunnerSO = so,
+            Runtime = rt
+        }));
+
+        float dmg = gunnerDmg * Mathf.Max(0f, damageMultiplier);
+
+        // Broad phase
+        int n = EnemiesInRadius(origin, range, _enemyBuf);
+        float cosThreshold = Mathf.Cos(Mathf.Deg2Rad * (angleDeg * 0.5f));
+
+        // Track slowed enemies so we can restore later
+        List<Enemy> slowed = null;
+        if (slowSeconds > 0f && slowPct > 0f) slowed = new List<Enemy>(n);
+
+        for (int i = 0; i < n; i++)
+        {
+            var e = _enemyBuf[i];
+            if (e == null || !e.IsAlive) continue;
+
+            Vector3 to = e.transform.position - origin;
+            to.y = 0f;
+            if (to.sqrMagnitude < 0.0001f) continue;
+
+            Vector3 dir = to.normalized;
+            float dot = Vector3.Dot(forward, dir);
+            if (dot < cosThreshold) continue;
+
+            e.TakeDamage(dmg, armorPenetrationPct: armorPenetrationPct, isAoe: true);
+
+            if (slowed != null)
+            {
+                e.ReduceMovementSpeed(slowPct); // SAME as Permafrost Domain
+                slowed.Add(e);
+            }
+        }
+
+        if (slowed != null && slowed.Count > 0)
+        {
+            yield return new WaitForSeconds(slowSeconds);
+
+            // Your existing convention elsewhere: pass negative to undo
+            for (int i = 0; i < slowed.Count; i++)
+            {
+                var e = slowed[i];
+                if (e == null || !e.IsAlive) continue;
+                e.ReduceMovementSpeed(-slowPct);
+            }
+        }
+    }
+
+
+    #endregion
+
+    // Helper for trap placement
+    private int WorldRadiusToCellRadius(float worldRadius)
+    {
+        float cell = Mathf.Max(0.0001f, GridManager.Instance._cellSize);
+        return Mathf.Max(0, Mathf.RoundToInt(worldRadius / cell));
+    }
+
+    /// <summary>
+    /// Deterministic spread: center, then rings around it.
+    /// Avoids random so the feel is consistent and testable.
+    /// </summary>
+    private List<Vector2Int> BuildRingCells(Vector2Int center, int count, int maxCellRadius)
+    {
+        var result = new List<Vector2Int>(count);
+
+        // Always include center first
+        result.Add(center);
+        if (count == 1) return result;
+
+        int r = 1;
+        while (result.Count < count && r <= Mathf.Max(1, maxCellRadius))
+        {
+            // square ring perimeter
+            for (int x = -r; x <= r && result.Count < count; x++)
+            {
+                result.Add(new Vector2Int(center.x + x, center.y + r));
+                if (result.Count >= count) break;
+                result.Add(new Vector2Int(center.x + x, center.y - r));
+            }
+
+            for (int y = -r + 1; y <= r - 1 && result.Count < count; y++)
+            {
+                result.Add(new Vector2Int(center.x + r, center.y + y));
+                if (result.Count >= count) break;
+                result.Add(new Vector2Int(center.x - r, center.y + y));
+            }
+
+            r++;
+        }
+
+        // If maxCellRadius was small and we still need more, just keep expanding.
+        while (result.Count < count)
+        {
+            result.Add(new Vector2Int(center.x + r, center.y));
+            r++;
+        }
+
+        return result;
     }
 
 

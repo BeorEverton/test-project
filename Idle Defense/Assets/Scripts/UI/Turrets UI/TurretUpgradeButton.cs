@@ -81,11 +81,13 @@ namespace Assets.Scripts.UI
             UpdateInteractableState();
         }
 
+        /* Removed to show fire rate on the turret
         private void Update()
         {
             if (_upgradeType == TurretUpgradeType.FireRate)
                 UpdateFireRateCooldownUI();
         }
+        */
 
         private void UpdateFireRateCooldownUI()
         {

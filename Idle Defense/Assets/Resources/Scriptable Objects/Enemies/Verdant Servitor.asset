@@ -21,8 +21,9 @@ MonoBehaviour:
   IsFlying: 0
   CoinDropAmount: 9
   CurrencyDropType: 0
-  CoinDropMultiplierByWaveCount: 2.2
+  CoinDropMultiplierByWaveCount: 1.01
   HealthMultiplierByWaveCount: 1.05
+  DamageMultiplierByWaveCount: 1.05
   Damage: 3
   AttackRange: 0.3
   AttackRangeDifference: 0.1
@@ -47,9 +48,9 @@ MonoBehaviour:
   SummonPrefab: {fileID: 0}
   SummonPrewarmCount: 0
   SummonType: 0
-  SummonCount: 10
-  SummonStreamInterval: 5
-  SummonForwardDepth: 0.8
-  SummonXJitter: 0.5
-  SummonFirstDelay: 0.75
-  SummonCooldown: 0
+  SummonCount: 0
+  SummonStreamInterval: 10
+  SummonForwardDepth: 5
+  SummonXJitter: 0.8
+  SummonFirstDelay: 0.5
+  SummonCooldown: 0.75

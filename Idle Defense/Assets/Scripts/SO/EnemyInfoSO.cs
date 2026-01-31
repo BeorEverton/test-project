@@ -23,10 +23,14 @@ namespace Assets.Scripts.SO
         public Currency CurrencyDropType;
 
         [Header("Wave Multipliers")]
-        [Tooltip("CoinDrop = Ceil(CoinDrop * coinDropmultiplier) (Default = 1.05, 5% increase per wave)")]
-        public float CoinDropMultiplierByWaveCount = 1.05f;
-        [Tooltip("Maxhealth += waveCount * healthMultiplier (Default = 2)")]
-        public float HealthMultiplierByWaveCount = 2f;
+        [Tooltip("Coin Drop = Ceil(Coin Drop Amount * coinDropMultiplier) every wave. Meaning a 5% increase per wave if value is 1.05")]
+        public float CoinDropMultiplierByWaveCount = 1.0f;
+
+        [Tooltip("MaxHealth += waveCount * healthAddPerWave (Default = 2)")]
+        public float HealthMultiplierByWaveCount = 2.0f;
+
+        [Tooltip("Damage += waveCount * damageAddPerWave (Default = 0). Use additive scaling for spreadsheet-friendly tuning.")]
+        public float DamageMultiplierByWaveCount = 0.0f;
 
         [Header("Attack stats")]
         [Tooltip("Damage dealth to the player per attack")]

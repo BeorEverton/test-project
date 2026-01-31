@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eed2d6401ebd334592d07186c1e18e9, type: 3}
+  m_Name: GunnerUnlockTable
+  m_EditorClassIdentifier: 
+  Entries:
+  - Gunner: {fileID: 11400000, guid: 9fb2637e38e3dff4b9497b4ec2b09994, type: 2}
+    GunnerId: GUN_08
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 8f33b4a5ffca55c4dbe5ca63f520d1e9, type: 2}
+    GunnerId: GUN_06
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 62208ed68f3a3a947ae3f727119519aa, type: 2}
+    GunnerId: 
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 7756b2b769263e240ba9b448e511127d, type: 2}
+    GunnerId: GUN_20
+    WaveToUnlock: 0
+    unlockCost: 1
+    unlockCurrency: 2
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: f9d04fb61667cbc489ef6c6002e1bf99, type: 2}
+    GunnerId: GUN_05
+    WaveToUnlock: 0
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 6faf60742f13ec84494171a2d3516fee, type: 2}
+    GunnerId: GUN_13
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 083f4088afa8b3548a036dc90f677f6e, type: 2}
+    GunnerId: GUN_01
+    WaveToUnlock: 0
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 36b63cf0c29032047ae7f5be5a7d6550, type: 2}
+    GunnerId: GUN_16
+    WaveToUnlock: 0
+    unlockCost: 1
+    unlockCurrency: 2
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 80b26fc02be121e468d388f11d809132, type: 2}
+    GunnerId: GUN_07
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: a699f5c68e18698419cf3515021ff095, type: 2}
+    GunnerId: GUN_02
+    WaveToUnlock: 0
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: d65bf1ef3d9a76847a1e62430696b544, type: 2}
+    GunnerId: GUN_09
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 0f486ad138ca82c48b34c20ad315546d, type: 2}
+    GunnerId: GUN_17
+    WaveToUnlock: 0
+    unlockCost: 1
+    unlockCurrency: 2
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: b9b3803ef567fb04980ac675c4b21068, type: 2}
+    GunnerId: GUN_04
+    WaveToUnlock: 0
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 09296cf8dd28b5c4892e4f0af0092ad6, type: 2}
+    GunnerId: GUN_11
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 01176e7a44629aa4c956c4fa680bc6aa, type: 2}
+    GunnerId: GUN_14
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 567882ff8dde3464fa7ceaa576b122da, type: 2}
+    GunnerId: GUN_19
+    WaveToUnlock: 0
+    unlockCost: 1
+    unlockCurrency: 2
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: 1a5178e3eed82a148a383265329a84e7, type: 2}
+    GunnerId: GUN_18
+    WaveToUnlock: 0
+    unlockCost: 1
+    unlockCurrency: 2
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: a3005ea37dee3e14697e4420a78d99bf, type: 2}
+    GunnerId: GUN_03
+    WaveToUnlock: 0
+    unlockCost: 10000
+    unlockCurrency: 0
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: edf6c666799b382478102d669ff66c90, type: 2}
+    GunnerId: GUN_12
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0
+  - Gunner: {fileID: 11400000, guid: ae903d89a902b2b4e867403284d8d473, type: 2}
+    GunnerId: GUN_15
+    WaveToUnlock: 0
+    unlockCost: 5000
+    unlockCurrency: 1
+    RequirePrestigeUnlock: 0

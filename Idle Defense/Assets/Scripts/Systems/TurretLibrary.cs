@@ -15,7 +15,7 @@ namespace Assets.Scripts.Systems
     /// </summary>
     public class TurretLibrary : MonoBehaviour
     {
-        [Header("Resources paths (change if you use a different structure)")]
+        [Header("Resources paths")]
         [SerializeField] private string infoFolder = "Scriptable Objects/Turrets";
         [SerializeField] private string prefabFolder = "Turrets from Interfaces";
 

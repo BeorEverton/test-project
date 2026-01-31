@@ -8,8 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Bubble
-  m_Shader: {fileID: -6465566751694194690, guid: 44645333006018f4e956743e3ee99f61,
-    type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 44645333006018f4e956743e3ee99f61, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -54,7 +53,7 @@ Material:
     - _ShadowSharpness: 0.9
     - _ShadowSize: 0.534
     - _ShadowStrength: 0.782
-    - _SpecularSize: -0.441
+    - _SpecularSize: -0.107
     - _SrcBlend: 1
     - _Surface: 1
     - _WorkflowMode: 0
@@ -62,8 +61,8 @@ Material:
     - _ZWrite: 0
     - _ZWriteControl: 0
     m_Colors:
-    - _Color: {r: 0.80339986, g: 0.9622641, b: 0.95591384, a: 0.019607844}
-    - _Specular: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.79698133, g: 0, b: 1, a: 1}
+    - _Specular: {r: 1, g: 0, b: 0.718277, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &363034625437609637

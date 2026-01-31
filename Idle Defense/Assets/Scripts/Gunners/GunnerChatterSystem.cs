@@ -50,6 +50,17 @@ public class GunnerChatterSystem : MonoBehaviour
     [Tooltip("Chance the listener replies on two-person chats.")]
     [SerializeField, Range(0f, 1f)] private float replyChance = 1f; // default always reply
 
+    [Header("Rate Limiting (Real Time)")]
+    [Tooltip("Minimum real seconds between ANY two chat lines globally (prevents spam when fire rate/timeScale is high).")]
+    [SerializeField, Min(0f)] private float MinRealSecondsBetweenAnyChat = 4f;
+
+    [Tooltip("Minimum real seconds between lines from the SAME speaker.")]
+    [SerializeField, Min(0f)] private float MinRealSecondsBetweenSameSpeaker = 10.0f;
+
+    private float _nextGlobalSpeakAtUnscaled = 0f;
+    private readonly Dictionary<string, float> _nextSpeakerSpeakAtUnscaled = new Dictionary<string, float>();
+
+
     private float _timer;
     private GunnerAffinityStore _affinity = new GunnerAffinityStore();
     public static GunnerChatterSystem Instance { get; private set; }
@@ -75,11 +86,11 @@ public class GunnerChatterSystem : MonoBehaviour
 
     public void TriggerEvent(GunnerEvent evt, GunnerSO actor, GunnerSO optionalOther = null, float? chanceOverride = null)
     {
-        // Only allow chatter from OWNED gunners; ignore unowned actors entirely.
-        if (actor == null || !IsOwned(actor)) return;
+        // Only allow chatter from OWNED + ALIVE gunners.
+        if (actor == null || !IsOwnedAndAlive(actor)) return;
 
-        // If the "other" isn’t owned, treat as no listener.
-        if (optionalOther != null && !IsOwned(optionalOther))
+        // If the "other" isn’t owned+alive, treat as no listener.
+        if (optionalOther != null && !IsOwnedAndAlive(optionalOther))
             optionalOther = null;
 
         float p = chanceOverride.HasValue ? Mathf.Clamp01(chanceOverride.Value) : EventAutoChatChance;
@@ -109,10 +120,11 @@ public class GunnerChatterSystem : MonoBehaviour
     /// <summary>Speak a combat line now (no event gate), null-safe.</summary>
     public static void TryForceCombat(GunnerSO speaker, GunnerSO listener = null)
     {
-        if (Instance == null || speaker == null) return;
-        // Guard against unowned speakers/listeners.
-        if (!Instance.IsOwned(speaker)) return;
-        if (listener != null && !Instance.IsOwned(listener)) listener = null;
+        if (Instance == null || speaker == null) return;        
+        // Guard against unowned OR dead speakers/listeners.
+        if (!Instance.IsOwnedAndAlive(speaker)) return;
+        if (listener != null && !Instance.IsOwnedAndAlive(listener)) listener = null;
+
 
         Instance.TrySpeakFromList(speaker, listener, speaker.CombatChatPhrases);
     }
@@ -161,13 +173,13 @@ public class GunnerChatterSystem : MonoBehaviour
             // Equipped implies owned, but we still hard-filter to be safe.
             pool = GunnerManager.Instance
                 .GetAllEquippedGunners()
-                .Where(IsOwned)
+                .Where(IsOwnedAndAlive)
                 .ToList();
         }
         else
         {
             // Fallback to ActiveGunners but still filter to owned.
-            pool = (ActiveGunners ?? new List<GunnerSO>()).Where(IsOwned).ToList();
+            pool = (ActiveGunners ?? new List<GunnerSO>()).Where(IsOwnedAndAlive).ToList();
         }
 
         if (pool == null || pool.Count < 2) return;
@@ -203,9 +215,10 @@ public class GunnerChatterSystem : MonoBehaviour
 
         // Only allow idle chat from gunners the player OWNS.
         var pool = GunnerManager.Instance
-            .GetAllIdleGunners() // not equipped & not on quest
-            .Where(IsOwned)
+            .GetAllIdleGunners() // not equipped & not on quest (also not dead by IsAvailable())
+            .Where(IsOwnedAndAlive)
             .ToList();
+
 
         if (pool == null || pool.Count == 0) return;
 
@@ -217,6 +230,19 @@ public class GunnerChatterSystem : MonoBehaviour
     {
         return (so != null && GunnerManager.Instance != null && GunnerManager.Instance.IsOwned(so.GunnerId));
     }
+
+    private bool IsAlive(GunnerSO so)
+    {
+        if (so == null || GunnerManager.Instance == null) return false;
+        var rt = GunnerManager.Instance.GetRuntime(so.GunnerId);
+        return rt != null && !rt.IsDead;
+    }
+
+    private bool IsOwnedAndAlive(GunnerSO so)
+    {
+        return IsOwned(so) && IsAlive(so);
+    }
+
 
     private GunnerSO PickPartnerFromPool(GunnerSO a, List<GunnerSO> pool)
     {
@@ -281,11 +307,23 @@ public class GunnerChatterSystem : MonoBehaviour
     private bool TrySpeakFromList(GunnerSO speaker, GunnerSO listener, List<string> pool)
     {
         if (speaker == null || pool == null || pool.Count == 0) return false;
+        if (speechUIBehaviour == null) return false;
+
+        // Hard safety: never let dead/unowned speakers talk (covers ForcePraise/ForceNegative too)
+        if (!IsOwnedAndAlive(speaker)) return false;
+
+        // Listener might have died between selection and display; treat as no listener.
+        if (listener != null && !IsOwnedAndAlive(listener))
+            listener = null;
+
+        // Real-time limiter (timeScale independent)
+        if (!CanSpeakNow(speaker)) return false;
 
         // If no listener, avoid phrases that require a *name* token.
         List<string> candidates = (listener == null || string.IsNullOrEmpty(nameToken))
             ? pool
             : pool;
+
 
         if (listener == null && !string.IsNullOrEmpty(nameToken))
             candidates = pool.Where(p => !string.IsNullOrEmpty(p) && !p.Contains(nameToken)).ToList();
@@ -296,7 +334,9 @@ public class GunnerChatterSystem : MonoBehaviour
         string line = FormatLine(raw, speaker, listener);
 
         speechUIBehaviour.ShowLine(speaker, listener, line);
+        MarkSpoke(speaker);
         return true;
+
     }
 
 
@@ -333,6 +373,10 @@ public class GunnerChatterSystem : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(replyDelaySeconds);
 
+        // They might have died during the delay. Hard stop if speaker/replier is no longer valid.
+        if (!IsOwnedAndAlive(replier)) yield break;
+        if (originalSpeaker != null && !IsOwnedAndAlive(originalSpeaker)) yield break;
+
         // Try matching tone; then combat; then idle.
         List<string> pool = replyPositive ? replier.PraisePhrases : replier.NegativePhrases;
 
@@ -342,7 +386,39 @@ public class GunnerChatterSystem : MonoBehaviour
 
         // small mutual affinity nudge for successful exchanges
         LearnAffinity(replier, originalSpeaker, +AffinityGainPerChat * 0.25f);
+
     }
+
+    private bool CanSpeakNow(GunnerSO speaker)
+    {
+        if (speaker == null) return false;
+
+        float now = Time.unscaledTime;
+
+        if (MinRealSecondsBetweenAnyChat > 0f && now < _nextGlobalSpeakAtUnscaled)
+            return false;
+
+        if (MinRealSecondsBetweenSameSpeaker > 0f
+            && _nextSpeakerSpeakAtUnscaled.TryGetValue(speaker.GunnerId, out float nextAt)
+            && now < nextAt)
+            return false;
+
+        return true;
+    }
+
+    private void MarkSpoke(GunnerSO speaker)
+    {
+        if (speaker == null) return;
+
+        float now = Time.unscaledTime;
+
+        if (MinRealSecondsBetweenAnyChat > 0f)
+            _nextGlobalSpeakAtUnscaled = now + MinRealSecondsBetweenAnyChat;
+
+        if (MinRealSecondsBetweenSameSpeaker > 0f)
+            _nextSpeakerSpeakAtUnscaled[speaker.GunnerId] = now + MinRealSecondsBetweenSameSpeaker;
+    }
+
 }
 
 public enum GunnerEvent

@@ -38,42 +38,44 @@ namespace Assets.Editor
             "CoinDropMultiplierByWaveCount", // 11
             // Attack stats
             "Damage",                 // 12
-            "AttackRange",            // 13
-            "AttackRangeDifference",  // 14
-            "AttackSpeed",            // 15
-            "SweepTargets",           // 16
+            "DamageMultiplierByWaveCount", // 13  NEW
+            "AttackRange",            // 14
+            "AttackRangeDifference",  // 15
+            "AttackSpeed",            // 16
+            "SweepTargets",           // 17
             // Defense
-            "Armor",                  // 17
-            "DodgeChance",            // 18
-            "ShieldCharges",          // 19
+            "Armor",                  // 18
+
+            "DodgeChance",            // 19
+            "ShieldCharges",          // 20
             // Exploder
-            "ExploderEnabled",        // 20
-            "ExploderDelay",          // 21
-            "ExploderRadius",         // 22
-            "ExploderMaxGunners",     // 23
+            "ExploderEnabled",        // 21
+            "ExploderDelay",          // 22
+            "ExploderRadius",         // 23
+            "ExploderMaxGunners",     // 24
             // Healer
-            "HealerEnabled",          // 24
-            "HealerCooldown",         // 25
-            "HealerHealPctOfMaxHP",   // 26
-            "HealerRadius",           // 27
-            "HealerMaxTargets",       // 28
+            "HealerEnabled",          // 25
+            "HealerCooldown",         // 26
+            "HealerHealPctOfMaxHP",   // 27
+            "HealerRadius",           // 28
+            "HealerMaxTargets",       // 29
             // Kamikaze
-            "KamikazeOnReach",        // 29
-            "KamikazeRadius",         // 30
-            "KamikazeMaxGunners",     // 31
+            "KamikazeOnReach",        // 30
+            "KamikazeRadius",         // 31
+            "KamikazeMaxGunners",     // 32
             // Summoner
-            "SummonerEnabled",        // 32
-            "SummonPrefabAssetPath",  // 33 optional (can be empty)
-            "SummonPrewarmCount",     // 34
-            "SummonType",             // 35
-            "SummonCount",            // 36
-            "SummonStreamInterval",   // 37
+            "SummonerEnabled",        // 33
+            "SummonPrefabAssetPath",  // 34 optional (can be empty)
+            "SummonPrewarmCount",     // 35
+            "SummonType",             // 36
+            "SummonCount",            // 37
+            "SummonStreamInterval",   // 38
             // Summon Placement
-            "SummonForwardDepth",     // 38
-            "SummonXJitter",          // 39
+            "SummonForwardDepth",     // 39
+            "SummonXJitter",          // 40
             // Summon Timing
-            "SummonFirstDelay",       // 40
-            "SummonCooldown"          // 41
+            "SummonFirstDelay",       // 41
+            "SummonCooldown"          // 42
         };
 
         // ===== MENU =====
@@ -155,36 +157,37 @@ namespace Assets.Editor
 
                 // Attack
                 enemyInfo.Damage = ParseFloat(cols[12]);
-                enemyInfo.AttackRange = ParseFloat(cols[13]);
-                enemyInfo.AttackRangeDifference = ParseFloat(cols[14]);
-                enemyInfo.AttackSpeed = ParseFloat(cols[15]);
-                enemyInfo.SweepTargets = Mathf.Clamp(ParseInt(cols[16], 1), 1, 5);
+                enemyInfo.DamageMultiplierByWaveCount = ParseFloat(cols[13]); // NEW
+                enemyInfo.AttackRange = ParseFloat(cols[14]);
+                enemyInfo.AttackRangeDifference = ParseFloat(cols[15]);
+                enemyInfo.AttackSpeed = ParseFloat(cols[16]);
+                enemyInfo.SweepTargets = Mathf.Clamp(ParseInt(cols[17], 1), 1, 5);
 
                 // Defense
-                enemyInfo.Armor = Mathf.Clamp01(ParseFloat(cols[17]));
-                enemyInfo.DodgeChance = Mathf.Clamp01(ParseFloat(cols[18]));
-                enemyInfo.ShieldCharges = Mathf.Max(0, ParseInt(cols[19]));
+                enemyInfo.Armor = Mathf.Clamp01(ParseFloat(cols[18]));
+                enemyInfo.DodgeChance = Mathf.Clamp01(ParseFloat(cols[19]));
+                enemyInfo.ShieldCharges = Mathf.Max(0, ParseInt(cols[20]));
 
                 // Exploder
-                enemyInfo.ExploderEnabled = ParseBool(cols[20]);
-                enemyInfo.ExploderDelay = ParseFloat(cols[21]);
-                enemyInfo.ExploderRadius = ParseFloat(cols[22]);
-                enemyInfo.ExploderMaxGunners = Mathf.Clamp(ParseInt(cols[23], 1), 1, 5);
+                enemyInfo.ExploderEnabled = ParseBool(cols[21]);
+                enemyInfo.ExploderDelay = ParseFloat(cols[22]);
+                enemyInfo.ExploderRadius = ParseFloat(cols[23]);
+                enemyInfo.ExploderMaxGunners = Mathf.Clamp(ParseInt(cols[24], 1), 1, 5);
 
                 // Healer
-                enemyInfo.HealerEnabled = ParseBool(cols[24]);
-                enemyInfo.HealerCooldown = ParseFloat(cols[25]);
-                enemyInfo.HealerHealPctOfMaxHP = Mathf.Clamp01(ParseFloat(cols[26]));
-                enemyInfo.HealerRadius = ParseFloat(cols[27]);
-                enemyInfo.HealerMaxTargets = Mathf.Max(0, ParseInt(cols[28]));
+                enemyInfo.HealerEnabled = ParseBool(cols[25]);
+                enemyInfo.HealerCooldown = ParseFloat(cols[26]);
+                enemyInfo.HealerHealPctOfMaxHP = Mathf.Clamp01(ParseFloat(cols[27]));
+                enemyInfo.HealerRadius = ParseFloat(cols[28]);
+                enemyInfo.HealerMaxTargets = Mathf.Max(0, ParseInt(cols[29]));
 
                 // Kamikaze
-                enemyInfo.KamikazeOnReach = ParseBool(cols[29]);
-                enemyInfo.KamikazeRadius = ParseFloat(cols[30]);
-                enemyInfo.KamikazeMaxGunners = Mathf.Clamp(ParseInt(cols[31], 1), 1, 5);
+                enemyInfo.KamikazeOnReach = ParseBool(cols[30]);
+                enemyInfo.KamikazeRadius = ParseFloat(cols[31]);
+                enemyInfo.KamikazeMaxGunners = Mathf.Clamp(ParseInt(cols[32], 1), 1, 5);
 
                 // Summoner
-                enemyInfo.SummonerEnabled = ParseBool(cols[32]);
+                enemyInfo.SummonerEnabled = ParseBool(cols[33]);
 
                 string prefabPath = cols[33].Trim();
                 if (!string.IsNullOrEmpty(prefabPath))
@@ -259,49 +262,51 @@ namespace Assets.Editor
 
                 // Attack
                 row[12] = e.Damage.ToString(CI);
-                row[13] = e.AttackRange.ToString(CI);
-                row[14] = e.AttackRangeDifference.ToString(CI);
-                row[15] = e.AttackSpeed.ToString(CI);
-                row[16] = e.SweepTargets.ToString(CI);
+                row[13] = e.DamageMultiplierByWaveCount.ToString(CI); // NEW
+                row[14] = e.AttackRange.ToString(CI);
+                row[15] = e.AttackRangeDifference.ToString(CI);
+                row[16] = e.AttackSpeed.ToString(CI);
+                row[17] = e.SweepTargets.ToString(CI);
 
                 // Defense
-                row[17] = e.Armor.ToString(CI);
-                row[18] = e.DodgeChance.ToString(CI);
-                row[19] = e.ShieldCharges.ToString(CI);
+                row[18] = e.Armor.ToString(CI);
+                row[19] = e.DodgeChance.ToString(CI);
+                row[20] = e.ShieldCharges.ToString(CI);
+
 
                 // Exploder
-                row[20] = e.ExploderEnabled ? "TRUE" : "FALSE";
-                row[21] = e.ExploderDelay.ToString(CI);
-                row[22] = e.ExploderRadius.ToString(CI);
-                row[23] = e.ExploderMaxGunners.ToString(CI);
+                row[21] = e.ExploderEnabled ? "TRUE" : "FALSE";
+                row[22] = e.ExploderDelay.ToString(CI);
+                row[23] = e.ExploderRadius.ToString(CI);
+                row[24] = e.ExploderMaxGunners.ToString(CI);
 
                 // Healer
-                row[24] = e.HealerEnabled ? "TRUE" : "FALSE";
-                row[25] = e.HealerCooldown.ToString(CI);
-                row[26] = e.HealerHealPctOfMaxHP.ToString(CI);
-                row[27] = e.HealerRadius.ToString(CI);
-                row[28] = e.HealerMaxTargets.ToString(CI);
+                row[25] = e.HealerEnabled ? "TRUE" : "FALSE";
+                row[26] = e.HealerCooldown.ToString(CI);
+                row[27] = e.HealerHealPctOfMaxHP.ToString(CI);
+                row[28] = e.HealerRadius.ToString(CI);
+                row[29] = e.HealerMaxTargets.ToString(CI);
 
                 // Kamikaze
-                row[29] = e.KamikazeOnReach ? "TRUE" : "FALSE";
-                row[30] = e.KamikazeRadius.ToString(CI);
-                row[31] = e.KamikazeMaxGunners.ToString(CI);
+                row[30] = e.KamikazeOnReach ? "TRUE" : "FALSE";
+                row[31] = e.KamikazeRadius.ToString(CI);
+                row[32] = e.KamikazeMaxGunners.ToString(CI);
 
                 // Summoner
-                row[32] = e.SummonerEnabled ? "TRUE" : "FALSE";
-                row[33] = SafeAssetPath(e.SummonPrefab); // SummonPrefabAssetPath
-                row[34] = e.SummonPrewarmCount.ToString(CI);
-                row[35] = e.SummonType.ToString();
-                row[36] = e.SummonCount.ToString(CI);
-                row[37] = e.SummonStreamInterval.ToString(CI);
+                row[33] = e.SummonerEnabled ? "TRUE" : "FALSE";
+                row[34] = SafeAssetPath(e.SummonPrefab); // SummonPrefabAssetPath
+                row[35] = e.SummonPrewarmCount.ToString(CI);
+                row[36] = e.SummonType.ToString();
+                row[37] = e.SummonCount.ToString(CI);
+                row[38] = e.SummonStreamInterval.ToString(CI);
 
                 // Summon placement
-                row[38] = e.SummonForwardDepth.ToString(CI);
-                row[39] = e.SummonXJitter.ToString(CI);
+                row[39] = e.SummonForwardDepth.ToString(CI);
+                row[40] = e.SummonXJitter.ToString(CI);
 
                 // Summon timing
-                row[40] = e.SummonFirstDelay.ToString(CI);
-                row[41] = e.SummonCooldown.ToString(CI);
+                row[41] = e.SummonFirstDelay.ToString(CI);
+                row[42] = e.SummonCooldown.ToString(CI);
 
                 lines.Add(JoinCsv(row));
             }

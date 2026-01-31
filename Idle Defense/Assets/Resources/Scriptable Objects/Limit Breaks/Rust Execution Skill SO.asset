@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec1ba39fe6eeaa44b93487b2432778cc, type: 3}
+  m_Name: Rust Execution Skill SO
+  m_EditorClassIdentifier: 
+  Type: 0
+  DisplayName: Rust Execution
+  Description: Strikes the target for a massic damage, ignores armor
+  Icon: {fileID: 0}
+  Duration: 8
+  Magnitude: 1.5
+  ClickMaxBonusPct: 100
+  BaselinePct: 0
+  DamageMultiplier: 8
+  ArmorPenetrationPct: 100

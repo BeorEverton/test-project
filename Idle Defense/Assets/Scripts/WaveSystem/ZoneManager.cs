@@ -38,6 +38,20 @@ namespace Assets.Scripts.WaveSystem
         [Tooltip("Hard cap on TOTAL enemies per wave across all entries. 0 = no cap.")]
         [SerializeField] private int _maxEnemiesPerWave = 10000;
 
+        // -------------------------
+        // Plateau knobs (editor + runtime tuning)
+        // -------------------------
+        [SerializeField] private int _bossInterval = 10;
+
+        // how strong the "new tier" jump is (applied once you enter the tier)
+        [SerializeField] private float _plateauSpikeBase = 1.25f;
+
+        // per-wave growth inside the tier (0.01 = +1% per wave)
+        [SerializeField] private float _plateauStepPerWave = 0.01f;
+
+        // exponent for the tier base wave power (10^1.3 etc.)
+        [SerializeField] private float _plateauWavePowerExponent = 1.3f;
+
 
         /// <summary>Called when the active zone changes (for visuals, music, etc.).</summary>
         public event Action<ZoneDefinitionSO> OnZoneChanged;
@@ -163,6 +177,7 @@ namespace Assets.Scripts.WaveSystem
             {
                 wave.AddEnemyClassToWave(info.EnemyId, info);
             }
+
 
             return wave;
         }
@@ -376,29 +391,86 @@ namespace Assets.Scripts.WaveSystem
         {
             EnemyInfoSO clonedInfo = UnityEngine.Object.Instantiate(enemy.Info);
 
-            // --- Health Plateaued Scaling (original logic) ---
+            // -------------------------
+            // 1) Base scaling using EnemyInfoSO wave multipliers
+            // -------------------------
+            int wave = Mathf.Max(1, globalIndex);
+
+            // Health (additive)
             float baseHealth = clonedInfo.MaxHealth;
-            int bossInterval = 10;
-            int bossIndex = globalIndex / bossInterval;
-            int plateauBaseWave = bossIndex * bossInterval;
+            float healthAddPerWave = Mathf.Max(0f, clonedInfo.HealthMultiplierByWaveCount);
+            clonedInfo.MaxHealth = baseHealth + (wave * healthAddPerWave);
 
-            float spikeMultiplier = Mathf.Pow(1.25f, bossIndex);
-            float plateauMultiplier = 1f + ((globalIndex - plateauBaseWave) * 0.01f);
-            float wavePower = Mathf.Pow(plateauBaseWave > 0 ? plateauBaseWave : 1f, 1.3f);
+            // Damage (additive)
+            float baseDamage = clonedInfo.Damage;
+            float dmgAddPerWave = Mathf.Max(0f, clonedInfo.DamageMultiplierByWaveCount);
+            clonedInfo.Damage = baseDamage + (wave * dmgAddPerWave);
 
-            clonedInfo.MaxHealth = baseHealth * wavePower * spikeMultiplier * plateauMultiplier;
+            // Coins (compounding)
+            ulong baseCoin = clonedInfo.CoinDropAmount;
+            float coinMul = Mathf.Max(0f, clonedInfo.CoinDropMultiplierByWaveCount);
+            if (coinMul <= 0f) coinMul = 1f;
 
-            // Apply prestige enemy health multiplier (single place)
+            double coinScaledDouble = baseCoin * System.Math.Pow(coinMul, wave - 1);
+            if (coinScaledDouble < 0) coinScaledDouble = 0;
+            if (coinScaledDouble > ulong.MaxValue) coinScaledDouble = ulong.MaxValue;
+            clonedInfo.CoinDropAmount = (ulong)System.Math.Ceiling(coinScaledDouble);
+
+
+            // -------------------------
+            // 2) Plateau tier scaling (starts AFTER boss wave)
+            //    tier = (wave-1)/bossInterval => wave 11 enters tier 1
+            // -------------------------
+            int bossInterval = Mathf.Max(1, _bossInterval);
+            int tier = (wave - 1) / bossInterval;
+
+            if (tier > 0)
+            {
+                int tierBaseWave = tier * bossInterval;           // 10, 20, 30...
+                int intra = wave - tierBaseWave;                  // 1..bossInterval (wave 11 => intra=1)
+
+                float spikeMultiplier = Mathf.Pow(_plateauSpikeBase, tier);
+                float plateauMultiplier = 1f + ((intra - 1) * _plateauStepPerWave);
+                float wavePower = Mathf.Pow(tierBaseWave, _plateauWavePowerExponent);
+
+                float plateauFactor = wavePower * spikeMultiplier * plateauMultiplier;
+
+                clonedInfo.MaxHealth *= plateauFactor;
+                clonedInfo.Damage *= plateauFactor;
+
+                double c2 = clonedInfo.CoinDropAmount * (double)(wavePower * spikeMultiplier * plateauMultiplier);
+                if (c2 > ulong.MaxValue) c2 = ulong.MaxValue;
+                    clonedInfo.CoinDropAmount = (ulong)System.Math.Ceiling(c2);
+            }
+
+            // Prestige enemy health multiplier (existing behavior)
             var pm = PrestigeManager.Instance;
             if (pm != null)
             {
                 clonedInfo.MaxHealth *= pm.GetEnemyHealthMultiplier();
             }
 
-            // You can extend scaling for damage / coins here later if desired.
+            // Global formula multipliers (JSON). Applied on top of per-enemy scaling + plateau.            
+            var fm = BalanceFormulaManager.Instance;
+            if (fm != null)
+            {
+                float hMul = fm.GetEnemyHealthMultiplier(globalIndex);
+                float dMul = fm.GetEnemyDamageMultiplier(globalIndex);
+                float cMul = fm.GetEnemyCoinMultiplier(globalIndex);
+
+                clonedInfo.MaxHealth *= hMul;
+                clonedInfo.Damage *= dMul;
+
+                double coins = clonedInfo.CoinDropAmount * (double)cMul;
+                if (coins > ulong.MaxValue) coins = ulong.MaxValue;
+                if (coins < 0) coins = 0;
+                clonedInfo.CoinDropAmount = (ulong)System.Math.Ceiling(coins);
+            }
+
 
             return clonedInfo;
         }
+
 
         #endregion
     }

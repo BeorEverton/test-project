@@ -26,6 +26,9 @@ namespace Assets.Scripts.UI
         [SerializeField] private TMP_Text waveText;      // "Wave 20"
         [SerializeField] private TMP_Text priceText;     // "$5 000"
         [SerializeField] private Button buyButton;     // same click as slot
+        [Header("Fire Rate Indicator")]
+        [SerializeField] private GameObject fireRateIndicator;
+
 
         /* ----------- turret prefab setup ------------------------ */
         [Header("Turret prefab")]
@@ -46,6 +49,12 @@ namespace Assets.Scripts.UI
 
         private GameObject spawned;
 
+        [Header("Selection Indicator")]
+        [SerializeField] private GameObject selectedIndicator;
+
+        // Tracks the currently selected slot button, so we can turn off the old indicator.
+        private static SlotWorldButton _currentSelected;
+
         /* --------------------------------------------------------- */
 
         private void Start()
@@ -55,6 +64,8 @@ namespace Assets.Scripts.UI
 
         private void Initialize()
         {
+            SetSelectedVisual(false);
+
             TurretSlotManager.Instance.OnEquippedChanged += RefreshSlot;
             WaveManager.Instance.OnWaveStarted += OnWaveStart;
 
@@ -72,12 +83,16 @@ namespace Assets.Scripts.UI
 
             if (WaveManager.Instance != null)
                 WaveManager.Instance.OnWaveStarted -= OnWaveStart;
+
+            if (_currentSelected == this)
+                _currentSelected = null;
+
         }
 
         /* ---------------- main click ----------------------------- */
 
         public void OnSlotClicked()
-        {
+        {            
             // Intercept Gunner equip flow first
             if (GunnerEquipFlow.Instance != null && GunnerEquipFlow.Instance.IsAwaitingSlotSelection)
             {
@@ -111,7 +126,7 @@ namespace Assets.Scripts.UI
                     return;
                 }
 
-                GunnerEquipFlow.Instance.CompleteSelection();
+                GunnerEquipFlow.Instance.CompleteSelection();     
 
                 // Refresh overlay/panel states if needed
                 UpdateOverlay();
@@ -119,6 +134,15 @@ namespace Assets.Scripts.UI
                 return;
             }
 
+            // Selection indicator: disable previous, enable this one
+            if (_currentSelected != this)
+            {
+                if (_currentSelected != null)
+                    _currentSelected.SetSelectedVisual(false);
+
+                _currentSelected = this;
+            }
+            SetSelectedVisual(true);
 
             UIManager.Instance.DeactivateRightPanels();
 
@@ -182,12 +206,18 @@ namespace Assets.Scripts.UI
 
         }
 
+        private void SetSelectedVisual(bool selected)
+        {
+            if (selectedIndicator != null)
+                selectedIndicator.SetActive(selected);
+        }
+
+
         /* ------------- refresh when slot state changes ----------- */
 
         private void RefreshSlot(int changed, TurretStatsInstance inst)
         {
-            //Debug.Log("[SlotWorldButton] Refreshing slot " + changed);            
-
+            //Debug.Log("[SlotWorldButton] Refreshing slot " + changed);                        
             if (changed != slotIndex)
                 return;
 
@@ -206,6 +236,9 @@ namespace Assets.Scripts.UI
                 if (noTurretHint != null)
                     noTurretHint.SetActive(true);
 
+                if (fireRateIndicator != null)
+                    fireRateIndicator.SetActive(false);
+
                 // INFORM GunnerManager: no turret present -> park any equipped gunner on this slot
                 if (GunnerManager.Instance != null)
                     GunnerManager.Instance.NotifyTurretPresent(slotIndex, barrelAnchor, hasTurret: false);
@@ -223,7 +256,7 @@ namespace Assets.Scripts.UI
 
             // Try to reuse the GameObject if it already exists
             GameObject go = TurretInventoryManager.Instance.GetGameObjectForInstance(equippedTurret.Runtime);
-            BaseTurret baseTurret = new BaseTurret();
+            BaseTurret baseTurret = null;
             if (go == null)
             {
                 // Fallback: instantiate and register
@@ -254,6 +287,9 @@ namespace Assets.Scripts.UI
                 baseTurret.BindToGunnerManager(slotIndex);
                 baseTurret.SlotIndex = slotIndex;
             }
+
+            if (fireRateIndicator != null)
+                fireRateIndicator.SetActive(true);
 
             // Attach gunner visual above the turret, if a gunner is equipped for this slot
             GunnerManager.Instance.AttachEquippedGunnerVisual(slotIndex, barrelAnchor);
@@ -393,5 +429,18 @@ namespace Assets.Scripts.UI
             visibilityWrapper.SetActive(shouldBeVisible);
             UpdateColor();
         }
+
+        /// <summary>
+        /// Used by the fire rate ring UI to get the current turret in this slot.
+        /// </summary>
+        public BaseTurret CurrentTurret
+        {
+            get
+            {
+                if (spawned == null) return null;
+                return spawned.GetComponent<BaseTurret>();
+            }
+        }
+
     }
 }

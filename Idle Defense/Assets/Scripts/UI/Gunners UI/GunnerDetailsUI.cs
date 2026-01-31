@@ -28,7 +28,8 @@ public class GunnerDetailsUI : MonoBehaviour
     public TextMeshProUGUI pointsText; // shows available skill points for this gunner
 
     [Header("Center")]
-    public Image portraitImage;            // big gunner art
+    public RawImage portraitRender;                 // shows RenderTexture from preview camera
+    [SerializeField] private GunnerUIPreviewRenderer previewRenderer; // spawns the 3D model + decor
     public Button prevButton;
     public Button nextButton;
 
@@ -65,6 +66,35 @@ public class GunnerDetailsUI : MonoBehaviour
     public event Action Closed;
 
     private bool _isOpen = false;
+
+    [System.Serializable]
+    public struct RegionDecorationEntry
+    {
+        public GunnerArea region;
+        public GameObject decorationPrefab;
+    }
+
+    [Header("3D Preview - Region Decor")]
+    [SerializeField] private RegionDecorationEntry[] regionDecorations;
+
+    // Optional tuning (keeps it UI-only and easy to tweak per-screen)
+    [SerializeField] private Vector3 decorationLocalPos = Vector3.zero;
+    [SerializeField] private Vector3 decorationLocalEuler = Vector3.zero;
+    [SerializeField] private Vector3 decorationLocalScale = Vector3.one;
+
+    private GameObject GetDecorationPrefabForRegion(GunnerArea region)
+    {
+        if (regionDecorations == null) return null;
+
+        for (int i = 0; i < regionDecorations.Length; i++)
+        {
+            if (regionDecorations[i].region == region)
+                return regionDecorations[i].decorationPrefab;
+        }
+
+        return null;
+    }
+
 
     // local working
     private GunnerSO _so;
@@ -111,6 +141,9 @@ public class GunnerDetailsUI : MonoBehaviour
         if (!_isOpen) return;
 
         UnwireListeners();
+
+        if (previewRenderer != null)
+            previewRenderer.Clear();
 
         SetVisible(false);
         _isOpen = false;
@@ -229,8 +262,35 @@ public class GunnerDetailsUI : MonoBehaviour
         }
         if (xpValueText) xpValueText.text = Mathf.FloorToInt(curXp) + " / " + Mathf.FloorToInt(nextXp);
 
-        // Center
-        if (portraitImage) portraitImage.sprite = so.gunnerSprite;
+        // Center (3D preview instead of sprite)
+        bool owned = GunnerManager.Instance != null && GunnerManager.Instance.IsOwned(so.GunnerId);
+        bool purchasableNow = GunnerManager.Instance != null && GunnerManager.Instance.IsPurchasableNow(so.GunnerId);
+
+        // "Locked" means: not owned AND not purchasable (wave gate or prestige gate)
+        bool isLocked = !owned && !purchasableNow;
+
+        // If you want prestige-locked to also be silhouette even when wave is reached,
+        // swap the logic to: isLocked = !owned && GunnerManager.Instance.RequiresPrestigeUnlock(so.GunnerId) && !PrestigeManager.Instance.IsGunnerUnlocked(so.GunnerId);
+
+        if (previewRenderer != null)
+        {
+            // Assumes GunnerSO has ModelPrefab already (your GunnerManager uses so.ModelPrefab) :contentReference[oaicite:1]{index=1}
+            previewRenderer.Show(
+                so.ModelPrefab,
+                localPos: Vector3.zero,
+                localEuler: Vector3.zero,
+                localScale: Vector3.one,
+                locked: isLocked
+            );
+        }
+        // Region decoration is UI-only: map region enum -> prefab here
+        // Assumes your GunnerSO has a region enum field: so.Region
+        var decoPrefab = GetDecorationPrefabForRegion(so.Area);
+        if (previewRenderer != null)
+        {
+            previewRenderer.SetDecorations(decoPrefab, decorationLocalPos, decorationLocalEuler, decorationLocalScale);
+        }
+
 
         // Limit Break UI (always go through the registry)
         LimitBreakSkillSO lb = (LimitBreakManager.Instance != null)

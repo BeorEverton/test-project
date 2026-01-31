@@ -22,4 +22,7 @@ MonoBehaviour:
   ClickMaxBonusPct: 100
   BaselinePct: 0
   BeamWidth: 1.25
-  DPS: 50
+  DpsPctOfGunnerDamage: 200
+  FlatDPS: 50
+  MinDPS: 20
+  MaxDPS: 999999
