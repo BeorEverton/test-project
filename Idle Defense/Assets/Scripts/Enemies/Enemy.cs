@@ -5,6 +5,7 @@ using Assets.Scripts.UI;
 using Assets.Scripts.WaveSystem;
 using DamageNumbersPro;
 using DG.Tweening;
+using FSG.MeshAnimator;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -103,6 +104,7 @@ namespace Assets.Scripts.Enemies
         private void OnEnable()
         {
             ResetEnemy();
+            GetComponentInChildren<MeshAnimatorBase>()?.Play("WalkForward");
             LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
             GridManager.Instance.AddEnemy(this);
 
