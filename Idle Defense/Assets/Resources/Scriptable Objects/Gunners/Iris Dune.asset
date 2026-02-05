@@ -23,16 +23,16 @@ MonoBehaviour:
   Tier: 2
   gunnerSprite: {fileID: 21300000, guid: a7bbd4882270de94685090fa6a1799d9, type: 3}
   ModelPrefab: {fileID: 11587335015441105, guid: afe81f8fced4d9644a5524fde6ec8609, type: 3}
-  ModelOffsetOnTurret: {x: 0, y: 0, z: 0}
+  ModelOffsetOnTurret: {x: 0, y: 0, z: -0.35}
   RunSpeed: 6
-  ArrivalSnapDistance: 0.05
+  ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
   IdlePhrases: []
   PraisePhrases: []
   NegativePhrases: []
   CombatChatPhrases: []
-  BaseHealth: 400
-  BaseDamage: 1100
+  BaseHealth: 500
+  BaseDamage: 50
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0

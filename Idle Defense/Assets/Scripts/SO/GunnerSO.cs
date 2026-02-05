@@ -22,9 +22,9 @@ public class GunnerSO : ScriptableObject
 
     [Header("3D Model")]
     public GameObject ModelPrefab;
-    public Vector3 ModelOffsetOnTurret = new Vector3(0f, 0f, 0f);
+    public Vector3 ModelOffsetOnTurret = new Vector3(0f, 0f, -.35f);
     public float RunSpeed = 6f;
-    public float ArrivalSnapDistance = 0.05f;
+    public float ArrivalSnapDistance = 0.2f;
     public GameObject LimitBreakReadyVfx; // spawned on model when LB is full
 
     [Header("Flavor")]

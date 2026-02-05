@@ -1,0 +1,140 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2befe85aa3a74b44998715041c867c7e, type: 3}
+  m_Name: GUN_12
+  m_EditorClassIdentifier: 
+  GunnerId: GUN_12
+  DisplayName: Seren Veilwright
+  backgroundDescription: A priestess of the Furnace Guild who treats heat as divine
+    essence. She guides soldiers through exhaustion, her vapor chants keeping rhythm.
+    Faith and fire flow as one through her veins.
+  Area: 3
+  Mood: 1
+  Class: 4
+  Tier: 2
+  gunnerSprite: {fileID: 0}
+  ModelPrefab: {fileID: 638801424468080422, guid: 1c7d3532f7e336f42a63cd5d0d84924a, type: 3}
+  ModelOffsetOnTurret: {x: 0, y: 0, z: -0.35}
+  RunSpeed: 6
+  ArrivalSnapDistance: 0.2
+  LimitBreakReadyVfx: {fileID: 0}
+  IdlePhrases: []
+  PraisePhrases: []
+  NegativePhrases: []
+  CombatChatPhrases: []
+  BaseHealth: 3250
+  BaseDamage: 1750
+  BaseFireRate: 0
+  BaseRange: 0
+  BaseDamagePerSecPctBonus: 0
+  BaseSlowEffect: 0
+  BaseCriticalChance: 0
+  BaseCriticalDamage: 0
+  BaseKnockback: 0
+  BaseSplash: 0
+  BasePierceChance: 0
+  BasePierceFalloff: 0
+  BaseArmorPenetration: 0
+  LimitBreakSkill: {fileID: 11400000, guid: 4aa475d93a75dca409831bdef3be8ee6, type: 2}
+  XpCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 10
+      inSlope: 0
+      outSlope: 20.20408
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 50
+      value: 1000
+      inSlope: 20.20408
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  SkillPointsPerLevel: 1
+  StartingUnlocked: 0000000001000000
+  LevelUnlocks: []
+  UpgradeRules:
+  - Stat: 0
+    Mode: 0
+    AmountPerLevel: 5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 1
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 2
+    Mode: 0
+    AmountPerLevel: 0.05
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 3
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 4
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 5
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 6
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 7
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 8
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 9
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 10
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 11
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 12
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100

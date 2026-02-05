@@ -62,14 +62,9 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aaae5908fdf8ea9418670e132663bbf7, type: 3}
---- !u!137 &2296274551133600964 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1086420344386417637, guid: aaae5908fdf8ea9418670e132663bbf7, type: 3}
-  m_PrefabInstance: {fileID: 1210830607462862625}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &6406966494491495166 stripped
+--- !u!4 &893062987823431679 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 5199302490717177311, guid: aaae5908fdf8ea9418670e132663bbf7, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2065305100829405406, guid: aaae5908fdf8ea9418670e132663bbf7, type: 3}
   m_PrefabInstance: {fileID: 1210830607462862625}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4804659468570338985
@@ -83,7 +78,7 @@ PrefabInstance:
     - target: {fileID: 9021600297004719242, guid: e5603cf5deb556d45a8ba8be7d20a3f0, type: 3}
       propertyPath: targetRenderer
       value: 
-      objectReference: {fileID: 2296274551133600964}
+      objectReference: {fileID: 0}
     - target: {fileID: 9190963545131561838, guid: e5603cf5deb556d45a8ba8be7d20a3f0, type: 3}
       propertyPath: m_Avatar
       value: 
@@ -150,8 +145,8 @@ PrefabInstance:
     - {fileID: 5974671289373584747, guid: e5603cf5deb556d45a8ba8be7d20a3f0, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 9190963545141370088, guid: e5603cf5deb556d45a8ba8be7d20a3f0, type: 3}
-      insertIndex: 0
-      addedObject: {fileID: 6406966494491495166}
+      insertIndex: -1
+      addedObject: {fileID: 893062987823431679}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e5603cf5deb556d45a8ba8be7d20a3f0, type: 3}
 --- !u!4 &4404882117338430017 stripped

@@ -1,0 +1,140 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2befe85aa3a74b44998715041c867c7e, type: 3}
+  m_Name: GUN_07
+  m_EditorClassIdentifier: 
+  GunnerId: GUN_07
+  DisplayName: Kera Vale
+  backgroundDescription: "A seasoned bounty diver who hunts rogue bots beneath the
+    waves. She trusts only the sea and her chainblade\u2019s rhythm. Her silence
+    hides a fierce loyalty to her lost crew."
+  Area: 1
+  Mood: 0
+  Class: 0
+  Tier: 2
+  gunnerSprite: {fileID: 21300000, guid: d7091f6e1c3cdd749bff1eb5eb1df141, type: 3}
+  ModelPrefab: {fileID: 2816652136078810338, guid: 1953b57e4538bc948930243e082cb206, type: 3}
+  ModelOffsetOnTurret: {x: 0, y: 0, z: -0.35}
+  RunSpeed: 6
+  ArrivalSnapDistance: 0.2
+  LimitBreakReadyVfx: {fileID: 0}
+  IdlePhrases: []
+  PraisePhrases: []
+  NegativePhrases: []
+  CombatChatPhrases: []
+  BaseHealth: 3000
+  BaseDamage: 2000
+  BaseFireRate: 0
+  BaseRange: 0
+  BaseDamagePerSecPctBonus: 0
+  BaseSlowEffect: 0
+  BaseCriticalChance: 0
+  BaseCriticalDamage: 0
+  BaseKnockback: 0
+  BaseSplash: 0
+  BasePierceChance: 0
+  BasePierceFalloff: 0
+  BaseArmorPenetration: 0
+  LimitBreakSkill: {fileID: 11400000, guid: 10959be55903d1349ac005d9f80912d0, type: 2}
+  XpCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 10
+      inSlope: 0
+      outSlope: 20.20408
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 50
+      value: 1000
+      inSlope: 20.20408
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  SkillPointsPerLevel: 1
+  StartingUnlocked: 0000000001000000
+  LevelUnlocks: []
+  UpgradeRules:
+  - Stat: 0
+    Mode: 0
+    AmountPerLevel: 5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 1
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 2
+    Mode: 0
+    AmountPerLevel: 0.05
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 3
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 4
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 5
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 6
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 7
+    Mode: 0
+    AmountPerLevel: 1
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 8
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 9
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 10
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100
+  - Stat: 11
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 0
+  - Stat: 12
+    Mode: 0
+    AmountPerLevel: 0.5
+    MinValue: 0
+    MaxValue: 100

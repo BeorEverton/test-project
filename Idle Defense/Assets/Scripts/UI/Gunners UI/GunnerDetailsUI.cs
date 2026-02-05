@@ -28,8 +28,9 @@ public class GunnerDetailsUI : MonoBehaviour
     public TextMeshProUGUI pointsText; // shows available skill points for this gunner
 
     [Header("Center")]
-    public RawImage portraitRender;                 // shows RenderTexture from preview camera
-    [SerializeField] private GunnerUIPreviewRenderer previewRenderer; // spawns the 3D model + decor
+    public Image gunnerPreviewImage;          // shows static sprite 
+    //public RawImage portraitRender;                 // shows RenderTexture from preview camera
+    //[SerializeField] private GunnerUIPreviewRenderer previewRenderer; // spawns the 3D model + decor
     public Button prevButton;
     public Button nextButton;
 
@@ -142,8 +143,8 @@ public class GunnerDetailsUI : MonoBehaviour
 
         UnwireListeners();
 
-        if (previewRenderer != null)
-            previewRenderer.Clear();
+        /*if (previewRenderer != null)
+            previewRenderer.Clear();*/
 
         SetVisible(false);
         _isOpen = false;
@@ -261,18 +262,18 @@ public class GunnerDetailsUI : MonoBehaviour
             xpSlider.value = Mathf.Clamp(curXp, 0f, nextXp);
         }
         if (xpValueText) xpValueText.text = Mathf.FloorToInt(curXp) + " / " + Mathf.FloorToInt(nextXp);
-
-        // Center (3D preview instead of sprite)
+               
         bool owned = GunnerManager.Instance != null && GunnerManager.Instance.IsOwned(so.GunnerId);
         bool purchasableNow = GunnerManager.Instance != null && GunnerManager.Instance.IsPurchasableNow(so.GunnerId);
 
         // "Locked" means: not owned AND not purchasable (wave gate or prestige gate)
         bool isLocked = !owned && !purchasableNow;
 
-        // If you want prestige-locked to also be silhouette even when wave is reached,
-        // swap the logic to: isLocked = !owned && GunnerManager.Instance.RequiresPrestigeUnlock(so.GunnerId) && !PrestigeManager.Instance.IsGunnerUnlocked(so.GunnerId);
+        gunnerPreviewImage.sprite = so.gunnerSprite;
+        if (owned) gunnerPreviewImage.color = Color.white;
+        else gunnerPreviewImage.color = Color.black; // Can't see details if locked
 
-        if (previewRenderer != null)
+        /*if (previewRenderer != null)
         {
             // Assumes GunnerSO has ModelPrefab already (your GunnerManager uses so.ModelPrefab) :contentReference[oaicite:1]{index=1}
             previewRenderer.Show(
@@ -289,8 +290,7 @@ public class GunnerDetailsUI : MonoBehaviour
         if (previewRenderer != null)
         {
             previewRenderer.SetDecorations(decoPrefab, decorationLocalPos, decorationLocalEuler, decorationLocalScale);
-        }
-
+        }*/
 
         // Limit Break UI (always go through the registry)
         LimitBreakSkillSO lb = (LimitBreakManager.Instance != null)
