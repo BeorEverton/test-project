@@ -27,12 +27,52 @@ MonoBehaviour:
   RunSpeed: 6
   ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
-  IdlePhrases: []
-  PraisePhrases: []
-  NegativePhrases: []
-  CombatChatPhrases: []
-  BaseHealth: 500
-  BaseDamage: 50
+  IdlePhrases:
+  - Life always returns
+  - Rust is only a season
+  - Every vine remembers the sun
+  - The land still listens
+  - Growth answers every wound
+  - Green will reclaim all things
+  - Even steel feeds the soil
+  - Spores carry tomorrow
+  - Nothing truly dies here
+  - This world still dreams
+  PraisePhrases:
+  - The land smiles on you *name*
+  - Your actions nurture life *name*
+  - That growth was true *name*
+  - You tend the future *name*
+  - Well shaped *name*
+  - The vines answer you *name*
+  - Your will aligns *name*
+  - Renewal flows through you *name*
+  - You help the world remember *name*
+  - Bloom onward *name*
+  NegativePhrases:
+  - That path withers *name*
+  - You cut too deep *name*
+  - Growth faltered *name*
+  - Do not force renewal *name*
+  - The soil resists haste *name*
+  - That choice scars the land *name*
+  - Balance slipped *name*
+  - Let life breathe *name*
+  - You strained the roots *name*
+  - Try again with care *name*
+  CombatChatPhrases:
+  - Let life rise
+  - Roots awaken
+  - Spores take hold
+  - The land reclaims
+  - Bloom and endure
+  - Green answers steel
+  - Restoration spreads
+  - Nothing stays barren
+  - Life presses on
+  - Rebirth begins
+  BaseHealth: 35000
+  BaseDamage: 65000
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -52,7 +92,7 @@ MonoBehaviour:
       time: 1
       value: 10
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 20.20408
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -60,7 +100,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 50
       value: 1000
-      inSlope: 20.204082
+      inSlope: 20.20408
       outSlope: 0
       tangentMode: 0
       weightedMode: 0

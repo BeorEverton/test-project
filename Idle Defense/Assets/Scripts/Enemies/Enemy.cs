@@ -90,15 +90,105 @@ namespace Assets.Scripts.Enemies
 
         // Movement
         public Vector3 MoveDirection;
+        [SerializeField] private Animator _animator;
+        [SerializeField] private string _animMovingBool = "Idle";
+        [SerializeField] private string _animAttackTrigger = "Attack";
+        [SerializeField] private string _animSkillTrigger = "Skill";
+
+        private int _animMovingHash;
+        private int _animAttackHash;
+        private int _animSkillHash;
+
+        // Boss unique stuff
+        public enum BossDeathExplosionMode { AlliesOnly, GunnersOnly, Both }
+
+        private BossDeathExplosionMode _bossDeathExplosionMode = BossDeathExplosionMode.AlliesOnly;
+        public void SetBossDeathExplosionMode(BossDeathExplosionMode mode) => _bossDeathExplosionMode = mode;
+
+        public float MovementLockTimer { get; private set; }
+        public bool IsMovementLocked => MovementLockTimer > 0f;
+
+        // Runtime multipliers 
+        private float _speedMultRT = 1f;
+        private float _damageMultRT = 1f;
+        private float _armorDeltaRT = 0f;
+        private float _dodgeDeltaRT = 0f;
+
+        private float _buffTimer = 0f;
+
+        // Expose read-only access for manager
+        public float SpeedMultRT => _speedMultRT;
+        public float DamageMultRT => _damageMultRT;
+        public float ArmorDeltaRT => _armorDeltaRT;
+        public float DodgeDeltaRT => _dodgeDeltaRT;
+
+        public void ApplyTimedBuff(
+            float speedMult,
+            float damageMult,
+            float armorDelta,
+            float dodgeDelta,
+            float durationSeconds)
+        {
+            _speedMultRT = (speedMult <= 0f) ? 1f : speedMult;
+            _damageMultRT = (damageMult <= 0f) ? 1f : damageMult;
+            _armorDeltaRT = armorDelta;
+            _dodgeDeltaRT = dodgeDelta;
+            _buffTimer = Mathf.Max(0.01f, durationSeconds);
+        }
+
+        public void TickRuntimeBuffs(float dt)
+        {
+            if (_buffTimer <= 0f) return;
+
+            _buffTimer -= dt;
+            if (_buffTimer <= 0f)
+            {
+                _speedMultRT = 1f;
+                _damageMultRT = 1f;
+                _armorDeltaRT = 0f;
+                _dodgeDeltaRT = 0f;
+            }
+        }
+
 
         private void Awake()
         {
             if (_body != null)
                 _bodyOriginalLocalPos = _body.localPosition;
+
             if (hitFlash == null)
                 hitFlash = GetComponentInChildren<HitFlashOverlay>();
+
             EnemyDeathEffect = GetComponent<EnemyDeathEffect>();
+
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>(true);
+
+            _animMovingHash = Animator.StringToHash(_animMovingBool);
+            _animAttackHash = Animator.StringToHash(_animAttackTrigger);
+            _animSkillHash = Animator.StringToHash(_animSkillTrigger);
         }
+
+        public void SetAnimIdle(bool isIdle)
+        {
+            if (_animator == null) return;
+            _animator.SetBool(_animMovingHash, isIdle);
+        }
+
+        public void TriggerAnimAttack()
+        {
+            if (_animator == null) return;
+            _animator.ResetTrigger(_animAttackHash);
+            _animator.SetTrigger(_animAttackHash);
+        }
+
+        public void TriggerAnimSkill()
+        {
+            if (_animator == null) return;
+            _animator.ResetTrigger(_animSkillHash);
+            _animator.SetTrigger(_animSkillHash);
+        }
+
 
         private void OnEnable()
         {
@@ -125,6 +215,13 @@ namespace Assets.Scripts.Enemies
         private void OnDisable()
         {
             IsBossInstance = false;
+            if (EnemyManager.Instance != null)
+            {
+                EnemyManager.Instance.ClearPendingSkill(this);
+                EnemyManager.Instance.ClearPendingAttack(this);
+            }
+
+
             GridManager.Instance.RemoveEnemy(this, LastGridPos);
         }
 
@@ -142,9 +239,9 @@ namespace Assets.Scripts.Enemies
             }
 
             // 1) Optional Dodge (skip if AOE)
-            if (!isAoe && _info != null && _info.DodgeChance > 0f)
+            if (!isAoe && _info != null && _info.DodgeChance + _dodgeDeltaRT > 0f)
             {
-                if (Random.value < Mathf.Clamp01(_info.DodgeChance))
+                if (Random.value < Mathf.Clamp01(_info.DodgeChance + _dodgeDeltaRT))
                 {
                     damageNumber.Spawn(transform.position, "Miss");
                     return; // fully avoided
@@ -152,7 +249,7 @@ namespace Assets.Scripts.Enemies
             }
 
             // 2) Armor with penetration
-            float armor = (_info != null) ? Mathf.Clamp01(_info.Armor) : 0f;   // 0–0.9 in SO, clamp to [0..1)
+            float armor = (_info != null) ? Mathf.Clamp01(_info.Armor + _armorDeltaRT) : 0f;   // 0–0.9 in SO, clamp to [0..1)
             float ap = Mathf.Clamp01(armorPenetrationPct / 100f);           // 0..1
             float effectiveArmor = Mathf.Max(0f, armor * (1f - ap));           // after AP
             float finalDamage = amount * (1f - effectiveArmor);
@@ -196,6 +293,13 @@ namespace Assets.Scripts.Enemies
 
             IsAlive = false;
 
+            if (EnemyManager.Instance != null)
+            {
+                EnemyManager.Instance.ClearPendingSkill(this);
+                EnemyManager.Instance.ClearPendingAttack(this);
+            }
+
+
             // If this enemy explodes on death, run that first; then finish death.
             if (_info.ExploderEnabled)
             {
@@ -229,7 +333,8 @@ namespace Assets.Scripts.Enemies
             // Boss special
             if (IsBossInstance)
             {
-                TriggerBossExplosion();
+                TriggerBossExplosionMode();
+
                 StatsManager.Instance.BossesKilled++;
 
                 if (!suppressRewardsOnDeath)
@@ -287,25 +392,30 @@ namespace Assets.Scripts.Enemies
             return xp;
         }
 
-        private void TriggerBossExplosion()
+        private void TriggerBossExplosionMode()
         {
             float radius = _isMiniBoss ? 3f : 5f;
             float explosionDamage = MaxHealth * 0.2f;
 
-            List<Enemy> nearbyEnemies = GridManager.Instance.GetEnemiesInRange(transform.position, Mathf.CeilToInt(radius));
+            if (_bossDeathExplosionMode == BossDeathExplosionMode.AlliesOnly || _bossDeathExplosionMode == BossDeathExplosionMode.Both)
+                DamageNearbyAllies(radius, explosionDamage);
 
-            foreach (Enemy e in nearbyEnemies)
-            {
-                if (e == this || !e.IsAlive) continue;
-
-                float distance = Vector3.Distance(e.transform.position, transform.position);
-                if (distance <= radius)
-                {
-                    e.TakeDamage(explosionDamage);
-                }
-            }
+            if (_bossDeathExplosionMode == BossDeathExplosionMode.GunnersOnly || _bossDeathExplosionMode == BossDeathExplosionMode.Both)
+                HitNearestGunners(explosionDamage, radius, 3); // or scale by boss type
 
             AudioManager.Instance.Play("Rocket Impact");
+        }
+
+        private void DamageNearbyAllies(float radius, float damage)
+        {
+            var nearby = GridManager.Instance.GetEnemiesInRange(transform.position, Mathf.CeilToInt(radius));
+            for (int i = 0; i < nearby.Count; i++)
+            {
+                Enemy e = nearby[i];
+                if (e == null || e == this || !e.IsAlive) continue;
+                if (Vector3.Distance(e.transform.position, transform.position) <= radius)
+                    e.TakeDamage(damage);
+            }
         }
 
         private void ResetEnemy()
@@ -331,10 +441,19 @@ namespace Assets.Scripts.Enemies
                 Info = WaveManager.Instance.GetCurrentWave().WaveEnemies[Info.EnemyId];
             }
 
+            // reset animation
+            if (EnemyManager.Instance != null)
+            {
+                EnemyManager.Instance.ClearPendingSkill(this);
+                EnemyManager.Instance.ClearPendingAttack(this);
+            }
+
+
             ApplyBodySpriteFromInfo();
             ResetVisualPosition();
 
             CanAttack = false;
+            SetAnimIdle(false);
             IsAlive = true;
             MaxHealth = Info.MaxHealth;
             CurrentHealth = MaxHealth;
@@ -358,6 +477,12 @@ namespace Assets.Scripts.Enemies
             suppressRewardsOnDeath = false;
             didKamize = false;
             healerTimer = 0f;
+
+            _speedMultRT = 1f;
+            _damageMultRT = 1f;
+            _armorDeltaRT = 0f;
+            _dodgeDeltaRT = 0f;
+            _buffTimer = 0f;
         }
 
         public void SetAsBoss(bool isMini)
@@ -456,6 +581,17 @@ namespace Assets.Scripts.Enemies
 
         public void AnimateAttack()
         {
+            if (_animator != null)
+            {
+                TriggerAnimAttack();
+
+                // muzzle flash for ranged enemies 
+                if (_info != null && _info.AttackRange >= 0.5f)
+                    StartCoroutine(ShowMuzzleFlash());
+
+                return;
+            }
+            /* Old 2D stuff
             if (_body == null) return;
 
             _body.DOKill(); // stop any ongoing animation
@@ -482,7 +618,7 @@ namespace Assets.Scripts.Enemies
                           _body.DOLocalMove(_bodyOriginalLocalPos, 0.25f).SetEase(Ease.OutExpo);
                       });
                 StartCoroutine(ShowMuzzleFlash());
-            }
+            }*/
         }
 
         private IEnumerator ShowMuzzleFlash()
@@ -664,6 +800,63 @@ namespace Assets.Scripts.Enemies
             return new Vector3(x, 0f, z);
         }
 
+        // BOSS
+        public void AddShieldChargesRT(int amount)
+        {
+            if (amount <= 0) return;
+            shieldChargesRT += amount;
+        }
+
+        public void JumpDepth(float deltaZ)
+        {
+            Debug.Log($"Boss jumps by {deltaZ} depth");
+
+            transform.DOKill(false);
+
+            Vector3 start = transform.position;
+            Vector3 target = new Vector3(start.x, start.y, start.z + deltaZ);
+
+            const float duration = 1f;
+            const float jumpPower = 0.6f; // visual arc height
+            const int numJumps = 1;
+
+            transform.DOJump(target, jumpPower, numJumps, duration)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(false);
+        }
+
+
+        public void SpecialHitGunners(float damage, float radius, int maxTargets)
+        {
+            HitNearestGunners(Mathf.Max(0f, damage), Mathf.Max(0f, radius), Mathf.Clamp(maxTargets, 1, 5));
+        }
+
+        // call this from EnemyManager tick (since it already loops enemies) or Enemy.Update if you prefer
+        public void TickBuffs(float dt)
+        {
+            if (_buffTimer <= 0f) return;
+            _buffTimer -= dt;
+            if (_buffTimer <= 0f)
+            {
+                _armorDeltaRT = 0f;
+                _dodgeDeltaRT = 0f;
+                _speedMultRT = 1f;
+                _damageMultRT = 1f;
+            }
+        }
+
+
+        public void LockMovement(float seconds)
+        {
+            if (seconds <= 0f) return;
+            MovementLockTimer = Mathf.Max(MovementLockTimer, seconds);
+        }
+
+        public void TickMovementLock(float dt)
+        {
+            if (MovementLockTimer > 0f)
+                MovementLockTimer -= dt;
+        }
 
     }
 }

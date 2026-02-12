@@ -27,12 +27,52 @@ MonoBehaviour:
   RunSpeed: 6
   ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
-  IdlePhrases: []
-  PraisePhrases: []
-  NegativePhrases: []
-  CombatChatPhrases: []
-  BaseHealth: 500
-  BaseDamage: 50
+  IdlePhrases:
+  - Heat keeps my blood honest
+  - Silence before the burn
+  - Fire never hesitates
+  - The ash smells right today
+  - Pressure builds whether you like it or not
+  - Flame tells the truth
+  - I do not cool down
+  - This steel will glow soon
+  - Chaos always comes back
+  - Let them test the heat
+  PraisePhrases:
+  - That burn was clean *name*
+  - You feed the fire well *name*
+  - I like that pressure *name*
+  - They felt that one *name*
+  - Good heat output *name*
+  - You did not hold back *name*
+  - That fury landed *name*
+  - Strong follow through *name*
+  - You match the flame *name*
+  - Keep it burning *name*
+  NegativePhrases:
+  - Too soft *name*
+  - That lacked heat *name*
+  - Do not hesitate *name*
+  - You let them breathe *name*
+  - Turn it up *name*
+  - That was weak *name*
+  - They should be melting *name*
+  - Push harder *name*
+  - I expect more fire *name*
+  - Again *name*
+  CombatChatPhrases:
+  - Burn them
+  - Turn up the heat
+  - No cooling off
+  - Let it break
+  - More fire
+  - Melt everything
+  - They burn now
+  - Keep firing
+  - Crack the line
+  - Ash takes all
+  BaseHealth: 4000
+  BaseDamage: 1000
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -52,7 +92,7 @@ MonoBehaviour:
       time: 1
       value: 10
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 20.20408
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -60,7 +100,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 50
       value: 1000
-      inSlope: 20.204082
+      inSlope: 20.20408
       outSlope: 0
       tangentMode: 0
       weightedMode: 0
@@ -74,13 +114,13 @@ MonoBehaviour:
   LevelUnlocks: []
   UpgradeRules:
   - Stat: 0
-    Mode: 0
-    AmountPerLevel: 5
+    Mode: 1
+    AmountPerLevel: 100
     MinValue: 0
     MaxValue: 0
   - Stat: 1
-    Mode: 0
-    AmountPerLevel: 1
+    Mode: 1
+    AmountPerLevel: 10
     MinValue: 0
     MaxValue: 0
   - Stat: 2

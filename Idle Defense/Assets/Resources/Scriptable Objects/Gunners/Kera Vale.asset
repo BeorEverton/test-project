@@ -21,18 +21,58 @@ MonoBehaviour:
   Mood: 0
   Class: 0
   Tier: 2
-  gunnerSprite: {fileID: 21300000, guid: d7091f6e1c3cdd749bff1eb5eb1df141, type: 3}
+  gunnerSprite: {fileID: -3901373693331900054, guid: 6e3bb986c4db0b645a378002d564ee52, type: 3}
   ModelPrefab: {fileID: 2816652136078810338, guid: 1953b57e4538bc948930243e082cb206, type: 3}
   ModelOffsetOnTurret: {x: 0, y: 0, z: -0.35}
   RunSpeed: 6
   ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
-  IdlePhrases: []
-  PraisePhrases: []
-  NegativePhrases: []
-  CombatChatPhrases: []
-  BaseHealth: 500
-  BaseDamage: 50
+  IdlePhrases:
+  - The sea keeps its own counsel
+  - Chains sing clearer underwater
+  - Pressure feels familiar
+  - Rust tells me where I have been
+  - Depth teaches patience
+  - I still count the tides
+  - Silence keeps you alive down there
+  - The waves remember my crew
+  - Steel moves better when it flows
+  - I trust the rhythm
+  PraisePhrases:
+  - You kept pace *name*
+  - Good timing *name*
+  - You did not panic *name*
+  - That rhythm was right *name*
+  - You stayed close *name*
+  - Strong follow through *name*
+  - You held under pressure *name*
+  - I trust that strike *name*
+  - You earned that ground *name*
+  - You did well *name*
+  NegativePhrases:
+  - You broke rhythm *name*
+  - That hesitation costs *name*
+  - You drifted *name*
+  - Too wide *name*
+  - Stay closer *name*
+  - You lost timing *name*
+  - That would drown you *name*
+  - Focus *name*
+  - Do not rush the blade *name*
+  - Recenter *name*
+  CombatChatPhrases:
+  - Lock in
+  - Hold the chain
+  - Pull them close
+  - Cut through
+  - Do not let go
+  - Drag them down
+  - Stay with me
+  - Keep pressure
+  - Finish clean
+  - For the crew
+  BaseHealth: 3000
+  BaseDamage: 2000
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -52,7 +92,7 @@ MonoBehaviour:
       time: 1
       value: 10
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 20.20408
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -60,7 +100,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 50
       value: 1000
-      inSlope: 20.204082
+      inSlope: 20.20408
       outSlope: 0
       tangentMode: 0
       weightedMode: 0
@@ -74,13 +114,13 @@ MonoBehaviour:
   LevelUnlocks: []
   UpgradeRules:
   - Stat: 0
-    Mode: 0
-    AmountPerLevel: 5
+    Mode: 1
+    AmountPerLevel: 50
     MinValue: 0
     MaxValue: 0
   - Stat: 1
-    Mode: 0
-    AmountPerLevel: 1
+    Mode: 1
+    AmountPerLevel: 60
     MinValue: 0
     MaxValue: 0
   - Stat: 2

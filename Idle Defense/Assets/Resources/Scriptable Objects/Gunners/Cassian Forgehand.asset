@@ -76,13 +76,13 @@ MonoBehaviour:
   LevelUnlocks: []
   UpgradeRules:
   - Stat: 0
-    Mode: 0
-    AmountPerLevel: 5
+    Mode: 1
+    AmountPerLevel: 50
     MinValue: 0
     MaxValue: 0
   - Stat: 1
-    Mode: 0
-    AmountPerLevel: 1
+    Mode: 1
+    AmountPerLevel: 60
     MinValue: 0
     MaxValue: 0
   - Stat: 2

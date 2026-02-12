@@ -104,6 +104,8 @@ namespace Assets.Editor
                 Debug.LogWarning("CSV header does not match expected columns. Import will still attempt by position.");
 
             int imported = 0;
+            var index = BuildGunnerIndex();
+
             for (int i = 1; i < lines.Length; i++)
             {
                 string line = lines[i];
@@ -126,19 +128,46 @@ namespace Assets.Editor
                     continue;
                 }
 
-                string soPath = $"{GunnerSoFolder}/{gunnerId}.asset";
-                var so = AssetDatabase.LoadAssetAtPath<GunnerSO>(soPath);
+                string displayName = (cols[2] ?? string.Empty).Trim();
+
+                // Build an index once per import (cache) - place this outside the loop, see note below.
+                // var index = BuildGunnerIndex();
+
+                string reason;
+                string matchedPath;
+                var so = FindExistingGunner(index, gunnerId, displayName, out matchedPath, out reason);
+
                 if (so == null)
                 {
+                    // We are about to create a new asset. Log the exact reason.
+                    Debug.LogWarning($"[Gunner Import] Creating NEW asset for GunnerId='{gunnerId}', DisplayName='{displayName}' (CSV line {i + 1}). Reason: {reason}");
+
+                    // Create assets named by DisplayName (your preference), not by ID.
+                    string filenameBase = !string.IsNullOrWhiteSpace(displayName) ? displayName : gunnerId;
+                    string safeFilename = MakeSafeFileName(filenameBase);
+                    string desiredPath = AssetDatabase.GenerateUniqueAssetPath($"{GunnerSoFolder}/{safeFilename}.asset");
+
                     so = ScriptableObject.CreateInstance<GunnerSO>();
-                    AssetDatabase.CreateAsset(so, soPath);
+                    AssetDatabase.CreateAsset(so, desiredPath);
+                    matchedPath = desiredPath;
+                }
+                else
+                {
+                    // Optional: log when it matched by something other than the canonical path
+                    // (helps explain why duplicates used to happen)
+                    if (!string.IsNullOrEmpty(reason))
+                        Debug.Log($"[Gunner Import] Updating existing GunnerSO for GunnerId='{gunnerId}' using '{matchedPath}'. Match: {reason}");
                 }
 
-                // Identity
-                so.name = gunnerId;
+                // Identity (DO NOT force asset name to gunnerId)
                 so.GunnerId = gunnerId;
-                so.DisplayName = cols[2];
+                so.DisplayName = displayName;
                 so.backgroundDescription = cols[3];
+
+                // Keep the ScriptableObject's internal name aligned to display name for readability (does not change file name)
+                if (!string.IsNullOrWhiteSpace(displayName))
+                    so.name = displayName;
+
 
                 // Classification
                 so.Area = ParseEnum(cols[4], so.Area);
@@ -295,6 +324,114 @@ namespace Assets.Editor
         }
 
         // ---------------- Helpers ----------------
+        private sealed class GunnerIndex
+        {
+            public readonly Dictionary<string, List<(GunnerSO so, string path)>> ById =
+                new Dictionary<string, List<(GunnerSO, string)>>(StringComparer.OrdinalIgnoreCase);
+
+            public readonly Dictionary<string, List<(GunnerSO so, string path)>> ByDisplayName =
+                new Dictionary<string, List<(GunnerSO, string)>>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static GunnerIndex BuildGunnerIndex()
+        {
+            var idx = new GunnerIndex();
+
+            var guids = AssetDatabase.FindAssets("t:GunnerSO");
+            for (int k = 0; k < guids.Length; k++)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[k]);
+                var so = AssetDatabase.LoadAssetAtPath<GunnerSO>(path);
+                if (so == null) continue;
+
+                string id = (so.GunnerId ?? string.Empty).Trim();
+                if (!string.IsNullOrWhiteSpace(id))
+                {
+                    if (!idx.ById.TryGetValue(id, out var list)) { list = new List<(GunnerSO, string)>(); idx.ById[id] = list; }
+                    list.Add((so, path));
+                }
+
+                string dn = (so.DisplayName ?? string.Empty).Trim();
+                if (!string.IsNullOrWhiteSpace(dn))
+                {
+                    if (!idx.ByDisplayName.TryGetValue(dn, out var list)) { list = new List<(GunnerSO, string)>(); idx.ByDisplayName[dn] = list; }
+                    list.Add((so, path));
+                }
+            }
+
+            // Diagnostics: duplicates already in project
+            foreach (var pair in idx.ById)
+            {
+                if (pair.Value.Count > 1)
+                {
+                    Debug.LogError($"[Gunner Import] Duplicate GunnerId in project: '{pair.Key}'");
+                    foreach (var x in pair.Value)
+                        Debug.LogError($"  -> {x.path}");
+                }
+            }
+
+            return idx;
+        }
+
+        private static GunnerSO FindExistingGunner(
+            GunnerIndex idx,
+            string gunnerId,
+            string displayName,
+            out string matchedPath,
+            out string reason)
+        {
+            matchedPath = null;
+            reason = string.Empty;
+
+            // 1) Strongest match: GunnerId field
+            if (!string.IsNullOrWhiteSpace(gunnerId) && idx.ById.TryGetValue(gunnerId.Trim(), out var byId))
+            {
+                if (byId.Count == 1)
+                {
+                    matchedPath = byId[0].path;
+                    reason = "Matched by GunnerId";
+                    return byId[0].so;
+                }
+
+                // Multiple is a real data problem; pick first but report loudly.
+                matchedPath = byId[0].path;
+                reason = $"Matched by GunnerId BUT {byId.Count} assets share this ID (see errors above)";
+                return byId[0].so;
+            }
+
+            // 2) Fallback: DisplayName (useful if older assets had missing IDs)
+            if (!string.IsNullOrWhiteSpace(displayName) && idx.ByDisplayName.TryGetValue(displayName.Trim(), out var byName))
+            {
+                matchedPath = byName[0].path;
+                reason = "Matched by DisplayName (GunnerId not found in project index)";
+                return byName[0].so;
+            }
+
+            // Nothing found -> explain why we are creating
+            if (string.IsNullOrWhiteSpace(gunnerId))
+                reason = "CSV GunnerId is empty after trimming";
+            else
+                reason = "No existing GunnerSO found by GunnerId or DisplayName (check folder, duplicates, or missing IDs on older assets)";
+
+            return null;
+        }
+
+        private static string MakeSafeFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "Unnamed";
+
+            // Unity/OS safe-ish filename
+            var invalid = Path.GetInvalidFileNameChars();
+            var sb = new StringBuilder(name.Length);
+            for (int i = 0; i < name.Length; i++)
+            {
+                char c = name[i];
+                sb.Append(invalid.Contains(c) ? '_' : c);
+            }
+
+            // avoid trailing dots/spaces
+            return sb.ToString().Trim().TrimEnd('.');
+        }
 
         private static T LoadAtPath<T>(string assetPath, string label, string gunnerId) where T : UnityEngine.Object
         {

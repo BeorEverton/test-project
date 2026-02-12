@@ -27,12 +27,52 @@ MonoBehaviour:
   RunSpeed: 6
   ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
-  IdlePhrases: []
-  PraisePhrases: []
-  NegativePhrases: []
-  CombatChatPhrases: []
-  BaseHealth: 500
-  BaseDamage: 50
+  IdlePhrases:
+  - Heat answers those who listen
+  - The furnace never sleeps
+  - Faith rises with the vapor
+  - Every pulse has a rhythm
+  - Fire carries us forward
+  - Breath and heat align
+  - The chant steadies the soul
+  - Exhaustion fades in warmth
+  - The guild watches over us
+  - Let the fire sing
+  PraisePhrases:
+  - Beautiful rhythm *name*
+  - You kept the chant alive *name*
+  - That fire flowed well *name*
+  - Strong spirit *name*
+  - You held through the strain *name*
+  - The heat answered you *name*
+  - Your pulse stayed true *name*
+  - Well sustained *name*
+  - The furnace favors you *name*
+  - Keep the faith *name*
+  NegativePhrases:
+  - You broke the rhythm *name*
+  - Do not lose the chant *name*
+  - That pulse faltered *name*
+  - Stay with the fire *name*
+  - You let the heat drop *name*
+  - Focus your breath *name*
+  - Do not doubt now *name*
+  - The furnace demands more *name*
+  - You can endure this *name*
+  - Again with conviction *name*
+  CombatChatPhrases:
+  - Keep the chant
+  - Fire sustains
+  - Hold the rhythm
+  - Faith fuels us
+  - Heat rising
+  - Do not falter
+  - Let it burn bright
+  - Endure the flame
+  - The furnace provides
+  - We carry the fire
+  BaseHealth: 3250
+  BaseDamage: 1750
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -52,7 +92,7 @@ MonoBehaviour:
       time: 1
       value: 10
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 20.20408
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -60,7 +100,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 50
       value: 1000
-      inSlope: 20.204082
+      inSlope: 20.20408
       outSlope: 0
       tangentMode: 0
       weightedMode: 0

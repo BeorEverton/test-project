@@ -55,6 +55,13 @@ namespace Assets.Scripts.UI
         // Tracks the currently selected slot button, so we can turn off the old indicator.
         private static SlotWorldButton _currentSelected;
 
+        // Allows UI panels (like GunnerDetailsUI) to know which slot the player currently selected.
+        public static int CurrentSelectedSlotIndex
+        {
+            get { return _currentSelected != null ? _currentSelected.slotIndex : -1; }
+        }
+
+
         /* --------------------------------------------------------- */
 
         private void Start()

@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac1ec8c5ea8013c4ea1e6ab4ed4c9f3b, type: 3}
   m_Name: WaveConfig 3
   m_EditorClassIdentifier: 
-  WaveStartIndex: 0
+  WaveStartIndex: 3
   EnemyWaveEntries:
   - EnemyPrefab: {fileID: 1582153025905571294, guid: eba3e73d5adfb9143b85d451ce7c504e, type: 3}
     NumberOfEnemies: 8
   - EnemyPrefab: {fileID: 5719079096867314638, guid: db4982f616dbf3140ae7cc5583355fe8, type: 3}
     NumberOfEnemies: 2
   TimeBetweenSpawns: 0.2
-  TotalSpawnDuration: 20
+  TotalSpawnDuration: 15
   SpawnCurve:
     serializedVersion: 2
     m_Curve:
@@ -43,7 +43,7 @@ MonoBehaviour:
       outWeight: 0.3616641
     - serializedVersion: 3
       time: 0.3
-      value: 0.29810792
+      value: 0.4
       inSlope: 0
       outSlope: 0
       tangentMode: 0

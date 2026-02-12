@@ -27,12 +27,52 @@ MonoBehaviour:
   RunSpeed: 6
   ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
-  IdlePhrases: []
-  PraisePhrases: []
-  NegativePhrases: []
-  CombatChatPhrases: []
-  BaseHealth: 500
-  BaseDamage: 50
+  IdlePhrases:
+  - Cold removes distraction
+  - Silence is efficient
+  - Ice preserves intent
+  - The void listens
+  - Stillness sharpens focus
+  - Heat invites error
+  - I returned unchanged
+  - Machines understand quiet
+  - Nothing needs saying
+  - This state is optimal
+  PraisePhrases:
+  - Execution confirmed *name*
+  - No excess *name*
+  - That was clean *name*
+  - Outcome achieved *name*
+  - You did not hesitate *name*
+  - Acceptable precision *name*
+  - Silence held *name*
+  - That aligned *name*
+  - Efficiency noted *name*
+  - Proceed *name*
+  NegativePhrases:
+  - That was unnecessary *name*
+  - You created noise *name*
+  - Precision failed *name*
+  - You hesitated *name*
+  - Excess detected *name*
+  - That exposed intent *name*
+  - Inefficient *name*
+  - Refine your strike *name*
+  - Silence was broken *name*
+  - Correct it *name*
+  CombatChatPhrases:
+  - Silence applied
+  - Freeze response
+  - No sound
+  - End signal
+  - Cold execution
+  - They stop here
+  - Void confirmed
+  - Ice holds
+  - Nothing remains
+  - Operation complete
+  BaseHealth: 1500
+  BaseDamage: 3500
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -52,7 +92,7 @@ MonoBehaviour:
       time: 1
       value: 10
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 20.20408
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -60,7 +100,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 50
       value: 1000
-      inSlope: 20.204082
+      inSlope: 20.20408
       outSlope: 0
       tangentMode: 0
       weightedMode: 0

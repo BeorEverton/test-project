@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac1ec8c5ea8013c4ea1e6ab4ed4c9f3b, type: 3}
   m_Name: WaveConfig 7
   m_EditorClassIdentifier: 
-  WaveStartIndex: 0
+  WaveStartIndex: 7
   EnemyWaveEntries:
   - EnemyPrefab: {fileID: 1582153025905571294, guid: eba3e73d5adfb9143b85d451ce7c504e, type: 3}
     NumberOfEnemies: 1
@@ -22,7 +22,7 @@ MonoBehaviour:
     NumberOfEnemies: 2
   - EnemyPrefab: {fileID: 8983687310494030301, guid: aeff080aacfaaa34e921496fb8be5b66, type: 3}
     NumberOfEnemies: 4
-  - EnemyPrefab: {fileID: 3951883345677795443, guid: 3d305b7f5055e164fac6b9223ac9c955, type: 3}
+  - EnemyPrefab: {fileID: 8159247977724216355, guid: 9c92ec25b8dedd04d83fe01d519a01d3, type: 3}
     NumberOfEnemies: 2
   TimeBetweenSpawns: 0.2
   TotalSpawnDuration: 25
@@ -32,18 +32,18 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0

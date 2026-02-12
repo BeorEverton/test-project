@@ -15,17 +15,17 @@ MonoBehaviour:
   WaveStartIndex: 1
   EnemyWaveEntries:
   - EnemyPrefab: {fileID: 1582153025905571294, guid: eba3e73d5adfb9143b85d451ce7c504e, type: 3}
-    NumberOfEnemies: 10
+    NumberOfEnemies: 15
   TimeBetweenSpawns: 0.3
-  TotalSpawnDuration: 0.5
+  TotalSpawnDuration: 10
   SpawnCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -33,8 +33,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 0
-      outSlope: 0
+      inSlope: 1
+      outSlope: 1
       tangentMode: 34
       weightedMode: 0
       inWeight: 0

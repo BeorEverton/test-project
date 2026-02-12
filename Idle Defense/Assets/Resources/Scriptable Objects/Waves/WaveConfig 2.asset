@@ -17,15 +17,15 @@ MonoBehaviour:
   - EnemyPrefab: {fileID: 1582153025905571294, guid: eba3e73d5adfb9143b85d451ce7c504e, type: 3}
     NumberOfEnemies: 10
   TimeBetweenSpawns: 0.3
-  TotalSpawnDuration: 0.5
+  TotalSpawnDuration: 10
   SpawnCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
-      inSlope: -2
-      outSlope: -2
+      value: 0.4
+      inSlope: -0.8
+      outSlope: -0.8
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -33,17 +33,26 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0.5
       value: 0
-      inSlope: 1.5000002
-      outSlope: 1.5000002
+      inSlope: 0.85000014
+      outSlope: 0.85000014
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 0.7
+      value: 0.5
+      inSlope: 2.0833335
+      outSlope: 2.0833335
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
       value: 1
-      inSlope: 5.0000005
-      outSlope: 5.0000005
+      inSlope: 1.6666666
+      outSlope: 1.6666666
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334

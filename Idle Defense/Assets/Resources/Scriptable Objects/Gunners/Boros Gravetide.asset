@@ -27,12 +27,52 @@ MonoBehaviour:
   RunSpeed: 6
   ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
-  IdlePhrases: []
-  PraisePhrases: []
-  NegativePhrases: []
-  CombatChatPhrases: []
-  BaseHealth: 500
-  BaseDamage: 50
+  IdlePhrases:
+  - The forest still breathes with us
+  - Fog keeps old secrets safe
+  - Roots and steel grow stronger together
+  - This armor remembers every stand
+  - Green still shelters humanity
+  - I like the sound of leaves at rest
+  - The earth knows we are here
+  - These trees saw worse than this
+  - Life always pushes back
+  - The jungle has not forgotten us
+  PraisePhrases:
+  - Good footing *name*
+  - You stood firm *name*
+  - That heart will carry you far *name*
+  - The forest favors you *name*
+  - Strong spirit *name*
+  - You protected what matters *name*
+  - Well held *name*
+  - That resolve shows *name*
+  - I would stand beside you again *name*
+  - You did right *name*
+  NegativePhrases:
+  - Careful *name* the ground shifts
+  - Do not rush *name*
+  - You left yourself open *name*
+  - Steady now *name*
+  - That step was careless *name*
+  - The fog punishes haste *name*
+  - Brace yourself *name*
+  - Hold your ground *name*
+  - You nearly fell *name*
+  - Focus *name*
+  CombatChatPhrases:
+  - Stand behind me
+  - Roots hold fast
+  - I have you
+  - They break here
+  - The line holds
+  - Push through the fog
+  - Nothing passes
+  - Stay close
+  - We endure
+  - For those still hiding
+  BaseHealth: 4000
+  BaseDamage: 1000
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -52,7 +92,7 @@ MonoBehaviour:
       time: 1
       value: 10
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 20.20408
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -60,7 +100,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 50
       value: 1000
-      inSlope: 20.204082
+      inSlope: 20.20408
       outSlope: 0
       tangentMode: 0
       weightedMode: 0
@@ -74,13 +114,13 @@ MonoBehaviour:
   LevelUnlocks: []
   UpgradeRules:
   - Stat: 0
-    Mode: 0
-    AmountPerLevel: 5
+    Mode: 1
+    AmountPerLevel: 100
     MinValue: 0
     MaxValue: 0
   - Stat: 1
-    Mode: 0
-    AmountPerLevel: 1
+    Mode: 1
+    AmountPerLevel: 10
     MinValue: 0
     MaxValue: 0
   - Stat: 2

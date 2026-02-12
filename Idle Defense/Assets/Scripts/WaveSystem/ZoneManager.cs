@@ -307,32 +307,44 @@ namespace Assets.Scripts.WaveSystem
             enemyWaveEntries = new List<EnemyInfoSO>();
             tempWaveConfig = ScriptableObject.CreateInstance<WaveConfigSO>();
 
-            // Copy authored pacing data (otherwise spawner falls back to linear/default behaviour).
             tempWaveConfig.WaveStartIndex = baseWave.WaveStartIndex;
             tempWaveConfig.TimeBetweenSpawns = baseWave.TimeBetweenSpawns;
             tempWaveConfig.TotalSpawnDuration = baseWave.TotalSpawnDuration;
 
-            // Important: clone the curve so runtime edits can't mutate the asset.
             tempWaveConfig.SpawnCurve = (baseWave.SpawnCurve != null && baseWave.SpawnCurve.length > 0)
                 ? new AnimationCurve(baseWave.SpawnCurve.keys)
                 : null;
 
             tempWaveConfig.EnemyWaveEntries = new List<EnemyWaveEntry>();
 
-            int totalCount = 0;
             int cap = _maxEnemiesPerWave > 0 ? _maxEnemiesPerWave : int.MaxValue;
 
+            // ---- Wave-wide scaling (instead of per-entry "+extra") ----
+            int baseTotal = 0;
+            foreach (var e in baseWave.EnemyWaveEntries)
+                baseTotal += Mathf.Max(0, e.NumberOfEnemies);
+
+            // Extra enemies are added to the WAVE, not to every entry.
+            int extraTotal = 0;
+            if (_extraEnemiesPerWave > 0f && globalIndex > 1)
+                extraTotal = Mathf.Max(0, Mathf.RoundToInt((globalIndex - 1) * _extraEnemiesPerWave));
+
+            float scaleFactor = 1f;
+            if (baseTotal > 0 && extraTotal > 0)
+                scaleFactor = (baseTotal + extraTotal) / (float)baseTotal;
+
+            int totalCount = 0;
 
             foreach (EnemyWaveEntry entry in baseWave.EnemyWaveEntries)
             {
-                EnemyWaveEntry newEntry = CreateNewEntry(entry, globalIndex);
+                EnemyWaveEntry newEntry = CreateNewEntry(entry, scaleFactor);
 
                 if (newEntry.EnemyPrefab == null || newEntry.NumberOfEnemies <= 0)
                     continue;
 
                 int remaining = cap - totalCount;
                 if (remaining <= 0)
-                    break; // hit global cap for this wave
+                    break;
 
                 if (newEntry.NumberOfEnemies > remaining)
                     newEntry.NumberOfEnemies = remaining;
@@ -350,6 +362,39 @@ namespace Assets.Scripts.WaveSystem
 
                 tempWaveConfig.EnemyWaveEntries.Add(newEntry);
             }
+        }
+
+        /// <summary>
+        /// Scale entry counts based on a wave-wide factor, then apply prestige.
+        /// This preserves the authored composition instead of inflating every entry equally.
+        /// </summary>
+        private EnemyWaveEntry CreateNewEntry(EnemyWaveEntry baseEntry, float scaleFactor)
+        {
+            int baseCount = Mathf.Max(0, baseEntry.NumberOfEnemies);
+
+            int count = baseCount;
+            if (baseCount > 0)
+            {
+                count = Mathf.RoundToInt(baseCount * scaleFactor);
+
+                // Preserve presence of authored types (avoid rounding them to 0)
+                if (count <= 0)
+                    count = 1;
+            }
+
+            // Prestige multiplier
+            var pm = PrestigeManager.Instance;
+            if (pm != null && count > 0)
+            {
+                float countMul = pm.GetEnemyCountMultiplier();
+                count = Mathf.Max(1, Mathf.RoundToInt(count * countMul));
+            }
+
+            return new EnemyWaveEntry
+            {
+                EnemyPrefab = baseEntry.EnemyPrefab,
+                NumberOfEnemies = Mathf.Max(0, count)
+            };
         }
 
 

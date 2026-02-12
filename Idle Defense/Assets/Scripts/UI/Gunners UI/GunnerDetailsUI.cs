@@ -103,26 +103,40 @@ public class GunnerDetailsUI : MonoBehaviour
 
     public void Open(List<GunnerSO> list = null, int startIndex = 0)
     {
-        panelRoot.SetActive(true);
-        // Seed list priority: explicit arg > existing roster > manager’s list (if exposed)
-        var seed = list ?? roster;
+        if (panelRoot) panelRoot.SetActive(true);
 
+        // Always build a stable "full catalog" roster when we have the unlock table.
+        // The caller-provided list is treated as optional (fallback only).
         if (useUnlockTableOrder && unlockTable != null)
-            roster = BuildRosterFromUnlockTable(seed);
+        {
+            roster = BuildRosterFromUnlockTable();
+        }
         else
-            roster = seed ?? roster;
+        {
+            // Fallback: use the provided list, else keep existing roster.
+            // (If you want "always full" even without unlockTable, you can add a GunnerManager API later.)
+            roster = (list != null && list.Count > 0) ? new List<GunnerSO>(list) : roster;
+        }
 
         if (roster == null || roster.Count == 0)
         {
             Debug.LogWarning("GunnerDetailsUI.Open: roster is empty. Assign a list or the GunnerUnlockTable.");
             return;
         }
+                
+        // Always keep the roster in GunnerId order (GUN_01 .. GUN_20)
+        SortRosterByGunnerId(roster);
 
-        currentIndex = Mathf.Clamp(startIndex, 0, roster.Count - 1);
+        // Resolve the start index from slot context (selected slot -> smallest equipped slot -> smallest GunnerId)
+        currentIndex = ResolveStartIndex(roster, startIndex);
 
+        // Prevent listener duplication if Open is called twice without Close.
+        UnwireListeners();
         WireListeners();
+
         SetVisible(true);
         BindByIndex(currentIndex);
+
         _isOpen = true;
         Opened?.Invoke();
     }
@@ -192,40 +206,127 @@ public class GunnerDetailsUI : MonoBehaviour
         }
     }
 
-    private List<GunnerSO> BuildRosterFromUnlockTable(List<GunnerSO> seed)
+    private List<GunnerSO> BuildRosterFromUnlockTable()
     {
         var ordered = new List<GunnerSO>();
-        var seen = new HashSet<string>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
 
-        // Try to resolve SOs by id in table order
-        if (unlockTable != null)
+        if (unlockTable == null || unlockTable.Entries == null) return ordered;
+
+        // Use the SO reference directly (do not depend on GunnerManager.Instance being ready).
+        for (int i = 0; i < unlockTable.Entries.Count; i++)
         {
-            foreach (var e in unlockTable.Entries)
-            {
-                GunnerSO so = null;
+            var e = unlockTable.Entries[i];
+            var so = e.Gunner;
+            if (so == null) continue;
 
-                // Prefer manager lookup (fast), else from the seed list
-                if (GunnerManager.Instance != null)
-                    so = GunnerManager.Instance.GetSO(e.GunnerId);
+            if (string.IsNullOrEmpty(so.GunnerId)) continue;
+            if (!seen.Add(so.GunnerId)) continue;
 
-                if (so == null && seed != null)
-                    so = seed.Find(x => x != null && x.GunnerId == e.GunnerId);
-
-                if (so != null && seen.Add(so.GunnerId))
-                    ordered.Add(so);
-            }
-        }
-
-        // Append any seed gunners not present in the table (keeps things robust)
-        if (seed != null)
-        {
-            foreach (var so in seed)
-                if (so != null && seen.Add(so.GunnerId))
-                    ordered.Add(so);
+            ordered.Add(so);
         }
 
         return ordered;
     }
+
+    private int ResolveStartIndex(List<GunnerSO> list, int fallbackStartIndex)
+    {
+        if (list == null || list.Count == 0) return 0;
+
+        // 1) If a slot is selected, prefer its equipped gunner.
+        int selectedSlot = SlotWorldButton.CurrentSelectedSlotIndex;
+        if (selectedSlot >= 0 && GunnerManager.Instance != null)
+        {
+            string equippedId = GunnerManager.Instance.GetEquippedGunnerId(selectedSlot);
+            int idx = IndexOfGunnerId(list, equippedId);
+            if (idx >= 0) return idx;
+        }
+
+        // 2) Else: smallest slot that has a gunner equipped.
+        if (GunnerManager.Instance != null)
+        {
+            for (int slot = 0; slot < 5; slot++)
+            {
+                string equippedId = GunnerManager.Instance.GetEquippedGunnerId(slot);
+                int idx = IndexOfGunnerId(list, equippedId);
+                if (idx >= 0) return idx;
+            }
+        }
+
+        // 3) Else: no equipped gunners -> smallest GunnerId in natural numeric order.
+        int best = 0;
+        int bestNum = int.MaxValue;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            var so = list[i];
+            if (so == null) continue;
+
+            int n = ExtractGunnerNumber(so.GunnerId);
+            if (n < bestNum)
+            {
+                bestNum = n;
+                best = i;
+            }
+        }
+
+        // If parsing failed for everything, use fallbackStartIndex (clamped).
+        if (bestNum == int.MaxValue)
+            return Mathf.Clamp(fallbackStartIndex, 0, list.Count - 1);
+
+        return best;
+    }
+
+    private void SortRosterByGunnerId(List<GunnerSO> list)
+    {
+        if (list == null || list.Count <= 1) return;
+
+        list.Sort((a, b) =>
+        {
+            if (a == null && b == null) return 0;
+            if (a == null) return 1;
+            if (b == null) return -1;
+
+            int an = ExtractGunnerNumber(a.GunnerId);
+            int bn = ExtractGunnerNumber(b.GunnerId);
+
+            // Valid numeric IDs come first
+            if (an != bn) return an.CompareTo(bn);
+
+            // Fallback stable-ish ordering if parsing fails or ties
+            return string.CompareOrdinal(a.GunnerId, b.GunnerId);
+        });
+    }
+
+    private int ExtractGunnerNumber(string gunnerId)
+    {
+        // Expected formats like: GUN_01, GUN_10, GUN_18
+        if (string.IsNullOrEmpty(gunnerId)) return int.MaxValue;
+
+        int underscore = gunnerId.LastIndexOf('_');
+        if (underscore < 0 || underscore >= gunnerId.Length - 1) return int.MaxValue;
+
+        string suffix = gunnerId.Substring(underscore + 1);
+        if (int.TryParse(suffix, out int n)) return n;
+
+        return int.MaxValue;
+    }
+
+
+    private int IndexOfGunnerId(List<GunnerSO> list, string gunnerId)
+    {
+        if (string.IsNullOrEmpty(gunnerId) || list == null) return -1;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            var so = list[i];
+            if (so != null && so.GunnerId == gunnerId)
+                return i;
+        }
+        return -1;
+    }
+
+    
 
     // PUBLIC API -------------------------------------------------------------
 

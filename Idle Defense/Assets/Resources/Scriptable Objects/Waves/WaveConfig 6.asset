@@ -12,36 +12,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac1ec8c5ea8013c4ea1e6ab4ed4c9f3b, type: 3}
   m_Name: WaveConfig 6
   m_EditorClassIdentifier: 
-  WaveStartIndex: 0
+  WaveStartIndex: 6
   EnemyWaveEntries:
   - EnemyPrefab: {fileID: 1582153025905571294, guid: eba3e73d5adfb9143b85d451ce7c504e, type: 3}
     NumberOfEnemies: 1
   - EnemyPrefab: {fileID: 5719079096867314638, guid: db4982f616dbf3140ae7cc5583355fe8, type: 3}
     NumberOfEnemies: 2
   - EnemyPrefab: {fileID: 7132878058401336631, guid: 1af6ec5e4a33f1642b041b06b51a7d36, type: 3}
-    NumberOfEnemies: 2
+    NumberOfEnemies: 3
   - EnemyPrefab: {fileID: 8983687310494030301, guid: aeff080aacfaaa34e921496fb8be5b66, type: 3}
-    NumberOfEnemies: 5
+    NumberOfEnemies: 4
   TimeBetweenSpawns: 0.2
-  TotalSpawnDuration: 25
+  TotalSpawnDuration: 20
   SpawnCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
+      time: 0.4
+      value: 0.2
+      inSlope: 0.033782188
+      outSlope: 0.033782188
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.31747916
+    - serializedVersion: 3
+      time: 0.5
+      value: 0.5
+      inSlope: Infinity
+      outSlope: Infinity
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.8049425
+      value: 0.7
+      inSlope: -Infinity
+      outSlope: -Infinity
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
+      inSlope: Infinity
+      outSlope: Infinity
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0

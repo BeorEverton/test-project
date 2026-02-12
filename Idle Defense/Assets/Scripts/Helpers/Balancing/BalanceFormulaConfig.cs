@@ -6,6 +6,30 @@ public class BalanceFormulaConfig
 {
     public int version = 1;
 
+    // Human-readable help don't edit this
+    public string help =
+        "FORMULA TYPES (FormulaType):\n" +
+        "  Constant: multiplier = a\n" +
+        "  Linear:   multiplier = a + b*x\n" +
+        "  Power:    multiplier = a * x^p\n" +
+        "  Exponential: multiplier = a * r^x\n" +
+        "  LinearPlusPower: multiplier = a + b * x^p\n" +
+        "\n" +
+        "FIELDS:\n" +
+        "  a: main coefficient (usually base multiplier)\n" +
+        "  b: slope (Linear) OR coefficient for x^p (LinearPlusPower)\n" +
+        "  p: exponent (Power / LinearPlusPower)\n" +
+        "  r: exponential base (Exponential)\n" +
+        "\n" +
+        "x MEANING:\n" +
+        "  For enemy formulas: x = globalWaveIndex (1..N)\n" +
+        "  For upgrade formulas: x = upgradeLevel (0..N)\n" +
+        "\n" +
+        "NEUTRAL BASELINE:\n" +
+        "  Use Constant with a=1.0 to make a formula do nothing.\n" +
+        "  Example: { \"type\":\"Constant\", \"a\": 1.0 }\n";
+
+
     public EnemyGlobalFormula enemy = new EnemyGlobalFormula();
     public UpgradeCostGlobalFormula upgrades = new UpgradeCostGlobalFormula();
 

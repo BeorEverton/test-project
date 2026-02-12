@@ -27,12 +27,52 @@ MonoBehaviour:
   RunSpeed: 6
   ArrivalSnapDistance: 0.2
   LimitBreakReadyVfx: {fileID: 0}
-  IdlePhrases: []
-  PraisePhrases: []
-  NegativePhrases: []
-  CombatChatPhrases: []
-  BaseHealth: 500
-  BaseDamage: 50
+  IdlePhrases:
+  - The tide never forgets a command
+  - Wrecks still answer the call
+  - Storms listen when spoken to
+  - Power flows through the fleet
+  - The sea remembers its captains
+  - Ghosts keep good watch
+  - Salt binds what steel cannot
+  - Every wave carries orders
+  - The grid hums like rigging
+  - We sail even when still
+  PraisePhrases:
+  - Your signal carried *name*
+  - That response held *name*
+  - The tide answered you *name*
+  - Clean coordination *name*
+  - You kept the current steady *name*
+  - That pressure was sound *name*
+  - Well maintained *name*
+  - The fleet holds because of you *name*
+  - Your timing aligned *name*
+  - Acknowledged *name*
+  NegativePhrases:
+  - The current wavered *name*
+  - That broke formation *name*
+  - You lost the rhythm *name*
+  - Signal was unclear *name*
+  - That strain was avoidable *name*
+  - You disrupted the flow *name*
+  - Focus the grid *name*
+  - Do not fight the tide *name*
+  - That weakens the line *name*
+  - Correct it *name*
+  CombatChatPhrases:
+  - Tide rising
+  - Storm engaged
+  - Fleet responding
+  - Power routed
+  - Hold the current
+  - The sea answers
+  - Pressure maintained
+  - Ghosts advance
+  - Wrecks awaken
+  - Command holds
+  BaseHealth: 65000
+  BaseDamage: 35000
   BaseFireRate: 0
   BaseRange: 0
   BaseDamagePerSecPctBonus: 0
@@ -52,7 +92,7 @@ MonoBehaviour:
       time: 1
       value: 10
       inSlope: 0
-      outSlope: 20.204082
+      outSlope: 20.20408
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -60,7 +100,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 50
       value: 1000
-      inSlope: 20.204082
+      inSlope: 20.20408
       outSlope: 0
       tangentMode: 0
       weightedMode: 0

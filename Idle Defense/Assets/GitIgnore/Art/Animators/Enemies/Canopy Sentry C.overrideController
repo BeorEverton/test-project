@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Canopy Sentry C
+  m_Controller: {fileID: 9100000, guid: a035d08004575b846bf78f9ed09f6699, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: f87772f712b2c7d41a3dd53231a5ce54, type: 2}
+    m_OverrideClip: {fileID: -8144452484969819248, guid: 099d1f9f6a889c441a097ddfc393b9b2, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: f8902d4d94a67a644a9ada14707dc257, type: 2}
+    m_OverrideClip: {fileID: -4259011444652720740, guid: 099d1f9f6a889c441a097ddfc393b9b2, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: 0c383743b2af3f7458e9872575843866, type: 2}
+    m_OverrideClip: {fileID: -6338511496846211826, guid: 099d1f9f6a889c441a097ddfc393b9b2, type: 3}

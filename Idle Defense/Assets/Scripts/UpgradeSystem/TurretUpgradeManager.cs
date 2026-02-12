@@ -1076,6 +1076,12 @@ namespace Assets.Scripts.Systems
             if (PrestigeManager.Instance != null)
                 cost *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
 
+            if (BalanceFormulaManager.Instance != null)
+            {
+                int xLevel = Mathf.Max(0, level + outAmount);
+                cost *= BalanceFormulaManager.Instance.GetUpgradeCostMultiplier(xLevel);
+            }
+
             cost = Mathf.Max(1f, cost);
         }
 
@@ -1100,6 +1106,14 @@ namespace Assets.Scripts.Systems
 
             if (PrestigeManager.Instance != null)
                 c *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
+
+            // Global JSON cost multiplier (optional).
+            // Use resulting level (level + maxAmount) so bulk purchases scale sensibly.
+            if (BalanceFormulaManager.Instance != null)
+            {
+                int xLevel = Mathf.Max(0, level + maxAmount);
+                c *= BalanceFormulaManager.Instance.GetUpgradeCostMultiplier(xLevel);
+            }
 
             return Mathf.Max(1f, c);
         }
@@ -1130,6 +1144,12 @@ namespace Assets.Scripts.Systems
             if (PrestigeManager.Instance != null)
                 cost *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
 
+            if (BalanceFormulaManager.Instance != null)
+            {
+                int xLevel = Mathf.Max(0, level + outAmount);
+                cost *= BalanceFormulaManager.Instance.GetUpgradeCostMultiplier(xLevel);
+            }
+
             cost = Mathf.Max(1f, cost);
         }
 
@@ -1155,7 +1175,16 @@ namespace Assets.Scripts.Systems
             if (PrestigeManager.Instance != null)
                 c *= PrestigeManager.Instance.GetUpgradeCostMultiplier(type);
 
+            // Global JSON cost multiplier (optional).
+            // Use resulting level (level + maxAmount) so bulk purchases scale sensibly.
+            if (BalanceFormulaManager.Instance != null)
+            {
+                int xLevel = Mathf.Max(0, level + maxAmount);
+                c *= BalanceFormulaManager.Instance.GetUpgradeCostMultiplier(xLevel);
+            }
+
             return Mathf.Max(1f, c);
+
         }
 
 
