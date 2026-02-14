@@ -6,7 +6,7 @@ public sealed class BossPiece_ChanceEveryNAttacks : MonoBehaviour, IBossPiece
     [SerializeField] private int priority = 0;
     public int Priority => priority;
 
-    [SerializeField] private string animationTrigger = "Skill_Shockwave";
+    [SerializeField] private string animationTrigger = "Skill";
     public string AnimationTrigger => animationTrigger;
 
     [SerializeField] private int everyN = 3;
@@ -21,6 +21,8 @@ public sealed class BossPiece_ChanceEveryNAttacks : MonoBehaviour, IBossPiece
     private int _nextAttack;
     private int _lastAttackSeen = -1;
     private bool _shouldFire;
+
+    Animator _animator;
 
     private void OnEnable()
     {
@@ -52,6 +54,13 @@ public sealed class BossPiece_ChanceEveryNAttacks : MonoBehaviour, IBossPiece
     public void Execute(BossContext ctx)
     {
         _shouldFire = false;
+
+        Debug.Log($"BossPiece_ChanceEveryNAttacks triggered on attack {_lastAttackSeen} (next check at {_nextAttack}).");
+
+        if (!_animator)
+            _animator = ctx.Boss.GetComponentInChildren<Animator>();
+
+        _animator.SetTrigger(animationTrigger);
 
         ctx.Manager.SetPendingBossSkill(
             ctx.Boss,

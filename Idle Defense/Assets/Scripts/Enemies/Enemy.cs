@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Enemies
@@ -809,12 +810,13 @@ namespace Assets.Scripts.Enemies
 
         public void JumpDepth(float deltaZ)
         {
-            Debug.Log($"Boss jumps by {deltaZ} depth");
-
             transform.DOKill(false);
 
             Vector3 start = transform.position;
-            Vector3 target = new Vector3(start.x, start.y, start.z + deltaZ);
+            float targetZ = start.z + deltaZ;
+            targetZ = Mathf.Max(targetZ, attackRange);
+
+            Vector3 target = new Vector3(start.x, start.y, targetZ);
 
             const float duration = 1f;
             const float jumpPower = 0.6f; // visual arc height

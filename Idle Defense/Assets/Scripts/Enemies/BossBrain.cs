@@ -77,5 +77,6 @@ public sealed class BossBrain : MonoBehaviour
     public void NotifyAttackExecuted()
     {
         _ctx.AttacksDone++;
+        Debug.Log($"Boss executed attack #{_ctx.AttacksDone} at time {_ctx.TimeAlive:F1}s, hp%={_ctx.Hp01:P1}");
     }
 }

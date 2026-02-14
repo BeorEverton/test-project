@@ -300,7 +300,7 @@ MonoBehaviour:
   priority: 2
   animationTrigger: Skill
   everyN: 3
-  chance: 0.5
+  chance: 0.8
   skill: 6
   damage: 20
   radius: 4
@@ -332,9 +332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 519e59f0ce796fe4e84945f195c08d37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  everySeconds: 10
-  jumpDepth: -20
-  doFollowUpSkill: 0
-  followUp: 6
   priority: 1
   animationTrigger: Jump
+  everySeconds: 10
+  jumpDepth: -20

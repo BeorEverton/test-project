@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using static Assets.Scripts.Enemies.Enemy;
 
 namespace Assets.Scripts.WaveSystem
@@ -66,6 +67,8 @@ namespace Assets.Scripts.WaveSystem
         public void SetPendingBossSkill(Enemy enemy, BossSkillId skill, float a = 0f, float b = 0f, int i = 0)
         {
             if (enemy == null) return;
+
+            Debug.Log($"EnemyManager: Setting pending boss skill {skill} for {enemy.name} with params a={a}, b={b}, i={i}.");
             _pendingSkills[enemy.GetInstanceID()] = new PendingSkill
             {
                 Type = PendingSkillType.BossSkill,
@@ -77,6 +80,17 @@ namespace Assets.Scripts.WaveSystem
                 ParamI = i
             };
         }
+
+        public bool HasPendingSkill(Enemy enemy)
+        {
+            if (enemy == null) return false;
+
+            int key = enemy.GetInstanceID();
+            if (!_pendingSkills.TryGetValue(key, out PendingSkill p)) return false;
+
+            return p.Type == PendingSkillType.BossSkill || p.Type == PendingSkillType.Heal || p.Type == PendingSkillType.Summon;
+        }
+
 
         private readonly Dictionary<int, PendingSkill> _pendingSkills = new Dictionary<int, PendingSkill>();
 
@@ -363,6 +377,11 @@ namespace Assets.Scripts.WaveSystem
             if (enemy.KnockbackTime > 0f)
                 return;
 
+            if (enemy.IsBossInstance && HasPendingSkill(enemy))
+            {
+                return;
+            }
+
             enemy.TimeSinceLastAttack += Time.deltaTime;
             float atkSpd = Mathf.Max(0.001f, enemy.Info.AttackSpeed);
             if (enemy.TimeSinceLastAttack < 1f / atkSpd)
@@ -535,9 +554,14 @@ namespace Assets.Scripts.WaveSystem
         {
             if (enemy == null) return;
 
+            Debug.Log($"EnemyManager: Attempting to execute pending skill for {enemy.name}.");
+
             int id = enemy.GetInstanceID();
             if (!_pendingSkills.TryGetValue(id, out PendingSkill pending))
                 return;
+
+            _pendingSkills.Remove(id);
+
 
             // Consume first to avoid double-fire if multiple events happen.
             _pendingSkills.Remove(id);
@@ -695,6 +719,7 @@ namespace Assets.Scripts.WaveSystem
 
             // Notify boss brain (only if present)
             BossBrain brain = enemy.GetComponent<BossBrain>();
+            Debug.Log($"EnemyManager: Executed attack from {enemy.name} on slots {pending.SlotA} and {pending.SlotB} for {pending.Damage} damage. BossBrain present: {brain != null}");
             if (brain != null) brain.NotifyAttackExecuted();
         }
 
