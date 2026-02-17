@@ -3,8 +3,12 @@ using UnityEngine;
 
 public sealed class BossPiece_Jump : MonoBehaviour, IBossPiece
 {
+    [SerializeField] private OutOfRangeBehavior outOfRangeBehavior = OutOfRangeBehavior.ExecuteAnyway;
+    public OutOfRangeBehavior OutOfRangeBehavior => outOfRangeBehavior;
+
     [SerializeField] private int priority = 0;
     public int Priority => priority;
+
 
     [SerializeField] private string animationTrigger = "Skill_Jump";
     public string AnimationTrigger => animationTrigger;

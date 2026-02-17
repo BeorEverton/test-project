@@ -3,8 +3,12 @@ using static Assets.Scripts.WaveSystem.EnemyManager;
 
 public sealed class BossPiece_ChanceEveryNAttacks : MonoBehaviour, IBossPiece
 {
+    [SerializeField] private OutOfRangeBehavior outOfRangeBehavior = OutOfRangeBehavior.ExecuteAnyway;
+    public OutOfRangeBehavior OutOfRangeBehavior => outOfRangeBehavior;
+
     [SerializeField] private int priority = 0;
     public int Priority => priority;
+
 
     [SerializeField] private string animationTrigger = "Skill";
     public string AnimationTrigger => animationTrigger;
@@ -56,11 +60,6 @@ public sealed class BossPiece_ChanceEveryNAttacks : MonoBehaviour, IBossPiece
         _shouldFire = false;
 
         Debug.Log($"BossPiece_ChanceEveryNAttacks triggered on attack {_lastAttackSeen} (next check at {_nextAttack}).");
-
-        if (!_animator)
-            _animator = ctx.Boss.GetComponentInChildren<Animator>();
-
-        _animator.SetTrigger(animationTrigger);
 
         ctx.Manager.SetPendingBossSkill(
             ctx.Boss,

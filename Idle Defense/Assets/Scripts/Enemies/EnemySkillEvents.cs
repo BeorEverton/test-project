@@ -5,18 +5,30 @@ using UnityEngine;
 public sealed class EnemySkillEvents : MonoBehaviour
 {
     private Enemy _enemy;
+    private BossBrain _bossBrain;
 
     private void Awake()
     {
         _enemy = GetComponentInParent<Enemy>();
+        _bossBrain = GetComponentInParent<BossBrain>();
     }
 
-    // Call this from an Animation Event inside the Skill clip.
+    public void AnimEvent_SkillStart()
+    {
+        if (_bossBrain != null) _bossBrain.OnSkillAnimStart();
+    }
+
     public void AnimEvent_ExecuteSkill()
     {
-        if (_enemy == null) return;
+        if (_bossBrain != null) _bossBrain.OnSkillAnimExecute();
         EnemyManager.Instance.ExecutePendingSkill(_enemy);
     }
+
+    public void AnimEvent_SkillEnd()
+    {
+        if (_bossBrain != null) _bossBrain.OnSkillAnimEnd();
+    }
+
 
     // Animation Event inside the Attack clip
     public void AnimEvent_ExecuteAttack()

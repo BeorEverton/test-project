@@ -248,13 +248,16 @@ PrefabInstance:
       addedObject: {fileID: 3732856212603279567}
     - targetCorrespondingSourceObject: {fileID: 4012000093620566100, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 4569462109593082109}
+    - targetCorrespondingSourceObject: {fileID: 4012000093620566100, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 8005190942817180519}
     - targetCorrespondingSourceObject: {fileID: 4012000093620566100, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1512502454760639688}
+      addedObject: {fileID: 1859482697847649108}
     - targetCorrespondingSourceObject: {fileID: 4012000093620566100, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4569462109593082109}
+      addedObject: {fileID: 1512502454760639688}
   m_SourcePrefab: {fileID: 100100000, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
 --- !u!4 &6999986974564289017 stripped
 Transform:
@@ -285,6 +288,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 7269318300199646198}
   animTriggerSkill: Skill
+--- !u!114 &4569462109593082109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949349015582361943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 519e59f0ce796fe4e84945f195c08d37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outOfRangeBehavior: 0
+  priority: 1
+  animationTrigger: Jump
+  everySeconds: 10
+  jumpDepth: -20
 --- !u!114 &8005190942817180519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,14 +317,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91761532dbd5c4b42b1041ab5f490a46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  outOfRangeBehavior: 2
   priority: 2
   animationTrigger: Skill
   everyN: 3
   chance: 0.8
   skill: 6
   damage: 20
-  radius: 4
-  maxTargets: 2
+  radius: 10
+  maxTargets: 5
+--- !u!114 &1859482697847649108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949349015582361943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 292db0b4ed92a7141ba07dd3bb4a63c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  step: 0.2
+  skill: 6
+  paramA: 20
+  paramB: 10
+  paramI: 1
+  outOfRangeBehavior: 1
+  priority: 10
+  animationTrigger: Skill2
 --- !u!114 &1512502454760639688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -318,21 +359,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mode: 0
+  outOfRangeBehavior: 0
   priority: 999
   animationTrigger: 
---- !u!114 &4569462109593082109
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7949349015582361943}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 519e59f0ce796fe4e84945f195c08d37, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  priority: 1
-  animationTrigger: Jump
-  everySeconds: 10
-  jumpDepth: -20

@@ -176,5 +176,5 @@ public static class Axes
 public static class EnemyConfig
 {
     public const float BaseXArea = 2.5f;
-    public static float EnemySpawnDepth = 50f;
+    public static float EnemySpawnDepth = 80f;
 }

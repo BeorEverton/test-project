@@ -1,4 +1,5 @@
 using Assets.Scripts.WaveSystem;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static Assets.Scripts.WaveSystem.EnemyManager;
 
@@ -11,8 +12,21 @@ public sealed class BossPiece_AlternateSkills : MonoBehaviour, IBossPiece
     private int _phaseStartAttacks;
     private bool _useA = true;
 
+    // Generic payload 
+    // SpecialGunnerHit: A=damage, B=radius, I=maxTargets
+    // ShieldGain: I=charges
+    // JumpDepth: A=deltaZ
+    // BuffSelf: A=armorDelta, B=speedMult, I=durationSeconds
+    [SerializeField] private float paramA = 20f;
+    [SerializeField] private float paramB = 4f;
+    [SerializeField] private int paramI = 2;
+
+    [SerializeField] private OutOfRangeBehavior outOfRangeBehavior = OutOfRangeBehavior.ExecuteAnyway;
+    public OutOfRangeBehavior OutOfRangeBehavior => outOfRangeBehavior;
+
     [SerializeField] private int priority = 0;
     public int Priority => priority;
+
 
     [SerializeField] private string animationTriggerA = "Skill_PhaseA";
     [SerializeField] private string animationTriggerB = "Skill_PhaseB";
@@ -31,7 +45,7 @@ public sealed class BossPiece_AlternateSkills : MonoBehaviour, IBossPiece
         _useA = !_useA;
 
         var s = _useA ? skillA : skillB;
-        ctx.Manager.SetPendingBossSkill(ctx.Boss, s, i: 2);
-        
+        ctx.Manager.SetPendingBossSkill(ctx.Boss, s, a: paramA, b: paramB, i: paramI);
+
     }
 }

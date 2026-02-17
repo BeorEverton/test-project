@@ -13,6 +13,10 @@ public sealed class BossBrain : MonoBehaviour
     private BossContext _ctx;
 
     private readonly List<IBossPiece> _pieces = new List<IBossPiece>(16);
+    private IBossPiece _activePiece;
+
+    private IBossPiece _pendingPiece;
+    private float _pendingSetTimeAlive = -999f; // optional: prevents spamming last skill time logic
 
     private Vector3 _lastPos;
     private float _timeAlive;
@@ -52,26 +56,85 @@ public sealed class BossBrain : MonoBehaviour
         _ctx.TimeAlive = _timeAlive;
         _ctx.Hp01 = (_boss.MaxHealth <= 0f) ? 0f : (_boss.CurrentHealth / _boss.MaxHealth);
 
-        // Pick first matching piece (order = priority). No allocations.
+        // Pick first matching piece (order = priority). 
+        bool inRange = IsBossInAttackRange();
+
+        // 1) If we were waiting on something and now we’re in range, fire it first.
+        if (_pendingPiece != null && inRange)
+        {
+            TryExecutePiece(_pendingPiece);
+            _pendingPiece = null;
+            return;
+        }
+
+        // 2) Otherwise scan pieces in priority order (assuming your list is already sorted)
         for (int i = 0; i < _pieces.Count; i++)
         {
-            if (_pieces[i].WantsToExecute(_ctx))
+            IBossPiece piece = _pieces[i];
+            if (!piece.WantsToExecute(_ctx))
+                continue;
+
+            if (!inRange)
             {
-                _pieces[i].Execute(_ctx);
-                _ctx.LastSkillTime = _timeAlive;
-
-                // Play skill anim (animation event will execute)
-                if (animator != null && !string.IsNullOrEmpty(animTriggerSkill))
+                switch (piece.OutOfRangeBehavior)
                 {
-                    string trig = _pieces[i].AnimationTrigger;
-                    if (animator != null && !string.IsNullOrEmpty(trig))
-                        animator.SetTrigger(trig);
-                }
+                    case OutOfRangeBehavior.ExecuteAnyway:
+                        // allowed to fire out of range
+                        break;
 
-                return;
+                    case OutOfRangeBehavior.WaitUntilInRange:
+                        // store one pending piece (highest priority wins because list is sorted)
+                        _pendingPiece = piece;
+                        // do NOT execute anything else this frame, because “wait” means this action is the choice
+                        return;
+
+                    case OutOfRangeBehavior.SkipThisAttempt:
+                        // treat as "not ready" right now; keep scanning for other actions
+                        continue;
+                }
             }
+
+            // In range OR ExecuteAnyway
+            TryExecutePiece(piece);
+            return;
+        }
+
+    }
+
+    private bool IsBossInAttackRange()
+    {
+        if (_boss == null) return false;
+
+        float depthNow = transform.position.z;
+        return _boss.CanAttack && depthNow <= _boss.attackRange;
+    }
+
+    private void TryExecutePiece(IBossPiece piece)
+    {
+        _activePiece = piece;
+
+        piece.Execute(_ctx);
+        _ctx.LastSkillTime = _timeAlive;
+
+        string trig = piece.AnimationTrigger;
+
+        if (string.IsNullOrEmpty(trig))
+        {
+            OnSkillAnimExecute();
+            EnemyManager.Instance.ExecutePendingSkill(_boss);
+            OnSkillAnimEnd();
+            return;
+        }
+
+        OnSkillAnimStart();
+
+        if (animator != null)
+        {
+            animator.ResetTrigger(trig);
+            animator.SetTrigger(trig);
         }
     }
+
 
     // Call this from your EnemyManager when boss attack executes (or via animation event)
     public void NotifyAttackExecuted()
@@ -79,4 +142,37 @@ public sealed class BossBrain : MonoBehaviour
         _ctx.AttacksDone++;
         Debug.Log($"Boss executed attack #{_ctx.AttacksDone} at time {_ctx.TimeAlive:F1}s, hp%={_ctx.Hp01:P1}");
     }
+
+    #region VFX Helpers   
+
+    private void SpawnPieceVfx(GameObject prefab)
+    {
+        if (prefab == null || _activePiece == null)
+            return;
+
+        Transform anchor = _activePiece.VfxAnchor != null ?
+                           _activePiece.VfxAnchor :
+                           transform;
+
+        Instantiate(prefab, anchor.position + _activePiece.VfxOffset, Quaternion.identity);
+    }
+
+    public void OnSkillAnimStart()
+    {
+        SpawnPieceVfx(_activePiece.VfxOnStart);
+    }
+
+    public void OnSkillAnimExecute()
+    {
+        SpawnPieceVfx(_activePiece.VfxOnExecute);
+        EnemyManager.Instance.ExecutePendingSkill(_boss);
+    }
+
+    public void OnSkillAnimEnd()
+    {
+        SpawnPieceVfx(_activePiece.VfxOnEnd);
+    }
+
+
+    #endregion
 }

@@ -278,18 +278,18 @@ namespace Assets.Scripts.WaveSystem
                 float damageMultiplier;
                 float coinMultiplier;
 
-                if (currentWave == 10) // First boss is weaker
+                /*if (currentWave == 10) // First boss is weaker
                 {
                     healthMultiplier = 60f;
                     damageMultiplier = 25f;
                     coinMultiplier = 45f;
                 }
                 else
-                {
+                {*/
                     healthMultiplier = Mathf.Min(currentWave * 100f, 1000f);
                     damageMultiplier = Mathf.Min(currentWave * 20f, 500f);
                     coinMultiplier = Mathf.Min(currentWave * 20f, 500f);
-                }
+                //}
 
                 clonedInfo.MaxHealth *= healthMultiplier;
                 clonedInfo.Damage *= damageMultiplier;

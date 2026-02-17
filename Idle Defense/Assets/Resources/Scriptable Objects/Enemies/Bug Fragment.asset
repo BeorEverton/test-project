@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Bug Fragment
   Icon: {fileID: 4233310686934124197, guid: d845cc33df90002429fdc4093797496f, type: 3}
-  EnemyId: 28
+  EnemyId: 32
   MaxHealth: 4
-  MovementSpeed: 3.7
+  MovementSpeed: 5.55
   MovementSpeedDifference: 0.2
   IsFlying: 0
   CoinDropAmount: 9
@@ -49,8 +49,8 @@ MonoBehaviour:
   SummonPrewarmCount: 0
   SummonType: 0
   SummonCount: 0
-  SummonStreamInterval: 10
-  SummonForwardDepth: 5
-  SummonXJitter: 0.8
-  SummonFirstDelay: 0.5
-  SummonCooldown: 0.75
+  SummonStreamInterval: 0
+  SummonForwardDepth: 10
+  SummonXJitter: 5
+  SummonFirstDelay: 0.8
+  SummonCooldown: 0.5

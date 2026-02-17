@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: SDU-17 Spore Dispersal Unit
   Icon: {fileID: -7068553724952606805, guid: 22bd521d094e37a4b92fa09328ae8449, type: 3}
-  EnemyId: 3
+  EnemyId: 4
   MaxHealth: 5
-  MovementSpeed: 3.2
+  MovementSpeed: 4.8
   MovementSpeedDifference: 0.2
   IsFlying: 1
   CoinDropAmount: 10
@@ -49,8 +49,8 @@ MonoBehaviour:
   SummonPrewarmCount: 0
   SummonType: 0
   SummonCount: 0
-  SummonStreamInterval: 10
-  SummonForwardDepth: 5
-  SummonXJitter: 0.8
-  SummonFirstDelay: 0.5
-  SummonCooldown: 0.75
+  SummonStreamInterval: 0
+  SummonForwardDepth: 10
+  SummonXJitter: 5
+  SummonFirstDelay: 0.8
+  SummonCooldown: 0.5

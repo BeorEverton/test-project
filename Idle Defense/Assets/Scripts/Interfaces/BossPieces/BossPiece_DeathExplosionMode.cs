@@ -7,8 +7,12 @@ public sealed class BossPiece_DeathExplosionMode : MonoBehaviour, IBossPiece
 {
     [SerializeField] private Enemy.BossDeathExplosionMode mode = Enemy.BossDeathExplosionMode.Both;
 
-    [SerializeField] private int priority = 999; // run early
+    [SerializeField] private OutOfRangeBehavior outOfRangeBehavior = OutOfRangeBehavior.ExecuteAnyway;
+    public OutOfRangeBehavior OutOfRangeBehavior => outOfRangeBehavior;
+
+    [SerializeField] private int priority = 999;
     public int Priority => priority;
+
 
     [SerializeField] private string animationTrigger = ""; // no animation needed
     public string AnimationTrigger => animationTrigger;

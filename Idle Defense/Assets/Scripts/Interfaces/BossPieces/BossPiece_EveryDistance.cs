@@ -10,8 +10,12 @@ public sealed class BossPiece_EveryDistance : MonoBehaviour, IBossPiece
 
     private float _next;
 
+    [SerializeField] private OutOfRangeBehavior outOfRangeBehavior = OutOfRangeBehavior.ExecuteAnyway;
+    public OutOfRangeBehavior OutOfRangeBehavior => outOfRangeBehavior;
+
     [SerializeField] private int priority = 0;
     public int Priority => priority;
+
 
     [SerializeField] private string animationTrigger = "Skill_HpThreshold";
     public string AnimationTrigger => animationTrigger;
