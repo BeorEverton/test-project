@@ -67,13 +67,10 @@ namespace Assets.Scripts.WaveSystem
         private Coroutine _spawnEnemiesCoroutine;
 
         // to ensure we check for wave completion regularly
-        private Coroutine _waveCompletionCheckCoroutine;
-
-        public static float spawnXSpread = 22f;
+        private Coroutine _waveCompletionCheckCoroutine;        
 
         // Reused per-despawn to avoid allocations
         private readonly HashSet<GameObject> _tmpReturned = new HashSet<GameObject>(256);
-
 
         private void Awake()
         {
@@ -146,7 +143,6 @@ namespace Assets.Scripts.WaveSystem
             _spawnEnemiesCoroutine = StartCoroutine(SpawnEnemiesDelayed());
             _waveCompletionCheckCoroutine = StartCoroutine(PeriodicWaveCompletionCheck());
         }
-
 
         private async Task CreateWave()
         {            
@@ -312,6 +308,31 @@ namespace Assets.Scripts.WaveSystem
                 }
             }
 
+            // Apply Prestige + global formula multipliers to bosses
+            var pm = PrestigeManager.Instance;
+            if (pm != null)
+            {
+                clonedInfo.MaxHealth *= pm.GetEnemyHealthMultiplier();
+            }
+
+            var fm = BalanceFormulaManager.Instance;
+            if (fm != null)
+            {
+                int globalIndex = WaveManager.Instance != null ? WaveManager.Instance.GetCurrentWaveIndex() : 1;
+
+                float hMul = fm.GetEnemyHealthMultiplier(globalIndex);
+                float dMul = fm.GetEnemyDamageMultiplier(globalIndex);
+                float cMul = fm.GetEnemyCoinMultiplier(globalIndex);
+
+                clonedInfo.MaxHealth *= hMul;
+                clonedInfo.Damage *= dMul;
+
+                double coins = clonedInfo.CoinDropAmount * (double)cMul;
+                if (coins > ulong.MaxValue) coins = ulong.MaxValue;
+                if (coins < 0) coins = 0;
+                clonedInfo.CoinDropAmount = (ulong)System.Math.Ceiling(coins);
+            }
+
             bossEnemy.ApplyBossInfo(clonedInfo, isMini);
 
             // Boss waves tint the background; non-boss fallback handled earlier
@@ -399,6 +420,11 @@ namespace Assets.Scripts.WaveSystem
             int spawnedCount = 0;
             int maxConcurrent = _maxConcurrentEnemies;
 
+            // Safety: if the curve never reaches 1 at t=1, the wave can stall forever.
+            // We'll auto-correct at runtime by forcing remaining spawns once we reach the end.
+            bool forcedFinishLogged = false;
+            float forcedFinishSafetyTime = Mathf.Max(0.5f, spawnDuration * 2f);
+
             while (_canSpawnEnemies && spawnedCount < totalEnemies)
             {
                 elapsed += Time.deltaTime;
@@ -411,12 +437,23 @@ namespace Assets.Scripts.WaveSystem
                     0,
                     totalEnemies);
 
-#if UNITY_EDITOR
-                if (Time.frameCount % 15 == 0) // not every frame
+                // --- Runtime auto-correct if curve doesn't reach 1 at the end ---
+                // Case A: We reached t=1 but targetSpawned still leaves enemies behind.
+                // Case B: We somehow passed a generous safety time (protect against weird durations / timeScale changes).
+                if (!forcedFinishLogged && (t >= 0.9995f || elapsed >= forcedFinishSafetyTime))
                 {
-                    //Debug.Log($"[SpawnCurve] t={t:0.00} frac={fraction:0.00} target={targetSpawned}/{totalEnemies} spawned={spawnedCount} alive={EnemiesAlive.Count}");
+                    float endFrac = Mathf.Clamp01(curve.Evaluate(1f));
+                    if (endFrac < 0.9995f || targetSpawned < totalEnemies)
+                    {
+                        forcedFinishLogged = true;
+                        int remaining = totalEnemies - spawnedCount;
+                        Debug.LogError(
+                            $"EnemySpawner: SpawnCurve for wave config '{_currentWaveConfig?.name}' does not reach 1 at t=1 " +
+                            $"(Evaluate(1)={endFrac:0.###}). Forcing remaining {remaining} enemies to spawn at the end.");
+
+                        targetSpawned = totalEnemies;
+                    }
                 }
-#endif
 
 
                 // Spawn towards target, respecting concurrent cap.                
@@ -485,7 +522,6 @@ namespace Assets.Scripts.WaveSystem
             CheckIfWaveCompleted();
         }
 
-
         /// <summary>
         /// Updates the bounds of the screen to know where enemies should respawn
         /// </summary>
@@ -506,7 +542,7 @@ namespace Assets.Scripts.WaveSystem
         private Vector3 GetRandomSpawnPosition()
         {
             UpdateScreenBoundsIfNeeded();
-            float randomXPosition = Random.Range(-spawnXSpread, spawnXSpread);
+            float randomXPosition = Random.Range(-EnemyConfig.spawnXSpread, EnemyConfig.spawnXSpread);
 
             return new Vector3(randomXPosition, 0f, EnemyConfig.EnemySpawnDepth);
         }
@@ -563,7 +599,7 @@ namespace Assets.Scripts.WaveSystem
             // If it was a boss, reset presentation
             if (enemy.IsBossInstance)
             {
-                enemy.IsBossInstance = false;
+                // enemy.IsBossInstance = false; bosses are unique no need to disable anymore
                 AudioManager.Instance.PlayMusic("Main");
                 backgroundMaterial.color = new Color(0.04705883f, 0.0509804f, 0.07843138f, 1f);
             }
@@ -615,7 +651,7 @@ namespace Assets.Scripts.WaveSystem
 
                 EnemiesAlive.Remove(enemy.gameObject);
                 Enemy enemy_ = enemy.GetComponent<Enemy>();
-                enemy_.IsBossInstance = false; // Reset boss state if it was a boss
+                // enemy_.IsBossInstance = false; // 
                 enemy_.OnDeath -= Enemy_OnEnemyDeath;
                 _objectPool.ReturnObject(enemy.GetComponent<Enemy>().Info.Name, enemy);
             }
@@ -681,7 +717,10 @@ namespace Assets.Scripts.WaveSystem
                 // detach death callback; do NOT trigger death sequence or rewards
                 enemy.OnDeath -= Enemy_OnEnemyDeath;
 
-                if (enemy.IsBossInstance) { hadBoss = true; enemy.IsBossInstance = false; }
+                if (enemy.IsBossInstance) { 
+                    hadBoss = true; 
+                    //enemy.IsBossInstance = false; 
+                }
 
                 // return to pool immediately (will SetActive(false) inside)
                 _objectPool.ReturnObject(enemy.Info.Name, enemyObj);
@@ -771,9 +810,34 @@ namespace Assets.Scripts.WaveSystem
 
             return e;
         }
-
         #endregion
 
+        // Prestige formula accessors for summoned enemies (bosses and regulars)
+        public void RefreshAliveEnemiesFromCurrentWave(bool preserveHealthPercent = true)
+        {
+            var wm = WaveManager.Instance;
+            if (wm == null) return;
 
+            var wave = wm.GetCurrentWave();
+            if (wave == null || wave.WaveEnemies == null) return;
+
+            var alive = EnemiesAlive;
+            for (int i = 0; i < alive.Count; i++)
+            {
+                var go = alive[i];
+                if (go == null) continue;
+
+                var e = go.GetComponent<Enemy>();
+                if (e == null || !e.IsAlive) continue;
+
+                int id = (e.Info != null) ? e.Info.EnemyId : 0;
+                if (id <= 0) continue;
+
+                if (wave.WaveEnemies.TryGetValue(id, out var scaledInfo) && scaledInfo != null)
+                {
+                    e.ApplyNewInfoImmediate(scaledInfo, preserveHealthPercent);
+                }
+            }
+        }
     }
 }

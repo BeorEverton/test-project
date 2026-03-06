@@ -129,7 +129,7 @@ public class PrestigeNodeView : MonoBehaviour, IPointerEnterHandler, IPointerExi
         Add(keys, GameIconKeys.ScrapsGainStat.Replace("stat.", ""), node.ScrapsGainPct);
         Add(keys, GameIconKeys.BlackSteelGainStat.Replace("stat.", ""), node.BlackSteelGainPct);
 
-        // Enemy modifiers (reductions are beneficial → negative value becomes positive weight)
+        // Enemy modifiers 
         Add(keys, GameIconKeys.EnemyHealth.Replace("stat.", ""), -node.EnemyHealthPct);
         Add(keys, GameIconKeys.EnemyCount.Replace("stat.", ""), -node.EnemyCountPct);
 

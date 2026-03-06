@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Type: 0
   DisplayName: Heat Management
-  Description: Increases own health in exchange for some damage loss
+  Description: Increases own defense and regenerates health in exchange for some
+    damage loss.
   Icon: {fileID: 21300000, guid: c96f62a4ab65749128908e5360e39126, type: 3}
   Duration: 15
   Magnitude: 1.5
   ClickMaxBonusPct: 100
   BaselinePct: 0
-  ExtraHP: 500
-  DamagePenaltyPct: 20
+  RegenPctPerSecond: 5
+  SelfDefenseReductionPct: 35
+  SelfDamagePenaltyPct: 40

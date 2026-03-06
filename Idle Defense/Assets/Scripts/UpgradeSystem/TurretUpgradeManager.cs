@@ -31,6 +31,7 @@ namespace Assets.Scripts.Systems
         [SerializeField] private float maxTrapAheadDistance = 10f;
         [SerializeField] private int maxTrapPool = 100;
         [SerializeField] private float maxArmorPenetration = 100f;
+        [SerializeField] private float maxProcChance = 100f;
 
 
         private Dictionary<TurretUpgradeType, TurretUpgrade> _turretUpgrades;
@@ -889,7 +890,176 @@ namespace Assets.Scripts.Systems
                     }
 
                 },
+                [TurretUpgradeType.PelletChance] = new()
+                {
+                    GetCurrentValue = t => t.PelletChance,
+                    UpgradeTurret = (t, a) =>
+                    {
+                        t.PelletChanceLevel += a;
+                        t.PelletChance += (t.PelletChanceUpgradeAmount * a);
+                        t.PelletChance = Mathf.Min(t.PelletChance, 100f);
+                    },
+                    GetLevel = t => t.PelletChanceLevel,
+                    GetBaseStat = t => t.PelletChance,
+                    GetBaseCost = t => t.PelletChanceUpgradeBaseCost,
+                    GetUpgradeAmount = t => t.PelletChanceUpgradeAmount,
+                    GetCostMultiplier = t => 0f,
+                    GetMaxValue = t => 100f,
+                    GetMinValue = t => 0f,
+                    GetCost = (t, a, c) => GetHybridCost(t, TurretUpgradeType.PelletChance, a),
+                    GetDisplayStrings = (t, a) =>
+                    {
+                        float current = t.PelletChance;
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.PelletChance, a);
+                        GetHybridCost(t, TurretUpgradeType.PelletChance, a, out float cost, out int amount);
 
+                        if (current >= 100f)
+                            return ($"{current:F1}%", "Max", "", "0X");
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"{UIManager.AbbreviateNumber(cost)}",
+                            $"{amount}X"
+                        );
+                    }
+                },
+                [TurretUpgradeType.KnockbackChance] = new()
+                {
+                    GetCurrentValue = t => t.KnockbackChance,
+                    UpgradeTurret = (t, a) =>
+                    {
+                        t.KnockbackChanceLevel += a;
+                        t.KnockbackChance += (t.KnockbackChanceUpgradeAmount * a);
+                        t.KnockbackChance = Mathf.Min(t.KnockbackChance, 100f);
+                    },
+                    GetLevel = t => t.KnockbackChanceLevel,
+                    GetBaseStat = t => t.KnockbackChance,
+                    GetBaseCost = t => t.KnockbackChanceUpgradeBaseCost,
+                    GetUpgradeAmount = t => t.KnockbackChanceUpgradeAmount,
+                    GetCostMultiplier = t => 0f,
+                    GetMaxValue = t => 100f,
+                    GetMinValue = t => 0f,
+                    GetCost = (t, a, c) => GetHybridCost(t, TurretUpgradeType.KnockbackChance, a),
+                    GetDisplayStrings = (t, a) =>
+                    {
+                        float current = t.KnockbackChance;
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.KnockbackChance, a);
+                        GetHybridCost(t, TurretUpgradeType.KnockbackChance, a, out float cost, out int amount);
+
+                        if (current >= 100f)
+                            return ($"{current:F1}%", "Max", "", "0X");
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"{UIManager.AbbreviateNumber(cost)}",
+                            $"{amount}X"
+                        );
+                    }
+                },
+                [TurretUpgradeType.BounceChance] = new()
+                {
+                    GetCurrentValue = t => t.BounceChance,
+                    UpgradeTurret = (t, a) =>
+                    {
+                        t.BounceChanceLevel += a;
+                        t.BounceChance += (t.BounceChanceUpgradeAmount * a);
+                        t.BounceChance = Mathf.Min(t.BounceChance, 100f);
+                    },
+                    GetLevel = t => t.BounceChanceLevel,
+                    GetBaseStat = t => t.BounceChance,
+                    GetBaseCost = t => t.BounceChanceUpgradeBaseCost,
+                    GetUpgradeAmount = t => t.BounceChanceUpgradeAmount,
+                    GetCostMultiplier = t => 0f,
+                    GetMaxValue = t => 100f,
+                    GetMinValue = t => 0f,
+                    GetCost = (t, a, c) => GetHybridCost(t, TurretUpgradeType.BounceChance, a),
+                    GetDisplayStrings = (t, a) =>
+                    {
+                        float current = t.BounceChance;
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.BounceChance, a);
+                        GetHybridCost(t, TurretUpgradeType.BounceChance, a, out float cost, out int amount);
+
+                        if (current >= 100f)
+                            return ($"{current:F1}%", "Max", "", "0X");
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"{UIManager.AbbreviateNumber(cost)}",
+                            $"{amount}X"
+                        );
+                    }
+                },
+                [TurretUpgradeType.SlowChance] = new()
+                {
+                    GetCurrentValue = t => t.SlowChance,
+                    UpgradeTurret = (t, a) =>
+                    {
+                        t.SlowChanceLevel += a;
+                        t.SlowChance += (t.SlowChanceUpgradeAmount * a);
+                        t.SlowChance = Mathf.Min(t.SlowChance, 100f);
+                    },
+                    GetLevel = t => t.SlowChanceLevel,
+                    GetBaseStat = t => t.SlowChance,
+                    GetBaseCost = t => t.SlowChanceUpgradeBaseCost,
+                    GetUpgradeAmount = t => t.SlowChanceUpgradeAmount,
+                    GetCostMultiplier = t => 0f,
+                    GetMaxValue = t => 100f,
+                    GetMinValue = t => 0f,
+                    GetCost = (t, a, c) => GetHybridCost(t, TurretUpgradeType.SlowChance, a),
+                    GetDisplayStrings = (t, a) =>
+                    {
+                        float current = t.SlowChance;
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.SlowChance, a);
+                        GetHybridCost(t, TurretUpgradeType.SlowChance, a, out float cost, out int amount);
+
+                        if (current >= 100f)
+                            return ($"{current:F1}%", "Max", "", "0X");
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"{UIManager.AbbreviateNumber(cost)}",
+                            $"{amount}X"
+                        );
+                    }
+                },
+                [TurretUpgradeType.ArmorPenetrationChance] = new()
+                {
+                    GetCurrentValue = t => t.ArmorPenetrationChance,
+                    UpgradeTurret = (t, a) =>
+                    {
+                        t.ArmorPenetrationChanceLevel += a;
+                        t.ArmorPenetrationChance += (t.ArmorPenetrationChanceUpgradeAmount * a);
+                        t.ArmorPenetrationChance = Mathf.Min(t.ArmorPenetrationChance, 100f);
+                    },
+                    GetLevel = t => t.ArmorPenetrationChanceLevel,
+                    GetBaseStat = t => t.ArmorPenetrationChance,
+                    GetBaseCost = t => t.ArmorPenetrationChanceUpgradeBaseCost,
+                    GetUpgradeAmount = t => t.ArmorPenetrationChanceUpgradeAmount,
+                    GetCostMultiplier = t => 0f,
+                    GetMaxValue = t => 100f,
+                    GetMinValue = t => 0f,
+                    GetCost = (t, a, c) => GetHybridCost(t, TurretUpgradeType.ArmorPenetrationChance, a),
+                    GetDisplayStrings = (t, a) =>
+                    {
+                        float current = t.ArmorPenetrationChance;
+                        float bonus = GetBonusAmount(t, TurretUpgradeType.ArmorPenetrationChance, a);
+                        GetHybridCost(t, TurretUpgradeType.ArmorPenetrationChance, a, out float cost, out int amount);
+
+                        if (current >= 100f)
+                            return ($"{current:F1}%", "Max", "", "0X");
+
+                        return (
+                            $"{current:F1}%",
+                            $"+{bonus:F1}%",
+                            $"{UIManager.AbbreviateNumber(cost)}",
+                            $"{amount}X"
+                        );
+                    }
+                },
             };
         }
         #endregion
@@ -1467,6 +1637,13 @@ namespace Assets.Scripts.Systems
         MaxTrapsActive,
 
         // Damage/Defense Effects
-        ArmorPenetration   // percent, 0..100
+        ArmorPenetration,   // percent, 0..100
+
+                    // Proc Chances (0..100)
+        PelletChance,
+        KnockbackChance,
+        BounceChance,
+        SlowChance,
+        ArmorPenetrationChance
     }
 }

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.UI;
 using static Assets.Scripts.Enemies.Enemy;
 
 namespace Assets.Scripts.WaveSystem
@@ -68,7 +69,7 @@ namespace Assets.Scripts.WaveSystem
         {
             if (enemy == null) return;
 
-            Debug.Log($"EnemyManager: Setting pending boss skill {skill} for {enemy.name} with params a={a}, b={b}, i={i}.");
+            //Debug.Log($"EnemyManager: Setting pending boss skill {skill} for {enemy.name} with params a={a}, b={b}, i={i}.");
             _pendingSkills[enemy.GetInstanceID()] = new PendingSkill
             {
                 Type = PendingSkillType.BossSkill,
@@ -77,7 +78,8 @@ namespace Assets.Scripts.WaveSystem
                 BossSkill = skill,
                 ParamA = a,
                 ParamB = b,
-                ParamI = i
+                ParamI = i,
+
             };
         }
 
@@ -178,30 +180,42 @@ namespace Assets.Scripts.WaveSystem
                 // Knockback handling
                 if (enemyComponent.KnockbackTime > 0f)
                 {
-                    if (enemyComponent.IsBossInstance)
-                    {
-                        enemyComponent.KnockbackVelocity /= 2f;
-                        enemyComponent.KnockbackTime /= 2f;
-                    }
+                    // Boss resistance WITHOUT mutating stored knockback every frame
+                    float bossMult = enemyComponent.IsBossInstance ? 0.5f : 1f;
 
-                    // Strictly depth-only knockback: no X drift, never touch Y
-                    enemyComponent.KnockbackVelocity.x = 0f;
-
-                    float stepMag = Mathf.Abs(enemyComponent.KnockbackVelocity.y) * Time.deltaTime;
+                    float stepMag = Mathf.Abs(enemyComponent.KnockbackVelocity.y) * bossMult * Time.deltaTime;
                     Vector3 p = enemyComponent.transform.position;
 
                     // Choose the Z direction that INCREASES Depth()
-                    float depthNow = p.Depth();
                     float depthPlus = new Vector3(p.x, p.y, p.z + stepMag).Depth();
                     float depthMinus = new Vector3(p.x, p.y, p.z - stepMag).Depth();
 
                     float signedStepZ = (depthPlus > depthMinus) ? (+stepMag) : (-stepMag);
-                    enemyComponent.transform.position = new Vector3(p.x, p.y, p.z + signedStepZ);
+                    p.z += signedStepZ;
 
+                    // IMPORTANT: keep steering while knocked back (X-only), so they still converge to center.
+                    float prog = DepthProgress(p.Depth());
+                    if (prog >= steerStartProgress)
+                    {
+                        int slot = GunnerManager.Instance.GetNearestAliveSlotByX(p.x);
+                        if (slot >= 0)
+                        {
+                            float t = Mathf.InverseLerp(steerStartProgress, steerFullProgress, prog);
+                            float weight = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t));
+
+                            float targetX = GunnerManager.Instance.GetSlotAnchorX(slot);
+                            targetX += StableOffsetForEnemy(enemyComponent, 1.3f);
+
+                            float stepX = Mathf.Max(0.001f, enemyComponent.MovementSpeed * lateralSpeedMultiplier * weight) * Time.deltaTime;
+                            p.x = Mathf.MoveTowards(p.x, targetX, stepX);
+                        }
+                    }
+
+                    enemyComponent.transform.position = p;
                     enemyComponent.SetAnimIdle(false);
 
                     enemyComponent.KnockbackTime -= Time.deltaTime;
-                    continue; // Skip movement/attack while being pushed
+                    continue; // Still skip normal movement/attack while being pushed
                 }
 
                 // Movement & grid position
@@ -239,7 +253,7 @@ namespace Assets.Scripts.WaveSystem
                         {
                             Trap trap = TrapPoolManager.Instance.GetTrapAtCell(enemyComponent.LastGridPos);
                             if (trap != null)
-                                StartCoroutine(TriggerTrapCoroutine(trap, enemyComponent));
+                                trap.Trigger(enemyComponent);
                         }
 
                         TryAttack(enemyComponent);
@@ -324,6 +338,14 @@ namespace Assets.Scripts.WaveSystem
                 float moveSpeed = enemy.MovementSpeed * enemy.SpeedMultRT;
                 enemy.transform.position += enemy.MoveDirection * moveSpeed * Time.deltaTime;
             }
+
+            // Final safety clamp into the funnel
+            var pFinal = enemy.transform.position;
+            float progFinal = DepthProgress(pFinal.Depth());
+            float halfFinal = FunnelHalfWidth(progFinal);
+            if (pFinal.x < -halfFinal) pFinal.x = -halfFinal;
+            else if (pFinal.x > halfFinal) pFinal.x = halfFinal;
+            enemy.transform.position = pFinal;
         }
 
         private void HandleGridPosition(GameObject enemy, Enemy enemyComponent)
@@ -361,7 +383,8 @@ namespace Assets.Scripts.WaveSystem
                 // AOE
                 var enemies = GridManager.Instance.GetEnemiesInRange(
                     GridManager.Instance.GetWorldPosition(trap.cell, trap.worldY),
-                    Mathf.CeilToInt(trap.radius));
+                    Mathf.CeilToInt(trap.radius),
+                    trap.ownerTurret.RuntimeStats.CanHitFlying);
                 Vector3 trapWorldPos = GridManager.Instance.GetWorldPosition(trap.cell, trap.worldY);
 
                 foreach (var e in enemies)
@@ -377,9 +400,14 @@ namespace Assets.Scripts.WaveSystem
             if (enemy.KnockbackTime > 0f)
                 return;
 
-            if (enemy.IsBossInstance && HasPendingSkill(enemy))
+            if (enemy.IsBossInstance)
             {
-                return;
+                BossBrain brain = enemy.GetComponent<BossBrain>();
+                if (brain != null && brain.BlocksBasicAttack)
+                    return;
+
+                if (HasPendingSkill(enemy))
+                    return;
             }
 
             enemy.TimeSinceLastAttack += Time.deltaTime;
@@ -453,9 +481,6 @@ namespace Assets.Scripts.WaveSystem
             };
 
             enemy.AnimateAttack();
-
-            // Fallback if the attack clip event isn't wired
-            StartCoroutine(ExecutePendingAttackFallback(enemy, 0.06f));
 
             enemy.TimeSinceLastAttack = 0f;
         }
@@ -554,14 +579,11 @@ namespace Assets.Scripts.WaveSystem
         {
             if (enemy == null) return;
 
-            Debug.Log($"EnemyManager: Attempting to execute pending skill for {enemy.name}.");
+            //Debug.Log($"EnemyManager: Attempting to execute pending skill for {enemy.name}.");
 
             int id = enemy.GetInstanceID();
             if (!_pendingSkills.TryGetValue(id, out PendingSkill pending))
                 return;
-
-            _pendingSkills.Remove(id);
-
 
             // Consume first to avoid double-fire if multiple events happen.
             _pendingSkills.Remove(id);
@@ -595,7 +617,7 @@ namespace Assets.Scripts.WaveSystem
             if (radius <= 0f || healPct <= 0f) return;
 
             // Broad phase: your grid query (same as boss explosion approach)
-            var nearby = GridManager.Instance.GetEnemiesInRange(healer.transform.position, Mathf.CeilToInt(radius));
+            var nearby = GridManager.Instance.GetEnemiesInRange(healer.transform.position, Mathf.CeilToInt(radius), true);
             if (nearby == null || nearby.Count == 0) return; // nothing nearby
                                                              // (Your GridManager API is already used for boss explosion and traps.) :contentReference[oaicite:5]{index=5}
 
@@ -651,17 +673,23 @@ namespace Assets.Scripts.WaveSystem
 
         private void ExecuteBossSkillNow(Enemy boss, PendingSkill pending)
         {
-            if (boss == null || !boss.IsAlive) return;
+            Debug.Log("Calling boss skillnow with " + pending.BossSkill);
+            Debug.Log("Boss null or dead? " + boss + boss.IsAlive);
+            if (boss == null || !boss.IsAlive)
+                return;
 
             switch (pending.BossSkill)
             {
                 case BossSkillId.ShieldGain:
+                    Debug.Log("Getting shield");
                     boss.AddShieldChargesRT(pending.ParamI);
                     break;
 
                 case BossSkillId.HealPulse:
-                    // Reuse existing healer execution for “heal allies” pulse
-                    ExecuteHealNow(boss, 0f);
+                    // ParamA = heal pct of max HP per target (0.10 = 10%)
+                    // ParamB = radius
+                    // ParamI = max targets
+                    ExecuteHealPulseNow(boss, pending.ParamA, pending.ParamB, pending.ParamI);
                     break;
 
                 case BossSkillId.SummonWave:
@@ -669,31 +697,108 @@ namespace Assets.Scripts.WaveSystem
                     break;
 
                 case BossSkillId.BuffSelf:
-                    // ParamA: armor delta, ParamB: speed delta, ParamI: time
+                    // ParamA = armor bonus as pct of base armor (0.25 = +25% of boss.Info.Armor)
+                    // ParamB = speed multiplier (1.25 = 125% speed)
+                    // ParamI = duration seconds
                     boss.ApplyTimedBuff(
-                        armorDelta: pending.ParamA,
+                        speedMult: (pending.ParamB <= 0f) ? 1f : pending.ParamB,
+                        damageMult: 1f,
+                        armorDelta: ResolveBossArmorDeltaFromPct(boss, pending.ParamA),
                         dodgeDelta: 0f,
-                        speedMult: pending.ParamB,
-                        damageMult: 0f,
                         durationSeconds: Mathf.Max(0.01f, pending.ParamI)
                     );
                     break;
 
+                case BossSkillId.DebuffSelf:
+                    break;
+
                 case BossSkillId.JumpDepth:
-                    // ParamA: depth delta (z)
                     boss.LockMovement(0.25f);
                     boss.JumpDepth(pending.ParamA);
                     break;
 
                 case BossSkillId.SpecialGunnerHit:
-                    // ParamA: damage, ParamI: targets count, ParamB: radius
-                    boss.SpecialHitGunners(pending.ParamA, pending.ParamB, pending.ParamI);
-                    break;
+                    {
+                        // ParamA = multiplier of regular attack damage (1.5 = 150%)
+                        // ParamB = radius
+                        // ParamI = max targets
+                        float finalDamage = ResolveBossAttackDamageFromMultiplier(boss, pending.ParamA);
+                        boss.SpecialHitGunners(finalDamage, pending.ParamB, pending.ParamI);
+                        break;
+                    }
 
                 case BossSkillId.DeathExplosionMode:
                     boss.SetBossDeathExplosionMode((BossDeathExplosionMode)pending.ParamI);
                     break;
             }
+        }
+        private float ResolveBossAttackDamageFromMultiplier(Enemy boss, float attackDamageMultiplier)
+        {
+            if (boss == null || boss.Info == null)
+                return 0f;
+
+            float mult = Mathf.Max(0f, attackDamageMultiplier);
+            return Mathf.Max(0f, boss.Info.Damage * boss.DamageMultRT * mult);
+        }
+
+        private float ResolveBossArmorDeltaFromPct(Enemy boss, float armorPctOfBase)
+        {
+            if (boss == null || boss.Info == null)
+                return 0f;
+
+            float pct = Mathf.Max(0f, armorPctOfBase);
+            return Mathf.Max(0f, boss.Info.Armor * pct);
+        }
+
+        private void ExecuteHealPulseNow(Enemy healer, float healPctOfMaxHp, float radius, int maxTargets)
+        {
+            if (healer == null || !healer.IsAlive)
+                return;
+
+            float finalRadius = Mathf.Max(0f, radius);
+            int finalMaxTargets = Mathf.Clamp(maxTargets, 1, 5);
+            float finalHealPct = Mathf.Clamp01(healPctOfMaxHp);
+
+            if (finalRadius <= 0f || finalHealPct <= 0f)
+                return;
+
+            var nearby = GridManager.Instance.GetEnemiesInRange(healer.transform.position, Mathf.CeilToInt(finalRadius), true);
+            if (nearby == null || nearby.Count == 0)
+                return;
+
+            float r2 = finalRadius * finalRadius;
+
+            Enemy a0 = null, a1 = null, a2 = null, a3 = null, a4 = null;
+            float d0 = float.MaxValue, d1 = float.MaxValue, d2 = float.MaxValue, d3 = float.MaxValue, d4 = float.MaxValue;
+
+            Vector3 epos = healer.transform.position;
+
+            for (int i = 0; i < nearby.Count; i++)
+            {
+                Enemy cand = nearby[i];
+                if (cand == null || cand == healer || !cand.IsAlive)
+                    continue;
+
+                Vector3 cpos = cand.transform.position;
+                float dx = cpos.x - epos.x;
+                float dz = cpos.z - epos.z;
+                float d2s = dx * dx + dz * dz;
+                if (d2s > r2)
+                    continue;
+
+                if (d2s < d0) { a4 = a3; d4 = d3; a3 = a2; d3 = d2; a2 = a1; d2 = d1; a1 = a0; d1 = d0; a0 = cand; d0 = d2s; }
+                else if (d2s < d1) { a4 = a3; d4 = d3; a3 = a2; d3 = d2; a2 = a1; d2 = d1; a1 = cand; d1 = d2s; }
+                else if (d2s < d2) { a4 = a3; d4 = d3; a3 = a2; d3 = d2; a2 = cand; d2 = d2s; }
+                else if (d2s < d3) { a4 = a3; d4 = d3; a3 = cand; d3 = d2s; }
+                else if (d2s < d4) { a4 = cand; d4 = d2s; }
+            }
+
+            int healed = 0;
+            if (a0 != null && healed < finalMaxTargets) { a0.Heal(a0.MaxHealth * finalHealPct); healed++; }
+            if (a1 != null && healed < finalMaxTargets) { a1.Heal(a1.MaxHealth * finalHealPct); healed++; }
+            if (a2 != null && healed < finalMaxTargets) { a2.Heal(a2.MaxHealth * finalHealPct); healed++; }
+            if (a3 != null && healed < finalMaxTargets) { a3.Heal(a3.MaxHealth * finalHealPct); healed++; }
+            if (a4 != null && healed < finalMaxTargets) { a4.Heal(a4.MaxHealth * finalHealPct); healed++; }
         }
 
         public void ClearPendingAttack(Enemy enemy)
@@ -719,15 +824,16 @@ namespace Assets.Scripts.WaveSystem
 
             // Notify boss brain (only if present)
             BossBrain brain = enemy.GetComponent<BossBrain>();
-            Debug.Log($"EnemyManager: Executed attack from {enemy.name} on slots {pending.SlotA} and {pending.SlotB} for {pending.Damage} damage. BossBrain present: {brain != null}");
+            //Debug.Log($"EnemyManager: Executed attack from {enemy.name} on slots {pending.SlotA} and {pending.SlotB} for {pending.Damage} damage. BossBrain present: {brain != null}");
             if (brain != null) brain.NotifyAttackExecuted();
         }
 
-        private IEnumerator ExecutePendingAttackFallback(Enemy enemy, float delay)
+        // Used to prevent enemies steering away from center
+        private static float FunnelHalfWidth(float prog01)
         {
-            yield return new WaitForSeconds(delay);
-            if (enemy == null || !enemy.IsAlive) yield break;
-            ExecutePendingAttack(enemy);
+            // prog01: 0 at spawn, 1 at base
+            // At horizon: +/-spawnXSpread, at base: +/-BaseXArea
+            return Mathf.Lerp(EnemyConfig.spawnXSpread, EnemyConfig.BaseXArea, Mathf.Clamp01(prog01));
         }
     }
 }

@@ -2,11 +2,13 @@
 using Assets.Scripts.Systems.Save;
 using Assets.Scripts.Turrets;
 using Assets.Scripts.WaveSystem;
+using Assets.Scripts.Enemies;
 using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using HighlightPlus;
 
 namespace Assets.Scripts.UI
 {
@@ -48,8 +50,15 @@ namespace Assets.Scripts.UI
 
         [Header("Wave System")]
         [SerializeField] private GameObject advanceWaveButton;
+        [SerializeField] private GameObject retreatWaveButton;
+
+        [Header("Boss Health Bar")]
+        [SerializeField] private BossHealthBarUI _bossHealthBarInstance;
+        [SerializeField] private Transform _bossHealthBarParent; // usually a top overlay area on mainCanvas
+                
 
         private int activeSlot; // for the equipment
+        HighlightEffect[] highlights; // for deselecting highlights when closing panels
 
         // Enemy display
         [SerializeField] private Image _enemyRingFill;
@@ -91,6 +100,8 @@ namespace Assets.Scripts.UI
             LimitBreakManager.OnLBSessionTick += HandleLBSessionTick;
             LimitBreakManager.OnLBSessionEnded += HandleLBSessionEnded;
 
+            Enemy.OnBossSpawned += HandleBossSpawned;
+            Enemy.OnBossDespawned += HandleBossDespawned;
         }
 
         private void OnDisable()
@@ -98,6 +109,10 @@ namespace Assets.Scripts.UI
             LimitBreakManager.OnLBSessionStarted -= HandleLBSessionStarted;
             LimitBreakManager.OnLBSessionTick -= HandleLBSessionTick;
             LimitBreakManager.OnLBSessionEnded -= HandleLBSessionEnded;
+
+            Enemy.OnBossSpawned -= HandleBossSpawned;
+            Enemy.OnBossDespawned -= HandleBossDespawned;
+
         }
 
         #endregion
@@ -263,6 +278,17 @@ namespace Assets.Scripts.UI
         public void DeactivateRightPanels()
         {
             VFX.RangeOverlayManager.Instance.Hide();
+
+            if (highlights == null)
+                highlights = FindObjectsByType<HighlightEffect>(FindObjectsSortMode.None);
+            if (highlights != null && highlights.Length > 0)
+            {
+                foreach (HighlightEffect highlight in highlights)            {
+                    highlight.highlighted = false;
+                }
+            }
+
+            
             foreach (GameObject panel in rightPanels)
             {
                 panel.SetActive(false);
@@ -291,6 +317,19 @@ namespace Assets.Scripts.UI
             immediateRestartButton.onClick.AddListener(SkipDeathCountdown);
 
             deathRoutine = StartCoroutine(DeathCountdownRoutine(seconds));
+        }
+
+        public void ShowRetreatButton(bool show)
+        {
+            if (retreatWaveButton != null)
+                retreatWaveButton.SetActive(show);
+        }
+                
+        public void RetreatToPreviousWave()
+        {
+            ShowRetreatButton(false);
+            if (WaveManager.Instance != null)
+                WaveManager.Instance.RetreatToPreviousWave();
         }
 
         private IEnumerator DeathCountdownRoutine(float seconds)
@@ -462,5 +501,22 @@ namespace Assets.Scripts.UI
             if (secondaryCanvas != null)
                 secondaryCanvas.gameObject.SetActive(!main);
         }
+
+        #region Boss Health Bar
+        private void HandleBossSpawned(Enemy boss)
+        {
+            _bossHealthBarInstance.gameObject.SetActive(true);
+            _bossHealthBarInstance.Bind(boss);
+        }
+
+        private void HandleBossDespawned(Enemy boss)
+        {
+            Debug.Log("Boss despawned, hiding health bar.");
+            if (_bossHealthBarInstance == null) return;
+            _bossHealthBarInstance.Unbind(boss);
+            _bossHealthBarInstance.gameObject.SetActive(false);
+        }
+
+        #endregion
     }
 }

@@ -9,6 +9,6 @@ public class AnimaInfusionSkillSO : LimitBreakSkillSO
 
     public override void Activate(LimitBreakContext ctx)
     {
-        LimitBreakManager.Instance?.ActivateAnimaInfusion(FireRateMultiplier, Duration, HealPct);
+        LimitBreakManager.Instance?.ActivateAnimaInfusion(FireRateMultiplier, Duration, HealPct, this);
     }
 }

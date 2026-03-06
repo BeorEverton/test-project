@@ -26,6 +26,7 @@ public class GunnerRuntime
 
     public bool IsDead => CurrentHealth <= 0f;
 
+
     [Serializable]
     public struct GunnerStatLevel
     {
@@ -64,7 +65,7 @@ public class GunnerRuntime
     }
 
     // Returns true if the gunner died on this call.
-    public bool TakeDamage(float amount, out float actualDamage)
+    public bool TakeDamage(float amount, out float actualDamage, bool debugImmortal = false)
     {
         if (IsDead)
         {
@@ -78,13 +79,14 @@ public class GunnerRuntime
         {
             actualDamage = CurrentHealth; // overflow canceled
             newHp = 0f;
+            if (debugImmortal) newHp = 1f; // for testing purposes
         }
         CurrentHealth = newHp;
 
         // Fill limit break by the exact damage amount (clamped to cap)
         LimitBreakCurrent = Mathf.Min(LimitBreakCurrent + actualDamage, LimitBreakMax);
 
-        if (CurrentHealth <= 0f)
+        if (CurrentHealth <= 0f && !debugImmortal)
         {
             ResetLimitBreak();
         }

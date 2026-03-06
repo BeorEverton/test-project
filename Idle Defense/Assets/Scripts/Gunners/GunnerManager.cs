@@ -45,7 +45,7 @@ public class GunnerManager : MonoBehaviour
 
     // bars by gunner id
     private readonly Dictionary<string, DualPhaseBarUI> healthBarByGunner = new();
-    private readonly Dictionary<string, DualPhaseBarUI> limitBarByGunner = new();
+    private readonly Dictionary<string, GunnerBillboardBinding> limitUIByGunner = new();
     private readonly Dictionary<string, GunnerBillboardBinding> billboardByGunner = new();
 
     // Ownership (first copy)
@@ -77,6 +77,9 @@ public class GunnerManager : MonoBehaviour
     // 3D model instances and “docked” state
     private readonly Dictionary<string, GunnerModelBinding> modelByGunner = new();
     private readonly HashSet<string> dockedGunners = new(); // bonuses apply only when docked
+
+    // Debug
+    private bool debugImmortal;
 
     public bool TryGetEquippedRuntime(int slotIndex, out GunnerRuntime rt)
     {
@@ -244,7 +247,7 @@ public class GunnerManager : MonoBehaviour
             visuals.Remove(gunnerId);
         }
         healthBarByGunner.Remove(gunnerId);
-        limitBarByGunner.Remove(gunnerId);
+        limitUIByGunner.Remove(gunnerId);
         slotAnchors.Remove(slotIndex);
         billboardByGunner.Remove(gunnerId);
 
@@ -307,7 +310,8 @@ public class GunnerManager : MonoBehaviour
         {
             bind.InitializeFromRuntime(rt, GetSkillIcon(so));
             if (bind.HealthBar) healthBarByGunner[gunnerId] = bind.HealthBar;
-            if (bind.LimitBreakBar) limitBarByGunner[gunnerId] = bind.LimitBreakBar;
+            if (bind != null)
+                limitUIByGunner[gunnerId] = bind;
             billboardByGunner[gunnerId] = bind;
         }
 
@@ -327,7 +331,7 @@ public class GunnerManager : MonoBehaviour
                 return;
             }
 
-            var go = Instantiate(so.ModelPrefab, start, Quaternion.LookRotation(turretAnchor.position - start));
+            var go = Instantiate(so.ModelPrefab, start, Quaternion.LookRotation(turretAnchor.position - start), turretAnchor.transform);
             model = go.GetComponent<GunnerModelBinding>();
             if (model == null) model = go.AddComponent<GunnerModelBinding>();
             model.Initialize(so.RunSpeed, so.LimitBreakReadyVfx);
@@ -467,7 +471,7 @@ public class GunnerManager : MonoBehaviour
             visuals.Remove(gunnerId);
         }
         healthBarByGunner.Remove(gunnerId);
-        limitBarByGunner.Remove(gunnerId);
+        limitUIByGunner.Remove(gunnerId);
         billboardByGunner.Remove(gunnerId);
 
         Save();
@@ -781,11 +785,20 @@ public class GunnerManager : MonoBehaviour
 
         if (LimitBreakManager.Instance != null)
         {
-            float red = Mathf.Clamp(LimitBreakManager.Instance.GunnerDamageReductionPct, 0f, 95f);
-            damage *= (1f - red / 100f);
+            float globalRed = Mathf.Clamp(LimitBreakManager.Instance.GunnerDamageReductionPct, 0f, 95f);
+            float personalRed = Mathf.Clamp(LimitBreakManager.Instance.GetHeatManagementIncomingReductionPct(gid), 0f, 95f);
+
+            // Combine reductions multiplicatively (more stable than simple add)
+            float globalMult = 1f - (globalRed / 100f);
+            float personalMult = 1f - (personalRed / 100f);
+
+            damage *= (globalMult * personalMult);
         }
 
-        bool diedNow = rt.TakeDamage(damage, out float actual);
+        bool diedNow = rt.TakeDamage(damage, out float actual, debugImmortal);
+        
+        if (debugImmortal)
+            diedNow = false;
 
         if (diedNow)
         {
@@ -817,10 +830,10 @@ public class GunnerManager : MonoBehaviour
         if (healthBarByGunner.TryGetValue(gid, out var hb) && hb != null)
             hb.SetValue(rt.CurrentHealth);
 
-        if (limitBarByGunner.TryGetValue(gid, out var lb) && lb != null)
+        if (limitUIByGunner.TryGetValue(gid, out var lb) && lb != null)
         {
             // Max rarely changes here; Set once at init / heal. Just push the value.
-            lb.SetValue(rt.LimitBreakCurrent);
+            lb.RefreshLimitBreak(rt.LimitBreakCurrent);
         }
 
         // Notify billboard to handle button/icon/VFX (will also snap if full)
@@ -841,6 +854,21 @@ public class GunnerManager : MonoBehaviour
 
         Save(); // persist HP changes with your central save
         return true;
+    }
+
+    /// <summary>Heals a specific gunner by a flat amount and refreshes their bar if equipped.</summary>
+    public void HealGunnerFlat(string gunnerId, float amount)
+    {
+        if (string.IsNullOrEmpty(gunnerId)) return;
+        if (!runtimes.TryGetValue(gunnerId, out var rt)) return;
+
+        rt.Heal(Mathf.Max(0f, amount));
+
+        if (healthBarByGunner.TryGetValue(gunnerId, out var hb) && hb != null)
+        {
+            hb.SetMax(rt.MaxHealth);
+            hb.SetValue(rt.CurrentHealth);
+        }
     }
 
     public bool TryApplyDamageForEnemy(Enemy enemy, float damage)
@@ -989,7 +1017,6 @@ public class GunnerManager : MonoBehaviour
         return any;
     }
 
-
     /* ===================== HEAL / LIMIT BREAK ===================== */
     /// <summary>
     /// Heal all gunners to full HP. Optionally reset Limit Break gauge.
@@ -1025,10 +1052,9 @@ public class GunnerManager : MonoBehaviour
                 hb.SetMax(rt.MaxHealth);
                 hb.SetValue(rt.CurrentHealth);
             }
-            if (limitBarByGunner.TryGetValue(gid, out var lb) && lb != null)
-            {
-                lb.SetMax(rt.LimitBreakMax);
-                lb.SetValue(rt.LimitBreakCurrent);
+            if (limitUIByGunner.TryGetValue(gid, out var lb) && lb != null)
+            {                
+                lb.RefreshLimitBreak(rt.LimitBreakCurrent);
             }
         }
 
@@ -1050,7 +1076,10 @@ public class GunnerManager : MonoBehaviour
         }
     }
 
-
+    public void NotifySlotGunnerStatsChanged(int slotIndex)
+    {
+        OnSlotGunnerStatsChanged?.Invoke(slotIndex);
+    }
 
     // Delegate to the new manager
     public bool TryActivateLimitBreak(string gunnerId)
@@ -1063,7 +1092,8 @@ public class GunnerManager : MonoBehaviour
     public void NotifyLimitBreakChanged(string gunnerId)
     {
         if (!runtimes.TryGetValue(gunnerId, out var rt)) return;
-        if (limitBarByGunner.TryGetValue(gunnerId, out var lb) && lb) { lb.SetMax(rt.LimitBreakMax); lb.SetValue(rt.LimitBreakCurrent); }
+        if (limitUIByGunner.TryGetValue(gunnerId, out var ui))
+            ui.RefreshLimitBreak(rt.LimitBreakCurrent);
         if (billboardByGunner.TryGetValue(gunnerId, out var bb) && bb) { bb.RefreshLimitBreak(rt.LimitBreakCurrent); }
     }
 
@@ -1434,6 +1464,8 @@ public class GunnerManager : MonoBehaviour
         foreach (var kv in runtimes)
             DebugDumpRuntime(title, kv.Key, kv.Value);
     }
+
+    public void SetImmortal(bool immortal) => debugImmortal = immortal;
     #endregion
 
 }

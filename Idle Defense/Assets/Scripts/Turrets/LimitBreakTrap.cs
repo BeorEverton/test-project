@@ -37,7 +37,7 @@ public class LimitBreakTrap : Trap
         }
         else
         {
-            var enemies = GridManager.Instance.GetEnemiesInRange(trapWorldPosition, Mathf.CeilToInt(radius));
+            var enemies = GridManager.Instance.GetEnemiesInRange(trapWorldPosition, Mathf.CeilToInt(radius), true);
             for (int i = 0; i < enemies.Count; i++)
             {
                 var e = enemies[i];

@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 077cc73e000aa434d946d397acc7b3d4, type: 3}
+  m_Name: Procurement Bus
+  m_EditorClassIdentifier: 
+  NodeId: eco_core_2
+  DisplayName: Procurement Bus -35%
+  Description: All upgrade costs reduced and a reset kickback.
+  Icon: {fileID: 0}
+  AnchoredPosition: {x: 120, y: -840}
+  BranchId: 2
+  RequiresAny: []
+  RequiresAll:
+  - eco_core_1
+  MinPrestigeLevel: 0
+  CrimsonCost: 720
+  Repeatable: 0
+  MaxLevel: 0
+  CostGrowthMultiplier: 2
+  GlobalDamagePct: 0
+  GlobalFireRatePct: 0
+  GlobalCritChancePct: 0
+  GlobalCritDamagePct: 0
+  GlobalPierceChancePct: 0
+  RangePct: 0
+  RotationSpeedPct: 0
+  ExplosionRadiusPct: 0
+  SplashDamagePct: 0
+  PierceDamageFalloffPct: 0
+  PelletCountPct: 0
+  PelletChancePct: 0
+  DamageFalloffOverDistancePct: 0
+  PercentBonusDamagePerSecPct: 0
+  SlowEffectPct: 0
+  SlowChancePct: 0
+  KnockbackStrengthPct: 0
+  KnockbackChancePct: 0
+  BounceCountPct: 0
+  BounceRangePct: 0
+  BounceDelayPct: 0
+  BounceDamagePctPct: 0
+  BounceChancePct: 0
+  ConeAnglePct: 0
+  ExplosionDelayPct: 0
+  AheadDistancePct: 0
+  MaxTrapsActivePct: 0
+  ArmorPenetrationPct: 0
+  ArmorPenChancePct: 0
+  ScrapsGainPct: 0
+  BlackSteelGainPct: 0
+  EnemyHealthPct: 0
+  EnemyCountPct: 0
+  SpeedMultiplierCapBonus: 0
+  DamageMultiplierCapBonus: 0
+  UnlockLimitBreaks: 
+  UnlockGunnerIds: []
+  UnlockTurretTypes: 
+  AllUpgradeCostPct: -35
+  PerUpgradeTypeDiscounts: []
+  OnResetGrantCrimson: 25

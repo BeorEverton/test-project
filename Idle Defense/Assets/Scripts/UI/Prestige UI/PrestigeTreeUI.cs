@@ -1,5 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+#endif
 using UnityEngine;
 
 public class PrestigeTreeUI : MonoBehaviour
@@ -70,6 +75,10 @@ public class PrestigeTreeUI : MonoBehaviour
         rt.localScale = Vector3.one;
         cv.parentNodeId = parentId;
         cv.childNodeId = childId;
+
+        // The baked points are authored in canvasRoot space, so convert from that space into the line's local.
+        cv.spaceRoot = canvasRoot;
+
         connections.Add((cv, parentId, childId));
     }
 
@@ -119,24 +128,22 @@ public class PrestigeTreeUI : MonoBehaviour
 
         foreach (var c in connections)
         {
-            var childSO = nodeViews[c.childId].NodeSO;
-            int missing = CountMissingDeps(pm, childSO);
-            bool parentOwned = pm.Owns(c.parentId);
+            // If already owned, treat as fully active.
+            bool owned = pm.Owns(c.childId);
 
-            if (parentOwned)
+            bool canBuy = false;
+            if (!owned)
+                canBuy = pm.CanBuy(c.childId, out _);
+
+            if (owned || canBuy)
             {
-                c.cv.SetStateFullAlpha();
+                // Available => black full alpha
+                c.cv.SetColor(new Color(0f, 0f, 0f, 1f));
             }
             else
             {
-                if (missing == 1)
-                {
-                    c.cv.SetStateGreyed();
-                }
-                else
-                {
-                    c.cv.SetStateBlackFaded();
-                }
+                // Not available => grey alpha 0.75
+                c.cv.SetColor(new Color(0.5f, 0.5f, 0.5f, 0.75f));
             }
         }
     }
@@ -235,397 +242,222 @@ public class PrestigeTreeUI : MonoBehaviour
     }
 
 
-    // ---------------------- ROUTE BAKER (EDITOR CONTEXT MENU) ----------------------
-    [ContextMenu("Bake Connections")]
-    public void Context_BakeConnections()
-    {
-        if (canvasRoot == null)
-        {
-            Debug.LogWarning("[PrestigeRoute] Missing canvasRoot.");
-            return;
-        }
+    // ---------------------- EDITOR TOOLS ----------------------
 
-        // Discover nodes and lines under the canvasRoot
-        var nodeViewsMap = new Dictionary<string, PrestigeNodeView>();
-        var views = canvasRoot.GetComponentsInChildren<PrestigeNodeView>(true);
-
-        foreach (var v in views)
-        {
-            // Prefer explicit NodeId; fallback to SO id for edit-time safety
-            string id = !string.IsNullOrEmpty(v.NodeId)
-                ? v.NodeId
-                : (v.NodeSO != null ? v.NodeSO.NodeId : null);
-
-            if (string.IsNullOrEmpty(id))
-            {
-                Debug.LogWarning($"[PrestigeRoute] Skipping node '{v.name}' — missing NodeId (set NodeSO or NodeId).");
-                continue;
-            }
-
-            if (nodeViewsMap.ContainsKey(id))
-            {
-                Debug.LogError($"[PrestigeRoute] Duplicate NodeId '{id}' on '{v.name}' and '{nodeViewsMap[id].name}'. " +
-                               $"Fix in inspector (NodeSO.NodeId must be unique).");
-                continue;
-            }
-
-            nodeViewsMap[id] = v;
-        }
-
-        var conns = canvasRoot.GetComponentsInChildren<PrestigeConnectionViewLR>(true).ToList();
-        if (nodeViewsMap.Count == 0 || conns.Count == 0)
-        {
-            Debug.LogWarning("[PrestigeRoute] Nothing to bake (no nodes or no connections).");
-            return;
-        }
-
-        // Settings
-        float grid = 32f;
-        float padding = 18f;
-        float z = 0f;
-
-        // Build rect map for node obstacles (in local space of canvasRoot)
-        var nodeRects = new Dictionary<string, Rect>();
-        foreach (var kv in nodeViewsMap)
-        {
-            var rt = kv.Value.GetComponent<RectTransform>();
-            Rect r = GetLocalRect(rt, canvasRoot);
-            r.xMin -= padding; r.xMax += padding; r.yMin -= padding; r.yMax += padding;
-            nodeRects[kv.Key] = r;
-        }
-
-        var usedSegments = new List<(Vector2 a, Vector2 b)>();
-        int routed = 0, fallback = 0;
-
-        foreach (var c in conns)
-        {
-            if (string.IsNullOrEmpty(c.parentNodeId) || string.IsNullOrEmpty(c.childNodeId)) continue;
-            if (!nodeViewsMap.ContainsKey(c.parentNodeId) || !nodeViewsMap.ContainsKey(c.childNodeId)) continue;
-
-            Vector2 p = LocalPos(nodeViewsMap[c.parentNodeId].transform as RectTransform, canvasRoot);
-            Vector2 q = LocalPos(nodeViewsMap[c.childNodeId].transform as RectTransform, canvasRoot);
-
-            p = Snap(p, grid);
-            q = Snap(q, grid);
-
-            // Try straight
-            var straight = new List<Vector2> { p, q };
-            if (!Intersects(straight, nodeRects, usedSegments))
-            {
-                SetConn(c, straight, z);
-                AddSegments(usedSegments, straight);
-                routed++;
-                continue;
-            }
-
-            // Try 1-bend (L)
-            Vector2 bend1 = Snap(new Vector2(p.x, q.y), grid);
-            Vector2 bend2 = Snap(new Vector2(q.x, p.y), grid);
-
-            var L1 = new List<Vector2> { p, bend1, q };
-            if (!Intersects(L1, nodeRects, usedSegments))
-            {
-                SetConn(c, L1, z);
-                AddSegments(usedSegments, L1);
-                routed++;
-                continue;
-            }
-
-            var L2 = new List<Vector2> { p, bend2, q };
-            if (!Intersects(L2, nodeRects, usedSegments))
-            {
-                SetConn(c, L2, z);
-                AddSegments(usedSegments, L2);
-                routed++;
-                continue;
-            }
-
-            // Try 2-bend with a few midY probes
-            float yMin = Mathf.Min(p.y, q.y), yMax = Mathf.Max(p.y, q.y);
-            bool success = false;
-            for (int i = 1; i <= 6 && !success; i++)
-            {
-                float midY = Snap(yMin + (yMax - yMin) * (i / 7f), grid);
-                var poly = new List<Vector2> { p, new Vector2(p.x, midY), new Vector2(q.x, midY), q };
-                if (!Intersects(poly, nodeRects, usedSegments))
-                {
-                    SetConn(c, poly, z);
-                    AddSegments(usedSegments, poly);
-                    routed++;
-                    success = true;
-                }
-            }
-
-            if (!success)
-            {
-                // Fallback: straight (you can hand-adjust later)
-                SetConn(c, straight, z);
-                AddSegments(usedSegments, straight);
-                fallback++;
-            }
-        }
 
 #if UNITY_EDITOR
-        // Mark scene dirty so baked points persist
-        foreach (var c in conns)
-            UnityEditor.EditorUtility.SetDirty(c);
-#endif
 
-        Debug.Log($"[PrestigeRoute] Bake complete. Routed={routed} Fallbacks={fallback}");
-    }
-
-    [ContextMenu("Build Nodes From Tree")]
-    public void Context_BuildNodesFromTree()
+    [ContextMenu("Create All (Rebuild)")]
+    public void Editor_CreateAll_Rebuild()
     {
-        if (tree == null || canvasRoot == null || nodePrefab == null)
+        if (tree == null || canvasRoot == null || nodePrefab == null || linePrefab == null)
         {
-            Debug.LogWarning("[PrestigeUI] Missing refs (tree/canvasRoot/nodePrefab).");
+            Debug.LogWarning("[PrestigeUI] Missing refs (tree/canvasRoot/nodePrefab/linePrefab).");
             return;
         }
 
-        // Clear existing node views? (comment out if you want to keep existing)
-        // foreach (var v in canvasRoot.GetComponentsInChildren<PrestigeNodeView>(true)) DestroyImmediate(v.gameObject);
-
-        foreach (var n in tree.Nodes)
+        // Delete existing nodes + connections under canvasRoot
         {
-            if (n == null) continue;
-            // Skip if already exists
-            var exists = FindNodeViewById(n.NodeId);
-            if (exists != null) continue;
+            var existingNodes = canvasRoot.GetComponentsInChildren<PrestigeNodeView>(true);
+            for (int i = existingNodes.Length - 1; i >= 0; i--)
+            {
+                if (existingNodes[i] != null)
+                    DestroyImmediate(existingNodes[i].gameObject);
+            }
 
-            var go = Instantiate(nodePrefab, canvasRoot);
+            var existingLines = canvasRoot.GetComponentsInChildren<PrestigeConnectionViewLR>(true);
+            for (int i = existingLines.Length - 1; i >= 0; i--)
+            {
+                if (existingLines[i] != null)
+                    DestroyImmediate(existingLines[i].gameObject);
+            }
+        }
+
+        // 1) Create nodes from tree (needed so we can bake line paths)
+        for (int i = 0; i < tree.Nodes.Count; i++)
+        {
+            var n = tree.Nodes[i];
+            if (n == null) continue;
+
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(nodePrefab, canvasRoot);
+            if (go == null) go = Instantiate(nodePrefab, canvasRoot);
+
             go.name = $"Node_{n.NodeId}";
+
             var rt = go.transform as RectTransform;
-            rt.anchoredPosition = n.AnchoredPosition;
+            if (rt != null)
+                rt.anchoredPosition = n.AnchoredPosition;
 
             var view = go.GetComponent<PrestigeNodeView>();
             if (view == null) view = go.AddComponent<PrestigeNodeView>();
-            view.NodeSO = n;                // OnValidate will copy NodeId and Icon
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(view);
-#endif
+
+            view.NodeSO = n;
+            view.Init(n);
+
+            EditorUtility.SetDirty(go);
+            EditorUtility.SetDirty(view);
         }
 
-        Debug.Log("[PrestigeUI] Nodes built from tree.");
+        // Refresh maps so connection building can find the node views
+        HydrateFromScene();
+
+        // 2) Create connections from RequiresAll + RequiresAny
+        var created = new HashSet<string>(); // "parent->child"
+        for (int i = 0; i < tree.Nodes.Count; i++)
+        {
+            var child = tree.Nodes[i];
+            if (child == null) continue;
+
+            if (child.RequiresAll != null)
+            {
+                for (int j = 0; j < child.RequiresAll.Count; j++)
+                    Editor_CreateConnectionIfValid(child.RequiresAll[j], child.NodeId, created);
+            }
+
+            if (child.RequiresAny != null)
+            {
+                for (int j = 0; j < child.RequiresAny.Count; j++)
+                    Editor_CreateConnectionIfValid(child.RequiresAny[j], child.NodeId, created);
+            }
+        }
+
+        // 3) Bake / sync everything (positions + line paths)
+        Editor_UpdateAll_Sync();
+
+        EditorSceneManager.MarkSceneDirty(gameObject.scene);
+        Debug.Log($"[PrestigeUI] Rebuilt all nodes + connections. Nodes={tree.Nodes.Count}, Connections={created.Count}");
     }
 
-    [ContextMenu("Create Missing Connections")]
-    public void Context_CreateMissingConnections()
+    [ContextMenu("Update All (Sync)")]
+    public void Editor_UpdateAll_Sync()
     {
-        if (tree == null || canvasRoot == null || linePrefab == null)
+        if (tree == null || canvasRoot == null)
         {
-            Debug.LogWarning("[PrestigeUI] Missing refs (tree/canvasRoot/linePrefab).");
+            Debug.LogWarning("[PrestigeUI] Missing refs (tree/canvasRoot).");
             return;
         }
 
-        // Map existing lines
-        var lines = new HashSet<string>(); // "parent->child"
-        foreach (var lr in canvasRoot.GetComponentsInChildren<PrestigeConnectionViewLR>(true))
-            lines.Add($"{lr.parentNodeId}->{lr.childNodeId}");
+        HydrateFromScene();
 
-        // Helper to spawn a line
-        void MakeLine(string parentId, string childId)
+        // Sync nodes (SO -> view)
+        int nodesUpdated = 0;
+        for (int i = 0; i < tree.Nodes.Count; i++)
         {
-            var key = $"{parentId}->{childId}";
-            if (lines.Contains(key)) return;
+            var n = tree.Nodes[i];
+            if (n == null) continue;
 
-            var go = Instantiate(linePrefab, canvasRoot);
-            go.name = $"Line_{parentId}_to_{childId}";
-            var cv = go.GetComponent<PrestigeConnectionViewLR>();
-            if (cv == null) cv = go.AddComponent<PrestigeConnectionViewLR>();
-            cv.parentNodeId = parentId;
-            cv.childNodeId = childId;
-            lines.Add(key);
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(cv);
-#endif
+            if (!nodeViews.TryGetValue(n.NodeId, out var view) || view == null)
+                continue;
+
+            view.NodeSO = n;
+
+            var rt = view.transform as RectTransform;
+            if (rt != null)
+                rt.anchoredPosition = n.AnchoredPosition;
+
+            view.Init(n);
+
+            EditorUtility.SetDirty(view);
+            nodesUpdated++;
         }
 
-        foreach (var child in tree.Nodes)
+        // Sync connections (straight-line baked path)
+        int connsUpdated = 0;
+        for (int i = 0; i < connections.Count; i++)
         {
-            if (child == null) continue;
-            if (child.RequiresAll != null)
-                foreach (var pid in child.RequiresAll)
-                    MakeLine(pid, child.NodeId);
+            var c = connections[i];
+            if (c.cv == null) continue;
 
-            if (child.RequiresAny != null)
-                foreach (var pid in child.RequiresAny)
-                    MakeLine(pid, child.NodeId);
-        }
+            if (!nodeViews.TryGetValue(c.parentId, out var parentView) || parentView == null) continue;
+            if (!nodeViews.TryGetValue(c.childId, out var childView) || childView == null) continue;
 
-        Debug.Log("[PrestigeUI] Missing connections created.");
-    }
+            var a = parentView.transform as RectTransform;
+            var b = childView.transform as RectTransform;
 
-    [ContextMenu("Validate Setup")]
-    public void Context_ValidateSetup()
-    {
-        var nodes = canvasRoot != null ? canvasRoot.GetComponentsInChildren<PrestigeNodeView>(true) : null;
-        var lines = canvasRoot != null ? canvasRoot.GetComponentsInChildren<PrestigeConnectionViewLR>(true) : null;
+            Vector2 p = LocalPos(a, canvasRoot);
+            Vector2 q = LocalPos(b, canvasRoot);
 
-        int nodesOk = 0, nodesMissingId = 0;
-        var seen = new HashSet<string>();
-
-        if (nodes != null)
-        {
-            foreach (var v in nodes)
+            var pts = new List<Vector3>(2)
             {
-                string id = !string.IsNullOrEmpty(v.NodeId) ? v.NodeId : (v.NodeSO ? v.NodeSO.NodeId : null);
-                if (string.IsNullOrEmpty(id)) { nodesMissingId++; continue; }
-                if (seen.Contains(id)) Debug.LogError($"[PrestigeUI] Duplicate NodeId '{id}' on {v.name}");
-                else { seen.Add(id); nodesOk++; }
-            }
+                new Vector3(p.x, p.y, 0f),
+                new Vector3(q.x, q.y, 0f)
+            };
+
+            c.cv.parentNodeId = c.parentId;
+            c.cv.childNodeId = c.childId;
+
+            // Ensure conversion space is correct for shifted-positions safety
+            c.cv.spaceRoot = canvasRoot;
+
+            c.cv.SetBakedLocalPoints(pts);
+            c.cv.ApplyBakedPathToRenderer();
+
+            EditorUtility.SetDirty(c.cv);
+            connsUpdated++;
         }
 
-        int linesOk = 0, linesBad = 0;
-        if (lines != null)
+        EditorSceneManager.MarkSceneDirty(gameObject.scene);
+        Debug.Log($"[PrestigeUI] Sync complete. NodesUpdated={nodesUpdated}, ConnectionsUpdated={connsUpdated}");
+    }
+
+    private void Editor_CreateConnectionIfValid(string parentId, string childId, HashSet<string> created)
+    {
+        if (string.IsNullOrEmpty(parentId) || string.IsNullOrEmpty(childId))
+            return;
+
+        if (!nodeViews.ContainsKey(parentId) || !nodeViews.ContainsKey(childId))
         {
-            foreach (var l in lines)
-            {
-                if (string.IsNullOrEmpty(l.parentNodeId) || string.IsNullOrEmpty(l.childNodeId))
-                {
-                    linesBad++;
-                    Debug.LogWarning($"[PrestigeUI] Line '{l.name}' missing IDs. parent='{l.parentNodeId}', child='{l.childNodeId}'");
-                    continue;
-                }
-
-                bool parentOk = seen.Contains(l.parentNodeId);
-                bool childOk = seen.Contains(l.childNodeId);
-
-                if (!parentOk || !childOk)
-                {
-                    linesBad++;
-                    Debug.LogWarning($"[PrestigeUI] Line '{l.name}' bad refs: parentOk={parentOk}({l.parentNodeId}) " +
-                                     $"childOk={childOk}({l.childNodeId}). " +
-                                     $"Ensure both nodes exist in this canvas (Build Nodes From Tree) and IDs match NodeSO.NodeId.");
-                    continue;
-                }
-                linesOk++;
-            }
-
+            Debug.LogWarning($"[PrestigeUI] Skipping connection {parentId}->{childId} (missing node view).");
+            return;
         }
 
-        Debug.Log($"[PrestigeUI] Validate: Nodes OK={nodesOk}, MissingId={nodesMissingId}. Lines OK={linesOk}, Bad={linesBad}.");
-    }
+        var key = parentId + "->" + childId;
+        if (created.Contains(key)) return;
 
-    private PrestigeNodeView FindNodeViewById(string nodeId)
-    {
-        if (string.IsNullOrEmpty(nodeId) || canvasRoot == null) return null;
-        var views = canvasRoot.GetComponentsInChildren<PrestigeNodeView>(true);
-        for (int i = 0; i < views.Length; i++)
-        {
-            var v = views[i];
-            var id = !string.IsNullOrEmpty(v.NodeId) ? v.NodeId : (v.NodeSO ? v.NodeSO.NodeId : null);
-            if (id == nodeId) return v;
-        }
-        return null;
-    }
+        var go = (GameObject)PrefabUtility.InstantiatePrefab(linePrefab, canvasRoot);
+        if (go == null) go = Instantiate(linePrefab, canvasRoot);
 
-    // ---------------------- Geom helpers (runtime-safe) ----------------------
-    private static Rect GetLocalRect(RectTransform rt, RectTransform parent)
-    {
-        // anchoredPosition is relative to the parent; rect.size/pivot give us the box
-        Vector2 size = rt.rect.size;
-        Vector2 pivot = rt.pivot;
-        Vector2 pos = rt.anchoredPosition;        // << key change
-        Vector2 min = pos - Vector2.Scale(size, pivot);
-        return new Rect(min, size);
-    }
+        go.name = $"Line_{parentId}_to_{childId}";
 
-    private static Vector2 LocalPos(RectTransform rt, RectTransform parent)
-    {
-        // Keep it simple and stable for UI: use anchoredPosition directly.
-        return rt.anchoredPosition;               // << key change
-    }
+        var cv = go.GetComponent<PrestigeConnectionViewLR>();
+        if (cv == null) cv = go.AddComponent<PrestigeConnectionViewLR>();
 
-
-    private static Vector2 Snap(Vector2 p, float g) => new Vector2(Mathf.Round(p.x / g) * g, Mathf.Round(p.y / g) * g);
-    private static float Snap(float v, float g) => Mathf.Round(v / g) * g;
-
-    private static void SetConn(PrestigeConnectionViewLR c, List<Vector2> pts, float z)
-    {
-        // Ensure line object's local origin doesn't add offsets
-        var rt = c.transform as RectTransform;
+        // Make sure RectTransform is sane for UI (full stretch)
+        var rt = go.transform as RectTransform;
         if (rt != null)
         {
-            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition3D = Vector3.zero;     // << important
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
             rt.localRotation = Quaternion.identity;
             rt.localScale = Vector3.one;
         }
 
-        var local3 = new List<Vector3>(pts.Count);
-        for (int i = 0; i < pts.Count; i++)
-            local3.Add(new Vector3(pts[i].x, pts[i].y, z));
+        cv.parentNodeId = parentId;
+        cv.childNodeId = childId;
 
-        c.SetBakedLocalPoints(local3);
+        // Important: baked points are in canvasRoot space, and we want correct conversion
+        cv.spaceRoot = canvasRoot;
+
+        // Important: ensure connections render behind nodes by hierarchy order
+        go.transform.SetAsFirstSibling();
+
+        EditorUtility.SetDirty(go);
+        EditorUtility.SetDirty(cv);
+
+        created.Add(key);
     }
 
+#endif
 
-    private static void AddSegments(List<(Vector2, Vector2)> used, List<Vector2> poly)
+    // ---------------------- LOCAL UI SPACE HELPERS ----------------------
+    private static Vector2 LocalPos(RectTransform rt, RectTransform parent)
     {
-        for (int i = 0; i < poly.Count - 1; i++)
-            used.Add((poly[i], poly[i + 1]));
+        // Use the RECT center in WORLD space, then convert to parent-local space.
+        // This works with any anchors, pivots, nested transforms, scaling, etc.
+        Vector3 worldCenter = rt.TransformPoint(rt.rect.center);
+        Vector3 local = parent.InverseTransformPoint(worldCenter);
+        return new Vector2(local.x, local.y);
     }
-
-    private static bool Intersects(List<Vector2> poly, Dictionary<string, Rect> rects, List<(Vector2, Vector2)> usedSegs)
-    {
-        // Against node rects
-        for (int i = 0; i < poly.Count - 1; i++)
-        {
-            var a = poly[i]; var b = poly[i + 1];
-            foreach (var r in rects.Values)
-                if (SegmentRectIntersect(a, b, r)) return true;
-        }
-        // Against already used segments
-        for (int i = 0; i < poly.Count - 1; i++)
-        {
-            var a = poly[i]; var b = poly[i + 1];
-            for (int j = 0; j < usedSegs.Count; j++)
-                if (SegmentsIntersect(a, b, usedSegs[j].Item1, usedSegs[j].Item2)) return true;
-        }
-        return false;
-    }
-
-    private static bool SegmentRectIntersect(Vector2 a, Vector2 b, Rect r)
-    {
-        if (r.Contains(a) || r.Contains(b)) return true;
-        var ca = new Vector2(r.xMin, r.yMin);
-        var cb = new Vector2(r.xMax, r.yMin);
-        var cc = new Vector2(r.xMax, r.yMax);
-        var cd = new Vector2(r.xMin, r.yMax);
-        if (SegmentsIntersect(a, b, ca, cb)) return true;
-        if (SegmentsIntersect(a, b, cb, cc)) return true;
-        if (SegmentsIntersect(a, b, cc, cd)) return true;
-        if (SegmentsIntersect(a, b, cd, ca)) return true;
-        return false;
-    }
-
-    private static bool SegmentsIntersect(Vector2 p, Vector2 p2, Vector2 q, Vector2 q2)
-    {
-        float o1 = Orient(p, p2, q);
-        float o2 = Orient(p, p2, q2);
-        float o3 = Orient(q, q2, p);
-        float o4 = Orient(q, q2, p2);
-
-        if (o1 * o2 < 0f && o3 * o4 < 0f) return true;
-
-        if (o1 == 0 && OnSegment(p, q, p2)) return true;
-        if (o2 == 0 && OnSegment(p, q2, p2)) return true;
-        if (o3 == 0 && OnSegment(q, p, q2)) return true;
-        if (o4 == 0 && OnSegment(q, p2, q2)) return true;
-
-        return false;
-    }
-
-    private static float Orient(Vector2 a, Vector2 b, Vector2 c)
-    {
-        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-    }
-
-    private static bool OnSegment(Vector2 a, Vector2 b, Vector2 c)
-    {
-        return Mathf.Min(a.x, c.x) <= b.x && b.x <= Mathf.Max(a.x, c.x) &&
-               Mathf.Min(a.y, c.y) <= b.y && b.y <= Mathf.Max(a.y, c.y);
-    }
-
 }

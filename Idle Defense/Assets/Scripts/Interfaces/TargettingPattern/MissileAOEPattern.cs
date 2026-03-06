@@ -35,7 +35,7 @@ public class MissileAOEPattern : MonoBehaviour, ITargetingPattern
 
     private void CreateExplosion(Vector3 hitPos, TurretStatsInstance stats, BaseTurret turret, Enemy primaryEnemy)
     {
-        var inRange = GridManager.Instance.GetEnemiesInRange(hitPos, Mathf.CeilToInt(stats.ExplosionRadius));
+        var inRange = GridManager.Instance.GetEnemiesInRange(hitPos, Mathf.CeilToInt(stats.ExplosionRadius), stats.CanHitFlying);
         float innerRadius = stats.ExplosionRadius / 3f;
 
         foreach (var e in inRange)
@@ -48,17 +48,20 @@ public class MissileAOEPattern : MonoBehaviour, ITargetingPattern
             if (isPrimary)
             {
                 // Full (flat) damage to primary/inner ring
-                turret.DamageEffects.ApplyAll(e, stats);
+                float baseDamage = turret.ComputeDamageAfterFalloff(e.transform.position, stats);
+                turret.DamageEffects.ApplyAll(e, stats, baseDamage, turret.SlotIndex);
             }
             else if (turret.SplashDamageEffectRef != null && stats.SplashDamage > 0f)
             {
                 // Splash = percentage of the total after all other effects
-                turret.DamageEffects.ApplyAll(e, stats, turret.SplashDamageEffectRef);
+                float baseDamage = turret.ComputeDamageAfterFalloff(e.transform.position, stats);
+                turret.DamageEffects.ApplyAll(e, stats, baseDamage, turret.SlotIndex, turret.SplashDamageEffectRef);
             }
             else
             {
                 // Fallback: full if splash not configured
-                turret.DamageEffects.ApplyAll(e, stats);
+                float baseDamage = turret.ComputeDamageAfterFalloff(e.transform.position, stats);
+                turret.DamageEffects.ApplyAll(e, stats, baseDamage, turret.SlotIndex);
             }
         }
 

@@ -83,7 +83,7 @@ namespace Assets.Scripts.Systems
             return enemyGrid.TryGetValue(gridPos, out List<Enemy> enemies) ? enemies : new List<Enemy>();
         }
 
-        public List<Enemy> GetEnemiesInRange(Vector3 position, int gridRange)
+        public List<Enemy> GetEnemiesInRange(Vector3 position, int gridRange, bool includeFlying)
         {
             List<Enemy> enemiesInRange = new();
             Vector2Int centerGridPos = GetGridPosition(position);
@@ -96,7 +96,18 @@ namespace Assets.Scripts.Systems
                     Vector2Int checkPosDown = new(centerGridPos.x + x, centerGridPos.y - y);
                     if (checkPosUp == checkPosDown)
                         if (enemyGrid.TryGetValue(checkPosUp, out List<Enemy> enemiesCenter))
-                            enemiesInRange.AddRange(enemiesCenter);
+                        {
+                            if (includeFlying)
+                                enemiesInRange.AddRange(enemiesCenter);
+                            else
+                            {
+                                foreach (Enemy enemy in enemiesCenter)
+                                {
+                                    if (!enemy.Info.IsFlying)
+                                        enemiesInRange.Add(enemy);
+                                }
+                            }
+                        }
                         else
                             continue;
                     else
@@ -177,4 +188,5 @@ public static class EnemyConfig
 {
     public const float BaseXArea = 2.5f;
     public static float EnemySpawnDepth = 80f;
+    public static float spawnXSpread = 35f;
 }

@@ -1,3 +1,4 @@
+using Assets.Scripts.SO;
 using Assets.Scripts.WaveSystem;
 using System.IO;
 using UnityEngine;
@@ -231,9 +232,158 @@ public class BalanceFormulaManager : MonoBehaviour
         return Mathf.Max(0f, normalized);
     }
 
-
     public float GetUpgradeCostMultiplier(int upgradeLevel)
     {
-        return Mathf.Max(0f, Config.upgrades.costMultiplier.Evaluate(upgradeLevel));
+        // Upgrade costs are not normalized; allow values < 1 to reduce costs.
+        if (Config == null || Config.upgrades == null || Config.upgrades.costMultiplier == null)
+            return 1f;
+
+        float v = Config.upgrades.costMultiplier.Evaluate(Mathf.Max(0, upgradeLevel));
+        if (float.IsNaN(v) || float.IsInfinity(v)) return 1f;
+        return Mathf.Max(0f, v);
+    }
+
+    public void SetEnemyHealthFormula(FormulaDefinition def)
+    {
+        if (Config.enemy == null) Config.enemy = new BalanceFormulaConfig.EnemyGlobalFormula();
+        Config.enemy.healthMultiplier = def ?? FormulaDefinition.Constant(1f);
+    }
+
+    public void SetEnemyDamageFormula(FormulaDefinition def)
+    {
+        if (Config.enemy == null) Config.enemy = new BalanceFormulaConfig.EnemyGlobalFormula();
+        Config.enemy.damageMultiplier = def ?? FormulaDefinition.Constant(1f);
+    }
+
+    public void SetEnemyCoinFormula(FormulaDefinition def)
+    {
+        if (Config.enemy == null) Config.enemy = new BalanceFormulaConfig.EnemyGlobalFormula();
+        Config.enemy.coinMultiplier = def ?? FormulaDefinition.Constant(1f);
+    }
+
+    public void SetUpgradeCostFormula(FormulaDefinition def)
+    {
+        if (Config.upgrades == null) Config.upgrades = new BalanceFormulaConfig.UpgradeCostGlobalFormula();
+        Config.upgrades.costMultiplier = def ?? FormulaDefinition.Constant(1f);
+    }
+
+    /// <summary>
+    /// This is the critical missing piece:
+    /// "Apply" must force the wave to rebuild so ZoneManager recreates the scaled EnemyInfoSO clones
+    /// using the new formulas.
+    /// </summary>
+    public void ApplyCurrentFormulasNow(bool restartWave = true)
+    {
+        // Optional: keep file in sync so testers can see current state (even if they don't hit Save).
+        // Comment out if you only want disk writes when Save is clicked.
+        TryWriteCurrentToPersistentWithoutSpamming();
+
+        if (!restartWave) return;
+
+        if (RuntimeBalanceTuningManager.Instance != null)
+        {
+            RuntimeBalanceTuningManager.Instance.ReloadCurrentWave();
+            return;
+        }
+
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.ForceRestartWave();
+            return;
+        }
+
+        Debug.LogWarning("[BalanceFormulaManager] ApplyCurrentFormulasNow: no WaveManager/RuntimeBalanceTuningManager found.");
+    }
+
+    public void SaveCurrentConfigToPersistent()
+    {
+        EnsurePersistentOverrideExists();
+        string path = GetPersistentPath();
+        try
+        {
+            // Ensure help text exists before writing.
+            if (string.IsNullOrWhiteSpace(Config.help))
+                Config.help = new BalanceFormulaConfig().help;
+
+            File.WriteAllText(path, JsonUtility.ToJson(Config, true));
+            Debug.Log("[BalanceFormulaManager] Saved formulas to: " + path);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("[BalanceFormulaManager] Save failed: " + ex.Message);
+        }
+    }
+
+    public string ExportCurrentConfigToJson()
+    {
+        if (Config == null) Config = new BalanceFormulaConfig();
+        if (string.IsNullOrWhiteSpace(Config.help))
+            Config.help = new BalanceFormulaConfig().help;
+
+        return JsonUtility.ToJson(Config, true);
+    }
+
+    private float _lastAutoWriteTime;
+    private void TryWriteCurrentToPersistentWithoutSpamming()
+    {
+        // Avoid writing every click/keystroke; only write at most once per second.
+        if (Time.unscaledTime - _lastAutoWriteTime < 1f) return;
+        _lastAutoWriteTime = Time.unscaledTime;
+
+        try
+        {
+            EnsurePersistentOverrideExists();
+            string path = GetPersistentPath();
+            File.WriteAllText(path, JsonUtility.ToJson(Config, true));
+        }
+        catch
+        {
+            // Silent: auto-write is optional convenience, not required for gameplay.
+        }
+    }
+
+
+    public void ApplyCurrentFormulasNow()
+    {
+        // Forces enemies to be rebuilt with the new formulas.
+        if (RuntimeBalanceTuningManager.Instance != null)
+            RuntimeBalanceTuningManager.Instance.ReloadCurrentWave();
+        else if (WaveManager.Instance != null)
+            WaveManager.Instance.ForceRestartWave();
+
+        // Upgrade costs: TurretUpgradeManager reads formula multiplier when it recalculates costs.
+        // If you have a "refresh UI" call in your upgrade UI, call it from your UI bridge.
+    }
+
+    /// <summary>
+    /// Apply the current enemy formula multipliers directly to a runtime Wave instance.
+    /// Call this AFTER any other runtime tuning that might rebuild/override stats.
+    /// </summary>
+    public void ApplyToWave(Wave wave, int globalWaveIndex)
+    {
+        if (wave == null || wave.WaveEnemies == null || wave.WaveEnemies.Count == 0) return;
+
+        float hMul = GetEnemyHealthMultiplier(globalWaveIndex);
+        float dMul = GetEnemyDamageMultiplier(globalWaveIndex);
+        float cMul = GetEnemyCoinMultiplier(globalWaveIndex);
+
+        // Defensive: avoid weird negatives/NaNs.
+        if (float.IsNaN(hMul) || float.IsInfinity(hMul) || hMul < 0f) hMul = 1f;
+        if (float.IsNaN(dMul) || float.IsInfinity(dMul) || dMul < 0f) dMul = 1f;
+        if (float.IsNaN(cMul) || float.IsInfinity(cMul) || cMul < 0f) cMul = 1f;
+
+        foreach (var kvp in wave.WaveEnemies)
+        {
+            EnemyInfoSO info = kvp.Value;
+            if (info == null) continue;
+
+            info.MaxHealth *= hMul;
+            info.Damage *= dMul;
+
+            double coins = info.CoinDropAmount * (double)cMul;
+            if (coins > ulong.MaxValue) coins = ulong.MaxValue;
+            if (coins < 0) coins = 0;
+            info.CoinDropAmount = (ulong)System.Math.Ceiling(coins);
+        }
     }
 }

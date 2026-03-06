@@ -7,6 +7,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using HighlightPlus;
 
 namespace Assets.Scripts.UI
 {
@@ -50,7 +51,8 @@ namespace Assets.Scripts.UI
         private GameObject spawned;
 
         [Header("Selection Indicator")]
-        [SerializeField] private GameObject selectedIndicator;
+        [SerializeField] private HighlightEffect effect;
+        //[SerializeField] private GameObject selectedIndicator;
 
         // Tracks the currently selected slot button, so we can turn off the old indicator.
         private static SlotWorldButton _currentSelected;
@@ -67,6 +69,9 @@ namespace Assets.Scripts.UI
         private void Start()
         {
             Initialize();//Invoke(nameof(Initialize), 0.1f); // Delay to ensure systems are initialized
+            effect = GetComponent<HighlightEffect>();
+            if (!effect)
+                Debug.Log("No HighlightEffect found on " + name + ". Selection indicator will not work.");
         }
 
         private void Initialize()
@@ -149,9 +154,9 @@ namespace Assets.Scripts.UI
 
                 _currentSelected = this;
             }
-            SetSelectedVisual(true);
 
             UIManager.Instance.DeactivateRightPanels();
+            SetSelectedVisual(true);
 
             AudioManager.Instance.Play("Click");
 
@@ -179,6 +184,7 @@ namespace Assets.Scripts.UI
 
                     // Immediately open the equip panel after unlocking
                     UIManager.Instance.OpenEquipPanel(slotIndex);
+                    SetSelectedVisual(true);
                 }
                 return;
             }
@@ -190,6 +196,7 @@ namespace Assets.Scripts.UI
             {
                 UIManager.Instance.OpenEquipPanel(slotIndex);
                 VFX.RangeOverlayManager.Instance.Hide();
+                SetSelectedVisual(true);
             }
             else
             {
@@ -215,8 +222,13 @@ namespace Assets.Scripts.UI
 
         private void SetSelectedVisual(bool selected)
         {
-            if (selectedIndicator != null)
-                selectedIndicator.SetActive(selected);
+            if (effect != null)
+                effect.highlighted = selected;
+            if (selected && effect)
+                effect.Refresh();
+            
+            /*if (selectedIndicator != null)
+                selectedIndicator.SetActive(selected);*/
         }
 
 
@@ -257,7 +269,7 @@ namespace Assets.Scripts.UI
             // Look up the EquippedTurret object instead of guessing stats
             if (!TurretSlotManager.Instance.TryGetEquippedTurret(slotIndex, out var equippedTurret) || equippedTurret == null)
             {
-                Debug.LogWarning($"[SlotWorldButton] Slot {slotIndex} does not have a valid EquippedTurret reference.");
+                //Debug.LogWarning($"[SlotWorldButton] Slot {slotIndex} does not have a valid EquippedTurret reference.");
                 return;
             }
 

@@ -84,7 +84,8 @@ public class PiercingLinePattern : MonoBehaviour, ITargetingPattern
             if (turret.PierceDamageEffectRef != null)
                 turret.PierceDamageEffectRef.SetHitIndex(hitIndex);
 
-            turret.DamageEffects.ApplyAll(enemy, stats);
+            float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+            turret.DamageEffects.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex);
             hitIndex++;
         }
     }

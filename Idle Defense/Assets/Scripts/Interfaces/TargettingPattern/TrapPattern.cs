@@ -19,6 +19,7 @@ public class TrapPattern : MonoBehaviour, ITargetingPattern
     [SerializeField] private float aheadDistance;
 
     private bool poolReady = false;
+    int maxTraps = 0;
 
     /// <summary>
     /// Triggers only trap placement logic, trap pool manager handles the actual placement in map and enemy manager handles explosion and damage
@@ -28,12 +29,13 @@ public class TrapPattern : MonoBehaviour, ITargetingPattern
     /// <param name="primaryTarget"></param>
     public void ExecuteAttack(BaseTurret turret, TurretStatsInstance stats, GameObject primaryTarget)
     {
-        if (!poolReady)
+        if (!poolReady || stats.MaxTrapsActive > maxTraps)
         {
             TrapPoolManager.Instance.InitializePool(
                 stats.TrapPrefab,
                 stats.MaxTrapsActive
             );
+            maxTraps = stats.MaxTrapsActive;
             poolReady = true;
         }
         explosionDelay = stats.ExplosionDelay;
@@ -80,6 +82,35 @@ public class TrapPattern : MonoBehaviour, ITargetingPattern
             trapCell = ClampCellToScreen(turret, trapCell, cellWorldY);
         }
 
+        // Prevent stacking traps on the same cell.
+        if (!IsCellFree(trapCell))
+        {
+            if (randomPlacement || primaryTarget == null)
+            {
+                // Try rerolling a few times for random placement.
+                const int maxAttempts = 12;
+                for (int attempt = 0; attempt < maxAttempts; attempt++)
+                {
+                    float randX = Random.Range(-EnemyConfig.BaseXArea, EnemyConfig.BaseXArea);
+                    float randZ = Random.Range(GridManager.Instance.NearZ + GridManager.Instance._cellSize, stats.Range);
+
+                    var candidate = GridManager.Instance.GetGridPosition(new Vector3(randX, 0f, randZ));
+                    candidate = ClampCellToScreen(turret, candidate, cellWorldY);
+
+                    if (IsCellFree(candidate))
+                    {
+                        trapCell = candidate;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                // For "ahead of target", find the nearest free neighbor cell.
+                trapCell = FindNearestFreeCell(trapCell, turret, cellWorldY, maxRing: 3);
+            }
+        }
+
         Vector3 trapWorldPos = GridManager.Instance.GetWorldPosition(trapCell, cellWorldY);
 
         TrapPoolManager.Instance.PlaceTrap(
@@ -90,7 +121,8 @@ public class TrapPattern : MonoBehaviour, ITargetingPattern
             explosionRadius,
             turret,
             cellWorldY
-            );
+        );
+
 
     }
 
@@ -110,6 +142,48 @@ public class TrapPattern : MonoBehaviour, ITargetingPattern
         cell.x = Mathf.Clamp(cell.x, minCellX, maxCellX);
         cell.y = Mathf.Clamp(cell.y, minCellZ, maxCellZ);
         return cell;
+    }
+
+    private bool IsCellFree(Vector2Int cell)
+    {
+        return TrapPoolManager.Instance.GetTrapAtCell(cell) == null;
+    }
+
+    private Vector2Int FindNearestFreeCell(Vector2Int startCell, BaseTurret turret, float yPos, int maxRing)
+    {
+        if (IsCellFree(startCell)) return startCell;
+
+        // Simple expanding square ring search around startCell.
+        for (int ring = 1; ring <= maxRing; ring++)
+        {
+            int minX = startCell.x - ring;
+            int maxX = startCell.x + ring;
+            int minZ = startCell.y - ring;
+            int maxZ = startCell.y + ring;
+
+            // Top and bottom edges
+            for (int x = minX; x <= maxX; x++)
+            {
+                var c1 = ClampCellToScreen(turret, new Vector2Int(x, minZ), yPos);
+                if (IsCellFree(c1)) return c1;
+
+                var c2 = ClampCellToScreen(turret, new Vector2Int(x, maxZ), yPos);
+                if (IsCellFree(c2)) return c2;
+            }
+
+            // Left and right edges (skip corners, already checked)
+            for (int z = minZ + 1; z <= maxZ - 1; z++)
+            {
+                var c1 = ClampCellToScreen(turret, new Vector2Int(minX, z), yPos);
+                if (IsCellFree(c1)) return c1;
+
+                var c2 = ClampCellToScreen(turret, new Vector2Int(maxX, z), yPos);
+                if (IsCellFree(c2)) return c2;
+            }
+        }
+
+        // No free cell found within maxRing; fall back to original.
+        return startCell;
     }
 
 }

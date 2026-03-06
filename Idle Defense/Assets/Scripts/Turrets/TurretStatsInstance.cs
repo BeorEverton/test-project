@@ -71,6 +71,11 @@ namespace Assets.Scripts.Turrets
         public int PelletCountLevel;
         public int PelletCountUpgradeAmount;
         public float PelletCountUpgradeBaseCost;
+        public float PelletChance;
+        public int PelletChanceLevel;
+        public float PelletChanceUpgradeAmount;
+        public float PelletChanceUpgradeBaseCost;
+        public float PelletChanceCostExponentialMultiplier;
 
         public float DamageFalloffOverDistance;
         public int DamageFalloffOverDistanceLevel;
@@ -82,6 +87,11 @@ namespace Assets.Scripts.Turrets
         public float KnockbackStrengthUpgradeAmount;
         public float KnockbackStrengthUpgradeBaseCost;
         public float KnockbackStrengthCostExponentialMultiplier;
+        public float KnockbackChance;
+        public int KnockbackChanceLevel;
+        public float KnockbackChanceUpgradeAmount;
+        public float KnockbackChanceUpgradeBaseCost;
+        public float KnockbackChanceCostExponentialMultiplier;
 
         public float PercentBonusDamagePerSec;
         public int PercentBonusDamagePerSecLevel;
@@ -92,6 +102,12 @@ namespace Assets.Scripts.Turrets
         public int SlowEffectLevel;
         public float SlowEffectUpgradeAmount;
         public float SlowEffectUpgradeBaseCost;
+        public float SlowChance;
+        public int SlowChanceLevel;
+        public int SlowChanceEffectLevel;
+        public float SlowChanceUpgradeAmount;
+        public float SlowChanceUpgradeBaseCost;
+        public float SlowChanceCostExponentialMultiplier;
 
         // ===== Range (upgradeable) =====
         public float RangeUpgradeAmount;
@@ -114,6 +130,11 @@ namespace Assets.Scripts.Turrets
         public float ArmorPenetrationUpgradeAmount;
         public float ArmorPenetrationUpgradeBaseCost;
         public float ArmorPenetrationCostExponentialMultiplier;
+        public float ArmorPenetrationChance;
+        public int ArmorPenetrationChanceLevel;
+        public float ArmorPenetrationChanceUpgradeAmount;
+        public float ArmorPenetrationChanceUpgradeBaseCost;
+        public float ArmorPenetrationChanceCostExponentialMultiplier;
 
         [Header("Bounce Pattern")]
         public int BounceCount;
@@ -121,6 +142,12 @@ namespace Assets.Scripts.Turrets
         public float BounceCountUpgradeAmount;
         public float BounceCountUpgradeBaseCost;
         public float BounceCountCostExponentialMultiplier;
+
+        public float BounceChance;
+        public int BounceChanceLevel;
+        public float BounceChanceUpgradeAmount;
+        public float BounceChanceUpgradeBaseCost;
+        public float BounceChanceCostExponentialMultiplier;
 
         public float BounceRange;
         public int BounceRangeLevel;
@@ -234,6 +261,11 @@ namespace Assets.Scripts.Turrets
             PelletCountLevel = source.PelletCountLevel;
             PelletCountUpgradeAmount = source.PelletCountUpgradeAmount;
             PelletCountUpgradeBaseCost = source.PelletCountUpgradeBaseCost;
+            PelletChance = source.PelletChance;
+            PelletChanceLevel = source.PelletChanceLevel;
+            PelletChanceUpgradeAmount = source.PelletChanceUpgradeAmount;
+            PelletChanceUpgradeBaseCost = source.PelletChanceUpgradeBaseCost;
+            PelletChanceCostExponentialMultiplier = source.PelletChanceCostExponentialMultiplier;
 
             DamageFalloffOverDistance = source.DamageFalloffOverDistance;
             DamageFalloffOverDistanceLevel = source.DamageFalloffOverDistanceLevel;
@@ -245,6 +277,11 @@ namespace Assets.Scripts.Turrets
             KnockbackStrengthUpgradeAmount = source.KnockbackStrengthUpgradeAmount;
             KnockbackStrengthUpgradeBaseCost = source.KnockbackStrengthUpgradeBaseCost;
             KnockbackStrengthCostExponentialMultiplier = source.KnockbackStrengthCostExponentialMultiplier;
+            KnockbackChance = source.KnockbackChance;
+            KnockbackChanceLevel = source.KnockbackChanceLevel;
+            KnockbackChanceUpgradeAmount = source.KnockbackChanceUpgradeAmount;
+            KnockbackChanceUpgradeBaseCost = source.KnockbackChanceUpgradeBaseCost;
+            KnockbackChanceCostExponentialMultiplier = source.KnockbackChanceCostExponentialMultiplier;
 
             PercentBonusDamagePerSec = source.PercentBonusDamagePerSec;
             PercentBonusDamagePerSecLevel = source.PercentBonusDamagePerSecLevel;
@@ -255,6 +292,11 @@ namespace Assets.Scripts.Turrets
             SlowEffectLevel = source.SlowEffectLevel;
             SlowEffectUpgradeAmount = source.SlowEffectUpgradeAmount;
             SlowEffectUpgradeBaseCost = source.SlowEffectUpgradeBaseCost;
+            SlowChance = source.SlowChance;
+            SlowChanceLevel = source.SlowChanceLevel;
+            SlowChanceUpgradeAmount = source.SlowChanceUpgradeAmount;
+            SlowChanceUpgradeBaseCost = source.SlowChanceUpgradeBaseCost;
+            SlowChanceCostExponentialMultiplier = source.SlowChanceCostExponentialMultiplier;
 
             // Bounce Pattern
             BounceCount = source.BounceCount;
@@ -262,6 +304,11 @@ namespace Assets.Scripts.Turrets
             BounceCountUpgradeAmount = source.BounceCountUpgradeAmount;
             BounceCountUpgradeBaseCost = source.BounceCountUpgradeBaseCost;
             BounceCountCostExponentialMultiplier = source.BounceCountCostExponentialMultiplier;
+            BounceChance = source.BounceChance;
+            BounceChanceLevel = source.BounceChanceLevel;
+            BounceChanceUpgradeAmount = source.BounceChanceUpgradeAmount;
+            BounceChanceUpgradeBaseCost = source.BounceChanceUpgradeBaseCost;
+            BounceChanceCostExponentialMultiplier = source.BounceChanceCostExponentialMultiplier;
 
             BounceRange = source.BounceRange;
             BounceRangeLevel = source.BounceRangeLevel;
@@ -332,6 +379,11 @@ namespace Assets.Scripts.Turrets
             ArmorPenetrationUpgradeAmount = source.ArmorPenetrationUpgradeAmount;
             ArmorPenetrationUpgradeBaseCost = source.ArmorPenetrationUpgradeBaseCost;
             ArmorPenetrationCostExponentialMultiplier = source.ArmorPenetrationCostExponentialMultiplier;
+            ArmorPenetrationChance = source.ArmorPenetrationChance;
+            ArmorPenetrationChanceLevel = source.ArmorPenetrationChanceLevel;
+            ArmorPenetrationChanceUpgradeAmount = source.ArmorPenetrationChanceUpgradeAmount;
+            ArmorPenetrationChanceUpgradeBaseCost = source.ArmorPenetrationChanceUpgradeBaseCost;
+            ArmorPenetrationChanceCostExponentialMultiplier = source.ArmorPenetrationChanceCostExponentialMultiplier;
 
         }
 
@@ -370,7 +422,13 @@ namespace Assets.Scripts.Turrets
 
                 + RangeLevel
                 + RotationSpeedLevel
-                + ArmorPenetrationLevel;
+                + ArmorPenetrationLevel
+
+                + ArmorPenetrationChanceLevel
+                + KnockbackChanceLevel
+                + BounceChanceLevel
+                + SlowChanceLevel
+                + PelletChanceLevel;
 
         }
     }

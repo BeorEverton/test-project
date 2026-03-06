@@ -497,6 +497,12 @@ namespace Assets.Scripts.UI
 
                 case TurretUpgradeType.ArmorPenetration: return s.ArmorPenetration;
 
+                case TurretUpgradeType.PelletChance: return s.PelletChance;
+                case TurretUpgradeType.KnockbackChance: return s.KnockbackChance;
+                case TurretUpgradeType.BounceChance: return s.BounceChance;
+                case TurretUpgradeType.SlowChance: return s.SlowChance;
+                case TurretUpgradeType.ArmorPenetrationChance: return s.ArmorPenetrationChance;
+
                 default: return float.NaN;
             }
         }
@@ -528,14 +534,17 @@ namespace Assets.Scripts.UI
                 case TurretUpgradeType.PercentBonusDamagePerSec: return $"{v:F1}%";
                 case TurretUpgradeType.ArmorPenetration: return $"{v:F1}%";
 
+                case TurretUpgradeType.PelletChance: return $"{v:F1}%";
+                case TurretUpgradeType.KnockbackChance: return $"{v:F1}%";
+                case TurretUpgradeType.BounceChance: return $"{v:F1}%";
+                case TurretUpgradeType.SlowChance: return $"{v:F1}%";
+                case TurretUpgradeType.ArmorPenetrationChance: return $"{v:F1}%";
+
                 // Counts like pellets or trap pool still look best as ints, but for everything else prefer one decimal.
                 default:
                     return $"{v:F1}";
             }
         }
-
-
-
         #endregion
     }
 }

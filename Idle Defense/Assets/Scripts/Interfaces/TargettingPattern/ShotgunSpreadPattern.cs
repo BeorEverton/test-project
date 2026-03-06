@@ -15,15 +15,29 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
     private List<Vector2> _pelletTargetPositions = new();
     private List<Vector2Int> _pathCells = new();
 
-    private float _cellSize = 1f;
     private float _pelletWidth = 0.5f;
 
-    TurretStatsInstance RuntimeStats;
+        TurretStatsInstance RuntimeStats;
+    private int _pelletCountThisShot = 1;
 
     public void ExecuteAttack(BaseTurret turret, TurretStatsInstance stats, GameObject primaryTarget)
     {
         RuntimeStats = stats;
-        
+
+        if (stats.PelletCount <= 1)
+        {
+            _pelletCountThisShot = 1;
+        }
+        else
+        {
+            float chance = stats.PelletChance;
+
+            bool proc =
+                (chance >= 100f) ||
+                (chance > 0f && Random.value <= (chance / 100f));
+
+            _pelletCountThisShot = proc ? Mathf.Max(1, stats.PelletCount) : 1;
+        }
 
         _pathCells.Clear();
         _pelletTargetPositions.Clear();
@@ -35,7 +49,7 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
         ).normalized;
 
 
-        if (stats.PelletCount % 2 == 1)
+        if (_pelletCountThisShot % 2 == 1)
         {
             FireWithUnevenPelletCount(baseDir);
         }
@@ -117,7 +131,7 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
         }
 
         // Distribute pellets
-        int pelletsRemaining = stats.PelletCount;
+        int pelletsRemaining = _pelletCountThisShot;
         int index = 0;        
 
         while (pelletsRemaining > 0 && sortedCount > 0)
@@ -127,7 +141,8 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
             float distToEnemy = enemyDistances[sortedIndices[index]];
             float damage = stats.Damage - GetDamageFalloff(distToEnemy);
 
-            turret.DamageEffects.ApplyAll(enemy, stats);
+            float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+            turret.DamageEffects.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex);
             pelletsRemaining--;
 
             index = (index + 1) % sortedCount;
@@ -148,10 +163,10 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
 
     private void FireWithUnevenPelletCount(Vector2 baseDir)
     {
-        for (int i = 0; i < RuntimeStats.PelletCount; i++)
+        for (int i = 0; i < _pelletCountThisShot; i++)
         {
-            float angleOffset = RuntimeStats.PelletCount > 1
-                ? Mathf.Lerp(-spreadAngle / 2f, spreadAngle / 2f, (float)i / (RuntimeStats.PelletCount - 1))
+            float angleOffset = _pelletCountThisShot > 1
+                ? Mathf.Lerp(-spreadAngle / 2f, spreadAngle / 2f, (float)i / (_pelletCountThisShot - 1))
                 : 0f;
 
             FirePellet(baseDir, angleOffset);
@@ -160,7 +175,7 @@ public class ShotgunSpreadPattern : MonoBehaviour, ITargetingPattern
 
     private void FireWithEvenPelletCount(Vector2 baseDir)
     {
-        int pelletsRemaining = RuntimeStats.PelletCount - 1;
+        int pelletsRemaining = _pelletCountThisShot - 1;
         int leftPellets = pelletsRemaining / 2;
         int rightPellets = pelletsRemaining - leftPellets;
 

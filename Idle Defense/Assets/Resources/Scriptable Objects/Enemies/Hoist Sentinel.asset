@@ -36,11 +36,11 @@ MonoBehaviour:
   ExploderDelay: 0
   ExploderRadius: 3
   ExploderMaxGunners: 2
-  HealerEnabled: 0
-  HealerCooldown: 5
-  HealerHealPctOfMaxHP: 0.1
-  HealerRadius: 6
-  HealerMaxTargets: 2
+  HealerEnabled: 1
+  HealerCooldown: 10
+  HealerHealPctOfMaxHP: 0.25
+  HealerRadius: 15
+  HealerMaxTargets: 8
   KamikazeOnReach: 0
   KamikazeRadius: 3
   KamikazeMaxGunners: 3

@@ -228,6 +228,24 @@ public class PrestigeManager : MonoBehaviour
         Save();
 
         OnPrestigeChanged?.Invoke();
+
+        // If the node changes enemy scaling, refresh current + future enemies immediately.
+        bool affectsEnemyScaling = node.EnemyHealthPct != 0f || node.EnemyCountPct != 0f;
+
+        if (affectsEnemyScaling)
+        {
+            var wm = Assets.Scripts.WaveSystem.WaveManager.Instance;
+            if (wm != null)
+            {
+                // 1) Rebuild WaveManager's current wave clones (so pooled/future spawns use new stats)
+                wm.RebuildCurrentWaveInstanceForCurrentStep();
+
+                // 2) Refresh all currently alive enemies in the scene right now
+                if (EnemySpawner.Instance != null)
+                    EnemySpawner.Instance.RefreshAliveEnemiesFromCurrentWave(preserveHealthPercent: true);
+            }
+        }
+
         return true;
     }
     public void GrantCrimson(int amount)
@@ -469,6 +487,23 @@ public class PrestigeManager : MonoBehaviour
 
         // Armor Penetration (0..100 clamped elsewhere)
         s.ArmorPenetration += sum.armorPenPct;
+
+        // ===== Chances (percentage points, clamped 0..100) =====
+        // Prestige adds directly as percentage points, same style as crit chance.
+        if (sum.slowChancePct != 0f)
+            s.SlowChance = Mathf.Clamp(s.SlowChance + sum.slowChancePct, 0f, 100f);
+
+        if (sum.pelletChancePct != 0f)
+            s.PelletChance = Mathf.Clamp(s.PelletChance + sum.pelletChancePct, 0f, 100f);
+
+        if (sum.knockbackChancePct != 0f)
+            s.KnockbackChance = Mathf.Clamp(s.KnockbackChance + sum.knockbackChancePct, 0f, 100f);
+
+        if (sum.bounceChancePct != 0f)
+            s.BounceChance = Mathf.Clamp(s.BounceChance + sum.bounceChancePct, 0f, 100f);
+
+        if (sum.armorPenChancePct != 0f)
+            s.ArmorPenetrationChance = Mathf.Clamp(s.ArmorPenetrationChance + sum.armorPenChancePct, 0f, 100f);
     }
 
     // 2) Enemy scaling: call this when computing per-wave HP/spawn
@@ -581,6 +616,12 @@ public class PrestigeManager : MonoBehaviour
 
             speedCapBonus = n.SpeedMultiplierCapBonus,
             allUpgradeCostPct = n.AllUpgradeCostPct,
+
+            pelletChancePct = n.PelletChancePct,
+            slowChancePct = n.SlowChancePct,
+            knockbackChancePct = n.KnockbackChancePct,
+            bounceChancePct = n.BounceChancePct,
+            armorPenChancePct = n.ArmorPenChancePct,
             perTypeDiscounts = new Dictionary<Assets.Scripts.Systems.TurretUpgradeType, float>()
         };
 

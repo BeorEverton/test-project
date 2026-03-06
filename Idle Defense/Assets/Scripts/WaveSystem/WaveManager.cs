@@ -38,6 +38,13 @@ namespace Assets.Scripts.WaveSystem
         // When false, player must click to start the next wave.
         public bool _autoAdvanceEnabled = true;
 
+        // Retreat rules:
+        // - Only offered on non-boss / non-mini-boss waves when all gunners die.
+        // - Can only retreat to the previous wave if that previous wave is NOT boss/mini-boss.
+        // - Can only be used once until the player completes the retreated-to wave.
+        private bool _retreatOfferedThisWave = false;
+        private int _retreatDisabledOnWave = -1; // wave index where retreat is disabled (the wave you retreated to)
+
         private void Awake()
         {
             if (Instance == null)
@@ -133,7 +140,12 @@ namespace Assets.Scripts.WaveSystem
             while (GameRunning)
             {                
                 // Keep local wave index in sync with ZoneManager.
-                _currentWave = _zoneManager != null ? _zoneManager.GlobalWaveIndex : _currentWave;               
+                _currentWave = _zoneManager != null ? _zoneManager.GlobalWaveIndex : _currentWave;
+
+                // New wave => reset retreat offer and hide UI.
+                _retreatOfferedThisWave = false;
+                if (UIManager.Instance != null)
+                    UIManager.Instance.ShowRetreatButton(false);
 
                 OnWaveStarted?.Invoke(this, new OnWaveStartedEventArgs
                 {
@@ -164,10 +176,15 @@ namespace Assets.Scripts.WaveSystem
                 _currentWaveInstance = wave;
 
                 // Apply runtime tuning to the wave clones (does not touch assets).
-                // Apply runtime tuning to the wave clones (does not touch assets).
                 if (RuntimeBalanceTuningManager.Instance != null)
                 {
                     RuntimeBalanceTuningManager.Instance.ApplyToCurrentWaveOnly();
+                }
+
+                // Apply JSON formulas AFTER tuning so they remain the final step.
+                if (BalanceFormulaManager.Instance != null)
+                {
+                    BalanceFormulaManager.Instance.ApplyToWave(_currentWaveInstance, _currentWave);
                 }
 
                 try
@@ -189,6 +206,8 @@ namespace Assets.Scripts.WaveSystem
 
                 if (_waveCompleted)
                 {
+                    int completedWaveIndex = _currentWave;
+
                     if (_autoAdvanceEnabled && _zoneManager != null)
                     {
                         // Let ZoneManager advance zones and global wave index
@@ -198,6 +217,11 @@ namespace Assets.Scripts.WaveSystem
 
                         StatsManager.Instance.TotalZonesSecured++;
                         StatsManager.Instance.MaxZone = _currentWave;
+
+                        // If we were on a wave where retreat was disabled (because we retreated to it),
+                        // and the player completed it, unlock retreat again for the next attempt.
+                        if (completedWaveIndex == _retreatDisabledOnWave)
+                            _retreatDisabledOnWave = -1;
                     }
                 }
 
@@ -243,6 +267,21 @@ namespace Assets.Scripts.WaveSystem
             StartCoroutine(StartWaveRoutine());
         }
 
+        public void RebuildCurrentWaveNow()
+        {
+            // Stop current loop and clear the field
+            AbortWaveAndDespawnAll();
+
+            // Critical: ensure nobody can keep using the previous wave instance
+            _currentWaveInstance = null;
+
+            // Keep the same global index; just rebuild the Wave (ZoneManager will rebuild fresh clones)
+            _autoAdvanceEnabled = true;
+
+            // StartWaveRoutine will call ZoneManager.BuildWaveForCurrentStep() again
+            ForceRestartWave();
+        }
+
         #region Stop wave progression
 
         /// <summary>
@@ -284,10 +323,14 @@ namespace Assets.Scripts.WaveSystem
             var wave = GetCurrentWave();
             if (wave == null) return;
 
-            // Only for boss / mini-boss waves (now uses zone-aware flags).
+            // Non-boss waves: offer retreat (player choice).
             if (!wave.IsMiniBossWave() && !wave.IsBossWave())
+            {
+                TryOfferRetreatForNonBossWave();
                 return;
+            }
 
+            // Boss / mini-boss waves: keep your existing auto-rollback behavior.
             _autoAdvanceEnabled = false;
 
             int prev = Mathf.Max(1, GetCurrentWaveIndex() - 1);
@@ -302,7 +345,92 @@ namespace Assets.Scripts.WaveSystem
                 UIManager.Instance.ShowManualAdvanceButton(true);
         }
 
+        private void TryOfferRetreatForNonBossWave()
+        {
+            if (_retreatOfferedThisWave)
+                return;
+
+            // If we already retreated to this wave, don't offer retreat again until the wave is completed.
+            if (_currentWave == _retreatDisabledOnWave)
+                return;
+
+            // Must have a previous wave.
+            int prev = _currentWave - 1;
+            if (prev < 1)
+                return;
+
+            // Can't go back to a boss/mini-boss wave.
+            if (IsBossOrMiniBossWaveIndex(prev))
+                return;
+
+            _retreatOfferedThisWave = true;
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowRetreatButton(true);
+        }
+
+        public void RetreatToPreviousWave()
+        {
+            var wave = GetCurrentWave();
+            if (wave == null) return;
+
+            // Only meaningful for non-boss waves. Boss waves have their own rollback flow.
+            if (wave.IsBossWave() || wave.IsMiniBossWave())
+                return;
+
+            if (_currentWave == _retreatDisabledOnWave)
+                return;
+
+            int prev = Mathf.Max(1, _currentWave - 1);
+            if (IsBossOrMiniBossWaveIndex(prev))
+                return;
+
+            _retreatOfferedThisWave = true;
+            _retreatDisabledOnWave = prev;
+
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowRetreatButton(false);
+
+            if (_enemySpawner != null)
+                _enemySpawner.AbortWaveAndDespawnAll();
+
+            LoadWave(prev);
+            ForceRestartWave();
+        }
+
+        private bool IsBossOrMiniBossWaveIndex(int waveIndex)
+        {
+            if (_zoneManager == null) return false;
+
+            int current = _zoneManager.GlobalWaveIndex;
+            try
+            {
+                _zoneManager.SetGlobalWaveIndex(waveIndex);
+                Wave w = _zoneManager.BuildWaveForCurrentStep();
+                return w != null && (w.IsBossWave() || w.IsMiniBossWave());
+            }
+            catch
+            {
+                // If anything goes wrong, fail "open" (treat as not boss) so we don't soft-lock players.
+                return false;
+            }
+            finally
+            {
+                _zoneManager.SetGlobalWaveIndex(current);
+            }
+        }
         #endregion
+
+        // Prestige manager needs a way to trigger a rebuild of the current wave with new formulas when the player changes prestige level.
+        public void RebuildCurrentWaveInstanceForCurrentStep()
+        {
+            if (_zoneManager == null) return;
+
+            // Rebuild the wave for the SAME current step (global wave index is held by ZoneManager)
+            Wave rebuilt = _zoneManager.BuildWaveForCurrentStep();
+            if (rebuilt == null) return;
+
+            _currentWaveInstance = rebuilt;
+        }
 
         #region Debugging
 

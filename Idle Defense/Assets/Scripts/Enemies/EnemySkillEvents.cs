@@ -15,25 +15,42 @@ public sealed class EnemySkillEvents : MonoBehaviour
 
     public void AnimEvent_SkillStart()
     {
-        if (_bossBrain != null) _bossBrain.OnSkillAnimStart();
+        if (_bossBrain != null)
+        {
+            _bossBrain.OnSkillAnimStart();
+            return;
+        }
     }
 
     public void AnimEvent_ExecuteSkill()
     {
-        if (_bossBrain != null) _bossBrain.OnSkillAnimExecute();
-        EnemyManager.Instance.ExecutePendingSkill(_enemy);
+        if (_bossBrain != null)
+        {
+            _bossBrain.OnSkillAnimExecute();
+            return;
+        }
+
+        if (_enemy != null)
+            EnemyManager.Instance.ExecutePendingSkill(_enemy);
     }
 
     public void AnimEvent_SkillEnd()
     {
-        if (_bossBrain != null) _bossBrain.OnSkillAnimEnd();
+        if (_bossBrain != null)
+        {
+            _bossBrain.OnSkillAnimEnd();
+            return;
+        }
+
+        if (_enemy != null)
+            EnemyManager.Instance.ClearPendingSkill(_enemy);
     }
 
-
-    // Animation Event inside the Attack clip
     public void AnimEvent_ExecuteAttack()
     {
-        if (_enemy == null) return;
+        if (_enemy == null)
+            return;
+
         EnemyManager.Instance.ExecutePendingAttack(_enemy);
     }
 }

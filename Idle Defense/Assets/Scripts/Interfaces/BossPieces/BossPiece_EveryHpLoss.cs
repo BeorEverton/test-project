@@ -5,21 +5,18 @@ using static Assets.Scripts.WaveSystem.EnemyManager;
 public sealed class BossPiece_EveryHpLoss : MonoBehaviour, IBossPiece
 {
     [Header("Trigger")]
-    [SerializeField, Range(0.01f, 0.5f)] private float step = 0.10f; // 10%
+    [SerializeField, Range(0.01f, 0.5f)] private float step = 0.10f;
 
     [Header("Skill")]
     [SerializeField] private BossSkillId skill = BossSkillId.HealPulse;
 
-    // Generic payload 
-    // SpecialGunnerHit: A=damage, B=radius, I=maxTargets
-    // ShieldGain: I=charges
-    // JumpDepth: A=deltaZ
-    // BuffSelf: A=armorDelta, B=speedMult, I=durationSeconds
-    [Tooltip("SpecialGunnerHit = A=damage. JumpDepth: A=deltaZ. BuffSelf: A=armorDelta")]
-    [SerializeField] private float paramA = 20f;
-    [Tooltip("SpecialGunnerHit = B=radius. BuffSelf: B=speedMult")]
+    [Tooltip("SpecialGunnerHit: multiplier of normal attack damage. 1.5 = 150%. HealPulse: heal pct of max HP. 0.10 = 10%. JumpDepth: delta Z. BuffSelf: armor pct of base armor. 0.25 = +25%.")]
+    [SerializeField] private float paramA = 0.10f;
+
+    [Tooltip("SpecialGunnerHit: radius. HealPulse: radius. BuffSelf: speed multiplier.")]
     [SerializeField] private float paramB = 4f;
-    [Tooltip("SpecialGunnerHit = I=maxTargets. ShieldGain: I=charges. BuffSelf: I=durationSeconds")]
+
+    [Tooltip("SpecialGunnerHit: max targets. HealPulse: max targets. ShieldGain: charges. BuffSelf: duration seconds.")]
     [SerializeField] private int paramI = 2;
 
     [Header("Boss Brain")]
@@ -28,7 +25,6 @@ public sealed class BossPiece_EveryHpLoss : MonoBehaviour, IBossPiece
 
     [SerializeField] private int priority = 0;
     public int Priority => priority;
-
 
     [SerializeField] private string animationTrigger = "Skill_HpThreshold";
     public string AnimationTrigger => animationTrigger;
@@ -47,7 +43,6 @@ public sealed class BossPiece_EveryHpLoss : MonoBehaviour, IBossPiece
 
     public void Execute(BossContext ctx)
     {
-        // Prevent multi-fire burst: advance thresholds past current HP in one go.
         float s = Mathf.Max(0.001f, step);
         while (ctx.Hp01 <= _next)
             _next -= s;

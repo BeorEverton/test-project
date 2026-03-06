@@ -25,6 +25,12 @@ namespace Assets.Scripts.Enemies
             public float XPDropAmount;
         }
 
+        // Boss UI hooks 
+        public static event Action<Enemy> OnBossSpawned;
+        public static event Action<Enemy> OnBossDespawned;
+
+        private bool _bossUiNotified = false;
+
         [SerializeField] private EnemyInfoSO _info;
         private bool _applyBossVisualsAfterReset = false;
         private bool _isMiniBoss = false;
@@ -91,6 +97,7 @@ namespace Assets.Scripts.Enemies
 
         // Movement
         public Vector3 MoveDirection;
+        // Animation
         [SerializeField] private Animator _animator;
         [SerializeField] private string _animMovingBool = "Idle";
         [SerializeField] private string _animAttackTrigger = "Attack";
@@ -123,6 +130,55 @@ namespace Assets.Scripts.Enemies
         public float ArmorDeltaRT => _armorDeltaRT;
         public float DodgeDeltaRT => _dodgeDeltaRT;
 
+        [SerializeField] private bool useAlternateBossAttackTriggers = false;
+        [SerializeField] private string bossAltAttackTrigger = "Skill3";
+
+        private int _bossAltAttackHash;
+        private bool _bossAltNext;
+
+        private void Awake()
+        {
+            if (_body != null)
+                _bodyOriginalLocalPos = _body.localPosition;
+
+            if (hitFlash == null)
+                hitFlash = GetComponentInChildren<HitFlashOverlay>();
+
+            EnemyDeathEffect = GetComponent<EnemyDeathEffect>();
+
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>(true);
+
+            _animMovingHash = Animator.StringToHash(_animMovingBool);
+            _animAttackHash = Animator.StringToHash(_animAttackTrigger);
+            _animSkillHash = Animator.StringToHash(_animSkillTrigger);
+
+            _bossAltAttackHash = Animator.StringToHash(bossAltAttackTrigger);
+        }
+
+        private void OnEnable()
+        {
+            ResetEnemy();
+            LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
+            GridManager.Instance.AddEnemy(this);
+
+            _bossAltNext = false;
+
+            // Prewarm the summoner's pool if configured
+            if (_info.SummonerEnabled && _info.SummonPrefab != null && _info.SummonPrewarmCount > 0)
+            {
+                EnemySpawner.Instance.PrewarmPrefab(_info.SummonPrefab, _info.SummonPrewarmCount);
+            }
+
+            summonerTimer = 0f;
+            hasSummonedOnce = false;
+
+#if UNITY_EDITOR
+            _coinDropAmount = _info.CoinDropAmount;
+            _damage = _info.Damage;
+#endif
+        }
+
         public void ApplyTimedBuff(
             float speedMult,
             float damageMult,
@@ -152,24 +208,6 @@ namespace Assets.Scripts.Enemies
         }
 
 
-        private void Awake()
-        {
-            if (_body != null)
-                _bodyOriginalLocalPos = _body.localPosition;
-
-            if (hitFlash == null)
-                hitFlash = GetComponentInChildren<HitFlashOverlay>();
-
-            EnemyDeathEffect = GetComponent<EnemyDeathEffect>();
-
-            if (_animator == null)
-                _animator = GetComponentInChildren<Animator>(true);
-
-            _animMovingHash = Animator.StringToHash(_animMovingBool);
-            _animAttackHash = Animator.StringToHash(_animAttackTrigger);
-            _animSkillHash = Animator.StringToHash(_animSkillTrigger);
-        }
-
         public void SetAnimIdle(bool isIdle)
         {
             if (_animator == null) return;
@@ -190,32 +228,25 @@ namespace Assets.Scripts.Enemies
             _animator.SetTrigger(_animSkillHash);
         }
 
-
-        private void OnEnable()
+        public void ResetAttackTriggerOnly()
         {
-            ResetEnemy();
-            LastGridPos = GridManager.Instance.GetGridPosition(transform.position);
-            GridManager.Instance.AddEnemy(this);
+            if (_animator == null) return;
 
-            // Prewarm the summoner's pool if configured
-            if (_info.SummonerEnabled && _info.SummonPrefab != null && _info.SummonPrewarmCount > 0)
-            {
-                EnemySpawner.Instance.PrewarmPrefab(_info.SummonPrefab, _info.SummonPrewarmCount);
-            }
+            _animator.ResetTrigger(_animAttackHash);
 
-            // Initialize summon timer
-            summonerTimer = 0f;
-            hasSummonedOnce = false;
-
-#if UNITY_EDITOR
-            _coinDropAmount = _info.CoinDropAmount;
-            _damage = _info.Damage;
-#endif
+            if (IsBossInstance && useAlternateBossAttackTriggers)
+                _animator.ResetTrigger(_bossAltAttackHash);
         }
 
         private void OnDisable()
         {
-            IsBossInstance = false;
+            // If pooled/disabled while still considered boss, ensure UI closes
+            if (IsBossInstance && _bossUiNotified)
+            {
+                _bossUiNotified = false;
+                OnBossDespawned?.Invoke(this);
+            }
+            
             if (EnemyManager.Instance != null)
             {
                 EnemyManager.Instance.ClearPendingSkill(this);
@@ -334,6 +365,12 @@ namespace Assets.Scripts.Enemies
             // Boss special
             if (IsBossInstance)
             {
+                if (_bossUiNotified)
+                {
+                    _bossUiNotified = false;
+                    OnBossDespawned?.Invoke(this);
+                }
+
                 TriggerBossExplosionMode();
 
                 StatsManager.Instance.BossesKilled++;
@@ -409,7 +446,7 @@ namespace Assets.Scripts.Enemies
 
         private void DamageNearbyAllies(float radius, float damage)
         {
-            var nearby = GridManager.Instance.GetEnemiesInRange(transform.position, Mathf.CeilToInt(radius));
+            var nearby = GridManager.Instance.GetEnemiesInRange(transform.position, Mathf.CeilToInt(radius), true);
             for (int i = 0; i < nearby.Count; i++)
             {
                 Enemy e = nearby[i];
@@ -449,7 +486,6 @@ namespace Assets.Scripts.Enemies
                 EnemyManager.Instance.ClearPendingAttack(this);
             }
 
-
             ApplyBodySpriteFromInfo();
             ResetVisualPosition();
 
@@ -459,6 +495,14 @@ namespace Assets.Scripts.Enemies
             MaxHealth = Info.MaxHealth;
             CurrentHealth = MaxHealth;
             OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
+
+            // Notify UI the correct max/current health.
+            if (IsBossInstance && !_bossUiNotified)
+            {
+                _bossUiNotified = true;
+                OnBossSpawned?.Invoke(this);
+            }
+
             SetRandomMovementSpeed();
             SetRandomAttackRange();
             _muzzleFlashRenderer.enabled = false;
@@ -527,20 +571,20 @@ namespace Assets.Scripts.Enemies
         {
             if (_body == null)
             {
-                Debug.LogWarning("Body transform is not assigned on: " + gameObject.name);
+                //Debug.LogWarning("Body transform is not assigned on: " + gameObject.name);
                 return;
             }
 
             if (_info == null || _info.Icon == null)
             {
-                Debug.LogWarning("EnemyInfo or Icon is null for: " + gameObject.name);
+               // Debug.LogWarning("EnemyInfo or Icon is null for: " + gameObject.name);
                 return;
             }
 
             SpriteRenderer sr = _body.GetComponent<SpriteRenderer>();
             if (sr == null)
             {
-                Debug.LogWarning("No SpriteRenderer found on _body for: " + gameObject.name);
+               // Debug.LogWarning("No SpriteRenderer found on _body for: " + gameObject.name);
                 return;
             }
 
@@ -580,18 +624,34 @@ namespace Assets.Scripts.Enemies
             IsSlowed = true;
         }
 
+        private void TriggerAnimByHash(int trigHash)
+        {
+            if (_animator == null) return;
+            _animator.ResetTrigger(trigHash);
+            _animator.SetTrigger(trigHash);
+        }
+
         public void AnimateAttack()
         {
             if (_animator != null)
             {
-                TriggerAnimAttack();
+                if (IsBossInstance && useAlternateBossAttackTriggers)
+                {
+                    int h = _bossAltNext ? _bossAltAttackHash : _animAttackHash;
+                    _bossAltNext = !_bossAltNext;
+                    TriggerAnimByHash(h);
+                }
+                else
+                {
+                    TriggerAnimAttack();
+                }
 
-                // muzzle flash for ranged enemies 
                 if (_info != null && _info.AttackRange >= 0.5f)
                     StartCoroutine(ShowMuzzleFlash());
 
                 return;
             }
+
             /* Old 2D stuff
             if (_body == null) return;
 
@@ -666,7 +726,7 @@ namespace Assets.Scripts.Enemies
 
         private void HitNearestGunners(float damage, float radius, int maxTargets)
         {
-            Debug.Log($"Enemy Explosion: Damage={damage}, Radius={radius}, MaxTargets={maxTargets}");
+            //Debug.Log($"Enemy Explosion: Damage={damage}, Radius={radius}, MaxTargets={maxTargets}");
             // Build (slot, distance) list for alive gunners within radius
             List<(int slot, float dist)> candidates = new List<(int, float)>(5);
             for (int slot = 0; slot < 5; slot++)
@@ -675,8 +735,7 @@ namespace Assets.Scripts.Enemies
                 float d = Mathf.Abs(z - transform.position.Depth());
 
                 bool alive = GunnerManager.Instance.IsSlotAlive(slot);
-
-                Debug.Log("Slot depth is " + z);
+                                
                 if (d <= radius && alive)
                     candidates.Add((slot, d));
             }
@@ -833,21 +892,6 @@ namespace Assets.Scripts.Enemies
             HitNearestGunners(Mathf.Max(0f, damage), Mathf.Max(0f, radius), Mathf.Clamp(maxTargets, 1, 5));
         }
 
-        // call this from EnemyManager tick (since it already loops enemies) or Enemy.Update if you prefer
-        public void TickBuffs(float dt)
-        {
-            if (_buffTimer <= 0f) return;
-            _buffTimer -= dt;
-            if (_buffTimer <= 0f)
-            {
-                _armorDeltaRT = 0f;
-                _dodgeDeltaRT = 0f;
-                _speedMultRT = 1f;
-                _damageMultRT = 1f;
-            }
-        }
-
-
         public void LockMovement(float seconds)
         {
             if (seconds <= 0f) return;
@@ -860,5 +904,24 @@ namespace Assets.Scripts.Enemies
                 MovementLockTimer -= dt;
         }
 
+        // Prestige immediate reset support
+        public void ApplyNewInfoImmediate(EnemyInfoSO newInfo, bool preserveHealthPercent)
+        {
+            if (newInfo == null) return;
+
+            float hpPct = 1f;
+            if (preserveHealthPercent && MaxHealth > 0.0001f)
+                hpPct = Mathf.Clamp01(CurrentHealth / MaxHealth);
+
+            // Swap info reference (important so future reads use the new SO)
+            Info = newInfo;
+
+            // Recompute derived runtime stats that must update immediately
+            MaxHealth = Info.MaxHealth;
+            CurrentHealth = preserveHealthPercent ? (MaxHealth * hpPct) : MaxHealth;
+
+            OnMaxHealthChanged?.Invoke(this, EventArgs.Empty);
+            OnCurrentHealthChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

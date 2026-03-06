@@ -14,6 +14,8 @@ namespace Assets.Scripts
         private void Awake()
         {
             _enemy = GetComponentInParent<Enemy>();
+            // Bosses have their own health bar, so we don't want to subscribe to their events
+            if (_enemy.IsBossInstance) return; 
             _enemy.OnMaxHealthChanged += UpdateMaxHealth;
             _enemy.OnCurrentHealthChanged += UpdateCurrentHealthHealth;
         }

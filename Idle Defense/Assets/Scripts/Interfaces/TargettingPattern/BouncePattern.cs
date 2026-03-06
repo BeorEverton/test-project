@@ -1,6 +1,7 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Systems;
 using Assets.Scripts.Turrets;
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,9 +16,27 @@ public class BouncePattern : MonoBehaviour, ITargetingPattern
     {
         if (primaryTarget == null) return;
 
+        // Always reset bounce index so we never “inherit” a previous shot.
+        if (turret.BounceDamageEffectRef != null)
+            turret.BounceDamageEffectRef.SetBounceIndex(0);
+
+        bool procBounce =
+            (stats.BounceChance >= 100f) ||
+            (stats.BounceChance > 0f && Random.value <= (stats.BounceChance / 100f));
+
+        // If bounce doesn’t proc, behave like a single-hit pattern.
+        if (!procBounce)
+        {
+            var enemy = primaryTarget.GetComponent<Enemy>();
+            if (enemy != null)
+                turret.DamageEffects?.ApplyAll(enemy, stats, turret.SlotIndex);
+            return;
+        }
+
         bounceCount = stats.BounceCount;
         bounceRange = stats.BounceRange;
         bounceDelay = stats.BounceDelay;
+
         StartCoroutine(BounceRoutine(turret, stats, primaryTarget));
     }
 
@@ -29,7 +48,7 @@ public class BouncePattern : MonoBehaviour, ITargetingPattern
         // 1 primary hit + N extra bounces
         int totalHits = Mathf.Max(1, stats.BounceCount + 1);
 
-        float currentDamage = stats.Damage;
+        float currentDamage = turret.ComputeDamageAfterFalloff(currentTarget.transform.position, stats);
 
         for (int i = 0; i < totalHits && currentTarget != null; i++)
         {
@@ -44,11 +63,11 @@ public class BouncePattern : MonoBehaviour, ITargetingPattern
                 turret.BounceDamageEffectRef.SetBounceIndex(i);
 
             // Apply all effects but skip any internal "bounce scaler"
-            turret.DamageEffects?.ApplyAll_NoBounce(currentTarget, stats, currentDamage);
+            turret.DamageEffects?.ApplyAll_NoBounce(currentTarget, stats, currentDamage, turret.SlotIndex);
             hitTargets.Add(currentTarget);
 
             // find next closest unhit enemy inside bounce range
-            Enemy nextTarget = FindClosestUnhitEnemy(currentTarget.transform.position, hitTargets);
+            Enemy nextTarget = FindClosestUnhitEnemy(currentTarget.transform.position, hitTargets, stats.CanHitFlying);
             currentTarget = nextTarget;
 
             // pacing
@@ -58,9 +77,9 @@ public class BouncePattern : MonoBehaviour, ITargetingPattern
     }
 
 
-    private Enemy FindClosestUnhitEnemy(Vector3 fromPosition, List<Enemy> excludeList)
+    private Enemy FindClosestUnhitEnemy(Vector3 fromPosition, List<Enemy> excludeList, bool hitFlying)
     {
-        var nearby = GridManager.Instance.GetEnemiesInRange(fromPosition, Mathf.CeilToInt(bounceRange));
+        var nearby = GridManager.Instance.GetEnemiesInRange(fromPosition, Mathf.CeilToInt(bounceRange), hitFlying);
         Enemy closest = null;
         float minDist = float.MaxValue;
 

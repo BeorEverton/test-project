@@ -17,12 +17,16 @@ public struct PrestigeEffects
     public float splashDamagePct;
     public float pierceDamageFalloffPct;
     public float pelletCountPct;
+    public float pelletChancePct;
     public float damageFalloffOverDistancePct;
     public float percentBonusDpsPct;
     public float slowEffectPct;
+    public float slowChancePct;
     public float knockbackStrengthPct;
+    public float knockbackChancePct;
 
     public float bounceCountPct;
+    public float bounceChancePct;
     public float bounceRangePct;
     public float bounceDelayPct;
     public float bounceDamagePctPct;
@@ -33,6 +37,7 @@ public struct PrestigeEffects
     public float maxTrapsActivePct;
 
     public float armorPenPct;
+    public float armorPenChancePct;
 
     // Economy / Meta
     public float scrapsGainPct;
@@ -67,12 +72,16 @@ public struct PrestigeEffects
             splashDamagePct = a.splashDamagePct + b.splashDamagePct,
             pierceDamageFalloffPct = a.pierceDamageFalloffPct + b.pierceDamageFalloffPct,
             pelletCountPct = a.pelletCountPct + b.pelletCountPct,
+            pelletChancePct = a.pelletChancePct + b.pelletChancePct,
             damageFalloffOverDistancePct = a.damageFalloffOverDistancePct + b.damageFalloffOverDistancePct,
             percentBonusDpsPct = a.percentBonusDpsPct + b.percentBonusDpsPct,
             slowEffectPct = a.slowEffectPct + b.slowEffectPct,
+            slowChancePct = a.slowChancePct + b.slowChancePct,
             knockbackStrengthPct = a.knockbackStrengthPct + b.knockbackStrengthPct,
+            knockbackChancePct = a.knockbackChancePct + b.knockbackChancePct,
 
             bounceCountPct = a.bounceCountPct + b.bounceCountPct,
+            bounceChancePct = a.bounceChancePct + b.bounceChancePct,
             bounceRangePct = a.bounceRangePct + b.bounceRangePct,
             bounceDelayPct = a.bounceDelayPct + b.bounceDelayPct,
             bounceDamagePctPct = a.bounceDamagePctPct + b.bounceDamagePctPct,
@@ -83,6 +92,7 @@ public struct PrestigeEffects
             maxTrapsActivePct = a.maxTrapsActivePct + b.maxTrapsActivePct,
 
             armorPenPct = a.armorPenPct + b.armorPenPct,
+            armorPenChancePct = a.armorPenChancePct + b.armorPenChancePct,
 
             scrapsGainPct = a.scrapsGainPct + b.scrapsGainPct,
             blackSteelGainPct = a.blackSteelGainPct + b.blackSteelGainPct,

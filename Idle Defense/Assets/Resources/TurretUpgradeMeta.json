@@ -1,72 +1,152 @@
 [
-    {
-        "Type": "Damage",
-        "DisplayName": "Damage",
-        "Description": "Increases turret base damage."
-    },
-    {
-        "Type": "FireRate",
-        "DisplayName": "Fire Rate",
-        "Description": "Increases shots per second. Faster firing speed."
-    },
-    {
-        "Type": "CriticalChance",
-        "DisplayName": "Critical Chance",
-        "Description": "Raises chance for critical hits. Max 50%."
-    },
-    {
-        "Type": "CriticalDamageMultiplier",
-        "DisplayName": "Critical Damage",
-        "Description": "Increases damage multiplier for critical hits."
-    },
-    {
-        "Type": "ExplosionRadius",
-        "DisplayName": "Explosion Radius",
-        "Description": "Enlarges explosion area of missiles."
-    },
-    {
-        "Type": "SplashDamage",
-        "DisplayName": "Splash Damage",
-        "Description": "Damages nearby enemies hit by explosions."
-    },
-    {
-        "Type": "PierceChance",
-        "DisplayName": "Pierce Chance",
-        "Description": "Increases chance for shots to pierce through enemies."
-    },
-    {
-        "Type": "PierceDamageFalloff",
-        "DisplayName": "Pierce Dmg Falloff",
-        "Description": "Reduces the damage lost on each pierced enemy."
-    },
-    {
-        "Type": "PelletCount",
-        "DisplayName": "Pellet Count",
-        "Description": "Adds more pellets per shotgun shot."
-    },
-    {
-        "Type": "DamageFalloffOverDistance",
-        "DisplayName": "Range Falloff",
-        "Description": "Reduces damage lost over distance for shotgun."
-    },
-    {
-        "Type": "PercentBonusDamagePerSec",
-        "DisplayName": "Bonus Dmg/s",
-        "Description": "Damage increases the longer it hits the same target."
-    },
-    {
-        "Type": "SlowEffect",
-        "DisplayName": "Slow Effect",
-        "Description": "Applies a slowing effect on enemies hit."
-    },
-    {
-        "Type": "KnockbackStrength",
-        "DisplayName": "Knockback",
-        "Description": "Pushes enemies back on hit. Stronger knockback per level."
-    },
-    {
-        "Type": "Unkown",
-        "DisplayName": "Unknown",
-        "Description": "Upgrade effect not documented."
-    }
+  {
+    "Type": "Damage",
+    "DisplayName": "Damage",
+    "Description": "Increases turret base damage."
+  },
+  {
+    "Type": "FireRate",
+    "DisplayName": "Fire Rate",
+    "Description": "Increases shots per second. Faster firing speed."
+  },
+  {
+    "Type": "RotationSpeed",
+    "DisplayName": "Rotation Speed",
+    "Description": "Rotates faster to track targets."
+  },
+  {
+    "Type": "Range",
+    "DisplayName": "Range",
+    "Description": "Increases targeting range."
+  },
+  {
+    "Type": "CriticalChance",
+    "DisplayName": "Critical Chance",
+    "Description": "Raises chance for critical hits. Max 50%."
+  },
+  {
+    "Type": "CriticalDamageMultiplier",
+    "DisplayName": "Critical Damage",
+    "Description": "Increases damage multiplier for critical hits."
+  },
+  {
+    "Type": "ExplosionRadius",
+    "DisplayName": "Explosion Radius",
+    "Description": "Enlarges explosion area of missiles."
+  },
+  {
+    "Type": "SplashDamage",
+    "DisplayName": "Splash Damage",
+    "Description": "Damages nearby enemies hit by explosions."
+  },
+  {
+    "Type": "PierceChance",
+    "DisplayName": "Pierce Chance",
+    "Description": "Increases chance for shots to pierce through enemies."
+  },
+  {
+    "Type": "PierceDamageFalloff",
+    "DisplayName": "Pierce Dmg Falloff",
+    "Description": "Reduces the damage lost on each pierced enemy."
+  },
+  {
+    "Type": "PelletCount",
+    "DisplayName": "Pellet Count",
+    "Description": "Adds more pellets per shotgun shot."
+  },
+  {
+    "Type": "DamageFalloffOverDistance",
+    "DisplayName": "Range Falloff",
+    "Description": "Reduces damage lost over distance for shotgun."
+  },
+  {
+    "Type": "PercentBonusDamagePerSec",
+    "DisplayName": "Bonus Dmg/s",
+    "Description": "Damage increases the longer it hits the same target."
+  },
+  {
+    "Type": "SlowEffect",
+    "DisplayName": "Slow Effect",
+    "Description": "Applies a slowing effect on enemies hit."
+  },
+  {
+    "Type": "KnockbackStrength",
+    "DisplayName": "Knockback",
+    "Description": "Pushes enemies back on hit. Stronger knockback per level."
+  },
+  {
+    "Type": "BounceCount",
+    "DisplayName": "Bounce Count",
+    "Description": "Allows the shot to bounce to additional enemies."
+  },
+  {
+    "Type": "BounceRange",
+    "DisplayName": "Bounce Range",
+    "Description": "Increases how far the bounce can search for the next enemy."
+  },
+  {
+    "Type": "BounceDelay",
+    "DisplayName": "Bounce Delay",
+    "Description": "Reduces the delay between bounces (bounces happen faster)."
+  },
+  {
+    "Type": "BounceDamagePct",
+    "DisplayName": "Bounce Damage",
+    "Description": "Increases damage dealt on bounces (as a percent modifier)."
+  },
+  {
+    "Type": "ConeAngle",
+    "DisplayName": "Cone Angle",
+    "Description": "Widens the cone area for cone attacks, hitting more enemies."
+  },
+  {
+    "Type": "ExplosionDelay",
+    "DisplayName": "Explosion Delay",
+    "Description": "Reduces the delay before explosions trigger."
+  },
+  {
+    "Type": "AheadDistance",
+    "DisplayName": "Aim Lead",
+    "Description": "Shoots further ahead of moving targets (better leading)."
+  },
+  {
+    "Type": "MaxTrapsActive",
+    "DisplayName": "Max Traps",
+    "Description": "Increases how many traps can be active at once."
+  },
+  {
+    "Type": "ArmorPenetration",
+    "DisplayName": "Armor Penetration",
+    "Description": "Ignores a percent of enemy armor on hit."
+  },
+  {
+    "Type": "PelletChance",
+    "DisplayName": "Pellet Chance",
+    "Description": "Chance for this turret to fire a multi-pellet shot. If it fails, it fires a single projectile instead."
+  },
+  {
+    "Type": "KnockbackChance",
+    "DisplayName": "Knockback Chance",
+    "Description": "Chance for hits to apply knockback. Higher chance means more enemies get pushed back."
+  },
+  {
+    "Type": "BounceChance",
+    "DisplayName": "Bounce Chance",
+    "Description": "Chance for attacks to start bouncing to additional targets. If it fails, only the primary target is hit."
+  },
+  {
+    "Type": "SlowChance",
+    "DisplayName": "Slow Chance",
+    "Description": "Chance for hits to apply slow. Higher chance makes it more reliable to keep enemies slowed."
+  },
+  {
+    "Type": "ArmorPenetrationChance",
+    "DisplayName": "Armor Penetration Chance",
+    "Description": "Chance for hits to ignore enemy armor (based on your Armor Penetration stat). If it fails, the hit uses 0% armor penetration."
+  },
+  {
+    "Type": "Unkown",
+    "DisplayName": "Unknown",
+    "Description": "Upgrade effect not documented."
+  }
 ]

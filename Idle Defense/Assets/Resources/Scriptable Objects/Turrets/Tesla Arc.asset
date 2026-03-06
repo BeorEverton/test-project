@@ -36,16 +36,26 @@ MonoBehaviour:
   RangeUpgradeBaseCost: 2000
   RangeLevel: 0
   RangeCostExponentialMultiplier: 1.05
-  PelletCount: 0
+  PelletCount: 5
   PelletCountLevel: 0
   PelletCountUpgradeAmount: 0
   PelletCountUpgradeBaseCost: 0
   PelletCountCostExponentialMultiplier: 0
+  PelletChance: 0
+  PelletChanceLevel: 0
+  PelletChanceUpgradeAmount: 0
+  PelletChanceUpgradeBaseCost: 0
+  PelletChanceCostExponentialMultiplier: 0
   KnockbackStrength: 0
   KnockbackStrengthLevel: 0
   KnockbackStrengthUpgradeAmount: 0
   KnockbackStrengthUpgradeBaseCost: 0
   KnockbackStrengthCostExponentialMultiplier: 0
+  KnockbackChance: 0
+  KnockbackChanceLevel: 0
+  KnockbackChanceUpgradeAmount: 0
+  KnockbackChanceUpgradeBaseCost: 0
+  KnockbackChanceCostExponentialMultiplier: 0
   ExplosionRadius: 0
   ExplosionRadiusLevel: 0
   ExplosionRadiusUpgradeAmount: 0
@@ -66,6 +76,11 @@ MonoBehaviour:
   BounceCountUpgradeAmount: 0
   BounceCountUpgradeBaseCost: 0
   BounceCountCostExponentialMultiplier: 0
+  BounceChance: 0
+  BounceChanceLevel: 0
+  BounceChanceUpgradeAmount: 0
+  BounceChanceUpgradeBaseCost: 0
+  BounceChanceCostExponentialMultiplier: 0
   BounceRange: 0
   BounceRangeLevel: 0
   BounceRangeUpgradeAmount: 0
@@ -132,8 +147,18 @@ MonoBehaviour:
   SlowEffectUpgradeAmount: 0
   SlowEffectUpgradeBaseCost: 0
   SlowEffectCostExponentialMultiplier: 0
+  SlowChance: 0
+  SlowChanceLevel: 0
+  SlowChanceUpgradeAmount: 0
+  SlowChanceUpgradeBaseCost: 0
+  SlowChanceCostExponentialMultiplier: 0
   ArmorPenetration: 0
   ArmorPenetrationLevel: 0
   ArmorPenetrationUpgradeAmount: 0
   ArmorPenetrationUpgradeBaseCost: 0
   ArmorPenetrationCostExponentialMultiplier: 0
+  ArmorPenetrationChance: 0
+  ArmorPenetrationChanceLevel: 0
+  ArmorPenetrationChanceUpgradeAmount: 0
+  ArmorPenetrationChanceUpgradeBaseCost: 0
+  ArmorPenetrationChanceCostExponentialMultiplier: 0

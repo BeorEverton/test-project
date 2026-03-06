@@ -47,7 +47,7 @@ public class HitFlashOverlay : MonoBehaviour
 
             targetRenderer.sharedMaterials = newMats;
 
-            Debug.LogWarning($"{name}: Flash material was missing, automatically added.");
+            //Debug.LogWarning($"{name}: Flash material was missing, automatically added.");
         }
 
         if (_mpb == null)

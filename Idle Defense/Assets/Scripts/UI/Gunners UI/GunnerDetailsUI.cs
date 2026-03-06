@@ -36,6 +36,7 @@ public class GunnerDetailsUI : MonoBehaviour
 
     [Header("Limit Break")]
     public Image limitIcon;
+    public TextMeshProUGUI limitName;
     public TextMeshProUGUI limitDescText;
 
     [Header("Controls")]
@@ -101,20 +102,20 @@ public class GunnerDetailsUI : MonoBehaviour
     private GunnerSO _so;
     private GunnerRuntime _rt;
 
-    public void Open(List<GunnerSO> list = null, int startIndex = 0)
+    private void InternalOpen(List<GunnerSO> list = null, int startIndex = 0)
     {
         if (panelRoot) panelRoot.SetActive(true);
 
+        Debug.Log("Opening gunner panel with " + (list != null ? list.Count : "null") + " gunners in list, startIndex=" + startIndex);
+
         // Always build a stable "full catalog" roster when we have the unlock table.
-        // The caller-provided list is treated as optional (fallback only).
-        if (useUnlockTableOrder && unlockTable != null)
+        if (unlockTable != null)
         {
+            Debug.Log("building roster");
             roster = BuildRosterFromUnlockTable();
         }
         else
         {
-            // Fallback: use the provided list, else keep existing roster.
-            // (If you want "always full" even without unlockTable, you can add a GunnerManager API later.)
             roster = (list != null && list.Count > 0) ? new List<GunnerSO>(list) : roster;
         }
 
@@ -139,16 +140,12 @@ public class GunnerDetailsUI : MonoBehaviour
 
         _isOpen = true;
         Opened?.Invoke();
+        Debug.Log("Gunner panel opened and bound to " + roster[currentIndex].GunnerId);
     }
 
-    public void Open(GunnerSO single)
+    public void Open()
     {
-        if (single != null)
-        {
-            if (roster == null) roster = new List<GunnerSO> { single };
-            currentIndex = Mathf.Max(0, roster.IndexOf(single));
-        }
-        Open(roster, currentIndex);
+        InternalOpen();
     }
 
     public void Close()
@@ -340,6 +337,7 @@ public class GunnerDetailsUI : MonoBehaviour
 
     public void Bind(GunnerSO so)
     {
+        Debug.Log("GunnerDetailsUI: Binding details for " + (so != null ? so.GunnerId : "null SO"));
         _so = so;
         _rt = (GunnerManager.Instance != null)
             ? GunnerManager.Instance.GetRuntime(so.GunnerId)
@@ -402,10 +400,10 @@ public class GunnerDetailsUI : MonoBehaviour
         {
             if (limitIcon) limitIcon.sprite = lb.Icon;
 
+            string name = string.IsNullOrEmpty(lb.DisplayName) ? "Limit Break" : lb.DisplayName;
+            if (limitName) limitName.text = name;
             if (limitDescText)
             {
-                string name = string.IsNullOrEmpty(lb.DisplayName) ? "Limit Break" : lb.DisplayName;
-
                 if (!string.IsNullOrEmpty(lb.Description))
                 {
                     limitDescText.text = lb.Description;

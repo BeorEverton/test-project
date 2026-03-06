@@ -57,6 +57,12 @@ namespace Assets.Scripts.SO
         public int PelletCountUpgradeAmount;
         public float PelletCountUpgradeBaseCost;
         public float PelletCountCostExponentialMultiplier;
+        [Tooltip("Chance (0-100) for PelletCount to be used. If it fails, the shot behaves as 1 pellet.")]
+        public float PelletChance;
+        public int PelletChanceLevel;
+        public int PelletChanceUpgradeAmount;
+        public float PelletChanceUpgradeBaseCost;
+        public float PelletChanceCostExponentialMultiplier;
 
         [Header("Knockback")]
         public float KnockbackStrength;
@@ -64,6 +70,12 @@ namespace Assets.Scripts.SO
         public float KnockbackStrengthUpgradeAmount;
         public float KnockbackStrengthUpgradeBaseCost;
         public float KnockbackStrengthCostExponentialMultiplier;
+        [Tooltip("Chance (0-100) for KnockbackStrength to apply on a hit.")]
+        public float KnockbackChance;
+        public int KnockbackChanceLevel;
+        public float KnockbackChanceUpgradeAmount;
+        public float KnockbackChanceUpgradeBaseCost;
+        public float KnockbackChanceCostExponentialMultiplier;
 
         [Header("AOE")]
         [Tooltip("Radius of the explosion, used by missile launcher, trap, multi target")]
@@ -88,6 +100,7 @@ namespace Assets.Scripts.SO
         public float PierceDamageFalloffUpgradeBaseCost;
         public float PierceDamageFalloffCostExponentialMultiplier;
 
+
         [Header("Bounce Pattern")]
         [Tooltip("Number of times the projectile or effect can bounce to a new target")]
         public int BounceCount;
@@ -95,6 +108,12 @@ namespace Assets.Scripts.SO
         public float BounceCountUpgradeAmount;
         public float BounceCountUpgradeBaseCost;
         public float BounceCountCostExponentialMultiplier;
+        [Tooltip("Chance (0-100) for this attack to bounce. If it fails, only the primary hit happens.")]
+        public float BounceChance;
+        public int BounceChanceLevel;
+        public float BounceChanceUpgradeAmount;
+        public float BounceChanceUpgradeBaseCost;
+        public float BounceChanceCostExponentialMultiplier;
 
         [Tooltip("Maximum range in units for each bounce to find a new target")]
         public float BounceRange;
@@ -197,10 +216,16 @@ namespace Assets.Scripts.SO
         [Header("Slow Effect")]
         [Tooltip("Amount of slow effect applied to the target")]
         public float SlowEffect;
+        [Tooltip("Chance (0-100) for SlowEffect to apply on a hit.")]
         public int SlowEffectLevel;
         public float SlowEffectUpgradeAmount;
         public float SlowEffectUpgradeBaseCost;
         public float SlowEffectCostExponentialMultiplier;
+        public float SlowChance;
+        public int SlowChanceLevel;
+        public float SlowChanceUpgradeAmount;
+        public float SlowChanceUpgradeBaseCost;
+        public float SlowChanceCostExponentialMultiplier;
 
         [Header("Armor Penetration")]
         [Tooltip("Percent of enemy armor ignored by this turret (0-100).")]
@@ -210,11 +235,24 @@ namespace Assets.Scripts.SO
         public float ArmorPenetrationUpgradeAmount;
         public float ArmorPenetrationUpgradeBaseCost;
         public float ArmorPenetrationCostExponentialMultiplier;
+        [Tooltip("Chance (0-100) for ArmorPenetration to apply on a hit.")]
+        public float ArmorPenetrationChance;
+        public int ArmorPenetrationChanceLevel;
+        public float ArmorPenetrationChanceUpgradeAmount;
+        public float ArmorPenetrationChanceUpgradeBaseCost;
+        public float ArmorPenetrationChanceCostExponentialMultiplier;
 
         private void OnValidate()
         {
             CriticalChance = Mathf.Clamp(CriticalChance, 0, 100);
+
+            PelletChance = Mathf.Clamp(PelletChance, 0f, 100f);
+            KnockbackChance = Mathf.Clamp(KnockbackChance, 0f, 100f);
+            BounceChance = Mathf.Clamp(BounceChance, 0f, 100f);
+            SlowChance = Mathf.Clamp(SlowChance, 0f, 100f);
+
             ArmorPenetration = Mathf.Clamp(ArmorPenetration, 0f, 100f);
+            ArmorPenetrationChance = Mathf.Clamp(ArmorPenetrationChance, 0f, 100f);
         }
     }
 

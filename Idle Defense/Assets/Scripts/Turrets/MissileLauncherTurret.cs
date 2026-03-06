@@ -59,7 +59,7 @@ namespace Assets.Scripts.Turrets
 
         private void CreateExplosion(Vector3 target)
         {
-            List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(RuntimeStats.ExplosionRadius));
+            List<Enemy> enemiesInAdjecentGrids = GridManager.Instance.GetEnemiesInRange(target, Mathf.CeilToInt(RuntimeStats.ExplosionRadius), true);
             float impactArea = RuntimeStats.ExplosionRadius / 3;
             AudioManager.Instance.PlayWithVariation(_explosionSound, 0.5f, 1f);
 

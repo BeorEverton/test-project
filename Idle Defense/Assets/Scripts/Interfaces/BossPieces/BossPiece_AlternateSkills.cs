@@ -1,5 +1,4 @@
 using Assets.Scripts.WaveSystem;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static Assets.Scripts.WaveSystem.EnemyManager;
 
@@ -9,16 +8,13 @@ public sealed class BossPiece_AlternateSkills : MonoBehaviour, IBossPiece
     [SerializeField] private BossSkillId skillA = BossSkillId.HealPulse;
     [SerializeField] private BossSkillId skillB = BossSkillId.ShieldGain;
 
-    private int _phaseStartAttacks;
-    private bool _useA = true;
+    [Tooltip("SpecialGunnerHit: multiplier of normal attack damage. 1.5 = 150%. HealPulse: heal pct of max HP. 0.10 = 10%. JumpDepth: delta Z. BuffSelf: armor pct of base armor. 0.25 = +25%.")]
+    [SerializeField] private float paramA = 0.10f;
 
-    // Generic payload 
-    // SpecialGunnerHit: A=damage, B=radius, I=maxTargets
-    // ShieldGain: I=charges
-    // JumpDepth: A=deltaZ
-    // BuffSelf: A=armorDelta, B=speedMult, I=durationSeconds
-    [SerializeField] private float paramA = 20f;
+    [Tooltip("SpecialGunnerHit: radius. HealPulse: radius. BuffSelf: speed multiplier.")]
     [SerializeField] private float paramB = 4f;
+
+    [Tooltip("SpecialGunnerHit: max targets. HealPulse: max targets. ShieldGain: charges. BuffSelf: duration seconds.")]
     [SerializeField] private int paramI = 2;
 
     [SerializeField] private OutOfRangeBehavior outOfRangeBehavior = OutOfRangeBehavior.ExecuteAnyway;
@@ -27,12 +23,19 @@ public sealed class BossPiece_AlternateSkills : MonoBehaviour, IBossPiece
     [SerializeField] private int priority = 0;
     public int Priority => priority;
 
-
     [SerializeField] private string animationTriggerA = "Skill_PhaseA";
     [SerializeField] private string animationTriggerB = "Skill_PhaseB";
-        
-    public string AnimationTrigger => _useA ? animationTriggerA : animationTriggerB;
 
+    private int _phaseStartAttacks;
+    private bool _nextUsesA = true;
+
+    public string AnimationTrigger => _nextUsesA ? animationTriggerA : animationTriggerB;
+
+    private void OnEnable()
+    {
+        _phaseStartAttacks = 0;
+        _nextUsesA = true;
+    }
 
     public bool WantsToExecute(BossContext ctx)
     {
@@ -42,10 +45,17 @@ public sealed class BossPiece_AlternateSkills : MonoBehaviour, IBossPiece
     public void Execute(BossContext ctx)
     {
         _phaseStartAttacks = ctx.AttacksDone;
-        _useA = !_useA;
 
-        var s = _useA ? skillA : skillB;
-        ctx.Manager.SetPendingBossSkill(ctx.Boss, s, a: paramA, b: paramB, i: paramI);
+        BossSkillId selectedSkill = _nextUsesA ? skillA : skillB;
 
+        ctx.Manager.SetPendingBossSkill(
+            ctx.Boss,
+            selectedSkill,
+            a: paramA,
+            b: paramB,
+            i: paramI
+        );
+
+        _nextUsesA = !_nextUsesA;
     }
 }

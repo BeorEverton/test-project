@@ -10,15 +10,17 @@ public class GunnerBillboardBinding : MonoBehaviour
 
     [Header("Bars on this billboard")]
     public DualPhaseBarUI HealthBar;
-    public DualPhaseBarUI LimitBreakBar;
 
     [Header("Limit Break UI")]
-    public Button LimitBreakButton;    // assign in prefab
-    public Image LimitBreakIcon;      // optional icon image
-    public GameObject LimitBreakGlow;  // optional VFX highlight
+    public Button LimitBreakButton;      // assign in prefab
+    public Image LimitBreakIcon;         // should be an Image set up as Filled
+    public GameObject LimitBreakGlow;    // optional VFX highlight
+
+    [Header("Limit Break Icon Visuals")]
+    [SerializeField] private Color LimitBreakNotFullColor = new Color(0.5f, 0.5f, 0.5f, 0.7f); // grey + faded
+    [SerializeField] private Color LimitBreakFullColor = new Color(1f, 1f, 1f, 1f);              // white + full alpha
 
     private GunnerRuntime _rt;
-
     private bool _lbButtonLocked = false;
 
     void Awake()
@@ -28,6 +30,10 @@ public class GunnerBillboardBinding : MonoBehaviour
             LimitBreakButton.onClick.RemoveAllListeners();
             LimitBreakButton.onClick.AddListener(OnClickLimitBreak);
         }
+
+        // We only control fillAmount; the fill method/origin/clockwise should be configured on the prefab.
+        if (LimitBreakIcon && LimitBreakIcon.type != Image.Type.Filled)
+            LimitBreakIcon.type = Image.Type.Filled;
     }
 
     public void InitializeFromRuntime(GunnerRuntime rt, Sprite limitBreakIcon)
@@ -40,93 +46,82 @@ public class GunnerBillboardBinding : MonoBehaviour
             HealthBar.SetValue(rt.CurrentHealth);
         }
 
-        if (LimitBreakBar != null)
-        {
-            LimitBreakBar.SetMax(rt.LimitBreakMax);
-            LimitBreakBar.SetValue(rt.LimitBreakCurrent);
-        }
-
-        LimitBreakIcon.sprite = limitBreakIcon;
+        if (LimitBreakIcon)
+            LimitBreakIcon.sprite = limitBreakIcon;
 
         RefreshLimitBreakUI();
     }
+
     public void RefreshLimitBreak(float current)
     {
         if (_rt == null) return;
 
         _rt.LimitBreakCurrent = current;
-
-        bool full = _rt.LimitBreakCurrent >= _rt.LimitBreakMax;
-
-        if (LimitBreakBar != null)
-        {
-            if (full)
-            {
-                // Snap to full, no animation
-                LimitBreakBar.SetValue(_rt.LimitBreakMax);
-            }
-            else
-            {
-                // Animate normally toward the new value
-                LimitBreakBar.SetValue(_rt.LimitBreakCurrent);
-            }
-        }
-
         RefreshLimitBreakUI();
     }
 
-
     private void RefreshLimitBreakUI()
     {
-        bool full = _rt != null && _rt.LimitBreakCurrent >= _rt.LimitBreakMax;
+        bool hasRt = _rt != null;
+        float max = hasRt ? _rt.LimitBreakMax : 0f;
+        float cur = hasRt ? _rt.LimitBreakCurrent : 0f;
 
+        float t = (max <= 0f) ? 0f : Mathf.Clamp01(cur / max);
+        bool full = hasRt && (cur >= max) && (max > 0f);
+
+        // Icon becomes the "bar"
+        if (LimitBreakIcon)
+        {
+            if (LimitBreakIcon.type != Image.Type.Filled)
+                LimitBreakIcon.type = Image.Type.Filled;
+
+            LimitBreakIcon.fillAmount = t;
+            LimitBreakIcon.color = full ? LimitBreakFullColor : LimitBreakNotFullColor;
+        }
+
+        // Button is always visible; only clickable when full (and not locked)
         if (LimitBreakButton)
         {
-            // Show only when full; interactable only if not locked.
-            LimitBreakButton.gameObject.SetActive(full);
+            if (!LimitBreakButton.gameObject.activeSelf)
+                LimitBreakButton.gameObject.SetActive(true);
+
             LimitBreakButton.interactable = full && !_lbButtonLocked;
 
             // If not full anymore, clear the lock so next time it fills we can click again.
             if (!full) _lbButtonLocked = false;
         }
 
-        // Prefer 3D VFX if available
+        // Ready highlight (optional)
         if (ModelBinding != null) ModelBinding.SetLimitBreakReady(full);
         else if (LimitBreakGlow) LimitBreakGlow.SetActive(full);
     }
 
-
     private void OnClickLimitBreak()
     {
         if (_rt == null) return;
-        if (_lbButtonLocked) return; // prevent double-press during same frame
+        if (_lbButtonLocked) return;
+
+        bool full = (_rt.LimitBreakMax > 0f) && (_rt.LimitBreakCurrent >= _rt.LimitBreakMax);
+        if (!full) return;
 
         _lbButtonLocked = true;
-        if (LimitBreakButton) LimitBreakButton.interactable = false; // immediate lock
+        if (LimitBreakButton) LimitBreakButton.interactable = false;
 
         bool ok = (LimitBreakManager.Instance != null) && LimitBreakManager.Instance.TryActivate(_rt.GunnerId);
         if (ok)
         {
-            // Force-clear the runtime meter so the button hides even if debug "no cost" is enabled.
             _rt.LimitBreakCurrent = 0f;
-            if (LimitBreakBar != null) LimitBreakBar.SetValue(0f);
 
             // Propagate to the rest of UI and systems that mirror this value.
             GunnerManager.Instance?.NotifyLimitBreakChanged(_rt.GunnerId);
 
-            // Will hide the button now (since not full) and also clear the lock for the next charge.
             RefreshLimitBreakUI();
         }
         else
         {
-            // Activation failed (requirements, cooldown, etc.). Re-enable click if still full.
+            // Activation failed; unlock if still full.
             _lbButtonLocked = false;
-            if (LimitBreakButton)
-            {
-                bool stillFull = _rt.LimitBreakCurrent >= _rt.LimitBreakMax;
-                LimitBreakButton.interactable = stillFull;
-            }
+            RefreshLimitBreakUI();
         }
     }
-
 }

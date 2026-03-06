@@ -15,6 +15,6 @@ public class PermafrostDomainSkillSO : LimitBreakSkillSO
     public override void Activate(LimitBreakContext ctx)
     {
         // This one is global; gunnerId isn't needed unless you want VFX at the gunner.
-        LimitBreakManager.Instance?.ActivatePermafrostDomain(Radius, SlowPct, DomainSeconds);
+        LimitBreakManager.Instance?.ActivatePermafrostDomain(Radius, SlowPct, DomainSeconds, this);
     }
 }

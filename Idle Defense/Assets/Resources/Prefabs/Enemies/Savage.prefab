@@ -233,6 +233,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 20357c5dee1314b4dabe629b4d71a6c4, type: 2}
     - target: {fileID: 8078747747107829962, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
+      propertyPath: IsBossInstance
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8078747747107829962, guid: ea8a4ab7f5b1c4d45af799a4365a4892, type: 3}
       propertyPath: _muzzleFlashSprites.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -323,9 +327,9 @@ MonoBehaviour:
   everyN: 3
   chance: 0.8
   skill: 6
-  damage: 20
-  radius: 10
-  maxTargets: 5
+  paramA: 0.7
+  paramB: 4
+  paramI: 2
 --- !u!114 &1859482697847649108
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,7 +344,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   step: 0.2
   skill: 6
-  paramA: 20
+  paramA: 1.5
   paramB: 10
   paramI: 1
   outOfRangeBehavior: 1

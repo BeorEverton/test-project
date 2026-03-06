@@ -78,7 +78,7 @@ namespace Assets.Scripts.Turrets
             // Damage via your effect pipeline (crit, knockback, pierce, LB dmg multiplier, etc.)
             // This uses EffectiveStats, so gunner/prestige layers are included.
             if (DamageEffects != null && enemy != null)
-                DamageEffects.ApplyAll(enemy, EffectiveStats);
+                DamageEffects.ApplyAll(enemy, EffectiveStats, SlotIndex);
 
             // Recoil & chatter (same logic as BaseTurret.Shoot)
             var recoil = GetComponentInChildren<Recoil>(true);
@@ -128,14 +128,34 @@ namespace Assets.Scripts.Turrets
 
         private bool PointerOverUI()
         {
-            if (uiRaycaster == null || _ped == null || EventSystem.current == null)
+            if (EventSystem.current == null)
                 return false;
 
-            _uiHits.Clear();
-            _ped.position = (Pointer.current != null) ? Pointer.current.position.ReadValue() : Vector2.zero;
-            uiRaycaster.Raycast(_ped, _uiHits);
-            return _uiHits.Count > 0;
+            // Works with EventSystem modules (including Input System UI module)
+            if (Pointer.current != null)
+            {
+                if (EventSystem.current.IsPointerOverGameObject(Pointer.current.deviceId))
+                    return true;
+            }
+            else
+            {
+                // Legacy / fallback
+                if (EventSystem.current.IsPointerOverGameObject())
+                    return true;
+            }
+
+            // Optional extra safety: explicit raycast if a GraphicRaycaster is provided
+            if (uiRaycaster != null && _ped != null)
+            {
+                _uiHits.Clear();
+                _ped.position = (Pointer.current != null) ? Pointer.current.position.ReadValue() : (Vector2)Input.mousePosition;
+                uiRaycaster.Raycast(_ped, _uiHits);
+                return _uiHits.Count > 0;
+            }
+
+            return false;
         }
+
 
         private Vector3 GetMouseOnXZ(float y)
         {
@@ -171,7 +191,13 @@ namespace Assets.Scripts.Turrets
             if (toLocal.sqrMagnitude < 1e-6f) { _targetInAim = false; return; }
 
             float yaw = Mathf.Atan2(toLocal.x, toLocal.z) * Mathf.Rad2Deg;
+
+            // Clamp to a 180-degree arc in front of the turret (left/right from forward).
+            // Assumes "forward" in local space is +Z.
+            yaw = Mathf.Clamp(yaw, -90f, 90f);
+
             Quaternion targetLocal = Quaternion.Euler(0f, yaw, 0f);
+
 
             _rotationPoint.localRotation = Quaternion.Slerp(
                 _rotationPoint.localRotation,

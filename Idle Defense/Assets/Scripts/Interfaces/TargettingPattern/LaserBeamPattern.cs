@@ -25,7 +25,8 @@ public class LaserBeamPattern : MonoBehaviour, ITargetingPattern
 
         // Apply all damage effects (includes ramp bonus)
         var enemy = primaryTarget.GetComponent<Enemy>();
-        turret.DamageEffects.ApplyAll(enemy, stats);
+        float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+        turret.DamageEffects.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex);
 
         // Visual only
         laserLine.enabled = true;

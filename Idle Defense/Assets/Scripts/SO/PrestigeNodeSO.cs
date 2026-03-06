@@ -45,16 +45,20 @@ public class PrestigeNodeSO : ScriptableObject
     public float SplashDamagePct;
     public float PierceDamageFalloffPct;        // negative to reduce falloff
     public float PelletCountPct;                // treated as % add on integer; we floor in manager
+    public float PelletChancePct;
     public float DamageFalloffOverDistancePct;  // negative to reduce falloff
     public float PercentBonusDamagePerSecPct;
     public float SlowEffectPct;                 // capped elsewhere 0..100
+    public float SlowChancePct;
     public float KnockbackStrengthPct;
+    public float KnockbackChancePct;
 
     [Header("Bounce Pattern (%)")]
     public float BounceCountPct;
     public float BounceRangePct;
     public float BounceDelayPct;                // negative reduces delay
     public float BounceDamagePctPct;            // "damage lost per bounce" — negative reduces loss
+    public float BounceChancePct;
 
     [Header("Cone / Delay / Trap (%)")]
     public float ConeAnglePct;
@@ -64,6 +68,7 @@ public class PrestigeNodeSO : ScriptableObject
 
     [Header("Armor Penetration (%)")]
     public float ArmorPenetrationPct;
+    public float ArmorPenChancePct;
 
     [Header("Economy / Meta")]
     public float ScrapsGainPct;

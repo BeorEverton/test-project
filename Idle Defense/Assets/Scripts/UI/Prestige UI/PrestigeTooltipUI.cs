@@ -205,13 +205,13 @@ public class PrestigeTooltipUI : MonoBehaviour, IPointerEnterHandler, IPointerEx
         Add("Armor Pen", n.ArmorPenetrationPct);
         Add("Scraps Gain", n.ScrapsGainPct);
         Add("Black Steel Gain", n.BlackSteelGainPct);
-        Add("Enemy Health", -n.EnemyHealthPct);
+        Add("Enemy Health", n.EnemyHealthPct);
         Add("Enemy Count", -n.EnemyCountPct);
         Add("Speed Cap", n.SpeedMultiplierCapBonus, pct: false);
         Add("Damage Cap", n.DamageMultiplierCapBonus, pct: false);
 
-        if (n.UnlockTurretTypes != null && n.UnlockTurretTypes.Count > 0) sb.AppendLine("Unlocks: Turret(s)");
-        if (n.UnlockGunnerIds != null && n.UnlockGunnerIds.Count > 0) sb.AppendLine("Unlocks: Gunner(s)");
+        if (n.UnlockTurretTypes != null && n.UnlockTurretTypes.Count > 0) sb.AppendLine("Unlocks: Turret");
+        if (n.UnlockGunnerIds != null && n.UnlockGunnerIds.Count > 0) sb.AppendLine("Unlocks: Gunner");
         if (n.UnlockLimitBreaks != null && n.UnlockLimitBreaks.Count > 0) sb.AppendLine("Unlocks: Limit Break");
 
         return sb.Length > 0 ? sb.ToString().TrimEnd() : "—";

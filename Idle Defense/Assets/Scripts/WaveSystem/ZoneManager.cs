@@ -182,7 +182,6 @@ namespace Assets.Scripts.WaveSystem
             return wave;
         }
 
-
         /// <summary>
         /// Called by WaveManager when a wave is successfully completed.
         /// This advances zone and wave indexes and increments the global step.
@@ -208,19 +207,19 @@ namespace Assets.Scripts.WaveSystem
         /// Used by debug tools / rollbacks.
         /// </summary>
         public void SetGlobalWaveIndex(int globalWaveIndex)
-        {            
+        {
             globalWaveIndex = Mathf.Max(1, globalWaveIndex);
 
             // Re-simulate the path from the beginning to that step.
             ResetProgress();
-            
+
             // We start at global 1; we need to advance (globalWaveIndex - 1) times.
             for (int i = 1; i < globalWaveIndex; i++)
             {
                 StepToNextWave(raiseZoneChanged: false);
             }
 
-            _globalWaveIndex = globalWaveIndex;            
+            _globalWaveIndex = globalWaveIndex;
 
             var zone = CurrentZone;
             if (zone != null)
@@ -485,7 +484,7 @@ namespace Assets.Scripts.WaveSystem
 
                 double c2 = clonedInfo.CoinDropAmount * (double)(wavePower * spikeMultiplier * plateauMultiplier);
                 if (c2 > ulong.MaxValue) c2 = ulong.MaxValue;
-                    clonedInfo.CoinDropAmount = (ulong)System.Math.Ceiling(c2);
+                clonedInfo.CoinDropAmount = (ulong)System.Math.Ceiling(c2);
             }
 
             // Prestige enemy health multiplier (existing behavior)
@@ -495,27 +494,8 @@ namespace Assets.Scripts.WaveSystem
                 clonedInfo.MaxHealth *= pm.GetEnemyHealthMultiplier();
             }
 
-            // Global formula multipliers (JSON). Applied on top of per-enemy scaling + plateau.            
-            var fm = BalanceFormulaManager.Instance;
-            if (fm != null)
-            {
-                float hMul = fm.GetEnemyHealthMultiplier(globalIndex);
-                float dMul = fm.GetEnemyDamageMultiplier(globalIndex);
-                float cMul = fm.GetEnemyCoinMultiplier(globalIndex);
-
-                clonedInfo.MaxHealth *= hMul;
-                clonedInfo.Damage *= dMul;
-
-                double coins = clonedInfo.CoinDropAmount * (double)cMul;
-                if (coins > ulong.MaxValue) coins = ulong.MaxValue;
-                if (coins < 0) coins = 0;
-                clonedInfo.CoinDropAmount = (ulong)System.Math.Ceiling(coins);
-            }
-
-
             return clonedInfo;
         }
-
 
         #endregion
     }

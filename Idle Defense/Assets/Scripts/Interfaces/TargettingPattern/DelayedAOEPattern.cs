@@ -33,14 +33,15 @@ public class DelayedAOEPattern : MonoBehaviour, ITargetingPattern
                 var enemy = primaryTarget.GetComponent<Enemy>();
                 if (enemy != null)
                 {
-                    turret.DamageEffects.ApplyAll(enemy, stats);
+                    float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+                    turret.DamageEffects.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex);
                 }
             }
         }
         else // Multi-target AOE hit
         {
             var enemies = GridManager.Instance.GetEnemiesInRange(
-                primaryTarget.transform.position, Mathf.CeilToInt(radius));
+                primaryTarget.transform.position, Mathf.CeilToInt(radius), stats.CanHitFlying);
 
             foreach (var enemy in enemies)
             {
@@ -49,11 +50,18 @@ public class DelayedAOEPattern : MonoBehaviour, ITargetingPattern
                 {
                     bool isPrimary = (primaryTarget != null && enemy.gameObject == primaryTarget);
                     if (isPrimary)
-                        turret.DamageEffects.ApplyAll(enemy, stats);                 // flat
+                        turret.DamageEffects.ApplyAll(enemy, stats, turret.SlotIndex);                 // flat
                     else if (turret.SplashDamageEffectRef != null && stats.SplashDamage > 0f)
-                        turret.DamageEffects.ApplyAll(enemy, stats, turret.SplashDamageEffectRef); // total * pct
+                    {
+                        float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+                        turret.DamageEffects.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex, turret.SplashDamageEffectRef);
+                    }
+                        
                     else
-                        turret.DamageEffects.ApplyAll(enemy, stats);
+                    {
+                        float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+                        turret.DamageEffects.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex);
+                    }
 
                 }
             }

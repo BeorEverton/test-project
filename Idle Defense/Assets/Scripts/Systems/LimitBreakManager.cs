@@ -8,6 +8,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class LimitBreakManager : MonoBehaviour
@@ -40,6 +41,8 @@ public class LimitBreakManager : MonoBehaviour
 
     private readonly Dictionary<LimitBreakType, LimitBreakSkillSO> byType = new();
     private readonly HashSet<string> _onCooldown = new();
+    // Prevent the same LB from being active twice
+    private readonly HashSet<LimitBreakSkillSO> _activeSkillTypes = new();
 
     // LB active flags
     private bool fireRateLBActive = false;
@@ -63,6 +66,22 @@ public class LimitBreakManager : MonoBehaviour
 
     // Tracks coroutine-based LBs per gunner so we can cancel them on death.
     private readonly Dictionary<string, List<Action>> _cancelActionsByGunner = new();
+
+    // Heat Management: per-gunner modifiers (personal, not global)
+    private readonly Dictionary<string, float> _hmIncomingReductionPct = new(); // defense
+    private readonly Dictionary<string, float> _hmOutgoingMult = new();         // damage penalty (multiplier)
+
+    public float GetHeatManagementIncomingReductionPct(string gunnerId)
+    {
+        if (string.IsNullOrEmpty(gunnerId)) return 0f;
+        return _hmIncomingReductionPct.TryGetValue(gunnerId, out var p) ? Mathf.Clamp(p, 0f, 95f) : 0f;
+    }
+
+    public float GetHeatManagementOutgoingDamageMultiplier(string gunnerId)
+    {
+        if (string.IsNullOrEmpty(gunnerId)) return 1f;
+        return _hmOutgoingMult.TryGetValue(gunnerId, out var m) ? Mathf.Clamp(m, 0.05f, 1f) : 1f;
+    }
 
 
     // ==== Multi-session support ====
@@ -287,6 +306,10 @@ public class LimitBreakManager : MonoBehaviour
         var rt = GunnerManager.Instance.GetRuntime(gunnerId);
         var skill = ResolveFor(so);
         if (so == null || rt == null || skill == null) return false;
+                
+        // Prevent double-activating the same LB while it's active
+        if (IsSkillTypeActive(skill))
+            return false;
 
         // Safety: dead gunners can't activate LB (prevents chatter + session ownership edge cases)
         if (rt.CurrentHealth <= 0f)
@@ -310,10 +333,23 @@ public class LimitBreakManager : MonoBehaviour
 
         var ctx = new LimitBreakContext { GunnerId = gunnerId, GunnerSO = so, Runtime = rt };
 
+        // Lock this skill type as "active" immediately so it can't be re-cast.
+        // This includes the targeting phase for click-to-cast skills (good UX).
+        BeginSkillType(skill);
+
+        // Auto-release after skill.Duration (skills should use their SO duration consistently).
+        StartCoroutine(ReleaseSkillTypeAfter(skill, skill.Duration));
+
         _activatingGunnerId = gunnerId;
         try
         {
             skill.Activate(ctx);
+        }
+        catch
+        {
+            // If something blows up during activation, don't permanently lock the skill.
+            EndSkillType(skill);
+            throw;
         }
         finally
         {
@@ -329,6 +365,29 @@ public class LimitBreakManager : MonoBehaviour
             chatter.TriggerEvent(GunnerEvent.LimitBreak, so, null, 1f);
         }
         return true;
+    }
+
+    private bool IsSkillTypeActive(LimitBreakSkillSO type)
+    {
+        return _activeSkillTypes.Contains(type);
+    }
+
+    private void BeginSkillType(LimitBreakSkillSO type)
+    {        
+        _activeSkillTypes.Add(type);    
+    }
+
+    private void EndSkillType(LimitBreakSkillSO type)
+    {        
+        _activeSkillTypes.Remove(type);
+    }
+
+    private IEnumerator ReleaseSkillTypeAfter(LimitBreakSkillSO type, float duration)
+    {
+        if (duration > 0.01f)
+            yield return new WaitForSeconds(duration);
+
+        EndSkillType(type);
     }
 
     // ===== Public API that skills call =====
@@ -397,6 +456,61 @@ public class LimitBreakManager : MonoBehaviour
         // End
         OnLBSessionEnded?.Invoke(s.SessionId);
         _activeLBs.Remove(s.SessionId);
+    }
+
+    private IEnumerator RunTimerOnlySession(float duration, LimitBreakSkillSO skill)
+    {
+        if (duration <= 0.01f)
+            yield break;
+
+        string sessionId = Guid.NewGuid().ToString("N");
+
+        var s = new ActiveLB
+        {
+            SessionId = sessionId,
+            OwnerGunnerId = _activatingGunnerId,
+
+            Focus = LBFocus.None,
+            MaxCap = 0f,
+            Baseline = 0f,
+            Current = 0f,
+            Remaining = duration,
+            Total = duration,
+            Icon = (skill != null) ? skill.Icon : null,
+            DisplayName = (skill != null && !string.IsNullOrWhiteSpace(skill.DisplayName))
+                ? skill.DisplayName
+                : "Limit Break"
+        };
+
+        _activeLBs[sessionId] = s;
+
+        OnLBSessionStarted?.Invoke(new LBSessionInfo
+        {
+            SessionId = s.SessionId,
+            DisplayName = s.DisplayName,
+            Icon = s.Icon,
+            MaxClickCap = 0f,
+            BaselinePct = 0f,
+            Focus = LBFocus.None
+        });
+
+        while (s.Remaining > 0f)
+        {
+            if (!_activeLBs.ContainsKey(s.SessionId))
+                yield break;
+
+            OnLBSessionTick?.Invoke(s.SessionId, 0f, s.Remaining, s.Total);
+            s.Remaining -= Time.deltaTime;
+            yield return null;
+        }
+
+        OnLBSessionEnded?.Invoke(s.SessionId);
+        _activeLBs.Remove(s.SessionId);
+    }
+
+    private void StartTimerOnlySession(float duration, LimitBreakSkillSO skill)
+    {
+        StartCoroutine(RunTimerOnlySession(duration, skill));
     }
 
     // UI Helper
@@ -519,7 +633,7 @@ public class LimitBreakManager : MonoBehaviour
     private int EnemiesInRadius(Vector3 pos, float radius, List<Enemy> into)
     {
         into.Clear();
-        var near = GridManager.Instance.GetEnemiesInRange(pos, Mathf.CeilToInt(radius));
+        var near = GridManager.Instance.GetEnemiesInRange(pos, Mathf.CeilToInt(radius), true);
         if (near == null) return 0;
         float r2 = radius * radius;
         for (int i = 0; i < near.Count; i++)
@@ -542,7 +656,7 @@ public class LimitBreakManager : MonoBehaviour
 
         // Broad phase: use radius = halfLen + width around segment midpoint
         float broad = halfLen + width;
-        var near = GridManager.Instance.GetEnemiesInRange(mid, Mathf.CeilToInt(broad));
+        var near = GridManager.Instance.GetEnemiesInRange(mid, Mathf.CeilToInt(broad), true);
         if (near == null) return 0;
 
         Vector3 dir = (to - from).normalized;
@@ -810,7 +924,7 @@ public class LimitBreakManager : MonoBehaviour
             Vector3 cellCenter = GridManager.Instance.GetWorldPosition(hoverCell, 0f);
 
             if (indicator == null) indicator = SpawnCircleIndicator(cellCenter, indicatorRadius, 0f);
-            else { indicator.transform.position = cellCenter; indicator.transform.localScale = new Vector3(indicatorRadius * 2f, 1f, indicatorRadius * 2f); }
+            else { indicator.transform.position = cellCenter; indicator.transform.localScale = new Vector3(indicatorRadius * 2f, .2f, indicatorRadius * 2f); }
 
             if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
             {
@@ -911,24 +1025,15 @@ public class LimitBreakManager : MonoBehaviour
 
     // 5) Cryo Burst → radial slow + light heal to allies
     public void ActivateCryoBurst(float radius, float slowPct, float slowSeconds, float healPct)
-    {
-        StartCoroutine(Co_CryoBurst(radius, slowPct, slowSeconds, healPct));
-    }
+    {        
+        GunnerManager.Instance?.HealEquippedPercent(healPct);
 
-    private IEnumerator Co_CryoBurst(float radius, float slowPct, float slowSeconds, float healPct)
-    {
         Vector3 center = new Vector3(0f, 0f, GridManager.Instance.NearZ + 3f);
         SpawnCircleIndicator(center, radius, 0.25f);
 
         int n = EnemiesInRadius(center, radius, _enemyBuf);
         for (int i = 0; i < n; i++)
             _enemyBuf[i].ReduceMovementSpeed(slowPct);
-
-        // decay the slow after a few seconds by restoring speed via smaller negative
-        yield return new WaitForSeconds(slowSeconds);
-
-        // Minor team heal
-        GunnerManager.Instance?.HealEquippedPercent(healPct);
     }
 
     // 6) Treefall Slam → click a spot; big AoE punch once
@@ -939,12 +1044,45 @@ public class LimitBreakManager : MonoBehaviour
 
     private IEnumerator Co_TreefallSlam(float radius, float damage)
     {
-        Vector3 aim = GetMouseOnXZ(0f);
-        SpawnCircleIndicator(aim, radius, 0.25f);
-        yield return new WaitForSeconds(0.12f);
+        // Live circular indicator at mouse, snapped to cell size (same UX as Cinderslash)
+        float cellSize = GridManager.Instance._cellSize;
+        float indicatorRadius = Mathf.Max(radius, cellSize * 0.5f);
 
-        int n = EnemiesInRadius(aim, radius, _enemyBuf);
-        for (int i = 0; i < n; i++) _enemyBuf[i].TakeDamage(damage, armorPenetrationPct: 10f, isAoe: true);
+        GameObject indicator = null;
+
+        while (true)
+        {
+            Vector3 hover = GetMouseOnXZ(0f);
+            Vector2Int hoverCell = GridManager.Instance.GetGridPosition(hover);
+            Vector3 cellCenter = GridManager.Instance.GetWorldPosition(hoverCell, 0f);
+
+            if (indicator == null) indicator = SpawnCircleIndicator(cellCenter, indicatorRadius, 0f);
+            else
+            {
+                indicator.transform.position = cellCenter;
+                indicator.transform.localScale = new Vector3(indicatorRadius * 2f, .2f, indicatorRadius * 2f);
+            }
+
+            if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                if (indicator != null) Destroy(indicator);
+
+                // Optional tiny impact delay (keeps your old timing)
+                yield return new WaitForSeconds(0.12f);
+
+                int n = EnemiesInRadius(cellCenter, radius, _enemyBuf);
+                for (int i = 0; i < n; i++)
+                {
+                    var e = _enemyBuf[i];
+                    if (e != null && e.IsAlive)
+                        e.TakeDamage(damage, armorPenetrationPct: 10f, isAoe: true);
+                }
+
+                yield break;
+            }
+
+            yield return null;
+        }
     }
 
     // 7) Tidepush → radial knockback + modest damage
@@ -971,50 +1109,89 @@ public class LimitBreakManager : MonoBehaviour
     }
 
     // 8) Iron Citadel → temporary dome: reduce all incoming damage for gunners
-    public void ActivateIronCitadel(float reducePct, float duration)
+    public void ActivateIronCitadel(float reducePct, float duration, LimitBreakSkillSO skill)
     {
+        StartTimerOnlySession(duration, skill);
         StartCoroutine(Co_IronCitadel(reducePct, duration));
     }
     private IEnumerator Co_IronCitadel(float reducePct, float duration)
     {
         GunnerDamageReductionPct = Mathf.Clamp(reducePct, 0f, 95f);
-        var dome = SpawnCircleIndicator(new Vector3(0f, 0f, GridManager.Instance.NearZ + 2f), 6f, duration);
+        SpawnCircleIndicator(new Vector3(0f, 0f, GridManager.Instance.NearZ + 2f), 6f, duration);
+
         yield return new WaitForSeconds(duration);
+
         GunnerDamageReductionPct = 0f;
     }
 
-    // 9) Heat Management → personal overhealth (shield) + temporary damage penalty
-    public void ActivateHeatManagement(string gunnerId, float extraHP, float selfDamagePenaltyPct, float duration)
+    // 9) Heat Management - personal regen + personal defense, in exchange for personal damage penalty
+    public void ActivateHeatManagement(
+        string gunnerId,
+        float regenPctPerSecond,
+        float selfDefenseReductionPct,
+        float selfDamagePenaltyPct,
+        float duration,
+        LimitBreakSkillSO skill)
     {
-        StartCoroutine(Co_HeatManagement(gunnerId, extraHP, selfDamagePenaltyPct, duration));
+        StartCoroutine(Co_HeatManagement(gunnerId, 
+            regenPctPerSecond, selfDefenseReductionPct, selfDamagePenaltyPct, 
+            duration, skill));
     }
-    private IEnumerator Co_HeatManagement(string gunnerId, float extraHP, float selfPenalty, float duration)
+
+    private IEnumerator Co_HeatManagement(
+        string gunnerId,
+        float regenPctPerSecond,
+        float selfDefenseReductionPct,
+        float selfDamagePenaltyPct,
+        float duration,
+        LimitBreakSkillSO skill)
     {
-        var rt = GunnerManager.Instance?.GetRuntime(gunnerId);
+        
+        var gm = GunnerManager.Instance;
+        var rt = gm != null ? gm.GetRuntime(gunnerId) : null;
         if (rt == null) yield break;
 
-        float beforeMax = rt.MaxHealth;
-        rt.MaxHealth += extraHP;
-        rt.CurrentHealth = Mathf.Min(rt.MaxHealth, rt.CurrentHealth + extraHP);
+        // Force immediate stat refresh on the turret using this gunner
+        if (rt.EquippedSlot >= 0)
+            gm.NotifySlotGunnerStatsChanged(rt.EquippedSlot);
 
-        // negative damage session (shows in the bar if you want)
-        StartCoroutine(RunLBSession(LBFocus.Damage, 1f - (selfPenalty / 100f), duration, null));
-
-        // Update bars
+        StartTimerOnlySession(duration, skill); // see note below
+        // Register personal modifiers
+        _hmIncomingReductionPct[gunnerId] = Mathf.Clamp(selfDefenseReductionPct, 0f, 95f);
+        _hmOutgoingMult[gunnerId] = Mathf.Clamp(1f - (Mathf.Clamp(selfDamagePenaltyPct, 0f, 95f) / 100f), 0.05f, 1f);
+        
         GunnerManager.Instance?.NotifyLimitBreakChanged(gunnerId);
 
-        yield return new WaitForSeconds(duration);
+        // Regen over time (immediate start)
+        float t = 0f;
+        while (t < duration)
+        {
+            // If the gunner died or got unequipped mid-effect, you may still want regen to stop.
+            // We’ll stop if runtime says dead.
+            if (rt.IsDead) break;
 
-        // Revert max; keep current clamped
-        rt.MaxHealth = beforeMax;
-        rt.CurrentHealth = Mathf.Min(rt.CurrentHealth, rt.MaxHealth);
+            if (regenPctPerSecond > 0f)
+            {
+                float heal = rt.MaxHealth * (regenPctPerSecond / 100f) * Time.deltaTime;
+                if (heal > 0f)
+                    gm.HealGunnerFlat(gunnerId, heal);
+            }
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        // Cleanup
+        _hmIncomingReductionPct.Remove(gunnerId);
+        _hmOutgoingMult.Remove(gunnerId);
         GunnerManager.Instance?.NotifyLimitBreakChanged(gunnerId);
+        if (rt != null && gm != null && rt.EquippedSlot >= 0)
+            gm.NotifySlotGunnerStatsChanged(rt.EquippedSlot);
     }
-
     // 10) Anima Infusion → global attack speed boost + small team heal
-    public void ActivateAnimaInfusion(float fireRateMult, float duration, float healPct)
+    public void ActivateAnimaInfusion(float fireRateMult, float duration, float healPct, LimitBreakSkillSO skillSO)
     {
-        StartCoroutine(RunLBSession(LBFocus.FireRate, fireRateMult, duration, null));
+        StartCoroutine(RunLBSession(LBFocus.FireRate, fireRateMult, duration, skillSO));
         GunnerManager.Instance?.HealEquippedPercent(healPct);
     }
 
@@ -1060,66 +1237,69 @@ public class LimitBreakManager : MonoBehaviour
         Vector3 start = originT.position;
         start = new Vector3(start.x, start.y + 1f, start.z);
 
-        // Aim once at activation time
-        Vector3 aim = GetMouseOnXZ(start.y);
-        Vector3 dir = (aim - start);
-        dir.y = 0f;
-
-        if (dir.sqrMagnitude < 0.001f)
-            dir = Vector3.forward;
-
-        dir.Normalize();
-
         float clampedLen = Mathf.Max(0.25f, length);
-        Vector3 end = start + dir * clampedLen;
 
-        // Quick indicator
-        GameObject lineObj = SpawnLineIndicator(start, end, 0.18f);
-        var lr = (lineObj != null) ? lineObj.GetComponent<LineRenderer>() : null;
-        if (lr != null) lr.startWidth = lr.endWidth = Mathf.Max(0.01f, width);
+        GameObject lineObj = null;
+        LineRenderer lr = null;
 
-        // Hit enemies in the line (piercing)
-        int n = EnemiesInLine(start, end, width, _enemyBuf);
-        if (n <= 0) yield break;
-
-        // Store who we slowed so we can restore later
-        // (Local list avoids allocations across frames)
-        List<Enemy> slowed = new List<Enemy>(n);
-
-        for (int i = 0; i < n; i++)
+        while (true)
         {
-            var e = _enemyBuf[i];
-            if (e == null || !e.IsAlive) continue;
+            Vector3 aim = GetMouseOnXZ(start.y);
 
-            e.TakeDamage(damage, armorPenetrationPct: armorPenetrationPct, isAoe: true);
+            Vector3 dir = (aim - start);
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.001f)
+                dir = Vector3.forward;
+            dir.Normalize();
 
-            if (slowPct > 0f)
+            Vector3 end = start + dir * clampedLen;
+
+            // Live indicator
+            if (lineObj == null)
             {
-                e.ReduceMovementSpeed(slowPct);
-                slowed.Add(e);
+                lineObj = SpawnLineIndicator(start, end, 0f); // 0 = don't auto-destroy while aiming
+                lr = (lineObj != null) ? lineObj.GetComponent<LineRenderer>() : null;
+                if (lr != null) lr.startWidth = lr.endWidth = Mathf.Max(0.01f, width);
             }
-        }
-
-        // Restore slow after duration (IMPORTANT: see note below)
-        if (slowSeconds > 0f && slowed.Count > 0 && slowPct > 0f)
-        {
-            yield return new WaitForSeconds(slowSeconds);
-
-            // Assumption: ReduceMovementSpeed is additive and accepts negative to undo.
-            // If your Enemy implementation clamps or doesn't support negative values,
-            // I’ll show you the alternative fix right after this code section.
-            for (int i = 0; i < slowed.Count; i++)
+            else
             {
-                var e = slowed[i];
-                if (e == null || !e.IsAlive) continue;
-                e.ReduceMovementSpeed(-slowPct);
+                // Update line positions
+                // (Assumes your SpawnLineIndicator uses a LineRenderer with 2 points.)
+                if (lr != null)
+                {
+                    lr.SetPosition(0, start);
+                    lr.SetPosition(1, end);
+                }
+                else
+                {
+                    lineObj.transform.position = start; // fallback
+                }
             }
+
+            // Commit on click
+            if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                if (lineObj != null) Destroy(lineObj);
+
+                int n = EnemiesInLine(start, end, width, _enemyBuf);
+                for (int i = 0; i < n; i++)
+                {
+                    var e = _enemyBuf[i];
+                    if (e != null && e.IsAlive)
+                        e.TakeDamage(damage, armorPenetrationPct: armorPenetrationPct, isAoe: true);
+                }
+
+                yield break;
+            }
+
+            yield return null;
         }
     }
 
     // Permafrost Domain → massively slow all enemies for several seconds (no recovery by design)
-    public void ActivatePermafrostDomain(float radius, float slowPct, float durationSeconds)
+    public void ActivatePermafrostDomain(float radius, float slowPct, float durationSeconds, LimitBreakSkillSO skill)
     {
+        StartTimerOnlySession(durationSeconds, skill);
         StartCoroutine(Co_PermafrostDomain(radius, slowPct, durationSeconds));
     }
 
@@ -1171,17 +1351,10 @@ public class LimitBreakManager : MonoBehaviour
         _permafrostActive = false;
     }
 
-    public void ActivateSandstormCollapse(
-    string gunnerId,
-    float dps,
-    float startRadius,
-    float endRadius,
-    float duration,
-    float armorPenetrationPct = 0f,
-    LimitBreakSkillSO skill = null)
+    public void ActivateSandstormCollapse(string gunnerId, float dps, float startRadius, float endRadius, float duration, float armorPenetrationPct = 0f, LimitBreakSkillSO skill = null)
     {
-        StartCoroutine(Co_SandstormCollapse(
-            gunnerId, dps, startRadius, endRadius, duration, armorPenetrationPct, skill));
+        StartTimerOnlySession(duration, skill);
+        StartCoroutine(Co_SandstormCollapse(gunnerId, dps, startRadius, endRadius, duration, armorPenetrationPct, skill));
     }
 
     private IEnumerator Co_SandstormCollapse(
@@ -1341,7 +1514,7 @@ public class LimitBreakManager : MonoBehaviour
             else
             {
                 indicator.transform.position = cellCenter;
-                indicator.transform.localScale = new Vector3(indicatorRadius * 2f, 1f, indicatorRadius * 2f);
+                indicator.transform.localScale = new Vector3(indicatorRadius * 2f, .2f, indicatorRadius * 2f);
             }
 
             if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
@@ -1853,7 +2026,7 @@ public class LimitBreakManager : MonoBehaviour
             else
             {
                 indicator.transform.position = cellCenter;
-                indicator.transform.localScale = new Vector3(pickRadius * 2f, 1f, pickRadius * 2f);
+                indicator.transform.localScale = new Vector3(pickRadius * 2f, .2f, pickRadius * 2f);
             }
 
             if (!PointerOverUI() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)

@@ -113,8 +113,31 @@ namespace Assets.Scripts.Turrets
             UpdateTurretAppearance();
 
             targetingPattern = targetingPatternBehaviour as ITargetingPattern;
+
+            // Auto-wire if not assigned in inspector 
+            if (targetingPattern == null)
+            {
+                var behaviours = GetComponents<MonoBehaviour>();
+                for (int i = 0; i < behaviours.Length; i++)
+                {
+                    if (behaviours[i] is ITargetingPattern tp)
+                    {
+                        targetingPatternBehaviour = behaviours[i];
+                        targetingPattern = tp;
+                        break;
+                    }
+                }
+            }
+
             BuildEffectiveStats();
             InitializeEffects();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (targetingPattern == null)
+            {
+                Debug.LogError($"{name} has no targeting pattern assigned/found. It will shoot VFX/SFX but deal no damage.", this);
+            }
+#endif
         }
 
         /// <summary>Overwrite the whole stats, preserving level counts, called on load.</summary>
@@ -241,7 +264,6 @@ namespace Assets.Scripts.Turrets
 
             _recoil?.AddRecoil();
 
-            // Light combat chatter 
             // Light combat chatter (only if the equipped gunner in this slot is alive)
             if (GunnerManager.Instance != null
                 && GunnerChatterSystem.Instance != null
@@ -256,7 +278,6 @@ namespace Assets.Scripts.Turrets
                         GunnerChatterSystem.TryForceCombat(so);
                 }
             }
-
 
             _timeSinceLastShot = 0f;
         }
@@ -375,7 +396,7 @@ namespace Assets.Scripts.Turrets
                             var go = _candBuffer[i];
                             var pos = go.transform.position;
 
-                            var nearby = GridManager.Instance.GetEnemiesInRange(pos, Mathf.CeilToInt(r));
+                            var nearby = GridManager.Instance.GetEnemiesInRange(pos, Mathf.CeilToInt(r), RuntimeStats.CanHitFlying);
                             int count = 0;
                             for (int j = 0; j < nearby.Count; j++)
                             {
@@ -555,7 +576,7 @@ namespace Assets.Scripts.Turrets
                             var go = cands[i];
                             var pos = go.transform.position;
                             // Broad phase via grid (cheap), narrow via squared distance
-                            var nearby = GridManager.Instance.GetEnemiesInRange(pos, gridRange); // returns Enemy list
+                            var nearby = GridManager.Instance.GetEnemiesInRange(pos, gridRange, RuntimeStats.CanHitFlying); // returns Enemy list
                             int count = 0;
                             for (int j = 0; j < nearby.Count; j++)
                             {
@@ -861,7 +882,6 @@ namespace Assets.Scripts.Turrets
 
         }
 
-
         public void UpdateTurretAppearance()
         {
             if (_turretBodyRenderer == null || _turretUpgradeSprites == null || _turretUpgradeSprites.Length == 0)
@@ -920,6 +940,32 @@ namespace Assets.Scripts.Turrets
             effectiveDamage *= (1f + bonusDpsPercent);
 
             return effectiveDamage * fireRate;
+        }
+
+        public float ComputeDamageAfterFalloff(Vector3 targetWorldPos, TurretStatsInstance stats)
+        {
+            // Fast path: most turrets will have this at 0.
+            if (stats.DamageFalloffOverDistance <= 0f)
+                return stats.Damage;
+
+            const float minFalloffDistance = 3f;
+
+            Vector3 delta = targetWorldPos - transform.position;
+            float distance = delta.magnitude;
+
+            if (distance <= minFalloffDistance)
+                return stats.Damage;
+
+            float effectiveDistance = distance - minFalloffDistance;
+
+            float falloff = stats.Damage * effectiveDistance * stats.DamageFalloffOverDistance / 100f;
+
+            // Cap at 90% reduction
+            float maxFalloff = stats.Damage * 0.9f;
+            if (falloff > maxFalloff) falloff = maxFalloff;
+
+            float result = stats.Damage - falloff;
+            return result > 0f ? result : 0f;
         }
 
         public void AnimateTurretUpgrade(Transform turret)
@@ -1004,7 +1050,6 @@ namespace Assets.Scripts.Turrets
                 RangeUpgradeBaseCost = src.RangeUpgradeBaseCost,
                 RangeCostExponentialMultiplier = src.RangeCostExponentialMultiplier,
 
-
                 // Crits
                 CriticalChance = src.CriticalChance,
                 CriticalChanceLevel = 0,
@@ -1045,6 +1090,11 @@ namespace Assets.Scripts.Turrets
                 PelletCountLevel = 0,
                 PelletCountUpgradeAmount = src.PelletCountUpgradeAmount,
                 PelletCountUpgradeBaseCost = src.PelletCountUpgradeBaseCost,
+                PelletChance = src.PelletChance,
+                PelletChanceLevel = 0,
+                PelletChanceUpgradeAmount = src.PelletChanceUpgradeAmount,
+                PelletChanceUpgradeBaseCost = src.PelletChanceUpgradeBaseCost,
+                PelletChanceCostExponentialMultiplier = src.PelletChanceCostExponentialMultiplier,
 
                 // Distance falloff
                 DamageFalloffOverDistance = src.DamageFalloffOverDistance,
@@ -1058,6 +1108,11 @@ namespace Assets.Scripts.Turrets
                 KnockbackStrengthUpgradeAmount = src.KnockbackStrengthUpgradeAmount,
                 KnockbackStrengthUpgradeBaseCost = src.KnockbackStrengthUpgradeBaseCost,
                 KnockbackStrengthCostExponentialMultiplier = src.KnockbackStrengthCostExponentialMultiplier,
+                KnockbackChance = src.KnockbackChance,
+                KnockbackChanceLevel = 0,
+                KnockbackChanceCostExponentialMultiplier = src.KnockbackChanceCostExponentialMultiplier,
+                KnockbackChanceUpgradeAmount = src.KnockbackChanceUpgradeAmount,
+                KnockbackChanceUpgradeBaseCost = src.KnockbackChanceUpgradeBaseCost,   
 
                 PercentBonusDamagePerSec = src.PercentBonusDamagePerSec,
                 PercentBonusDamagePerSecLevel = 0,
@@ -1068,6 +1123,11 @@ namespace Assets.Scripts.Turrets
                 SlowEffectLevel = 0,
                 SlowEffectUpgradeAmount = src.SlowEffectUpgradeAmount,
                 SlowEffectUpgradeBaseCost = src.SlowEffectUpgradeBaseCost,
+                SlowChance = src.SlowChance,    
+                SlowChanceLevel = 0,
+                SlowChanceUpgradeAmount = src.SlowChanceUpgradeAmount,
+                SlowChanceUpgradeBaseCost = src.SlowChanceUpgradeBaseCost,
+                SlowChanceCostExponentialMultiplier = src.SlowChanceCostExponentialMultiplier,
 
                 // Bounce pattern
                 BounceCount = src.BounceCount,
@@ -1075,6 +1135,11 @@ namespace Assets.Scripts.Turrets
                 BounceCountUpgradeAmount = src.BounceCountUpgradeAmount,
                 BounceCountUpgradeBaseCost = src.BounceCountUpgradeBaseCost,
                 BounceCountCostExponentialMultiplier = src.BounceCountCostExponentialMultiplier,
+                BounceChance = src.BounceChance,
+                BounceChanceCostExponentialMultiplier = src.BounceChanceCostExponentialMultiplier,
+                BounceChanceLevel = 0,
+                BounceChanceUpgradeAmount = src.BounceChanceUpgradeAmount,
+                BounceChanceUpgradeBaseCost = src.BounceChanceUpgradeBaseCost,
 
                 BounceRange = src.BounceRange,
                 BounceRangeLevel = 0,
@@ -1265,6 +1330,27 @@ namespace Assets.Scripts.Turrets
             if (PrestigeManager.Instance != null)
             {
                 PrestigeManager.Instance.ApplyToTurretStats(_effectiveScratch);
+            }
+
+            // Heat Management outgoing damage penalty (per-gunner, per-slot)
+            if (LimitBreakManager.Instance != null && GunnerManager.Instance != null && SlotIndex >= 0)
+            {
+                string gunnerId = GunnerManager.Instance.GetEquippedGunnerId(SlotIndex);
+                if (!string.IsNullOrEmpty(gunnerId))
+                {
+                    // Multiplier should be 1..(some lower bound), eg 0.75f for -25% damage.
+                    float outMult = LimitBreakManager.Instance.GetHeatManagementOutgoingDamageMultiplier(gunnerId);
+
+                    if (outMult < 0.999f)
+                    {
+                        // Core damage
+                        _effectiveScratch.Damage *= outMult;
+
+                        // If your turret uses these as direct damage components, scale them too.
+                        _effectiveScratch.SplashDamage *= outMult;
+
+                    }
+                }
             }
         }
 

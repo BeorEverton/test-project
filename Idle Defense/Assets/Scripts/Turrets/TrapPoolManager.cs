@@ -61,12 +61,26 @@ public class TrapPoolManager : MonoBehaviour
                 chosen.visual.transform.position = worldPos;
                 chosen.visual.SetActive(true);
                 chosen.cell = cell;
-                chosen.damage = damage;
+                chosen.damage = damage;   // fallback only
                 chosen.delay = delay;
                 chosen.radius = radius;
                 chosen.isActive = true;
-                if (owner)
-                    chosen.ownerTurret = owner;
+
+                chosen.ownerTurret = owner;
+                chosen.ownerSlotIndex = owner != null ? owner.SlotIndex : -1;
+
+                // Cache handler/effect refs so trap still works if turret GameObject is destroyed
+                if (owner != null)
+                {
+                    chosen.ownerDamageEffects = owner.DamageEffects;
+                    chosen.splashDamageEffectRef = owner.SplashDamageEffectRef;
+                }
+                else
+                {
+                    chosen.ownerDamageEffects = null;
+                    chosen.splashDamageEffectRef = null;
+                }
+
                 chosen.worldY = cellWorldY;
                 return chosen;
             }
@@ -90,5 +104,6 @@ public class TrapPoolManager : MonoBehaviour
     {
         trap.isActive = false;
         trap.visual.SetActive(false);
+        
     }
 }

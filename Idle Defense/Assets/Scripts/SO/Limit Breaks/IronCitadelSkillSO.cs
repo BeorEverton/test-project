@@ -8,6 +8,6 @@ public class IronCitadelSkillSO : LimitBreakSkillSO
 
     public override void Activate(LimitBreakContext ctx)
     {
-        LimitBreakManager.Instance?.ActivateIronCitadel(DamageReductionPct, Duration);
+        LimitBreakManager.Instance?.ActivateIronCitadel(DamageReductionPct, Duration, this);
     }
 }

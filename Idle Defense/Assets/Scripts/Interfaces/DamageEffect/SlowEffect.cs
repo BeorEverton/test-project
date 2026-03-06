@@ -7,7 +7,14 @@ public class SlowEffect : IDamageEffect
     {
         if (stats.SlowEffect > 0 && !enemy.IsSlowed)
         {
-            enemy.ReduceMovementSpeed(stats.SlowEffect);
+            float chance = stats.SlowChance;
+
+            bool proc =
+                (chance >= 100f) ||
+                (chance > 0f && UnityEngine.Random.value <= (chance / 100f));
+
+            if (proc)
+                enemy.ReduceMovementSpeed(stats.SlowEffect);
         }
 
         // Does not change damage

@@ -35,7 +35,7 @@ public class ConeAOEPattern : MonoBehaviour, ITargetingPattern
         // IMPORTANT: Grid query expects a cell radius. Convert world range -> grid cells.
         // (_cellSize is public; GetEnemiesInRange enumerates around a grid center in cells.)
         int gridRange = Mathf.CeilToInt(range / Mathf.Max(0.0001f, GridManager.Instance._cellSize));
-        List<Enemy> enemies = GridManager.Instance.GetEnemiesInRange(origin, gridRange);  // center at muzzle
+        List<Enemy> enemies = GridManager.Instance.GetEnemiesInRange(origin, gridRange, stats.CanHitFlying);  // center at muzzle
                                                                                           // Do NOT do a second Euclidean range check here — it truncates the cone prematurely.
 
         foreach (var enemy in enemies)
@@ -49,7 +49,11 @@ public class ConeAOEPattern : MonoBehaviour, ITargetingPattern
 
             // inside cone if dot >= cos(halfAngle)
             if (Vector3.Dot(axis, to) >= cosHalf)
-                turret.DamageEffects?.ApplyAll(enemy, stats);
+            {
+                float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+                turret.DamageEffects?.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex);
+            }
+                
         }
     }
 

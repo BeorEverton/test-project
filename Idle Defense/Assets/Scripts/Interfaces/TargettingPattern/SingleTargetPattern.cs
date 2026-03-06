@@ -10,6 +10,7 @@ public class SingleTargetPattern : MonoBehaviour, ITargetingPattern
         var enemy = primaryTarget.GetComponent<Enemy>();
         if (enemy == null) return;
 
-        turret.DamageEffects.ApplyAll(enemy, stats);
+        float baseDamage = turret.ComputeDamageAfterFalloff(enemy.transform.position, stats);
+        turret.DamageEffects.ApplyAll(enemy, stats, baseDamage, turret.SlotIndex);
     }
 }
