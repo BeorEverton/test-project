@@ -16,17 +16,57 @@ MonoBehaviour:
   DisplayName: Gloomcoil Vale
   ZoneIndex: 0
   Waves:
-  - WaveNumberInZone: 3
-    WaveConfig: {fileID: 11400000, guid: 5586dd2f1d19aad45906336900b74067, type: 2}
+  - WaveNumberInZone: 11
+    WaveConfig: {fileID: 11400000, guid: 3236ef2bc027a3e4d9255d16c90d602f, type: 2}
     IsMiniBoss: 0
     IsBoss: 0
     OverrideBossPrefab: {fileID: 0}
-  - WaveNumberInZone: 4
-    WaveConfig: {fileID: 11400000, guid: d3b76f98e4d4f1348861640f454e4824, type: 2}
+  - WaveNumberInZone: 12
+    WaveConfig: {fileID: 11400000, guid: 1208ce1b8b51c7447b08ab63a32233f4, type: 2}
     IsMiniBoss: 0
     IsBoss: 0
     OverrideBossPrefab: {fileID: 0}
-  BossPrefab: {fileID: 0}
+  - WaveNumberInZone: 13
+    WaveConfig: {fileID: 11400000, guid: f573928236d52c54b800e1082eefc780, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 14
+    WaveConfig: {fileID: 11400000, guid: b72bc3e22a3cce845bc2b7c40d0ede2f, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 15
+    WaveConfig: {fileID: 11400000, guid: e8b1334fe5e0784438f942f73cea5a38, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 16
+    WaveConfig: {fileID: 11400000, guid: 350de6efcd3994043a3c1e725c1715a0, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 17
+    WaveConfig: {fileID: 11400000, guid: 11b83b1e1d68a3b40826a32fcaf96c87, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 18
+    WaveConfig: {fileID: 11400000, guid: 973607460121ff14ebbb8cb4aa45cb6c, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 19
+    WaveConfig: {fileID: 11400000, guid: b9cdf91e72acd6f4c9cd09c21ac5965c, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  - WaveNumberInZone: 17
+    WaveConfig: {fileID: 11400000, guid: b9cdf91e72acd6f4c9cd09c21ac5965c, type: 2}
+    IsMiniBoss: 0
+    IsBoss: 0
+    OverrideBossPrefab: {fileID: 0}
+  BossPrefab: {fileID: 6350089413686517857, guid: 6fd7b6ee0d46d994bb1846342f11860d, type: 3}
   MiniBossPrefab: {fileID: 0}
   GroundMat: {fileID: 2100000, guid: e8c9cf42b0af84af58f6d9c41f024d8f, type: 2}
   SkyMat: {fileID: 2100000, guid: 7bbd6567f57f743be9da5759fd15265f, type: 2}

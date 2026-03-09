@@ -110,14 +110,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 974670749821757654}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.258819, y: 0, z: 0, w: 0.9659259}
+  m_LocalRotation: {x: -0.258819, y: -0, z: -0, w: 0.9659259}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 8724434883187897948}
   - {fileID: 8218056143803717926}
-  m_Father: {fileID: 8962778283225046703}
+  m_Father: {fileID: 5323689984083019162}
   m_LocalEulerAnglesHint: {x: -30, y: 0, z: 0}
 --- !u!1 &2410782945343309855
 GameObject:
@@ -150,6 +150,38 @@ Transform:
   m_Children:
   - {fileID: 5757089989905669699}
   m_Father: {fileID: 490163720642015852}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3062089031346689479
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5323689984083019162}
+  m_Layer: 0
+  m_Name: GFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5323689984083019162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3062089031346689479}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 490163720642015852}
+  m_Father: {fileID: 8962778283225046703}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5305969354509947295
 GameObject:
@@ -524,7 +556,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Name
-      value: Machine Gun Turret
+      value: MachineGun Auto Turret
       objectReference: {fileID: 0}
     - target: {fileID: 2172507219826973191, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       propertyPath: m_Layer
@@ -671,7 +703,7 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2206087817880179263, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 490163720642015852}
+      addedObject: {fileID: 5323689984083019162}
     - targetCorrespondingSourceObject: {fileID: 6800362798849118830, guid: a7c423bfe8411514aa7906a336cb250d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3040998846547159456}
@@ -838,6 +870,11 @@ MonoBehaviour:
     PelletCountLevel: 0
     PelletCountUpgradeAmount: 0
     PelletCountUpgradeBaseCost: 0
+    PelletChance: 0
+    PelletChanceLevel: 0
+    PelletChanceUpgradeAmount: 0
+    PelletChanceUpgradeBaseCost: 0
+    PelletChanceCostExponentialMultiplier: 0
     DamageFalloffOverDistance: 0
     DamageFalloffOverDistanceLevel: 0
     DamageFalloffOverDistanceUpgradeAmount: 0
@@ -847,6 +884,11 @@ MonoBehaviour:
     KnockbackStrengthUpgradeAmount: 0
     KnockbackStrengthUpgradeBaseCost: 0
     KnockbackStrengthCostExponentialMultiplier: 0
+    KnockbackChance: 0
+    KnockbackChanceLevel: 0
+    KnockbackChanceUpgradeAmount: 0
+    KnockbackChanceUpgradeBaseCost: 0
+    KnockbackChanceCostExponentialMultiplier: 0
     PercentBonusDamagePerSec: 0
     PercentBonusDamagePerSecLevel: 0
     PercentBonusDamagePerSecUpgradeAmount: 0
@@ -855,6 +897,12 @@ MonoBehaviour:
     SlowEffectLevel: 0
     SlowEffectUpgradeAmount: 0
     SlowEffectUpgradeBaseCost: 0
+    SlowChance: 0
+    SlowChanceLevel: 0
+    SlowChanceEffectLevel: 0
+    SlowChanceUpgradeAmount: 0
+    SlowChanceUpgradeBaseCost: 0
+    SlowChanceCostExponentialMultiplier: 0
     RangeUpgradeAmount: 0
     RangeUpgradeBaseCost: 0
     RangeLevel: 0
@@ -869,11 +917,21 @@ MonoBehaviour:
     ArmorPenetrationUpgradeAmount: 0
     ArmorPenetrationUpgradeBaseCost: 0
     ArmorPenetrationCostExponentialMultiplier: 0
+    ArmorPenetrationChance: 0
+    ArmorPenetrationChanceLevel: 0
+    ArmorPenetrationChanceUpgradeAmount: 0
+    ArmorPenetrationChanceUpgradeBaseCost: 0
+    ArmorPenetrationChanceCostExponentialMultiplier: 0
     BounceCount: 0
     BounceCountLevel: 0
     BounceCountUpgradeAmount: 0
     BounceCountUpgradeBaseCost: 0
     BounceCountCostExponentialMultiplier: 0
+    BounceChance: 0
+    BounceChanceLevel: 0
+    BounceChanceUpgradeAmount: 0
+    BounceChanceUpgradeBaseCost: 0
+    BounceChanceCostExponentialMultiplier: 0
     BounceRange: 0
     BounceRangeLevel: 0
     BounceRangeUpgradeAmount: 0
@@ -960,6 +1018,11 @@ MonoBehaviour:
     PelletCountLevel: 0
     PelletCountUpgradeAmount: 0
     PelletCountUpgradeBaseCost: 0
+    PelletChance: 0
+    PelletChanceLevel: 0
+    PelletChanceUpgradeAmount: 0
+    PelletChanceUpgradeBaseCost: 0
+    PelletChanceCostExponentialMultiplier: 0
     DamageFalloffOverDistance: 0
     DamageFalloffOverDistanceLevel: 0
     DamageFalloffOverDistanceUpgradeAmount: 0
@@ -969,6 +1032,11 @@ MonoBehaviour:
     KnockbackStrengthUpgradeAmount: 0
     KnockbackStrengthUpgradeBaseCost: 0
     KnockbackStrengthCostExponentialMultiplier: 0
+    KnockbackChance: 0
+    KnockbackChanceLevel: 0
+    KnockbackChanceUpgradeAmount: 0
+    KnockbackChanceUpgradeBaseCost: 0
+    KnockbackChanceCostExponentialMultiplier: 0
     PercentBonusDamagePerSec: 0
     PercentBonusDamagePerSecLevel: 0
     PercentBonusDamagePerSecUpgradeAmount: 0
@@ -977,6 +1045,12 @@ MonoBehaviour:
     SlowEffectLevel: 0
     SlowEffectUpgradeAmount: 0
     SlowEffectUpgradeBaseCost: 0
+    SlowChance: 0
+    SlowChanceLevel: 0
+    SlowChanceEffectLevel: 0
+    SlowChanceUpgradeAmount: 0
+    SlowChanceUpgradeBaseCost: 0
+    SlowChanceCostExponentialMultiplier: 0
     RangeUpgradeAmount: 0
     RangeUpgradeBaseCost: 0
     RangeLevel: 0
@@ -991,11 +1065,21 @@ MonoBehaviour:
     ArmorPenetrationUpgradeAmount: 0
     ArmorPenetrationUpgradeBaseCost: 0
     ArmorPenetrationCostExponentialMultiplier: 0
+    ArmorPenetrationChance: 0
+    ArmorPenetrationChanceLevel: 0
+    ArmorPenetrationChanceUpgradeAmount: 0
+    ArmorPenetrationChanceUpgradeBaseCost: 0
+    ArmorPenetrationChanceCostExponentialMultiplier: 0
     BounceCount: 0
     BounceCountLevel: 0
     BounceCountUpgradeAmount: 0
     BounceCountUpgradeBaseCost: 0
     BounceCountCostExponentialMultiplier: 0
+    BounceChance: 0
+    BounceChanceLevel: 0
+    BounceChanceUpgradeAmount: 0
+    BounceChanceUpgradeBaseCost: 0
+    BounceChanceCostExponentialMultiplier: 0
     BounceRange: 0
     BounceRangeLevel: 0
     BounceRangeUpgradeAmount: 0
